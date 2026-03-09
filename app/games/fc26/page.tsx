@@ -43,16 +43,31 @@ const LoadingDots = () => (
 
 // ========== LOGIN VIEW ==========
 function LoginView({ onSuccess }: { onSuccess: () => void }) {
-  const [pass, setPass] = useState("");
+  const [code, setCode] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isValidPass(pass, game.passSum)) {
-      onSuccess();
-    } else {
-      setError("Mã truy cập không chính xác!");
-      setPass("");
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch("/api/verify-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code }),
+      });
+      const data = await res.json();
+      if (data.valid) {
+        onSuccess();
+      } else {
+        setError(data.message || "Mã không hợp lệ!");
+        setCode("");
+      }
+    } catch {
+      setError("Lỗi kết nối server!");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -65,12 +80,12 @@ function LoginView({ onSuccess }: { onSuccess: () => void }) {
       </div>
       <div className="w-full space-y-2">
         <input
-          type="password"
-          placeholder="• • • • • • • •"
-          value={pass}
+          type="text"
+          placeholder="DUNG-XXXX-XXXX"
+          value={code}
           autoComplete="off"
-          onChange={e => { setPass(e.target.value); setError(""); }}
-          className={`w-full bg-white/5 border rounded-2xl px-6 py-4 text-center tracking-[1em] text-lg focus:outline-none transition-colors ${
+          onChange={e => { setCode(e.target.value.toUpperCase()); setError(""); }}
+          className={`w-full bg-white/5 border rounded-2xl px-6 py-4 text-center tracking-widest text-base font-mono focus:outline-none transition-colors ${
             error ? "border-red-500/60 focus:border-red-500" : "border-white/10 focus:border-[#ce5a67]"
           }`}
         />
@@ -78,9 +93,10 @@ function LoginView({ onSuccess }: { onSuccess: () => void }) {
       </div>
       <button
         type="submit"
-        className="w-full py-4 bg-[#ce5a67] rounded-2xl font-black tracking-[0.3em] hover:bg-[#b44c5c] transition-colors shadow-[0_8px_30px_rgba(206,90,103,0.3)]"
+        disabled={loading}
+        className="w-full py-4 bg-[#ce5a67] rounded-2xl font-black tracking-[0.3em] hover:bg-[#b44c5c] transition-colors shadow-[0_8px_30px_rgba(206,90,103,0.3)] disabled:opacity-60"
       >
-        XÁC THỰC
+        {loading ? "ĐANG KIỂM TRA..." : "XÁC THỰC"}
       </button>
       <Link href="/" className="text-[10px] text-slate-600 hover:text-slate-400 transition-colors tracking-widest uppercase">
         ← Quay lại trang chủ
@@ -88,6 +104,7 @@ function LoginView({ onSuccess }: { onSuccess: () => void }) {
     </form>
   );
 }
+
 
 // ========== DASHBOARD VIEW ==========
 function DashboardView() {
