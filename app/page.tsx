@@ -1,63 +1,124 @@
-// app/page.tsx
-import Image from 'next/image'
+"use client";
+import { useState } from 'react';
+import Image from 'next/image';
 
 export default function Home() {
-  return (
-    <main className="min-h-screen bg-slate-950 p-6 flex flex-col justify-between font-sans Vietnamese">
-      {/* Container Chính */}
-      <div className="flex-grow flex items-center justify-center">
-        <div className="bg-slate-900 rounded-3xl p-10 shadow-2xl w-full max-w-7xl relative overflow-hidden">
-          
-          {/* Header */}
-          <div className="flex items-center justify-between mb-16 relative z-10">
-            <div className="flex items-center gap-6">
-              {/* Logo Pixel-Art (Đã xóa nền, T thay file logo.svg của mình vào đây) */}
-              <div className="w-24 h-24 rounded-full bg-slate-800 p-2 flex items-center justify-center">
-                <Image src="/logo.svg" alt="Dung Gaming Logo" width={80} height={80} className="w-full h-full" />
-              </div>
-              <div>
-                <h1 className="text-slate-100 text-6xl font-bold">DUNGDIBINHLUAN</h1>
-                <p className="text-slate-300 text-3xl Vietnamese-serif-sub font-light">ALL IN ONE GAME SET UP</p>
-              </div>
-            </div>
-            
-            {/* System Online Status */}
-            <div className="flex items-center gap-3 bg-slate-800 rounded-full px-6 py-3 border border-slate-700">
-              <span className="relative flex h-3 w-3">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-500 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-pink-600"></span>
-              </span>
-              <span className="text-slate-300 text-xl font-medium tracking-widest Vietnamese uppercase">SYSTEM ONLINE</span>
-            </div>
-          </div>
+    const [passcode, setPasscode] = useState("");
+    const [isAuthorized, setIsAuthorized] = useState(false);
+    const [loading, setLoading] = useState(false);
 
-          {/* Body */}
-          <div className="space-y-16 relative z-10">
-            {/* Cụm Data Boxes */}
-            <div className="grid grid-cols-2 gap-8">
-              <div className="bg-slate-800 rounded-2xl p-8 border border-slate-700">
-                <p className="text-slate-400 text-lg Vietnamese-sub Vietnamese uppercase">DUNG LƯỢNG FILE</p>
-                <p className="text-slate-100 text-9xl font-bold Vietnamese-serif GB-text-extra Vietnamese">GB</p>
-              </div>
-              <div className="bg-slate-800 rounded-2xl p-8 border border-slate-700">
-                <p className="text-slate-400 text-lg Vietnamese-sub Vietnamese uppercase">ĐỊNH DẠNG</p>
-                <p className="text-slate-100 text-9xl font-bold Vietnamese-serif Vietnamese">WINRAR</p>
-              </div>
-            </div>
+    const ADMIN_CODE = process.env.NEXT_PUBLIC_ACCESS_CODE || "fc26vip";
 
-            {/* Nút BẮT ĐẦU TẢI XUỐNG */}
-            <button className="w-full text-center bg-pink-600 hover:bg-pink-700 text-white text-5xl font-bold py-12 rounded-3xl transition duration-300 shadow-lg shadow-pink-900/50 Vietnamese uppercase">
-              BẮT ĐẦU TẢI XUỐNG
-            </button>
-          </div>
+    const handleLogin = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (passcode === ADMIN_CODE) {
+            setIsAuthorized(true);
+        } else {
+            alert("Mã truy cập không chính xác!");
+        }
+    };
+
+    const handleDownload = async () => {
+        setLoading(true);
+        try {
+            const res = await fetch('/api/download');
+            const data = await res.json();
+            if (data.url) window.location.href = data.url;
+        } catch (error) {
+            alert("Lỗi kết nối máy chủ R2!");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="flex flex-col items-center justify-center min-h-screen bg-[#111111] text-white p-4 font-sans">
+
+            {!isAuthorized ? (
+                /* --- LOGIN --- */
+                <form onSubmit={handleLogin} className="w-full max-w-sm flex flex-col items-center gap-6">
+                    {/* Logo */}
+                    <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-[#ce5a67]/40">
+                        <Image src="/logo.png" alt="Dung Gaming" width={128} height={128} className="object-cover w-full h-full" />
+                    </div>
+
+                    {/* Title */}
+                    <div className="text-center">
+                        <h1 className="text-2xl font-black tracking-widest text-white">DUNGDIBINHLUAN</h1>
+                        <p className="text-xs text-slate-500 tracking-[0.3em] uppercase mt-1">ALL IN ONE GAME SET UP</p>
+                    </div>
+
+                    {/* Input */}
+                    <input
+                        type="password"
+                        placeholder="• • • • • • • •"
+                        value={passcode}
+                        onChange={(e) => setPasscode(e.target.value)}
+                        className="w-full bg-[#1e1e1e] border border-white/10 rounded-2xl px-6 py-4 focus:outline-none focus:border-[#ce5a67] transition-all text-center tracking-[1em] text-lg"
+                    />
+
+                    {/* Button */}
+                    <button type="submit" className="w-full bg-[#ce5a67] text-white font-black py-4 rounded-2xl hover:bg-[#b44c5c] transition-all text-lg tracking-widest">
+                        XÁC THỰC
+                    </button>
+                </form>
+
+            ) : (
+                /* --- DASHBOARD --- */
+                <div className="w-full max-w-xl bg-[#1a1a1a] rounded-3xl overflow-hidden">
+                    {/* Header */}
+                    <div className="flex items-center gap-4 p-6 border-b border-white/5">
+                        <div className="w-14 h-14 rounded-full overflow-hidden flex-shrink-0">
+                            <Image src="/logo.png" alt="Dung Gaming" width={56} height={56} className="object-cover w-full h-full" />
+                        </div>
+                        <div>
+                            <h1 className="text-lg font-black italic tracking-tight">DUNGDIBINHLUAN</h1>
+                            <p className="text-[10px] text-[#ce5a67] tracking-[0.3em] uppercase">ALL IN ONE GAME SET UP</p>
+                        </div>
+                    </div>
+
+                    <div className="p-8">
+                        {/* Title + Badge */}
+                        <div className="flex justify-between items-start mb-8">
+                            <div>
+                                <h2 className="text-3xl font-black italic tracking-tight">DUNGDIBINHLUAN</h2>
+                                <p className="text-[10px] text-[#ce5a67] tracking-[0.3em] uppercase mt-1">ALL IN ONE GAME SET UP</p>
+                            </div>
+                            <div className="flex items-center gap-2 border border-[#ce5a67]/30 rounded-full px-3 py-1.5 mt-1">
+                                <span className="w-2 h-2 bg-[#ce5a67] rounded-full animate-pulse"></span>
+                                <span className="text-[9px] font-bold text-[#ce5a67] tracking-widest">SYSTEM ONLINE</span>
+                            </div>
+                        </div>
+
+                        {/* Info Cards */}
+                        <div className="grid grid-cols-2 gap-4 mb-8">
+                            <div className="p-5 bg-[#111] rounded-2xl border border-white/5">
+                                <p className="text-[10px] text-slate-500 uppercase tracking-widest mb-2">Dung lượng file</p>
+                                <p className="text-2xl font-black">50<span className="text-sm text-[#ce5a67] ml-1">GB</span></p>
+                            </div>
+                            <div className="p-5 bg-[#111] rounded-2xl border border-white/5">
+                                <p className="text-[10px] text-slate-500 uppercase tracking-widest mb-2">Định dạng</p>
+                                <p className="text-xl font-black text-[#ce5a67]">WINRAR</p>
+                            </div>
+                        </div>
+
+                        {/* Download Button */}
+                        <button
+                            onClick={handleDownload}
+                            disabled={loading}
+                            className="w-full py-5 bg-[#ce5a67] rounded-2xl font-black text-xl text-white tracking-widest hover:bg-[#b44c5c] transition-all active:scale-[0.98]"
+                        >
+                            {loading ? "ĐANG KHỞI TẠO..." : "BẮT ĐẦU TẢI XUỐNG"}
+                        </button>
+
+                        {/* Footer */}
+                        <div className="mt-8 pt-6 border-t border-white/5 flex justify-between text-[9px] text-slate-600 uppercase tracking-widest">
+                            <span>Powered by Google</span>
+                            <span>© 2026 DUNGDIBINHLUAN</span>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
-      </div>
-
-      {/* Footer */}
-      <footer className="flex items-center justify-between text-slate-500 text-xl mt-12 Vietnamese uppercase">
-        <div>POWERED BY GOOGLE</div>
-        <div>© 2026 DUNGDIBINHLUAN</div>
-      </footer>
-    </main>
-  )
+    );
 }
