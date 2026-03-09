@@ -64,7 +64,7 @@ export default function Home() {
                         <div className="flex justify-between items-center mb-12">
                             <div className="text-left">
                                 <h1 className="text-4xl font-black italic tracking-tighter text-white">DUNGDIBINHLUAN <span className="text-[#ce5a67]"></span></h1>
-                                <p className="text-[10px] text-slate-500 tracking-[0.4em] uppercase mt-1">Enterprise Asset Distribution</p>
+                                <p className="text-[10px] text-slate-500 tracking-[0.4em] uppercase mt-1">ALL IN ONE GAME SET </p>
                             </div>
                             <div className="px-4 py-1.5 border border-[#ce5a67]/30 rounded-full flex items-center gap-2">
                                 <span className="w-2 h-2 bg-[#ce5a67] rounded-full animate-pulse"></span>
@@ -75,11 +75,11 @@ export default function Home() {
                         <div className="grid grid-cols-2 gap-6 mb-12">
                             <div className="p-6 bg-white/5 rounded-3xl border border-white/5">
                                 <p className="text-[10px] text-slate-500 uppercase mb-2">Dung lượng file</p>
-                                <p className="text-2xl font-black">60.0 <span className="text-sm text-[#ce5a67]">GB</span></p>
+                                <p className="text-2xl font-black"><span className="text-sm text-[#ce5a67]">GB</span></p>
                             </div>
                             <div className="p-6 bg-white/5 rounded-3xl border border-white/5">
                                 <p className="text-[10px] text-slate-500 uppercase mb-2">Định dạng</p>
-                                <p className="text-2xl font-black">WIN<span className="text-sm text-[#ce5a67]">RAR</span></p>
+                                <p className="text-2xl font-black"><span className="text-sm text-[#ce5a67]">WINRAR</span></p>
                             </div>
                         </div>
 
@@ -93,7 +93,7 @@ export default function Home() {
                         </button>
 
                         <div className="mt-12 pt-8 border-t border-white/5 flex justify-between items-center text-[9px] text-slate-600 uppercase tracking-widest">
-                            <span>Powered by Cloudflare R2</span>
+                            <span>Powered by GOOGLE </span>
                             <span>© 2026 DUNGDIBINHLUAN</span>
                         </div>
                     </div>
