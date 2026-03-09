@@ -30,3 +30,36 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+/* app/globals.css */
+@layer base {
+  .font-sans {
+    font-family: var(--font-geist-sans), sans-serif;
+  }
+}
+
+@layer components {
+  /* Class hỗ trợ hiển thị tiếng Việt nuột nà */
+  .Vietnamese {
+    font-family: var(--font-be-vietnam), sans-serif !important;
+  }
+  
+  /* Class hỗ trợ font serif phụ (Cho chữ 'GB' và Định dạng) */
+  .Vietnamese-serif-sub {
+    font-family: var(--font-roboto-mono), monospace !important;
+  }
+
+  .Vietnamese-serif {
+    font-family: var(--font-montserrat), sans-serif !important;
+  }
+
+  /* Kéo dài chữ GB */
+  .GB-text-extra {
+    letter-spacing: -0.05em;
+    font-stretch: 125%;
+  }
+
+  /* Định dạng WINRAR */
+  .Vietnamese-serif p {
+    font-family: var(--font-montserrat), sans-serif !important;
+  }
+}
