@@ -31,8 +31,9 @@ const Navbar = () => (
         </a>
       </div>
 
+      {/* ← Đổi href sang /games/fc26/select */}
       <Link
-        href="/games/fc26"
+        href="/games/fc26/select"
         className="flex-shrink-0 px-4 md:px-5 py-2 md:py-2.5 bg-[#ce5a67] rounded-xl text-[10px] md:text-[11px] font-black tracking-widest text-white hover:bg-[#b44c5c] transition-colors shadow-[0_4px_20px_rgba(206,90,103,0.3)]"
       >
         TẢI NGAY
@@ -81,8 +82,9 @@ const Hero = () => (
         </p>
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          {/* ← Đổi href sang /games/fc26/select */}
           <Link
-            href="/games/fc26"
+            href="/games/fc26/select"
             className="group flex items-center justify-center gap-2 px-6 md:px-8 py-3.5 md:py-4 bg-[#ce5a67] rounded-2xl font-black tracking-widest text-sm md:text-base text-white hover:bg-[#b44c5c] transition-all shadow-[0_8px_30px_rgba(206,90,103,0.3)]"
           >
             TẢI FC 26 NGAY
