@@ -5,7 +5,7 @@ const kv = Redis.fromEnv();
 export async function POST(req: Request) {
   const { adminKey, type } = await req.json();
 
-  if (adminKey !== process.env.ADMIN_KEY) {
+  if (adminKey !== process.env.ADMIN_SECRET) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
