@@ -1,4 +1,6 @@
-import { kv } from "@vercel/kv";
+import { Redis } from "@upstash/redis";
+
+const kv = Redis.fromEnv();
 
 export async function POST(req: Request) {
   const { adminKey, type } = await req.json();
