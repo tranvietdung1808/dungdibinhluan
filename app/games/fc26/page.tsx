@@ -2,15 +2,10 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { GAMES } from "../../data/games";
 
 const game = GAMES.find(g => g.slug === "fc26")!;
-
-const isValidPass = (code: string, targetSum: number): boolean => {
-  const digits = code.slice(-3);
-  if (!/^\d{3}$/.test(digits)) return false;
-  return [...digits].reduce((sum, d) => sum + +d, 0) === targetSum;
-};
 
 const GlowBg = () => (
   <div aria-hidden className="pointer-events-none">
@@ -42,7 +37,7 @@ const LoadingDots = () => (
 );
 
 // ========== LOGIN VIEW ==========
-function LoginView({ onSuccess }: { onSuccess: () => void }) {
+function LoginView({ onSuccess }: { onSuccess: (type: string) => void }) {
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -59,7 +54,7 @@ function LoginView({ onSuccess }: { onSuccess: () => void }) {
       });
       const data = await res.json();
       if (data.valid) {
-        onSuccess();
+        onSuccess(data.type ?? "normal"); // ← truyền type lên
       } else {
         setError(data.message || "Mã không hợp lệ!");
         setCode("");
@@ -81,7 +76,7 @@ function LoginView({ onSuccess }: { onSuccess: () => void }) {
       <div className="w-full space-y-2">
         <input
           type="text"
-          placeholder="DUNG-XXXX-XXXX"
+          placeholder="DUNG-XXXX-XXXX hoặc MODS-XXXX-XXXX"
           value={code}
           autoComplete="off"
           onChange={e => { setCode(e.target.value.toUpperCase()); setError(""); }}
@@ -105,9 +100,8 @@ function LoginView({ onSuccess }: { onSuccess: () => void }) {
   );
 }
 
-
 // ========== DASHBOARD VIEW ==========
-function DashboardView() {
+function DashboardView({ type }: { type: string }) {
   const [status, setStatus] = useState<"idle" | "loading" | "done">("idle");
 
   const handleDownload = async () => {
@@ -121,6 +115,15 @@ function DashboardView() {
     } catch {
       alert("Lỗi kết nối máy chủ R2!");
       setStatus("idle");
+    }
+  };
+
+  const handleDownloadMods = async () => {
+    try {
+      const { url } = await fetch("/api/download-mods").then(r => r.json());
+      if (url) window.location.href = url;
+    } catch {
+      alert("Lỗi kết nối máy chủ R2!");
     }
   };
 
@@ -153,7 +156,9 @@ function DashboardView() {
             <Avatar size={40} />
             <div>
               <p className="text-sm font-black tracking-wider">{game.name}</p>
-              <p className="text-[9px] text-[#ce5a67] tracking-[0.3em] uppercase">{game.subtitle}</p>
+              <p className="text-[9px] text-[#ce5a67] tracking-[0.3em] uppercase">
+                {type === "mods" ? "FULL MODS EDITION" : game.subtitle}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#ce5a67]/30 bg-[#ce5a67]/5">
@@ -174,6 +179,7 @@ function DashboardView() {
             </div>
           </div>
 
+          {/* Nút tải game — luôn hiện */}
           <button
             onClick={handleDownload}
             disabled={status !== "idle"}
@@ -187,6 +193,16 @@ function DashboardView() {
             )}
           </button>
 
+          {/* Nút tải mods — chỉ hiện nếu type === "mods" */}
+          {type === "mods" && (
+            <button
+              onClick={handleDownloadMods}
+              className="group relative w-full py-5 rounded-2xl font-black text-lg overflow-hidden transition-all active:scale-[0.98] border border-[#ce5a67]/40 text-[#ce5a67] hover:bg-[#ce5a67]/10"
+            >
+              <span className="relative z-10 tracking-widest">🎮 TẢI FULL MODS PACK</span>
+            </button>
+          )}
+
           <footer className="pt-4 border-t border-white/5 flex justify-between items-center text-[9px] text-slate-600 uppercase tracking-widest">
             <span>Powered by Google Antivirus</span>
             <Link href="/" className="hover:text-slate-400 transition-colors">← Trang chủ</Link>
@@ -199,14 +215,14 @@ function DashboardView() {
 
 // ========== PAGE ==========
 export default function FC26Page() {
-  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [codeType, setCodeType] = useState<string | null>(null);
 
   return (
     <main className="relative flex items-center justify-center min-h-screen bg-[#0a0a0a] text-white p-4 overflow-hidden font-sans">
       <GlowBg />
-      {isAuthorized
-        ? <DashboardView />
-        : <LoginView onSuccess={() => setIsAuthorized(true)} />
+      {codeType !== null
+        ? <DashboardView type={codeType} />
+        : <LoginView onSuccess={(type) => setCodeType(type)} />
       }
     </main>
   );
