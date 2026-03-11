@@ -183,4 +183,42 @@ export default function HeroSection() {
                   </div>
                   <ul className="space-y-1.5 pl-3">
                     {section.items.map((item, i) => (
-                      <li key={i}
+                      <li
+                        key={i}
+                        className="flex items-start gap-2 text-xs md:text-sm text-slate-400 leading-relaxed"
+                      >
+                        <span className="mt-1.5 w-1 h-1 rounded-full bg-slate-600 flex-shrink-0" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+
+              <div className="pt-2 pb-1 text-xs text-slate-500 italic leading-relaxed border-t border-white/5">
+                Lưu ý: Bản mod chỉ dành cho anh em đã có game. Chưa có game có thể inbox page để mua nhé! Chuẩn mùa giải 2025–2026. Cài đặt dễ dàng.
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="flex-shrink-0 px-6 md:px-8 py-4 md:py-5 border-t border-white/5 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <Link
+                href="/games/fc26/select"
+                onClick={() => setOpen(false)}
+                className="flex items-center justify-center gap-2 flex-1 py-3 bg-[#ce5a67] rounded-2xl font-black tracking-widest text-sm text-white hover:bg-[#b44c5c] transition-all"
+              >
+                TẢI NGAY
+              </Link>
+              <button
+                onClick={() => setOpen(false)}
+                className="flex items-center justify-center gap-2 flex-1 py-3 rounded-2xl font-black tracking-widest text-sm text-slate-400 border border-white/10 hover:border-white/20 hover:text-white transition-all"
+              >
+                ĐÓNG
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
