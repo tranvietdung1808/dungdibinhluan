@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { GAMES } from "./data/games";
 import FeatureSlider from "./components/FeatureSlider";
+import HeroSection from "./components/HeroSection";
 
 // ========== NAVBAR ==========
 const navItems = [
@@ -51,84 +52,6 @@ const Navbar = () => (
       </Link>
     </div>
   </nav>
-);
-
-// ========== HERO ==========
-const Hero = () => (
-  <section
-    id="home"
-    className="relative h-[100vh] min-h-[640px] flex items-center overflow-hidden"
-  >
-    {/* BG Image */}
-    <div className="absolute inset-0">
-      <Image
-        src="/games/fc26-banner.jpg"
-        alt="EA FC 26"
-        fill
-        className="object-cover object-top opacity-55"
-        priority
-      />
-      {/* Gradient trái → phải */}
-      <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-[#0a0a0a]/60 to-transparent" />
-      {/* Gradient dưới đậm để blend vào slider */}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/10 to-transparent" />
-      {/* Accent glow đỏ nhẹ góc trái */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_20%_60%,rgba(206,90,103,0.12),transparent_55%)]" />
-    </div>
-
-    {/* Content */}
-    <div className="relative z-10 max-w-6xl mx-auto px-5 md:px-6 w-full">
-      <div className="max-w-xs sm:max-w-sm md:max-w-xl space-y-4 md:space-y-6">
-        <div className="flex items-center gap-2 md:gap-3 flex-wrap">
-          <span className="px-2.5 py-1 rounded-full text-[9px] md:text-[10px] font-black tracking-widest bg-[#ce5a67]/20 text-[#ce5a67] border border-[#ce5a67]/30">
-            🔥 HOT
-          </span>
-          <span className="px-2.5 py-1 rounded-full text-[9px] md:text-[10px] font-black tracking-widest bg-white/5 text-slate-400 border border-white/10">
-            SPOTLIGHT
-          </span>
-        </div>
-
-        <div>
-          <h1 className="text-4xl sm:text-5xl md:text-7xl font-black italic tracking-tighter leading-none text-white">
-            EA FC <span className="text-[#ce5a67]">26</span>
-          </h1>
-          <p className="text-slate-400 text-[10px] md:text-sm tracking-[0.2em] md:tracking-[0.3em] uppercase mt-2 md:mt-3">
-            ALL IN ONE GAME SET UP
-          </p>
-        </div>
-
-        <p className="text-slate-400 text-sm md:text-base leading-relaxed max-w-[260px] md:max-w-sm">
-          Bộ cài đặt đầy đủ, tối ưu hiệu năng. Chơi ngay không cần chờ đợi.
-        </p>
-
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-          <Link
-            href="/games/fc26/select"
-            className="group flex items-center justify-center gap-2 px-6 md:px-8 py-3.5 md:py-4 bg-[#ce5a67] rounded-2xl font-black tracking-widest text-sm md:text-base text-white hover:bg-[#b44c5c] transition-all shadow-[0_8px_30px_rgba(206,90,103,0.3)]"
-          >
-            TẢI FC 26 NGAY
-            <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-            </svg>
-          </Link>
-          <a
-            href="https://web.facebook.com/dungbinhluan/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center px-6 md:px-8 py-3.5 md:py-4 rounded-2xl font-black tracking-widest text-sm md:text-base text-slate-300 border border-white/10 hover:border-white/30 hover:text-white transition-all"
-          >
-            XEM VIDEO
-          </a>
-        </div>
-      </div>
-    </div>
-
-    {/* Scroll indicator */}
-    <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2 opacity-40">
-      <p className="text-[9px] tracking-[0.3em] uppercase text-slate-400">SCROLL</p>
-      <div className="w-[1px] h-8 bg-gradient-to-b from-slate-400 to-transparent" />
-    </div>
-  </section>
 );
 
 // ========== QUICK FEATURES ==========
@@ -240,8 +163,7 @@ export default function HomePage() {
     <main className="min-h-screen bg-[#0a0a0a] text-white">
       <Navbar />
       <div className="pt-14 md:pt-16">
-        <Hero />
-        {/* Slider overlap lên hero 40px */}
+        <HeroSection />
         <section id="tinh-nang" className="-mt-10 relative z-10">
           <FeatureSlider />
         </section>
