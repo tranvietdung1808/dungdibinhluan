@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { GAMES } from "./data/games";
+import FeatureSlider from "./components/FeatureSlider";
 
 // ========== NAVBAR ==========
 const Navbar = () => (
@@ -17,21 +18,24 @@ const Navbar = () => (
       </div>
 
       <div className="hidden md:flex items-center gap-1">
-        {["TRANG CHỦ", "MIX MODS", "HƯỚNG DẪN"].map(item => (
-          <button key={item} className="px-4 py-2 text-[11px] font-bold tracking-widest text-slate-400 hover:text-white transition-colors rounded-lg hover:bg-white/5">
+        {["TRANG CHỦ", "MIX MODS", "HƯỚNG DẪN"].map((item) => (
+          <button
+            key={item}
+            className="px-4 py-2 text-[11px] font-bold tracking-widest text-slate-400 hover:text-white transition-colors rounded-lg hover:bg-white/5"
+          >
             {item}
           </button>
         ))}
         <a
           href="https://web.facebook.com/dungbinhluan/"
-          target="_blank" rel="noopener noreferrer"
+          target="_blank"
+          rel="noopener noreferrer"
           className="px-4 py-2 text-[11px] font-bold tracking-widest text-slate-400 hover:text-white transition-colors rounded-lg hover:bg-white/5"
         >
           GROUP FACEBOOK
         </a>
       </div>
 
-      {/* ← Đổi href sang /games/fc26/select */}
       <Link
         href="/games/fc26/select"
         className="flex-shrink-0 px-4 md:px-5 py-2 md:py-2.5 bg-[#ce5a67] rounded-xl text-[10px] md:text-[11px] font-black tracking-widest text-white hover:bg-[#b44c5c] transition-colors shadow-[0_4px_20px_rgba(206,90,103,0.3)]"
@@ -82,7 +86,6 @@ const Hero = () => (
         </p>
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-          {/* ← Đổi href sang /games/fc26/select */}
           <Link
             href="/games/fc26/select"
             className="group flex items-center justify-center gap-2 px-6 md:px-8 py-3.5 md:py-4 bg-[#ce5a67] rounded-2xl font-black tracking-widest text-sm md:text-base text-white hover:bg-[#b44c5c] transition-all shadow-[0_8px_30px_rgba(206,90,103,0.3)]"
@@ -94,7 +97,8 @@ const Hero = () => (
           </Link>
           <a
             href="https://web.facebook.com/dungbinhluan/"
-            target="_blank" rel="noopener noreferrer"
+            target="_blank"
+            rel="noopener noreferrer"
             className="flex items-center justify-center px-6 md:px-8 py-3.5 md:py-4 rounded-2xl font-black tracking-widest text-sm md:text-base text-slate-300 border border-white/10 hover:border-white/30 hover:text-white transition-all"
           >
             XEM VIDEO
@@ -116,7 +120,7 @@ const features = [
 const Features = () => (
   <section className="bg-[#0d0d0d] border-t border-white/5 py-10 md:py-16">
     <div className="max-w-6xl mx-auto px-4 md:px-6 grid grid-cols-2 md:grid-cols-4 gap-5 md:gap-8">
-      {features.map(f => (
+      {features.map((f) => (
         <div key={f.title} className="text-center space-y-2 md:space-y-3">
           <div className="w-11 h-11 md:w-14 md:h-14 mx-auto rounded-xl md:rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center text-xl md:text-2xl">
             {f.icon}
@@ -131,7 +135,7 @@ const Features = () => (
 
 // ========== GAME GRID ==========
 const GameGrid = () => {
-  const others = GAMES.filter(g => !g.spotlight);
+  const others = GAMES.filter((g) => !g.spotlight);
 
   return (
     <section className="max-w-6xl mx-auto px-4 md:px-6 py-10 md:py-16 space-y-6 md:space-y-8">
@@ -142,7 +146,8 @@ const GameGrid = () => {
         </div>
         <a
           href="https://web.facebook.com/dungbinhluan/"
-          target="_blank" rel="noopener noreferrer"
+          target="_blank"
+          rel="noopener noreferrer"
           className="text-[10px] text-[#ce5a67] font-bold tracking-widest hover:underline uppercase"
         >
           Xem tất cả →
@@ -150,11 +155,14 @@ const GameGrid = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
-        {others.map(game => (
+        {others.map((game) => (
           <div
             key={game.slug}
             className="group relative overflow-hidden rounded-2xl border transition-all hover:scale-[1.01] duration-300"
-            style={{ borderColor: `${game.coverColor}20`, background: `radial-gradient(ellipse at top right, ${game.coverColor}10, transparent 60%), #111` }}
+            style={{
+              borderColor: `${game.coverColor}20`,
+              background: `radial-gradient(ellipse at top right, ${game.coverColor}10, transparent 60%), #111`,
+            }}
           >
             <div className="relative h-36 md:h-44 overflow-hidden">
               <Image
@@ -166,7 +174,11 @@ const GameGrid = () => {
               <div className="absolute inset-0 bg-gradient-to-t from-[#111] via-transparent to-transparent" />
               <span
                 className="absolute top-3 left-3 md:top-4 md:left-4 px-2.5 py-1 rounded-full text-[9px] font-black tracking-widest"
-                style={{ background: `${game.coverColor}20`, color: game.coverColor, border: `1px solid ${game.coverColor}30` }}
+                style={{
+                  background: `${game.coverColor}20`,
+                  color: game.coverColor,
+                  border: `1px solid ${game.coverColor}30`,
+                }}
               >
                 {game.tag}
               </span>
@@ -175,12 +187,15 @@ const GameGrid = () => {
             <div className="p-4 md:p-5 space-y-3 md:space-y-4">
               <div>
                 <h3 className="text-base md:text-lg font-black">{game.name}</h3>
-                <p className="text-[9px] uppercase tracking-widest mt-0.5" style={{ color: game.coverColor }}>{game.subtitle}</p>
+                <p className="text-[9px] uppercase tracking-widest mt-0.5" style={{ color: game.coverColor }}>
+                  {game.subtitle}
+                </p>
                 <p className="text-slate-500 text-xs mt-1">{game.description}</p>
               </div>
               <a
                 href={game.fbUrl}
-                target="_blank" rel="noopener noreferrer"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 py-2.5 md:py-3 rounded-xl text-xs font-black tracking-widest border transition-all hover:opacity-80"
                 style={{ borderColor: `${game.coverColor}40`, color: game.coverColor }}
               >
@@ -205,6 +220,7 @@ export default function HomePage() {
       <div className="pt-14 md:pt-16">
         <Hero />
         <Features />
+        <FeatureSlider />
         <GameGrid />
       </div>
       <footer className="border-t border-white/5 px-4 md:px-6 py-5 md:py-6 text-center text-[9px] text-slate-600 uppercase tracking-widest">
