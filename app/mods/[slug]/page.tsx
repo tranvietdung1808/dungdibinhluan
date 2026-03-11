@@ -11,8 +11,17 @@ const TAG_COLORS: Record<string, string> = {
   "Cơ chế game": "#ce5a67",
 };
 
-export default function ModDetailPage({ params }: { params: { slug: string } }) {
-  const mod = MODS.find((m) => m.slug === params.slug);
+export async function generateStaticParams() {
+  return MODS.map((mod) => ({ slug: mod.slug }));
+}
+
+export default async function ModDetailPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const mod = MODS.find((m) => m.slug === slug);
   if (!mod) return notFound();
 
   return (
@@ -38,7 +47,6 @@ export default function ModDetailPage({ params }: { params: { slug: string } }) 
             priority
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
-
           <div className="absolute bottom-5 left-5 right-5 flex items-end justify-between gap-4 flex-wrap">
             <div>
               <div className="flex items-center gap-2 mb-2 flex-wrap">
@@ -109,7 +117,6 @@ export default function ModDetailPage({ params }: { params: { slug: string } }) 
           </a>
         </div>
 
-        {/* Note */}
         <p className="text-xs text-slate-600 italic text-center">
           Lưu ý: Bản mod chỉ dành cho anh em đã có game. Chưa có game có thể inbox page để mua nhé!
         </p>
