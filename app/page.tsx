@@ -8,6 +8,7 @@ import HeroSection from "./components/HeroSection";
 const navItems = [
   { label: "TRANG CHỦ", href: "#home" },
   { label: "TÍNH NĂNG", href: "#tinh-nang" },
+  { label: "CHIA SẺ MODS", href: "/mods" },
   { label: "GAME KHÁC", href: "#games" },
 ];
 
