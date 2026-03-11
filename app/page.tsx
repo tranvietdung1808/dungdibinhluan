@@ -11,25 +11,15 @@ const navItems = [
 ];
 
 const Navbar = () => (
-  <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0a]/80 backdrop-blur-xl border-b border-white/5">
+  <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0a]/70 backdrop-blur-xl border-b border-white/5">
     <div className="max-w-6xl mx-auto px-4 md:px-6 h-14 md:h-16 flex items-center justify-between gap-3">
       <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
         <div className="w-8 h-8 md:w-9 md:h-9 rounded-full overflow-hidden ring-1 ring-[#ce5a67]/40">
-          <Image
-            src="/logo.png"
-            alt="Logo"
-            width={36}
-            height={36}
-            className="object-cover w-full h-full"
-          />
+          <Image src="/logo.png" alt="Logo" width={36} height={36} className="object-cover w-full h-full" />
         </div>
         <div>
-          <p className="font-black text-[11px] md:text-sm tracking-widest hidden sm:block">
-            DUNGDIBINHLUAN
-          </p>
-          <p className="text-[8px] text-slate-500 tracking-[0.3em] hidden sm:block">
-            ALL IN ONE GAME SET UP
-          </p>
+          <p className="font-black text-[11px] md:text-sm tracking-widest hidden sm:block">DUNGDIBINHLUAN</p>
+          <p className="text-[8px] text-slate-500 tracking-[0.3em] hidden sm:block">ALL IN ONE GAME SET UP</p>
         </div>
       </div>
 
@@ -67,20 +57,26 @@ const Navbar = () => (
 const Hero = () => (
   <section
     id="home"
-    className="relative h-[85vh] md:h-[90vh] min-h-[500px] md:min-h-[600px] flex items-center overflow-hidden"
+    className="relative h-[100vh] min-h-[640px] flex items-center overflow-hidden"
   >
+    {/* BG Image */}
     <div className="absolute inset-0">
       <Image
         src="/games/fc26-banner.jpg"
         alt="EA FC 26"
         fill
-        className="object-cover object-top opacity-50"
+        className="object-cover object-top opacity-55"
         priority
       />
-      <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-[#0a0a0a]/70 to-transparent" />
-      <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
+      {/* Gradient trái → phải */}
+      <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-[#0a0a0a]/60 to-transparent" />
+      {/* Gradient dưới đậm để blend vào slider */}
+      <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/10 to-transparent" />
+      {/* Accent glow đỏ nhẹ góc trái */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_20%_60%,rgba(206,90,103,0.12),transparent_55%)]" />
     </div>
 
+    {/* Content */}
     <div className="relative z-10 max-w-6xl mx-auto px-5 md:px-6 w-full">
       <div className="max-w-xs sm:max-w-sm md:max-w-xl space-y-4 md:space-y-6">
         <div className="flex items-center gap-2 md:gap-3 flex-wrap">
@@ -111,17 +107,10 @@ const Hero = () => (
             className="group flex items-center justify-center gap-2 px-6 md:px-8 py-3.5 md:py-4 bg-[#ce5a67] rounded-2xl font-black tracking-widest text-sm md:text-base text-white hover:bg-[#b44c5c] transition-all shadow-[0_8px_30px_rgba(206,90,103,0.3)]"
           >
             TẢI FC 26 NGAY
-            <svg
-              className="w-4 h-4 transition-transform group-hover:translate-x-1"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={3}
-            >
+            <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
             </svg>
           </Link>
-
           <a
             href="https://web.facebook.com/dungbinhluan/"
             target="_blank"
@@ -132,6 +121,12 @@ const Hero = () => (
           </a>
         </div>
       </div>
+    </div>
+
+    {/* Scroll indicator */}
+    <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2 opacity-40">
+      <p className="text-[9px] tracking-[0.3em] uppercase text-slate-400">SCROLL</p>
+      <div className="w-[1px] h-8 bg-gradient-to-b from-slate-400 to-transparent" />
     </div>
   </section>
 );
@@ -152,12 +147,8 @@ const Features = () => (
           <div className="w-11 h-11 md:w-14 md:h-14 mx-auto rounded-xl md:rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center text-xl md:text-2xl">
             {f.icon}
           </div>
-          <p className="text-[9px] md:text-[10px] font-black tracking-widest text-white uppercase">
-            {f.title}
-          </p>
-          <p className="text-[10px] md:text-xs text-slate-500 leading-relaxed">
-            {f.desc}
-          </p>
+          <p className="text-[9px] md:text-[10px] font-black tracking-widest text-white uppercase">{f.title}</p>
+          <p className="text-[10px] md:text-xs text-slate-500 leading-relaxed">{f.desc}</p>
         </div>
       ))}
     </div>
@@ -223,7 +214,6 @@ const GameGrid = () => {
                 </p>
                 <p className="text-slate-500 text-xs mt-1">{game.description}</p>
               </div>
-
               <a
                 href={game.fbUrl}
                 target="_blank"
@@ -251,7 +241,8 @@ export default function HomePage() {
       <Navbar />
       <div className="pt-14 md:pt-16">
         <Hero />
-        <section id="tinh-nang">
+        {/* Slider overlap lên hero 40px */}
+        <section id="tinh-nang" className="-mt-10 relative z-10">
           <FeatureSlider />
         </section>
         <Features />

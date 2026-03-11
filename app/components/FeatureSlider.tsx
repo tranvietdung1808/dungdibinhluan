@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 
 const slides = [
@@ -54,17 +54,30 @@ const slides = [
   },
 ] as const;
 
+const AUTO_PLAY_INTERVAL = 5000;
+
 export default function FeatureSlider() {
   const [current, setCurrent] = useState(0);
+  const [paused, setPaused] = useState(false);
 
+  const next = useCallback(
+    () => setCurrent((i) => (i + 1) % slides.length),
+    []
+  );
   const prev = () => setCurrent((i) => (i - 1 + slides.length) % slides.length);
-  const next = () => setCurrent((i) => (i + 1) % slides.length);
+
+  // Auto-play — dừng khi user hover vào card
+  useEffect(() => {
+    if (paused) return;
+    const timer = setInterval(next, AUTO_PLAY_INTERVAL);
+    return () => clearInterval(timer);
+  }, [paused, next]);
 
   const slide = slides[current];
   const isPortrait = slide.type === "portrait";
 
   return (
-    <section className="bg-[#0a0a0a] py-10 md:py-14 overflow-hidden border-y border-white/5">
+    <section className="bg-[#0a0a0a] pt-12 pb-10 md:pt-16 md:pb-14 overflow-hidden">
       <div className="max-w-6xl mx-auto px-4 md:px-6">
 
         {/* Header */}
@@ -78,12 +91,14 @@ export default function FeatureSlider() {
         </div>
 
         {/* Card */}
-        <div className="relative rounded-[24px] border border-white/10 overflow-hidden shadow-[0_24px_80px_rgba(0,0,0,0.5)] bg-[#0c0c0c]">
-
+        <div
+          className="relative rounded-[24px] border border-white/10 overflow-hidden shadow-[0_24px_80px_rgba(0,0,0,0.6)] bg-[#0c0c0c]"
+          onMouseEnter={() => setPaused(true)}
+          onMouseLeave={() => setPaused(false)}
+        >
           {isPortrait ? (
-            /* ── PORTRAIT: blur bg + card ảnh ── */
+            /* ── PORTRAIT ── */
             <div className="relative h-[440px] md:h-[560px]">
-              {/* blurred bg */}
               <Image
                 src={slide.img}
                 alt=""
@@ -93,16 +108,13 @@ export default function FeatureSlider() {
               <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/10 to-black/80" />
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(206,90,103,0.12),transparent_50%)]" />
 
-              {/* content */}
               <div className="relative z-10 h-full flex flex-col md:flex-row items-center gap-6 md:gap-12 px-6 md:px-12 py-8 md:py-10">
-                {/* portrait card */}
                 <div className="flex-shrink-0">
                   <div className="relative w-[200px] h-[268px] sm:w-[240px] sm:h-[320px] md:w-[300px] md:h-[400px] rounded-2xl overflow-hidden border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
                     <Image src={slide.img} alt={slide.title} fill className="object-cover" priority />
                   </div>
                 </div>
 
-                {/* text */}
                 <div className="flex flex-col gap-3 text-center md:text-left">
                   <span className="inline-flex self-center md:self-start px-3 py-1 rounded-full text-[10px] font-black tracking-[0.2em] uppercase bg-[#ce5a67]/15 text-[#f08a95] border border-[#ce5a67]/25">
                     {slide.tag}
@@ -117,10 +129,9 @@ export default function FeatureSlider() {
               </div>
             </div>
           ) : (
-            /* ── LANDSCAPE: ảnh full, text ở dưới ── */
+            /* ── LANDSCAPE: ảnh full sạch, text strip dưới ── */
             <div>
-              {/* image full, no overlay */}
-              <div className="relative w-full h-[240px] sm:h-[320px] md:h-[400px]">
+              <div className="relative w-full h-[240px] sm:h-[320px] md:h-[420px]">
                 <Image
                   src={slide.img}
                   alt={slide.title}
@@ -130,7 +141,6 @@ export default function FeatureSlider() {
                 />
               </div>
 
-              {/* text strip bên dưới */}
               <div className="bg-[#0e0e0e] border-t border-white/5 px-6 md:px-10 py-5 md:py-6 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
                 <span className="inline-flex self-start sm:self-auto flex-shrink-0 px-3 py-1 rounded-full text-[10px] font-black tracking-[0.2em] uppercase bg-white/5 text-slate-400 border border-white/10">
                   {slide.tag}
@@ -147,11 +157,13 @@ export default function FeatureSlider() {
             </div>
           )}
 
-          {/* Arrows */}
+          {/* Arrows — chỉ hover trên vùng ảnh */}
           <button
             onClick={prev}
             aria-label="Previous"
-            className={`absolute z-20 left-3 md:left-5 ${isPortrait ? "top-1/2 -translate-y-1/2" : "top-[calc(50%-32px)] -translate-y-1/2"} w-10 h-10 md:w-11 md:h-11 rounded-full bg-black/50 border border-white/10 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/10 hover:border-white/25 transition-all`}
+            className={`absolute z-20 left-3 md:left-5 ${
+              isPortrait ? "top-1/2 -translate-y-1/2" : "top-[200px] sm:top-[160px] md:top-[210px] -translate-y-1/2"
+            } w-10 h-10 md:w-11 md:h-11 rounded-full bg-black/55 border border-white/10 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/10 hover:border-white/25 transition-all`}
           >
             <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -161,7 +173,9 @@ export default function FeatureSlider() {
           <button
             onClick={next}
             aria-label="Next"
-            className={`absolute z-20 right-3 md:right-5 ${isPortrait ? "top-1/2 -translate-y-1/2" : "top-[calc(50%-32px)] -translate-y-1/2"} w-10 h-10 md:w-11 md:h-11 rounded-full bg-black/50 border border-white/10 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/10 hover:border-white/25 transition-all`}
+            className={`absolute z-20 right-3 md:right-5 ${
+              isPortrait ? "top-1/2 -translate-y-1/2" : "top-[200px] sm:top-[160px] md:top-[210px] -translate-y-1/2"
+            } w-10 h-10 md:w-11 md:h-11 rounded-full bg-black/55 border border-white/10 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/10 hover:border-white/25 transition-all`}
           >
             <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
@@ -169,13 +183,13 @@ export default function FeatureSlider() {
           </button>
         </div>
 
-        {/* Dots */}
-        <div className="flex items-center justify-center gap-2 mt-5">
+        {/* Dots + progress */}
+        <div className="flex items-center justify-center gap-2.5 mt-5">
           {slides.map((_, i) => (
             <button
               key={i}
               aria-label={`Slide ${i + 1}`}
-              onClick={() => setCurrent(i)}
+              onClick={() => { setCurrent(i); setPaused(true); }}
               className={`rounded-full transition-all duration-300 ${
                 i === current
                   ? "w-8 h-2 bg-[#ce5a67]"
