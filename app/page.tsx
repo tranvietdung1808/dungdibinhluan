@@ -4,27 +4,44 @@ import { GAMES } from "./data/games";
 import FeatureSlider from "./components/FeatureSlider";
 
 // ========== NAVBAR ==========
+const navItems = [
+  { label: "TRANG CHỦ", href: "#home" },
+  { label: "TÍNH NĂNG", href: "#tinh-nang" },
+  { label: "GAME KHÁC", href: "#games" },
+];
+
 const Navbar = () => (
   <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0a]/80 backdrop-blur-xl border-b border-white/5">
     <div className="max-w-6xl mx-auto px-4 md:px-6 h-14 md:h-16 flex items-center justify-between gap-3">
       <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
         <div className="w-8 h-8 md:w-9 md:h-9 rounded-full overflow-hidden ring-1 ring-[#ce5a67]/40">
-          <Image src="/logo.png" alt="Logo" width={36} height={36} className="object-cover w-full h-full" />
+          <Image
+            src="/logo.png"
+            alt="Logo"
+            width={36}
+            height={36}
+            className="object-cover w-full h-full"
+          />
         </div>
         <div>
-          <p className="font-black text-[11px] md:text-sm tracking-widest hidden sm:block">DUNGDIBINHLUAN</p>
-          <p className="text-[8px] text-slate-500 tracking-[0.3em] hidden sm:block">ALL IN ONE GAME SET UP</p>
+          <p className="font-black text-[11px] md:text-sm tracking-widest hidden sm:block">
+            DUNGDIBINHLUAN
+          </p>
+          <p className="text-[8px] text-slate-500 tracking-[0.3em] hidden sm:block">
+            ALL IN ONE GAME SET UP
+          </p>
         </div>
       </div>
 
       <div className="hidden md:flex items-center gap-1">
-        {["TRANG CHỦ", "MIX MODS", "HƯỚNG DẪN"].map((item) => (
-          <button
-            key={item}
+        {navItems.map((item) => (
+          <Link
+            key={item.label}
+            href={item.href}
             className="px-4 py-2 text-[11px] font-bold tracking-widest text-slate-400 hover:text-white transition-colors rounded-lg hover:bg-white/5"
           >
-            {item}
-          </button>
+            {item.label}
+          </Link>
         ))}
         <a
           href="https://web.facebook.com/dungbinhluan/"
@@ -48,7 +65,10 @@ const Navbar = () => (
 
 // ========== HERO ==========
 const Hero = () => (
-  <section className="relative h-[85vh] md:h-[90vh] min-h-[500px] md:min-h-[600px] flex items-center overflow-hidden">
+  <section
+    id="home"
+    className="relative h-[85vh] md:h-[90vh] min-h-[500px] md:min-h-[600px] flex items-center overflow-hidden"
+  >
     <div className="absolute inset-0">
       <Image
         src="/games/fc26-banner.jpg"
@@ -91,10 +111,17 @@ const Hero = () => (
             className="group flex items-center justify-center gap-2 px-6 md:px-8 py-3.5 md:py-4 bg-[#ce5a67] rounded-2xl font-black tracking-widest text-sm md:text-base text-white hover:bg-[#b44c5c] transition-all shadow-[0_8px_30px_rgba(206,90,103,0.3)]"
           >
             TẢI FC 26 NGAY
-            <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+            <svg
+              className="w-4 h-4 transition-transform group-hover:translate-x-1"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={3}
+            >
               <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
             </svg>
           </Link>
+
           <a
             href="https://web.facebook.com/dungbinhluan/"
             target="_blank"
@@ -109,7 +136,7 @@ const Hero = () => (
   </section>
 );
 
-// ========== FEATURES ==========
+// ========== QUICK FEATURES ==========
 const features = [
   { icon: "🛒", title: "MUA HÀNG DỄ DÀNG", desc: "Nhanh chóng, thuận tiện. Với nhiều mẫu mã cho anh em lựa chọn." },
   { icon: "💬", title: "HỖ TRỢ NHANH CHÓNG", desc: "Đội ngũ admin luôn sẵn sàng xử lí những vấn đề anh em gặp phải." },
@@ -118,15 +145,19 @@ const features = [
 ];
 
 const Features = () => (
-  <section className="bg-[#0d0d0d] border-t border-white/5 py-10 md:py-16">
+  <section className="bg-[#0d0d0d] border-y border-white/5 py-10 md:py-14">
     <div className="max-w-6xl mx-auto px-4 md:px-6 grid grid-cols-2 md:grid-cols-4 gap-5 md:gap-8">
       {features.map((f) => (
         <div key={f.title} className="text-center space-y-2 md:space-y-3">
           <div className="w-11 h-11 md:w-14 md:h-14 mx-auto rounded-xl md:rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center text-xl md:text-2xl">
             {f.icon}
           </div>
-          <p className="text-[9px] md:text-[10px] font-black tracking-widest text-white uppercase">{f.title}</p>
-          <p className="text-[10px] md:text-xs text-slate-500 leading-relaxed">{f.desc}</p>
+          <p className="text-[9px] md:text-[10px] font-black tracking-widest text-white uppercase">
+            {f.title}
+          </p>
+          <p className="text-[10px] md:text-xs text-slate-500 leading-relaxed">
+            {f.desc}
+          </p>
         </div>
       ))}
     </div>
@@ -138,7 +169,7 @@ const GameGrid = () => {
   const others = GAMES.filter((g) => !g.spotlight);
 
   return (
-    <section className="max-w-6xl mx-auto px-4 md:px-6 py-10 md:py-16 space-y-6 md:space-y-8">
+    <section id="games" className="max-w-6xl mx-auto px-4 md:px-6 py-10 md:py-16 space-y-6 md:space-y-8">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl md:text-2xl font-black tracking-tight">CÁC GAME KHÁC</h2>
@@ -192,6 +223,7 @@ const GameGrid = () => {
                 </p>
                 <p className="text-slate-500 text-xs mt-1">{game.description}</p>
               </div>
+
               <a
                 href={game.fbUrl}
                 target="_blank"
@@ -219,8 +251,10 @@ export default function HomePage() {
       <Navbar />
       <div className="pt-14 md:pt-16">
         <Hero />
+        <section id="tinh-nang">
+          <FeatureSlider />
+        </section>
         <Features />
-        <FeatureSlider />
         <GameGrid />
       </div>
       <footer className="border-t border-white/5 px-4 md:px-6 py-5 md:py-6 text-center text-[9px] text-slate-600 uppercase tracking-widest">
