@@ -16,16 +16,18 @@ const TAG_COLORS: Record<string, string> = {
 };
 
 // Gộp lại: mới nhất lên đầu theo từng mảng
-const ALL_MODS = [...[...FACES].reverse(), ...[...MODS].reverse()];
+const ALL_MODS = [...FACES, ...MODS];
+
 
 export default function ModsPage() {
   const [activeTag, setActiveTag] = useState("Tất cả");
   const [search, setSearch] = useState("");
 
   const filtered =
-    activeTag === "Tất cả"
-      ? ALL_MODS
-      : ALL_MODS.filter((m) => m.tags.includes(activeTag));
+  activeTag === "Tất cả"
+    ? [...ALL_MODS].reverse()
+    : [...ALL_MODS].reverse().filter((m) => m.tags.includes(activeTag));
+
 
   const displayed =
     activeTag === "Faces" && search.trim()
