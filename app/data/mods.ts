@@ -14,6 +14,7 @@ export type Mod = {
   featured?: boolean;
   version: string;
   updatedAt: string;
+  thumbnailOrientation?: "portrait" | "landscape";
 };
 
 export const MODS: Mod[] = [
