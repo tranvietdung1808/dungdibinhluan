@@ -60,7 +60,7 @@ Bao gồm facepack lớn nhất, áo đấu mùa 2025-26, gameplay AI được c
 {
   slug: "brx15",
   name: "BxR Mods V8.0",
-  author: "",
+  author: "BxR",
   category: "Kits",
   version: "TU 1.5.0",
   updatedAt: "12/03/2026",

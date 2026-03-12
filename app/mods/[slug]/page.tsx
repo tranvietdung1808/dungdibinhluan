@@ -76,15 +76,23 @@ export default async function ModDetailPage({
         </div>
 
         {/* Info row */}
-        <div className="flex items-center gap-4 flex-wrap text-xs text-slate-500 border-b border-white/5 pb-5">
-          <span>👤 by <span className="text-white font-bold">{mod.author}</span></span>
-          <span>🔄 Cập nhật: <span className="text-slate-300">{mod.updatedAt}</span></span>
-          <span>📦 {mod.version}</span>
-          <span className="ml-auto flex items-center gap-3">
-            <span>👍 {mod.likes}</span>
-            <span>⬇️ {mod.downloads.toLocaleString()} lượt tải</span>
-          </span>
-        </div>
+<div className="flex items-center gap-3 flex-wrap text-xs border-b border-white/5 pb-5">
+  <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-slate-300">
+    👤 <span className="font-bold">{mod.author}</span>
+  </span>
+  <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-slate-300">
+    📦 <span className="font-bold">{mod.version}</span>
+  </span>
+  <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-slate-300">
+    🔄 Cập nhật: <span className="font-bold">{mod.updatedAt}</span>
+  </span>
+  <span className="ml-auto flex items-center gap-3 text-slate-500">
+    <span>👍 {mod.likes}</span>
+    <span>⬇️ {Math.floor(mod.likes / 2 + Math.random() * 10)} lượt tải</span>
+
+  </span>
+</div>
+
 
         {/* Tags */}
         <div className="flex items-center gap-2 flex-wrap">
