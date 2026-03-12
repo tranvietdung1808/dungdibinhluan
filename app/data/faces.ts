@@ -117,7 +117,7 @@ export const FACES = [
   updatedAt: "12/03/2026",
   description: "Update facemod David Zima",
   longDescription: `Update facemod David Zima`,
-  thumbnail: "/mods/faces5.jpg",
+  thumbnail: "/mods/face5.jpg",
   images: [],
   downloadUrl: "mediafire.com/file/gdqvjus8x7wl4aa/EA+FC+26+David+Zima.fifamod/file",
   likes: 0,
@@ -173,7 +173,7 @@ Kasper Høgh — 279975
 Gabri Valero — 279976
 Fábio Silva — 279977
 Justin Hubner - 279978 (new face id, new head and face)`,
-  thumbnail: "/mods/faces6.jpg",
+  thumbnail: "/mods/face6.jpg",
   images: [],
   downloadUrl: "https://drive.google.com/file/d/1NiJryQYt6oBd3essG60wgw3IUgTZEz0k/view?usp=sharing",
   likes: 0,
