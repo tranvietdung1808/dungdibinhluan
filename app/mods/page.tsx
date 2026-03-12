@@ -169,16 +169,25 @@ export default function ModsPage() {
                   </div>
 
                   {/* Info */}
-                  <div className={`p-4 flex flex-col justify-center space-y-1.5 ${isPortrait ? "flex-1 min-w-0" : ""}`}>
-                    <h3 className="font-black text-sm leading-tight line-clamp-2">{mod.name}</h3>
-                    <p className="text-slate-500 text-xs leading-relaxed line-clamp-2">{mod.description}</p>
-                    <div className="flex items-center justify-between pt-1">
-                      <span className="text-[10px] text-slate-600 truncate">by {mod.author}</span>
-                      <span className="text-[10px] text-slate-400 flex-shrink-0">
-                        👍 {randomLikes()}
-                      </span>
-                    </div>
-                  </div>
+<div className={`p-4 flex flex-col justify-center space-y-1.5 ${isPortrait ? "flex-1 min-w-0" : ""}`}>
+  <h3 className="font-black text-sm leading-tight line-clamp-2">{mod.name}</h3>
+  <p className="text-slate-500 text-xs leading-relaxed line-clamp-2">{mod.description}</p>
+  <div className="flex items-center gap-2 flex-wrap pt-1">
+    <span className="text-[9px] px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-slate-400">
+      📦 {mod.version}
+    </span>
+    <span className="text-[9px] px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-slate-400">
+      🔄 {mod.updatedAt}
+    </span>
+  </div>
+  <div className="flex items-center justify-between pt-0.5">
+    <span className="text-[10px] text-slate-600 truncate">by {mod.author}</span>
+    <span className="text-[10px] text-slate-400 flex-shrink-0">
+      👍 {randomLikes()}
+    </span>
+  </div>
+</div>
+
                 </div>
               </Link>
             );
