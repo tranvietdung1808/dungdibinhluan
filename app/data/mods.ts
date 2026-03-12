@@ -104,7 +104,7 @@ Bao gồm facepack lớn nhất, áo đấu mùa 2025-26, gameplay AI được c
 },
 
 {
-  slug: "150",
+  slug: "rode150",
   name: "RODE's Kit Expansion Mod Beta 11.0",
   author: "RODE",
   category: "Kits",
@@ -141,7 +141,7 @@ Sửa các lỗi (Bugs) còn tồn đọng.`,
 },
 
 {
-  slug: "150",
+  slug: "fifer150",
   name: "FIFER's FC26 Realism Mod 1.0 Alpha 14 TU 1.5.0",
   author: "FIFER",
   category: "Faces",
