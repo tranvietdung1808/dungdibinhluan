@@ -29,8 +29,8 @@ export const MODS: Mod[] = [
     longDescription: `Siêu phẩm MIX MODS FC 26 đã chính thức ra mắt! Bản mod hoàn thiện nhất trên thị trường với hàng trăm mod mất phí được chọn lọc kĩ càng.
 
 Bao gồm facepack lớn nhất, áo đấu mùa 2025-26, gameplay AI được cải thiện, đồ họa 4K UltraHD và hàng trăm cập nhật khác.`,
-    thumbnail: "/mods/mix-mods-thumb.jpg",
-    images: ["/mods/mix-mods-1.jpg", "/mods/mix-mods-2.jpg"],
+    thumbnail: "/mods/mixmods.jpg",
+    images: ["/mods/mixmods.jpg", "/mods/mix-mods-2.jpg"],
     downloadUrl: "https://drive.google.com/file/d/1jP39z0kHDmB7XOLB8c682mpTxBOklXVW/view?usp=sharing",
     likes: 128,
     downloads: 1240,
