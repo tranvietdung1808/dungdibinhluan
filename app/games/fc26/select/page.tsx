@@ -11,7 +11,8 @@ const editions = [
     tag: "PHỔ BIẾN",
     tagColor: "#ce5a67",
     img: "/games/fc26n.jpg",
-    href: "/games/fc26?edition=normal",
+    price: "149.000₫",
+    href: "/games/fc26/payment?edition=normal", // 👈 đổi href
   },
   {
     id: "mods",
@@ -22,15 +23,14 @@ const editions = [
     tag: "EXCLUSIVE",
     tagColor: "#a855f7",
     img: "/games/fc26-banner.jpg",
-    href: "/games/fc26?edition=mods",
+    price: "269.000₫",
+    href: "/games/fc26/payment?edition=mods", // 👈 đổi href
   },
 ];
 
 export default function SelectEditionPage() {
   return (
     <main className="min-h-screen bg-[#0a0a0a] text-white flex flex-col items-center justify-center px-4 py-16">
-
-      {/* Header */}
       <div className="text-center space-y-2 mb-12">
         <h1 className="text-3xl md:text-4xl font-black">
           CHỌN <span className="text-[#ce5a67]">PHIÊN BẢN</span>
@@ -38,7 +38,6 @@ export default function SelectEditionPage() {
         <p className="text-slate-500 text-xs tracking-widest uppercase">Chọn gói phù hợp với bạn</p>
       </div>
 
-      {/* Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl">
         {editions.map(ed => (
           <Link
@@ -46,52 +45,37 @@ export default function SelectEditionPage() {
             href={ed.href}
             className="group relative overflow-hidden rounded-3xl border border-white/10 hover:border-white/20 transition-all hover:scale-[1.02] duration-300 bg-[#111]"
           >
-            {/* Ảnh nền mờ */}
             <div className="relative h-48 overflow-hidden">
-              <Image
-                src={ed.img}
-                alt={ed.title}
-                fill
-                className="object-cover opacity-40 group-hover:opacity-55 group-hover:scale-105 transition-all duration-500"
-              />
+              <Image src={ed.img} alt={ed.title} fill className="object-cover opacity-40 group-hover:opacity-55 group-hover:scale-105 transition-all duration-500" />
               <div className="absolute inset-0 bg-gradient-to-t from-[#111] via-[#111]/60 to-transparent" />
-
-              {/* Tag */}
               <span
                 className="absolute top-4 left-4 px-3 py-1 rounded-full text-[9px] font-black tracking-widest border"
-                style={{
-                  color: ed.tagColor,
-                  borderColor: `${ed.tagColor}40`,
-                  background: `${ed.tagColor}15`,
-                }}
+                style={{ color: ed.tagColor, borderColor: `${ed.tagColor}40`, background: `${ed.tagColor}15` }}
               >
                 {ed.tag}
               </span>
             </div>
 
-            {/* Content */}
             <div className="p-6 space-y-4">
               <div>
                 <h2 className="text-xl font-black">{ed.title}</h2>
-                <p className="text-[10px] tracking-widest uppercase mt-0.5" style={{ color: ed.tagColor }}>
-                  {ed.subtitle}
-                </p>
+                <p className="text-[10px] tracking-widest uppercase mt-0.5" style={{ color: ed.tagColor }}>{ed.subtitle}</p>
                 <p className="text-slate-400 text-sm mt-2 leading-relaxed">{ed.description}</p>
               </div>
-
-              {/* Features */}
               <ul className="space-y-1.5">
                 {ed.features.map(f => (
                   <li key={f} className="text-xs text-slate-300">{f}</li>
                 ))}
               </ul>
 
-              {/* CTA */}
-              <div
-                className="w-full py-3.5 rounded-2xl font-black text-xs tracking-widest text-center text-white transition-all"
-                style={{ background: ed.tagColor }}
-              >
-                CHỌN PHIÊN BẢN NÀY →
+              {/* Giá */}
+              <div className="flex items-center justify-between border-t border-white/5 pt-3">
+                <span className="text-xs text-slate-500 uppercase tracking-widest">Giá</span>
+                <span className="text-xl font-black" style={{ color: ed.tagColor }}>{ed.price}</span>
+              </div>
+
+              <div className="w-full py-3.5 rounded-2xl font-black text-xs tracking-widest text-center text-white transition-all" style={{ background: ed.tagColor }}>
+                MUA NGAY →
               </div>
             </div>
           </Link>
