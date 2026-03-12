@@ -19,9 +19,10 @@ export default function ModsPage() {
   const [search, setSearch] = useState(""); // 👈 thêm state tìm kiếm
 
   const filtered =
-    activeTag === "Tất cả"
-      ? MODS
-      : MODS.filter((m) => m.tags.includes(activeTag));
+  activeTag === "Tất cả"
+    ? [...MODS].reverse()
+    : [...MODS].reverse().filter((m) => m.tags.includes(activeTag));
+
 
   // Lọc thêm theo search nếu đang ở tab Faces
   const displayed =

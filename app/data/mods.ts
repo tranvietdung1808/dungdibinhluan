@@ -230,4 +230,70 @@ Sửa các lỗi (Bugs) còn tồn đọng.`,
   tags: ["Faces"],
   featured: false,
 },
+{
+  slug: "fifaman",
+  name: "FC 26 FIFAMAN Realism Mod V1",
+  author: "FIFAMAN",
+  category: "Cơ chế game",
+  version: "TU 1.5.0",
+  updatedAt: "12/03/2026",
+  description: "Update hệ thống game trong FC ",
+  longDescription: `FC 26 FIFAMAN Realism Mod V1 (TU 1.5.0)
+"Biến Career Mode thành một thử thách quản lý thực thụ"
+
+Hệ thống Scout 2.0: Nâng cấp cấu trúc tuyển trạch với chi phí thực tế (Scout 5★ lên tới €25M). Chỉ những CLB lớn mới đủ sức vận hành học viện đỉnh cao.
+
+Học viện thực tế: Mở rộng độ tuổi (12–20 tuổi) và giới hạn tỉ lệ xuất hiện Wonderkid (Platinum chỉ 0–1%). Tìm thấy một "tiểu Messi" giờ đây là cả một hành trình.
+
+Phát triển cầu thủ: Tốc độ tăng chỉ số chậm hơn 30%, yêu cầu sự kiên nhẫn và chiến thuật đào tạo dài hạn.
+
+Thị trường chuyển nhượng "Gắt": AI thông minh hơn trong đàm phán, ưu tiên lòng trung thành và các điều khoản giải phóng hợp đồng phức tạp.
+
+Tương thích: Hoàn hảo cho bản cập nhật TU 1.5.0.`,
+  thumbnail: "/mods/fifaman.jpg",
+  images: [],
+  downloadUrl: "https://drive.google.com/file/d/1y1BJXIqXBkL6KVOjFBCJ-sdzNpSQTRZD/view?usp=sharing",
+  likes: 0,
+  downloads: 0,
+  thumbnailOrientation: "portrait",
+  tags: ["Faces"],
+  featured: false,
+},
+{
+  slug: "face4",
+  name: "Tomáš Holeš - Face Update",
+  author: "MichalGrau",
+  category: "Faces",
+  version: "TU 1.5.0",
+  updatedAt: "12/03/2026",
+  description: "Update facemod Tomáš Holeš",
+  longDescription: `Update facemod Tomáš Holeš`,
+  thumbnail: "/mods/face4.jpg",
+  images: [],
+  downloadUrl: "mediafire.com/file/u6wkz1loijwlsph/EA+FC+26+Tom+Hole.fifamod/file",
+  likes: 0,
+  downloads: 0,
+  thumbnailOrientation: "portrait",
+  tags: ["Faces"],
+  featured: false,
+},
+{
+  slug: "face5",
+  name: "David Zima - Face Update",
+  author: "MichalGrau",
+  category: "Faces",
+  version: "TU 1.5.0",
+  updatedAt: "12/03/2026",
+  description: "Update facemod David Zima",
+  longDescription: `Update facemod David Zima`,
+  thumbnail: "/mods/face5.jpg",
+  images: [],
+  downloadUrl: "mediafire.com/file/gdqvjus8x7wl4aa/EA+FC+26+David+Zima.fifamod/file",
+  likes: 0,
+  downloads: 0,
+  thumbnailOrientation: "portrait",
+  tags: ["Faces"],
+  featured: false,
+},
+
 ];
