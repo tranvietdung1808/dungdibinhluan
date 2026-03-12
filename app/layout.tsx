@@ -11,10 +11,18 @@ const beVietnamPro = Be_Vietnam_Pro({
 
 export const metadata: Metadata = {
   title: {
-    default: "DungDiBinhLuan — All In One Game Set Up",
+    default: "DungDiBinhLuan — Tất cả về ",
     template: "%s | DungDiBinhLuan",
   },
   description: "Bộ cài đặt game đầy đủ, tối ưu hiệu năng. Mod FC 26, FIFA chất lượng cao được tuyển chọn bởi DungDiBinhLuan.",
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
+  },
+  alternates: {
+  canonical: "https://dungdibinhluan.com",
+},
   keywords: ["FC 26 mod", "FIFA mod", "game set up", "DungDiBinhLuan", "facepack", "kits mod"],
   authors: [{ name: "DungDiBinhLuan" }],
   creator: "DungDiBinhLuan",

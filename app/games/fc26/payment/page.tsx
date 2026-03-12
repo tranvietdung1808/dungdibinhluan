@@ -1,6 +1,7 @@
 "use client";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Suspense } from "react";
 
 const EDITIONS: Record<string, { label: string; price: string; color: string }> = {
@@ -8,12 +9,11 @@ const EDITIONS: Record<string, { label: string; price: string; color: string }> 
   mods:   { label: "FULL MODS EDITION", price: "269.000₫", color: "#a855f7" },
 };
 
-// ⚠️ Thay thông tin thật của bro vào đây
 const BANK_INFO = {
-  bank: "MB BANK",         // tên ngân hàng
-  accountNumber: "XXXXXXXXXX",  // số tài khoản
-  accountName: "NGUYEN VAN DUNG", // tên chủ tài khoản
-  adminFb: "https://web.facebook.com/dungbinhluan/", // link FB admin
+  bank: "BIDV",
+  accountNumber: "5200501707",
+  accountName: "TRAN VIET DUNG",
+  adminFb: "https://web.facebook.com/dungbinhluan/",
 };
 
 function PaymentContent() {
@@ -42,15 +42,22 @@ function PaymentContent() {
           <p className="text-4xl font-black" style={{ color: ed.color }}>{ed.price}</p>
         </div>
 
+        {/* QR Code */}
+        <div className="rounded-2xl border border-white/10 bg-[#111] p-5 flex flex-col items-center gap-3">
+          <p className="text-[10px] font-black tracking-widest text-slate-400 uppercase">Quét QR để thanh toán</p>
+          <div className="relative w-52 h-52 rounded-xl overflow-hidden border border-white/10">
+            <Image src="/qrbidv.jpg" alt="QR BIDV" fill className="object-contain" />
+          </div>
+          <p className="text-[10px] text-slate-500">Hoặc chuyển khoản thủ công bên dưới</p>
+        </div>
+
         {/* Thông tin ngân hàng */}
         <div className="rounded-2xl border border-white/10 bg-[#111] p-5 space-y-4">
           <p className="text-[10px] font-black tracking-widest text-slate-400 uppercase">Chuyển khoản ngân hàng</p>
-
           {[
             { label: "Ngân hàng", value: BANK_INFO.bank },
             { label: "Số tài khoản", value: BANK_INFO.accountNumber },
             { label: "Chủ tài khoản", value: BANK_INFO.accountName },
-            { label: "Nội dung CK", value: `FC26 ${ed.label}` },
           ].map(row => (
             <div key={row.label} className="flex items-center justify-between gap-4">
               <span className="text-xs text-slate-500 flex-shrink-0">{row.label}</span>
@@ -64,7 +71,7 @@ function PaymentContent() {
           <p className="text-[10px] font-black tracking-widest text-slate-400 uppercase">Các bước tiếp theo</p>
           <ol className="space-y-2.5">
             {[
-              "Chuyển khoản đúng số tiền & nội dung",
+              "Chuyển khoản đúng số tiền",
               "Nhắn tin cho admin kèm ảnh chụp màn hình giao dịch",
               "Admin xác nhận & gửi code kích hoạt cho bạn",
               "Nhập code để tải và cài đặt game",
