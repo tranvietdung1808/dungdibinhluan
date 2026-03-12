@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { MODS } from "../../data/mods";
+import { FACES } from "../../data/faces";
 import { notFound } from "next/navigation";
 
 const TAG_COLORS: Record<string, string> = {
@@ -12,8 +13,10 @@ const TAG_COLORS: Record<string, string> = {
   "Cơ chế game": "#ce5a67",
 };
 
+const ALL_MODS = [...FACES, ...MODS];
+
 export async function generateStaticParams() {
-  return MODS.map((mod) => ({ slug: mod.slug }));
+  return ALL_MODS.map((mod) => ({ slug: mod.slug }));
 }
 
 export async function generateMetadata({
@@ -22,7 +25,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const mod = MODS.find((m) => m.slug === slug);
+  const mod = ALL_MODS.find((m) => m.slug === slug);
   if (!mod) return { title: "Mod không tồn tại" };
 
   return {
@@ -42,7 +45,7 @@ export default async function ModDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const mod = MODS.find((m) => m.slug === slug);
+  const mod = ALL_MODS.find((m) => m.slug === slug);
   if (!mod) return notFound();
 
   const isMixMods = mod.slug === "mix-mods-fc26";
