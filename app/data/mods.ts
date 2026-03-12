@@ -107,7 +107,7 @@ Bao gồm facepack lớn nhất, áo đấu mùa 2025-26, gameplay AI được c
   slug: "150",
   name: "RODE's Kit Expansion Mod Beta 11.0",
   author: "RODE",
-  category: "Kits,
+  category: "Kits"
   version: "TU 1.5.0",
   updatedAt: "12/03/2026",
   description: "Bản update quần áo đầy  cho update 1.5.0",
