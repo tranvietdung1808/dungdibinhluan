@@ -6,12 +6,14 @@ export type Game = {
   tag: string;
   spotlight: boolean;
   hasDownload: boolean;
-  passSum: number;        // Tổng 3 chữ số cuối của pass
+  passSum: number;
   fileSize?: string;
   fileFormat?: string;
-  coverColor: string;     // Màu accent của từng game
+  coverColor: string;
   fbUrl?: string;
+  thumbnail?: string; 
 };
+
 
 export const GAMES: Game[] = [
   {
@@ -36,6 +38,7 @@ export const GAMES: Game[] = [
     spotlight: false,
     hasDownload: false,
     passSum: 14,
+    thumbnail: "/games/fc25.jpg",
     coverColor: "#4a90d9",
     fbUrl: "https://web.facebook.com/dungbinhluan/",
   },
@@ -47,6 +50,7 @@ export const GAMES: Game[] = [
     tag: "AVAILABLE",
     spotlight: false,
     hasDownload: false,
+    thumbnail: "/games/blmwk.jpg",
     passSum: 13,
     coverColor: "#d4a84b",
     fbUrl: "https://web.facebook.com/dungbinhluan/",

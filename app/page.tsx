@@ -112,7 +112,8 @@ const GameGrid = () => {
           >
             <div className="relative h-36 md:h-44 overflow-hidden">
               <Image
-                src={`/games/${game.slug}-thumb.jpg`}
+                src={game.thumbnail ?? `/games/${game.slug}-thumb.jpg`}
+
                 alt={game.name}
                 fill
                 className="object-cover opacity-60 group-hover:opacity-80 group-hover:scale-105 transition-all duration-500"

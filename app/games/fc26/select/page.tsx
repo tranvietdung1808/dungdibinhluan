@@ -10,7 +10,7 @@ const editions = [
     features: ["✅ Game đầy đủ bản quyền crack", "✅ Tối ưu FPS sẵn", "✅ Hỗ trợ cài đặt 1:1"],
     tag: "PHỔ BIẾN",
     tagColor: "#ce5a67",
-    img: "/games/fc26-thumb.jpg", // placeholder
+    img: "/games/fc26n.jpg",
     href: "/games/fc26?edition=normal",
   },
   {
@@ -21,7 +21,7 @@ const editions = [
     features: ["✅ Tất cả từ bản thường", "✅ Face mods cao cấp", "✅ Kit + Stadium mods"],
     tag: "EXCLUSIVE",
     tagColor: "#a855f7",
-    img: "/games/fc26-banner.jpg", // placeholder
+    img: "/games/fc26-banner.jpg",
     href: "/games/fc26?edition=mods",
   },
 ];
