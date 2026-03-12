@@ -198,5 +198,23 @@ Tương thích hoàn hảo: Hoạt động ổn định trên phiên bản TU 1.
   featured: false,
 },
 
+{
+  slug: "aimotion150",
+  name: "AI MOTION 10.0 TU 1.5.0",
+  author: "Cheng",
+  category: "Gameplay",
+  version: "TU 1.5.0",
+  updatedAt: "13/03/2026",
+  description: "Một bản Mod gameplay có phong cách khá độc đáo và riêng biệt đến từ các "pháp sư" modder Hàn Quốc",
+  longDescription: `Một bản Mod gameplay có phong cách khá độc đáo và riêng biệt đến từ các "pháp sư" modder Hàn Quốc, với những cải tiến đáng chú ý về chuyển động của cầu thủ, AI thông minh hơn và phản ứng nhanh hơn trên sân cỏ. Bản mod này hứa hẹn mang đến trải nghiệm chơi game mượt mà và thực tế hơn cho người chơi FC 26.`,
+  thumbnail: "/mods/aimotion.jpg",
+  images: [],
+  downloadUrl: "https://pixeldrain.com/u/Bok1fhYV",
+  likes: 0,
+  downloads: 0,
+  thumbnailOrientation: "portrait",
+  tags: ["Gameplay"],
+  featured: false,
+},
 
 ];
