@@ -183,5 +183,278 @@ Justin Hubner - 279978 (new face id, new head and face)`,
   featured: false,
 },
 
+{
+  slug: "face7",
+  name: "ViP3eR's AIO FacePack + Tattoo V6 (TU 1.5.0)",
+  author: "ViP3eR",
+  category: "Faces",
+  version: "TU 1.5.0",
+  updatedAt: "12/03/2026",
+  description: "Update facemod ViP3eR's AIO FacePack + Tattoo V6",
+  longDescription: `Để kết hợp bản này với các gói áo đấu (Kit Pack) khác, hãy sử dụng tệp Squads nằm trong thư mục: 26-27 AIO V1 x Ultimate AIO V5 x FacePack V6
+ Fermín López
+Dean Huijsen
+Julián Alvarez
+Pedro Fernández
+Dominik Szoboszlai
+Richard Rios
+Robert Lewandowski
+Raphinha
+Roony Bardghji
+Toni Fernández
+Jules Koundé
+Frenkie de Jong
+Marc Bernal
+Guille Fernández
+Kylian Mbappé
+Gonzalo
+Daniel Svensson
+Tyrique George
+Moisés Caicedo
+Alisson Becker
+Alexander Isak
+Aarón Anselmino
+Senne Lammens
+Giovanni Leoni
+Nico O'Reilly
+Jobe Bellingham
+Gabriel Moscardo
+Petar Sučić
+Harry Amass
+Phil Foden
+Valentín Carboni
+Hugo Ekitike
+João Pedro
+Igor Jesus
+Jamie Gittens
+Rasmus Højlund
+Reece James
+Pablo Torre
+Patrick Dorgu
+Julien Duranville
+Mohammed Kudus
+Anthony Gordon
+Elliot Anderson
+Djed Spence
+Ayden Heaven
+Hector Fort
+Jorthy Mokio
+Ivan Provedel
+Francesco Camarda
+Lucas Bergvall
+Arthur Vermeeren
+Enzo Fernández
+Jarell Quansah
+Archie Gray
+Morgan Gibbs-White
+Lewis Miley
+Carney Chukwuemeka
+Stefan Bajčetić
+Martin Baturina
+Álex Jiménez
+Marcus Thuram
+Daniel Maldini
+Sergi Domínguez
+Manuel Akanji
+Filippo Terracciano
+Tyrell Malacia
+Mikey Moore
+Estêvão
+Ademola Lookman
+Mateo Retegui
+Vitinha
+Benjamin Šeško
+Pau Víctor
+Raheem Sterling
+Xavi Simons
+İlkay Gündoğan
+Kristjan Asllani
+Strahinja Pavlović
+Josip Šutalo
+Nicolas Jackson
+Chadi Riad
+Noni Madueke
+Iñaki Peña
+Matteo Gabbia
+Marcus Rashford
+Gerard Martín
+Fisayo Dele-Bashiru
+Ahmetcan Kaplan
+Crysencio Summerville
+Julián Araujo
+Enzo Barrenechea
+Tijjani Reijnders
+Nicolo Rovella
+Matheus Nunes
+Gavi
+Adam Aznou
+Davide Bartesaghi
+Jesper Lindstrøm
+Marcos Leonardo
+Giorgio Scalvini
+Matteo Prati
+Ferdi Kadıoğlu
+Matteo Ruggeri
+André
+Carlos Augusto
+Éderson (José dos Santos)
+Filip Jörgensen
+Matvey Safonov
+Carlos Alcaraz
+Ângelo
+Wesley
+Ardon Jashari
+Bento (Bento Krepski)
+Lucas Perri
+Eric Garcia
+Paulo Dybala
+Riqui Puig
+Arijon Ibrahimović
+Tammy Abraham
+Yann Bisseck
+Pietro Terracciano
+Gustav Isaksen
+Conor Bradley
+Morgan Rogers
+Roger Ibañez
+Alessandro Bastoni
+Galeno
+Nicola Zalewski
+Mika Godts
+Malick Fofana
+Ernest Nuamah
+Mehdi Taremi
+Iñigo Martínez
+Bryan Mbeumo
+Saúl Coco
+Kevin Zenon
+Semih Kilicsoy
+Elia Caprile
+Jacobo Ramón
+Josep Martínez
+Fran González
+Ricardo Pepi
+Natan (Bernardo de Souza)
+Alexandr Golovin
+Jesús Rodríguez
+Kaishu Sano
+Nathaniel Brown
+Lucas Stassin
+Mika Biereth
+Darwin Núñez
+Daniel Muñoz
+Heorhii Sudakov
+Mamadou Sarr
+Nick Woltemade
+Oscar Højlund
+Stefanos Tzimas
+Franjo Ivanović
+Diego Kochen
+El Hadji Malick Diouf
+Mohamed Amoura
+Konstantinos Karetsas
+Konstantinos Koulierakis
+Lennart Karl
+Eberechi Eze
+Xabi Alonso
+Salih Uçan
+Adam Marušić
+Ersin Destanoğlu
+Merih Demiral
+Mees Hilgers
+Kacper Kozłowski
+Yusuf Demir
+Tomás Avilés
+Michael Kayode
+Mario Pašalić
+Raoul Bellanova
+Berat Djimsiti
+Marco Brescianini
+Maximillian Oyedele
+Kian Fitz-Jim
+Youri Baas
+Tijjani Noslin
+Warren Bondo
+Mario Gila
+Sem Steijn
+Mika Mármol
+Tanner Tessmann
+Toby Collyer
+Lamine Camara
+Joey Veerman
+Sebastian Nanasi
+Antonín Kinský
+Jonathan David
+Loïs Openda
+Nico Paz
+Dani Olmo
+Pau Cubarsí
+Bendito Mantato
+Alejandro Garnacho
+Daizen Maeda
+Kota Takai
+Taichi Fukui
+Kuryu Matsuki
+Sota Kitano
+Shunsuke Mito
+Kenan Yıldız
+Ferran Torres
+Federico Valverde
+Romelu Lukaku
+Koki Machida
+Ko Itakura
+Hiroki Sekine
+Noa Lang
+Roger Ibañez
+Rico Lewis
+Benjamin Šeško
+Zion Suzuki
+Kaio César
+Robert Lewandowski
+Daichi Kamada
+Sebastiano Desplanches
+Jean-Mattéo Bahoya
+Franco Mastantuono
+Mauro Icardi
+Lamine Yamal
+Ernest Muçi
+Walter Benítez
+Julian Ryerson
+Ismael Saibari
+Mohamed Abdelmonem
+Osame Sahraoui
+Leon Bailey
+Ricardo Horta
+Matz Sels
+Andrey Santos
+Dominik Szoboszlai
+Lisandro Martínez
+Lautaro Martínez
+Nnamdi Collins
+Ibrahim Mbaye
+Diego León
+Kendry Páez
+Mike Penders
+Joaquín Panichelli
+Elias Baum
+Marc Pubill
+Jan Ziółkowski
+Yasin Ayari
+Fábio Carvalho
+Hugo Ekitike
+Gilberto Mora
+Riccardo Calafiori
+Ibrahim Maza
+Endrick
+Hamza Abdelkarim `,
+  thumbnail: "/mods/face7.jpg",
+  images: [],
+  downloadUrl: "https://pixeldrain.com/u/ramq2dse",
+  likes: 0,
+  downloads: 0,
+  thumbnailOrientation: "portrait",
+  tags: ["Faces"],
+  featured: false,
+},
 
 ];
