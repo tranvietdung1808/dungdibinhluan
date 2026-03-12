@@ -3,6 +3,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { MODS } from "../data/mods";
+import { FACES } from "../data/faces";
 
 const ALL_TAGS = ["Tất cả", "Faces", "Kits", "Gameplay", "Đồ họa", "Cơ chế game"];
 
@@ -14,17 +15,18 @@ const TAG_COLORS: Record<string, string> = {
   "Cơ chế game": "#ce5a67",
 };
 
+// Gộp lại: mới nhất lên đầu theo từng mảng
+const ALL_MODS = [...[...FACES].reverse(), ...[...MODS].reverse()];
+
 export default function ModsPage() {
   const [activeTag, setActiveTag] = useState("Tất cả");
-  const [search, setSearch] = useState(""); // 👈 thêm state tìm kiếm
+  const [search, setSearch] = useState("");
 
   const filtered =
-  activeTag === "Tất cả"
-    ? [...MODS].reverse()
-    : [...MODS].reverse().filter((m) => m.tags.includes(activeTag));
+    activeTag === "Tất cả"
+      ? ALL_MODS
+      : ALL_MODS.filter((m) => m.tags.includes(activeTag));
 
-
-  // Lọc thêm theo search nếu đang ở tab Faces
   const displayed =
     activeTag === "Faces" && search.trim()
       ? filtered.filter((m) =>
@@ -33,7 +35,7 @@ export default function ModsPage() {
         )
       : filtered;
 
-  const featured = MODS.find((m) => m.featured);
+  const featured = ALL_MODS.find((m) => m.featured);
   const rest = displayed.filter((m) => !m.featured);
 
   return (
@@ -109,7 +111,7 @@ export default function ModsPage() {
               key={tag}
               onClick={() => {
                 setActiveTag(tag);
-                setSearch(""); // reset search khi đổi tab
+                setSearch("");
               }}
               className={`px-4 py-2 rounded-xl text-[11px] font-black tracking-widest transition-all border ${
                 activeTag === tag
@@ -123,7 +125,7 @@ export default function ModsPage() {
           <span className="ml-auto text-xs text-slate-600">{displayed.length} mod</span>
         </div>
 
-        {/* 🔍 Search bar — chỉ hiện khi tab Faces */}
+        {/* Search bar — chỉ hiện khi tab Faces */}
         {activeTag === "Faces" && (
           <div className="relative">
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm">🔍</span>
@@ -132,7 +134,7 @@ export default function ModsPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Tìm kiếm faces... (tên cầu thủ, mô tả)"
-              className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-[#3b82f6]/50 focus:bg-white/8 transition-all"
+              className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-[#3b82f6]/50 transition-all"
             />
             {search && (
               <button
