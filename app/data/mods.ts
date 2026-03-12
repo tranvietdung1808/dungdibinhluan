@@ -36,4 +36,24 @@ Bao gồm facepack lớn nhất, áo đấu mùa 2025-26, gameplay AI được c
     tags: ["Faces", "Kits", "Gameplay", "Đồ họa", "Cơ chế game"],
     featured: true,
   },
+
+  {
+  slug: "griezmann-update-face",
+  name: "Antoine Griezmann Update Face",
+  author: "Facemaker",
+  category: "Faces",
+  version: "v1.0",
+  updatedAt: "12/03/2026",
+  description: "Update facemod Antoine Griezmann",
+  longDescription: `Faces lẻ của Antoine Griezmann dành cho FC 26`,
+  thumbnail: "/mods/grz1.jpg",
+  images: [],
+  downloadUrl: "https://pixeldrain.com/u/ramq2dse",
+  likes: 0,
+  downloads: 0,
+  thumbnailOrientation: "portrait",
+  tags: ["Faces"],
+  featured: false,
+},
+
 ];

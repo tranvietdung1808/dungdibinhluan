@@ -14,6 +14,10 @@ const TAG_COLORS: Record<string, string> = {
   "Cơ chế game": "#ce5a67",
 };
 
+function randomLikes() {
+  return Math.floor(Math.random() * 71) + 30;
+}
+
 export default function ModsPage() {
   const [activeTag, setActiveTag] = useState("Tất cả");
 
@@ -90,7 +94,7 @@ export default function ModsPage() {
                     </span>
                   ))}
                   <span className="text-slate-500 text-xs ml-auto">
-                    👍 {featured.likes} &nbsp;·&nbsp; ⬇️ {featured.downloads.toLocaleString()}
+                    👍 {randomLikes()} &nbsp;·&nbsp; ⬇️ {featured.downloads.toLocaleString()}
                   </span>
                 </div>
               </div>
@@ -116,45 +120,69 @@ export default function ModsPage() {
           <span className="ml-auto text-xs text-slate-600">{filtered.length} mod</span>
         </div>
 
-        {/* Grid */}
-        {rest.length === 0 && filtered.length === 0 && (
+        {/* Empty state */}
+        {filtered.length === 0 && (
           <p className="text-slate-600 text-sm py-10 text-center">Chưa có mod nào trong danh mục này.</p>
         )}
 
+        {/* Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
-          {(activeTag === "Tất cả" ? rest : filtered).map((mod) => (
-            <Link key={mod.slug} href={`/mods/${mod.slug}`}>
-              <div className="group relative rounded-2xl overflow-hidden border border-white/10 hover:border-[#ce5a67]/40 transition-all bg-[#111] cursor-pointer">
-                <div className="relative h-40">
-                  <Image
-                    src={mod.thumbnail}
-                    alt={mod.name}
-                    fill
-                    className="object-cover opacity-60 group-hover:opacity-80 group-hover:scale-105 transition-all duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#111] via-transparent to-transparent" />
-                  <span
-                    className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[9px] font-black tracking-widest"
-                    style={{
-                      background: `${TAG_COLORS[mod.tags[0]]}20`,
-                      color: TAG_COLORS[mod.tags[0]],
-                      border: `1px solid ${TAG_COLORS[mod.tags[0]]}30`,
-                    }}
+          {(activeTag === "Tất cả" ? rest : filtered).map((mod) => {
+            const isPortrait = mod.thumbnailOrientation === "portrait";
+
+            return (
+              <Link key={mod.slug} href={`/mods/${mod.slug}`}>
+                <div
+                  className={`group relative rounded-2xl overflow-hidden border border-white/10 hover:border-[#ce5a67]/40 transition-all bg-[#111] cursor-pointer ${
+                    isPortrait ? "flex flex-row h-36" : "flex flex-col"
+                  }`}
+                >
+                  {/* Thumbnail */}
+                  <div
+                    className={`relative flex-shrink-0 overflow-hidden ${
+                      isPortrait ? "w-28 h-full" : "h-40 w-full"
+                    }`}
                   >
-                    {mod.category}
-                  </span>
-                </div>
-                <div className="p-4 space-y-2">
-                  <h3 className="font-black text-sm leading-tight">{mod.name}</h3>
-                  <p className="text-slate-500 text-xs leading-relaxed line-clamp-2">{mod.description}</p>
-                  <div className="flex items-center justify-between pt-1">
-                    <span className="text-[10px] text-slate-600">by {mod.author}</span>
-                    <span className="text-[10px] text-slate-500">👍 {mod.likes} · ⬇️ {mod.downloads}</span>
+                    <Image
+                      src={mod.thumbnail}
+                      alt={mod.name}
+                      fill
+                      className="object-cover opacity-60 group-hover:opacity-80 group-hover:scale-105 transition-all duration-500 object-center"
+                    />
+                    <div
+                      className={`absolute inset-0 ${
+                        isPortrait
+                          ? "bg-gradient-to-r from-transparent via-transparent to-[#111]"
+                          : "bg-gradient-to-t from-[#111] via-[#111]/20 to-transparent"
+                      }`}
+                    />
+                    <span
+                      className="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[9px] font-black tracking-widest"
+                      style={{
+                        background: `${TAG_COLORS[mod.tags[0]]}25`,
+                        color: TAG_COLORS[mod.tags[0]],
+                        border: `1px solid ${TAG_COLORS[mod.tags[0]]}40`,
+                      }}
+                    >
+                      {mod.category}
+                    </span>
+                  </div>
+
+                  {/* Info */}
+                  <div className={`p-4 flex flex-col justify-center space-y-1.5 ${isPortrait ? "flex-1 min-w-0" : ""}`}>
+                    <h3 className="font-black text-sm leading-tight line-clamp-2">{mod.name}</h3>
+                    <p className="text-slate-500 text-xs leading-relaxed line-clamp-2">{mod.description}</p>
+                    <div className="flex items-center justify-between pt-1">
+                      <span className="text-[10px] text-slate-600 truncate">by {mod.author}</span>
+                      <span className="text-[10px] text-slate-400 flex-shrink-0">
+                        👍 {randomLikes()}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       </div>
     </main>
