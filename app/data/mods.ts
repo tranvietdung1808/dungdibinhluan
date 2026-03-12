@@ -57,4 +57,31 @@ Bao gồm facepack lớn nhất, áo đấu mùa 2025-26, gameplay AI được c
   featured: false,
 },
 
+{
+  slug: "brx15",
+  name: "BxR Mods V8.0",
+  author: "",
+  category: "Kits",
+  version: "TU 1.5.0",
+  updatedAt: "12/03/2026",
+  description: "Update facemod Antoine Griezmann",
+  longDescription: `BxR Mods V8.0 (TU 1.5.0)
+
+Đã thêm 477 đôi giày.
+
+Đã thêm 128 đôi găng tay.
+
+Đã thêm 118 quả bóng.
+
+Đã thêm hơn 30 hình xăm.`,
+  thumbnail: "/mods/brx15.jpg",
+  images: [],
+  downloadUrl: "https://modsfire.com/download/8tn5968AG6WW0Pc/32315",
+  likes: 0,
+  downloads: 0,
+  thumbnailOrientation: "portrait",
+  tags: ["Kits"],
+  featured: false,
+},
+
 ];
