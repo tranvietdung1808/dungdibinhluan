@@ -169,20 +169,33 @@ export default function ModsPage() {
                   </div>
 
                   {/* Info */}
-<div className={`p-4 flex flex-col justify-center space-y-1.5 ${isPortrait ? "flex-1 min-w-0" : ""}`}>
-  <h3 className="font-black text-sm leading-tight line-clamp-2">{mod.name}</h3>
-  <p className="text-slate-500 text-xs leading-relaxed line-clamp-2">{mod.description}</p>
-  <div className="flex items-center gap-2 flex-wrap pt-1">
-    <span className="text-[9px] px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-slate-400">
+<div className={`p-4 flex flex-col justify-center space-y-2 ${isPortrait ? "flex-1 min-w-0" : "w-full"}`}>
+  {/* Tiêu đề: Bỏ line-clamp nếu muốn hiện hết, hoặc để line-clamp-2 nhưng thêm leading-tight */}
+  <h3 className="font-black text-[15px] leading-snug text-white group-hover:text-[#ce5a67] transition-colors break-words">
+    {mod.name}
+  </h3>
+  
+  {/* Mô tả: Đảm bảo không bị mất chữ quan trọng */}
+  <p className="text-slate-400 text-xs leading-relaxed line-clamp-2 italic">
+    {mod.description}
+  </p>
+
+  {/* Badge thông tin: Thêm flex-wrap để không bị đẩy ra ngoài */}
+  <div className="flex flex-wrap items-center gap-1.5 pt-1">
+    <span className="text-[9px] px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-slate-300 whitespace-nowrap">
       📦 {mod.version}
     </span>
-    <span className="text-[9px] px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-slate-400">
-      🔄 {mod.updatedAt}
+    <span className="text-[9px] px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-slate-300 whitespace-nowrap">
+      📅 {mod.updatedAt}
     </span>
   </div>
-  <div className="flex items-center justify-between pt-0.5">
-    <span className="text-[10px] text-slate-600 truncate">by {mod.author}</span>
-    <span className="text-[10px] text-slate-400 flex-shrink-0">
+
+  {/* Footer của card */}
+  <div className="flex items-center justify-between pt-2 border-t border-white/5">
+    <span className="text-[10px] text-slate-500 truncate max-w-[100px]">
+      by <span className="text-slate-300">{mod.author}</span>
+    </span>
+    <span className="text-[10px] font-bold text-[#f59e0b] flex items-center gap-1">
       👍 {randomLikes()}
     </span>
   </div>

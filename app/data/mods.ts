@@ -64,7 +64,7 @@ Bao gồm facepack lớn nhất, áo đấu mùa 2025-26, gameplay AI được c
   category: "Kits",
   version: "TU 1.5.0",
   updatedAt: "12/03/2026",
-  description: "Update facemod Antoine Griezmann",
+  description: "Update giày dép, găng tay, bóng và hình xăm mới nhất cho FC 26",
   longDescription: `BxR Mods V8.0 (TU 1.5.0)
 
 Đã thêm 477 đôi giày.
