@@ -38,14 +38,25 @@ export default async function ModDetailPage({
       <div className="max-w-4xl mx-auto px-4 md:px-6 py-8 md:py-12 space-y-8">
 
         {/* Thumbnail hero */}
-        <div className="relative rounded-3xl overflow-hidden h-56 md:h-96 border border-white/10">
-          <Image
-            src={mod.thumbnail}
-            alt={mod.name}
-            fill
-            className="object-cover opacity-70"
-            priority
-          />
+<div
+  className={`relative rounded-3xl overflow-hidden border border-white/10 ${
+    mod.thumbnailOrientation === "portrait"
+      ? "h-[420px] md:h-[560px]"
+      : "h-56 md:h-96"
+  }`}
+>
+  <Image
+    src={mod.thumbnail}
+    alt={mod.name}
+    fill
+    className={`opacity-70 object-cover ${
+      mod.thumbnailOrientation === "portrait"
+        ? "object-top"
+        : "object-center"
+    }`}
+    priority
+  />
+
           <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
           <div className="absolute bottom-5 left-5 right-5 flex items-end justify-between gap-4 flex-wrap">
             <div>
@@ -103,9 +114,9 @@ export default async function ModDetailPage({
         {/* Download CTA */}
         <div className="bg-gradient-to-br from-[#ce5a67]/10 to-transparent border border-[#ce5a67]/20 rounded-3xl p-6 md:p-8 flex flex-col sm:flex-row items-center gap-5">
           <div className="flex-1 text-center sm:text-left">
-            <p className="text-xs text-slate-500 uppercase tracking-widest">Sẵn sàng cài đặt?</p>
+            <p className="text-xs text-slate-500 uppercase tracking-widest">Sẵn sàng cài đặt</p>
             <p className="text-lg md:text-xl font-black mt-1">Tải xuống miễn phí</p>
-            <p className="text-slate-500 text-xs mt-1">File được lưu trên Google Drive · An toàn · Miễn phí</p>
+            <p className="text-slate-500 text-xs mt-1"> An toàn · Miễn phí</p>
           </div>
           <a
             href={mod.downloadUrl}
