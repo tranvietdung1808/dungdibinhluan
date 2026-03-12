@@ -1,6 +1,7 @@
 // app/layout.tsx
 import type { Metadata } from "next";
 import { Be_Vietnam_Pro } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 
 const beVietnamPro = Be_Vietnam_Pro({
@@ -11,40 +12,71 @@ const beVietnamPro = Be_Vietnam_Pro({
 
 export const metadata: Metadata = {
   title: {
-    default: "DungDiBinhLuan — Tất cả về ",
+    default: "DungDiBinhLuan — Mod Game FC 26, FIFA, Facepack",
     template: "%s | DungDiBinhLuan",
   },
-  description: "Bộ cài đặt game đầy đủ, tối ưu hiệu năng. Mod FC 26, FIFA chất lượng cao được tuyển chọn bởi DungDiBinhLuan.",
+
+  description:
+    "Tải mod FC 26, FIFA, facepack, kits và bộ cài đặt game tối ưu hiệu năng. Mod chất lượng cao được tuyển chọn bởi DungDiBinhLuan.",
+
+  metadataBase: new URL("https://dungdibinhluan.com"),
+
   icons: {
     icon: "/favicon.ico",
     shortcut: "/favicon.ico",
     apple: "/apple-touch-icon.png",
   },
+
   alternates: {
-  canonical: "https://dungdibinhluan.com",
-},
-  keywords: ["FC 26 mod", "FIFA mod", "game set up", "DungDiBinhLuan", "facepack", "kits mod"],
+    canonical: "https://dungdibinhluan.com",
+  },
+
+  keywords: [
+    "FC 26 mod",
+    "FIFA mod",
+    "FC 26 facepack",
+    "FC 26 kits",
+    "FIFA mods download",
+    "game mod",
+    "DungDiBinhLuan",
+  ],
+
   authors: [{ name: "DungDiBinhLuan" }],
   creator: "DungDiBinhLuan",
-  metadataBase: new URL("https://dungdibinhluan.com"),
+
   openGraph: {
     type: "website",
     locale: "vi_VN",
     url: "https://dungdibinhluan.com",
     siteName: "DungDiBinhLuan",
-    title: "DungDiBinhLuan — All In One Game Set Up",
-    description: "Bộ cài đặt game đầy đủ, tối ưu hiệu năng. Mod FC 26 chất lượng cao.",
-    images: [{ url: "/og-image.jpg", width: 1200, height: 630 }],
+    title: "DungDiBinhLuan — Mod FC 26, FIFA chất lượng cao",
+    description:
+      "Website chia sẻ mod FC 26, FIFA, facepack, kits và bộ cài đặt game tối ưu hiệu năng.",
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "DungDiBinhLuan Game Mods",
+      },
+    ],
   },
+
   twitter: {
     card: "summary_large_image",
-    title: "DungDiBinhLuan — All In One Game Set Up",
-    description: "Bộ cài đặt game đầy đủ, tối ưu hiệu năng.",
+    title: "DungDiBinhLuan — Mod FC 26, FIFA",
+    description: "Website chia sẻ mod game chất lượng cao.",
     images: ["/og-image.jpg"],
   },
+
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+    },
   },
 };
 
@@ -57,6 +89,7 @@ export default function RootLayout({
     <html lang="vi">
       <body className={`${beVietnamPro.variable} antialiased font-sans`}>
         {children}
+        <Analytics />
       </body>
     </html>
   );
