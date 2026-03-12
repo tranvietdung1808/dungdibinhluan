@@ -84,4 +84,23 @@ Bao gồm facepack lớn nhất, áo đấu mùa 2025-26, gameplay AI được c
   featured: false,
 },
 
+{
+  slug: "esim150",
+  name: "eSIM Mod 1.9.1",
+  author: "eSIM",
+  category: "Đồ họa",
+  version: "TU 1.5.0",
+  updatedAt: "12/03/2026",
+  description: "Bản eSim cho update 1.5.0",
+  longDescription: `Bản eSim cho update 1.5.0`,
+  thumbnail: "/mods/.jpg",
+  images: [],
+  downloadUrl: "https://drive.google.com/file/d/1et-Extmt2i2Y7pPrjDvvWE5Jpv3vav8w/view?usp=sharing",
+  likes: 0,
+  downloads: 0,
+  thumbnailOrientation: "landscape",
+  tags: ["Đồ họa"],
+  featured: false,
+},
+
 ];
