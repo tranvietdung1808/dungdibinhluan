@@ -93,7 +93,7 @@ Bao gồm facepack lớn nhất, áo đấu mùa 2025-26, gameplay AI được c
   updatedAt: "12/03/2026",
   description: "Bản eSim cho update 1.5.0",
   longDescription: `Bản eSim cho update 1.5.0`,
-  thumbnail: "/mods/.jpg",
+  thumbnail: "/mods/esim.jpg",
   images: [],
   downloadUrl: "https://drive.google.com/file/d/1et-Extmt2i2Y7pPrjDvvWE5Jpv3vav8w/view?usp=sharing",
   likes: 0,
