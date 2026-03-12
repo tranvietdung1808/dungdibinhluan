@@ -126,6 +126,62 @@ export const FACES = [
   tags: ["Faces"],
   featured: false,
 },
+{
+  slug: "face6",
+  name: "FC 26 - AGT Facepack v11.0",
+  author: "AGT Facemaker",
+  category: "Faces",
+  version: "TU 1.5.0",
+  updatedAt: "12/03/2026",
+  description: "Update facemod AGT Facepack v11.0",
+  longDescription: `Aimar Blazquez — 279944
+James Rodríguez — 279945
+Will Lankshear — 279946
+Fran González — 279947
+Victor Froholdt — 279948
+Franjo Ivanović — 279949
+Rodrigo Ribeiro — 279950
+Giorgio Scalvini — 279951
+Kiano Dyer — 279952
+Leopold Querfeld — 279953
+Zion Suzuki — 279954
+Noah Adedeji-Sternberg - 279955
+Sidiki Cherif - 279956 (new face id)
+Lionel Messi - 279957 (face update, new hair, new face id)
+Nico O'Reilly - 279715 (added tattoo)
+Hugo Ekitiké – 279806 (face and hair update)
+Tom Fellows — 279958
+Harrison Armstrong — 279959
+Arthur Vermeeren — 279960
+Carlos Jonas Alcaraz - 279961
+Rayan Bardghji — 279962
+Pau Cabanes — 279963
+Erik Kojzek — 279964
+Jakob Schöller — 279965
+Aaron Bouwman — 279966
+Viggo Gebel — 279967
+Mohamed Belloumi — 279968
+Brandon Williams - 243414 (added tattoo)
+Richard Olise — 279969
+Hiroki Abe — 279970
+Tidiam Gomis — 279971
+Adrian Blake — 279972
+Georges Mikautadze - 279973 (var 0 (v1), var 1 (v2))
+Jobe Bellingham - 273567 (new face and hair update)
+Alen Halilović — 279974
+Kasper Høgh — 279975
+Gabri Valero — 279976
+Fábio Silva — 279977
+Justin Hubner - 279978 (new face id, new head and face)`,
+  thumbnail: "/mods/faces6.jpg",
+  images: [],
+  downloadUrl: "https://drive.google.com/file/d/1NiJryQYt6oBd3essG60wgw3IUgTZEz0k/view?usp=sharing",
+  likes: 0,
+  downloads: 0,
+  thumbnailOrientation: "portrait",
+  tags: ["Faces"],
+  featured: false,
+},
 
 
 ];

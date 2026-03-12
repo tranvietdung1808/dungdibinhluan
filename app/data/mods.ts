@@ -170,7 +170,31 @@ Tương thích: Hoàn hảo cho bản cập nhật TU 1.5.0.`,
   likes: 0,
   downloads: 0,
   thumbnailOrientation: "portrait",
-  tags: ["Faces"],
+  tags: ["Cơ chế game"],
+  featured: false,
+},
+{
+  slug: "art150",
+  name: "FC 26 Artisan Bootpack V39.0.1 TU 1.5.0",
+  author: "Artisan",
+  category: "Kits",
+  version: "TU 1.5.0",
+  updatedAt: "12/03/2026",
+  description: "Đây là gói giày (Bootpack) trả phí có quy mô lớn nhất dành cho FC 26",
+  longDescription: `FC 26 Artisan Bootpack V39.0.1 – "Siêu tủ giày" lớn nhất cho FC 26
+
+Số lượng cực khủng: Bổ sung hơn 940+ mẫu giày từ các thương hiệu hàng đầu, đa dạng mẫu mã và màu sắc.
+
+Chất lượng Premium: Đây là bản Bootpack trả phí được tối ưu hóa cực tốt về hình ảnh, đảm bảo độ chi tiết cao nhất trên sân cỏ.
+
+Tương thích hoàn hảo: Hoạt động ổn định trên phiên bản TU 1.5.0.`,
+  thumbnail: "/mods/art150.jpg",
+  images: [],
+  downloadUrl: "https://drive.google.com/file/d/11l2P3N14Jkg8NqRFaRTwDqFzX0dPvNhM/view?usp=sharing",
+  likes: 0,
+  downloads: 0,
+  thumbnailOrientation: "landscape",
+  tags: ["Kits"],
   featured: false,
 },
 
