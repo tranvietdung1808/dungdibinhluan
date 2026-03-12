@@ -103,4 +103,40 @@ Bao gồm facepack lớn nhất, áo đấu mùa 2025-26, gameplay AI được c
   featured: false,
 },
 
+{
+  slug: "150",
+  name: "RODE's Kit Expansion Mod Beta 11.0",
+  author: "RODE",
+  category: "Kits,
+  version: "TU 1.5.0",
+  updatedAt: "12/03/2026",
+  description: "Bản update quần áo đầy  cho update 1.5.0",
+  longDescription: `RODE's Kit Expansion Mod Beta 11 (Dành cho bản cập nhật TU 1.5.0)
+
+Tương thích hoàn toàn với FIFER's Mod.
+
+Tương thích hoàn toàn với các bản mod của KIARIKA.
+
+Đã thêm bộ trang phục thi đấu thứ 3 (Third kits).
+
+Mở khóa bản quyền (License) cho các đội bóng Serie A.
+
+Thêm bộ trang phục World Cup 2026 cho các đội tuyển quốc gia.
+
+Thêm các mẫu áo đặc biệt đóng vai trò là bộ trang phục thứ 4.
+
+Thêm font số áo đấu dành riêng cho các giải cúp (Cup fonts).
+
+Thêm logo World Cup (WC badge) lên áo đấu của Chelsea.
+
+Sửa các lỗi (Bugs) còn tồn đọng.`,
+  thumbnail: "/mods/rodek.jpg",
+  images: [],
+  downloadUrl: "https://drive.google.com/file/d/1LoD0Fh2i8aAPyDxiEjRePYxO37ix6Sxu/view?usp=sharing",
+  likes: 0,
+  downloads: 0,
+  thumbnailOrientation: "landscape",
+  tags: ["Kits"],
+  featured: false,
+},
 ];
