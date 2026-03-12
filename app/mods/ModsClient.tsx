@@ -16,14 +16,24 @@ const TAG_COLORS: Record<string, string> = {
 
 export default function ModsPage() {
   const [activeTag, setActiveTag] = useState("Tất cả");
+  const [search, setSearch] = useState(""); // 👈 thêm state tìm kiếm
 
   const filtered =
     activeTag === "Tất cả"
       ? MODS
       : MODS.filter((m) => m.tags.includes(activeTag));
 
+  // Lọc thêm theo search nếu đang ở tab Faces
+  const displayed =
+    activeTag === "Faces" && search.trim()
+      ? filtered.filter((m) =>
+          m.name.toLowerCase().includes(search.toLowerCase()) ||
+          m.description?.toLowerCase().includes(search.toLowerCase())
+        )
+      : filtered;
+
   const featured = MODS.find((m) => m.featured);
-  const rest = filtered.filter((m) => !m.featured);
+  const rest = displayed.filter((m) => !m.featured);
 
   return (
     <main className="min-h-screen bg-[#0a0a0a] text-white">
@@ -59,8 +69,6 @@ export default function ModsPage() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-[#0a0a0a]/50 to-transparent" />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
-
-                {/* Badge */}
                 <div className="absolute top-4 left-4 flex items-center gap-2 flex-wrap">
                   <span className="px-3 py-1 rounded-full text-[10px] font-black tracking-widest bg-[#ce5a67] text-white">
                     ⭐ FEATURED
@@ -70,11 +78,9 @@ export default function ModsPage() {
                   </span>
                 </div>
               </div>
-
               <div className="absolute bottom-0 left-0 right-0 p-5 md:p-8">
                 <h2 className="text-xl md:text-3xl font-black leading-tight">{featured.name}</h2>
                 <p className="text-slate-400 text-sm mt-1 max-w-lg">{featured.description}</p>
-
                 <div className="flex items-center gap-4 mt-3 flex-wrap">
                   {featured.tags.map((tag) => (
                     <span
@@ -100,7 +106,10 @@ export default function ModsPage() {
           {ALL_TAGS.map((tag) => (
             <button
               key={tag}
-              onClick={() => setActiveTag(tag)}
+              onClick={() => {
+                setActiveTag(tag);
+                setSearch(""); // reset search khi đổi tab
+              }}
               className={`px-4 py-2 rounded-xl text-[11px] font-black tracking-widest transition-all border ${
                 activeTag === tag
                   ? "bg-[#ce5a67] text-white border-[#ce5a67]"
@@ -110,19 +119,42 @@ export default function ModsPage() {
               {tag.toUpperCase()}
             </button>
           ))}
-          <span className="ml-auto text-xs text-slate-600">{filtered.length} mod</span>
+          <span className="ml-auto text-xs text-slate-600">{displayed.length} mod</span>
         </div>
 
+        {/* 🔍 Search bar — chỉ hiện khi tab Faces */}
+        {activeTag === "Faces" && (
+          <div className="relative">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm">🔍</span>
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Tìm kiếm faces... (tên cầu thủ, mô tả)"
+              className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-[#3b82f6]/50 focus:bg-white/8 transition-all"
+            />
+            {search && (
+              <button
+                onClick={() => setSearch("")}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors text-xs"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+        )}
+
         {/* Empty state */}
-        {filtered.length === 0 && (
-          <p className="text-slate-600 text-sm py-10 text-center">Chưa có mod nào trong danh mục này.</p>
+        {displayed.length === 0 && (
+          <p className="text-slate-600 text-sm py-10 text-center">
+            {search ? `Không tìm thấy faces nào với từ khoá "${search}"` : "Chưa có mod nào trong danh mục này."}
+          </p>
         )}
 
         {/* Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
-          {(activeTag === "Tất cả" ? rest : filtered).map((mod) => {
+          {(activeTag === "Tất cả" ? rest : displayed).map((mod) => {
             const isPortrait = mod.thumbnailOrientation === "portrait";
-
             return (
               <Link key={mod.slug} href={`/mods/${mod.slug}`}>
                 <div
@@ -130,25 +162,14 @@ export default function ModsPage() {
                     isPortrait ? "flex flex-row h-36" : "flex flex-col"
                   }`}
                 >
-                  {/* Thumbnail */}
-                  <div
-                    className={`relative flex-shrink-0 overflow-hidden ${
-                      isPortrait ? "w-28 h-full" : "h-40 w-full"
-                    }`}
-                  >
+                  <div className={`relative flex-shrink-0 overflow-hidden ${isPortrait ? "w-28 h-full" : "h-40 w-full"}`}>
                     <Image
                       src={mod.thumbnail}
                       alt={mod.name}
                       fill
                       className="object-cover opacity-60 group-hover:opacity-80 group-hover:scale-105 transition-all duration-500 object-center"
                     />
-                    <div
-                      className={`absolute inset-0 ${
-                        isPortrait
-                          ? "bg-gradient-to-r from-transparent via-transparent to-[#111]"
-                          : "bg-gradient-to-t from-[#111] via-[#111]/20 to-transparent"
-                      }`}
-                    />
+                    <div className={`absolute inset-0 ${isPortrait ? "bg-gradient-to-r from-transparent via-transparent to-[#111]" : "bg-gradient-to-t from-[#111] via-[#111]/20 to-transparent"}`} />
                     <span
                       className="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[9px] font-black tracking-widest"
                       style={{
@@ -160,15 +181,11 @@ export default function ModsPage() {
                       {mod.category}
                     </span>
                   </div>
-
-                  {/* Info */}
                   <div className={`p-4 flex flex-col justify-center space-y-2 ${isPortrait ? "flex-1 min-w-0" : "w-full"}`}>
                     <h3 className="font-black text-[15px] leading-snug text-white group-hover:text-[#ce5a67] transition-colors break-words">
                       {mod.name}
                     </h3>
-                    <p className="text-slate-400 text-xs leading-relaxed line-clamp-2 italic">
-                      {mod.description}
-                    </p>
+                    <p className="text-slate-400 text-xs leading-relaxed line-clamp-2 italic">{mod.description}</p>
                     <div className="flex flex-wrap items-center gap-1.5 pt-1">
                       <span className="text-[9px] px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-slate-300 whitespace-nowrap">
                         📦 {mod.version}
