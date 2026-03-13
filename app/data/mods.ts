@@ -247,5 +247,44 @@ Mod có thể kết hợp với Facepack và các gói Kit khác. Để đồng 
   tags: ["Kits"],
   featured: false,
 },
+{
+  slug: "gvsx150",
+  name: "GVSX Mod TU 1.5.0",
+  author: "GVSX",
+  category: "Đồ họa",
+  version: "TU 1.5.0",
+  updatedAt: "13/03/2026",
+  description: "GVSX Mod là một cuộc đại tu toàn diện về mặt thị giác và cảm giác chơi, đặc biệt là cực kỳ chi tiết ở mảng vật lý lưới và giải VĐQG Brazil",
+  longDescription: `Hệ thống lưới (Nets) siêu thực: * Nhiều kiểu dáng: Lưới chữ nhật (căng, lỏng, cong), lưới kiểu "voan cô dâu" (Bridal Veil), lưới BOX, và lưới lấy cảm hứng từ PES 2011.
 
+Có 3 độ sâu: Dài, Thường, và Ngắn cho mỗi loại.
+
+Mặt cỏ (Grasses): Cỏ tự nhiên 4K siêu nét, cỏ nhân tạo, cỏ tiêu chuẩn châu Âu và addon tăng độ cao cỏ.
+
+Ánh sáng (Lighting): 3 chế độ ánh sáng khác nhau cho mọi loại thời tiết (Sương mù, nắng ráo, mưa, tuyết...). Bóng đổ (shadows) được làm lại chân thực hơn.
+
+Khán giả (Crowd): Mod khán giả siêu thực cho Career Mode hoặc tùy chọn xóa bỏ khán giả để tăng hiệu năng.
+
+Trọng tài: Cập nhật đồng phục trọng tài giải Brazil 2026 và âm thanh còi mới.
+
+Hiệu năng & Đồ họa: Tăng cường độ chi tiết (LOD) cả trong và ngoài sân; Mod tối ưu giúp tăng FPS.
+
+Giao diện (HUD): Loại bỏ các chỉ báo rườm rà (vòng tròn dưới chân, điểm bóng rơi) để tăng tính trải nghiệm điện ảnh.
+
+Âm thanh: Tiếng bóng đập lưới mới, nhạc ăn mừng bàn thắng (Goal Track) từ các nhà đài lớn (FOX Sports, Globo, TNT...).
+
+Phụ kiện cầu thủ: Tất cực ngắn, băng tay, găng tay có thương hiệu thật, băng bảo vệ cổ chân.
+
+Camera: Hệ thống camera tùy biến góc rộng; Camera mới cho đá phạt, penalty, phạt góc; Camera PRO lấy cảm hứng từ PES 2021.
+
+Cá nhân hóa đội bóng: Hệ thống lưới riêng cho từng đội bóng Brazil (có logo, tên đội hoặc sọc màu đặc trưng của CLB đó trên lưới).`,
+  thumbnail: "/mods/gvsx.jpg",
+  images: [],
+  downloadUrl: "https://pixeldrain.com/u/8esN9uJp",
+  likes: 0,
+  downloads: 0,
+  thumbnailOrientation: "portrait",
+  tags: ["Đồ họa"],
+  featured: false,
+},
 ];
