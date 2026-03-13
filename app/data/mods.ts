@@ -217,5 +217,35 @@ Tương thích hoàn hảo: Hoạt động ổn định trên phiên bản TU 1.
   tags: ["Gameplay"],
   featured: false,
 },
+{
+  slug: "kit1",
+  name: "26-27 AIO KitPack Mod V1 FC26",
+  author: "ViP3eR",
+  category: "Kits",
+  version: "TU 1.5.0",
+  updatedAt: "13/03/2026",
+  description: "Cập nhật tương lai: Hơn 100+ bộ kit mới nhất mùa giải 26/27 và bộ sưu tập áo đấu World Cup 2026 cực hot",
+  longDescription: `26-27 AIO KitPack Mod V1 FC26 By ViP3eR (Dành cho TU 1.5.0)
+
+Đã thêm hơn 100 bộ trang phục thi đấu của mùa giải 26/27.
+
+Đã thêm áo đấu cho World Cup 2026.
+
+Mở khóa bản quyền (License) hoàn toàn cho các đội bóng Serie A.
+
+Thêm băng rôn và cờ cổ vũ cho các đội Serie A đã được cấp bản quyền.
+
+Tính năng bổ sung: Cho phép bắt đầu chế độ sự nghiệp (Career Mode) từ năm 2026.
+
+Mod có thể kết hợp với Facepack và các gói Kit khác. Để đồng bộ, hãy sử dụng tệp Squads trong thư mục: 26-27 AIO V1 x Ultimate AIO V5 x FacePack V5.`,
+  thumbnail: "/mods/kit1.jpg",
+  images: [],
+  downloadUrl: "https://pixeldrain.com/u/VV561EGT",
+  likes: 0,
+  downloads: 0,
+  thumbnailOrientation: "portrait",
+  tags: ["Kits"],
+  featured: false,
+},
 
 ];
