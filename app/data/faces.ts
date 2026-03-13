@@ -24,7 +24,7 @@ export const FACES = [
   author: "wichanwoo",
   category: "Faces",
   version: "TU 1.5.0",
-  updatedAt: "12/03/2026",
+  updatedAt: "14/03/2026",
   description: "Update facemod Jude Bellingham",
   longDescription: `Update facemod Jude Bellingham`,
   thumbnail: "/mods/bellingham1.jpg",
