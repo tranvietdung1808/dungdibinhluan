@@ -287,4 +287,30 @@ Cá nhân hóa đội bóng: Hệ thống lưới riêng cho từng đội bóng
   tags: ["Đồ họa"],
   featured: false,
 },
+{
+  slug: "mnf1",
+  name: "Better Regen Minifaces",
+  author: "uNKNOWN",
+  category: "Cơ chế game",
+  version: "TU 1.5.0",
+  updatedAt: "14/03/2026",
+  description: "Bản mod này cải thiện hình ảnh đại diện (minifaces) của các cầu thủ trẻ trong học viện (Youth Academy) ",
+  longDescription: `Better Regen Minifaces – Xóa tan nỗi lo "mặt nhựa" của cầu thủ trẻ
+
+Cải thiện thẩm mỹ: Thay thế các hình ảnh đại diện mặc định thô cứng của cầu thủ trẻ (Regens) bằng những gương mặt tự nhiên và chân thực hơn.
+
+Tăng tính trải nghiệm: Giúp chế độ Career Mode trở nên chuyên nghiệp hơn, khi các tài năng tương lai trong học viện có ngoại hình chỉn chu như cầu thủ thực thụ.
+
+Tương thích hoàn hảo: Hoạt động ổn định trên phiên bản TU 1.5.0.
+
+Nhẹ nhàng & Hiệu quả: Không gây nặng máy, dễ dàng kết hợp với các bản Mod gameplay hay đồ họa khác.`,
+  thumbnail: "/mods/mnf1.jpg",
+  images: [],
+  downloadUrl: "https://pixeldrain.com/u/P224marX",
+  likes: 0,
+  downloads: 0,
+  thumbnailOrientation: "portrait",
+  tags: ["Cơ chế game"],
+  featured: false,
+},
 ];
