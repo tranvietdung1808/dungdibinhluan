@@ -20,8 +20,12 @@ const parseDate = (str: string) => {
   return new Date(year, month - 1, day).getTime();
 };
 
-// Gộp MODS trước FACES để cùng ngày thì MODS lên trên, rồi sort theo ngày mới nhất
-const ALL_MODS = [...MODS, ...FACES].sort((a, b) => parseDate(b.updatedAt) - parseDate(a.updatedAt));
+const SOURCE = [...MODS, ...FACES]; // giữ mảng gốc để lấy index
+const ALL_MODS = [...SOURCE].sort((a, b) => {
+  const dateDiff = parseDate(b.updatedAt) - parseDate(a.updatedAt);
+  if (dateDiff !== 0) return dateDiff; // khác ngày → mới hơn lên trên
+  return SOURCE.indexOf(b) - SOURCE.indexOf(a); // cùng ngày → cuối mảng (mới hơn) lên trên
+});
 
 export default function ModsPage() {
   const [activeTag, setActiveTag] = useState("Tất cả");
