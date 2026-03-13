@@ -15,19 +15,22 @@ const TAG_COLORS: Record<string, string> = {
   "Cơ chế game": "#ce5a67",
 };
 
-// Gộp lại: mới nhất lên đầu theo từng mảng
-const ALL_MODS = [...FACES, ...MODS];
+const parseDate = (str: string) => {
+  const [day, month, year] = str.split("/").map(Number);
+  return new Date(year, month - 1, day).getTime();
+};
 
+// Gộp MODS trước FACES để cùng ngày thì MODS lên trên, rồi sort theo ngày mới nhất
+const ALL_MODS = [...MODS, ...FACES].sort((a, b) => parseDate(b.updatedAt) - parseDate(a.updatedAt));
 
 export default function ModsPage() {
   const [activeTag, setActiveTag] = useState("Tất cả");
   const [search, setSearch] = useState("");
 
   const filtered =
-  activeTag === "Tất cả"
-    ? [...ALL_MODS].reverse()
-    : [...ALL_MODS].reverse().filter((m) => m.tags.includes(activeTag));
-
+    activeTag === "Tất cả"
+      ? ALL_MODS
+      : ALL_MODS.filter((m) => m.tags.includes(activeTag));
 
   const displayed =
     activeTag === "Faces" && search.trim()
