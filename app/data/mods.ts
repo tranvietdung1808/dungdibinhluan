@@ -314,7 +314,7 @@ Nhẹ nhàng & Hiệu quả: Không gây nặng máy, dễ dàng kết hợp v�
   featured: false,
 },
 {
-  slug: "",
+  slug: "le150",
   name: "FC 26 - Live Editor v2.8",
   author: "xAranaktu",
   category: "Cơ chế game",
