@@ -329,7 +329,7 @@ Tăng tính tương tác: Giúp người chơi có thể tùy biến trải nghi
 
 Tương thích hoàn hảo: Hoạt động ổn định trên phiên bản TU 1.5.0.`,
 
-  thumbnail: "/mods/le.jpg",
+  thumbnail: "/mods/LE.jpg",
   images: [],
   downloadUrl: "https://drive.google.com/file/d/13_wBjHXJZipFbrccRsvLDjJYV8mO5cfk/view?usp=sharing",
   likes: 0,
@@ -344,7 +344,7 @@ Tương thích hoàn hảo: Hoạt động ổn định trên phiên bản TU 1.
   author: "KO",
   category: "Đồ họa",
   version: "TU 1.5.0",
-  updatedAt: "/03/2026",
+  updatedAt: "14/03/2026",
   description: "TV Logo Pack là một bản mod đồ họa dành cho FC 26, bổ sung các logo truyền hình thực tế từ các nhà đài lớn như FOX Sports, Globo, TNT... giúp tăng tính chân thực và sống động cho trải nghiệm xem trận đấu trong game.",
   longDescription: `TV Logo Pack TU 1.5.0 – Bản mod bổ sung logo truyền hình thực tế cho FC 26`,
   thumbnail: "/mods/kotvlogo.jpg",
