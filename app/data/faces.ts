@@ -528,5 +528,177 @@ Hamza Abdelkarim `,
   tags: ["Faces"],
   featured: false,
 },
+{
+  slug: "christ-inao-oula-face",
+  name: "Christ Inao Oulaï - Face Update",
+  author: "Eren",
+  category: "Faces",
+  version: "TU 1.5.0",
+  updatedAt: "15/03/2026",
+  description: "Update facemod Christ Inao Oulaï",
+  longDescription: `EAFC26 Faces - Christ Inao Oulaï
+
+Face update cho cầu thủ Christ Inao Oulaï (ID: 212493) trong EA FC 26.`,
+  thumbnail: "/mods/face12.jpg",
+  images: [],
+  downloadUrl: "https://www.mediafire.com/file/3t3o7x7omuo6j0f/233741_Christ_Inao_Oula.fifamod/file",
+  likes: 0,
+  downloads: 0,
+  thumbnailOrientation: "portrait",
+  tags: ["Faces"],
+  featured: false,
+},
+{
+  slug: "martial-godo-face",
+  name: "Martial Godo - Face Update",
+  author: "Evcn",
+  category: "Faces",
+  version: "TU 1.5.0",
+  updatedAt: "15/03/2026",
+  description: "Update facemod Martial Godo",
+  longDescription: `EAFC26 Faces - Martial Godo
+
+Face update cho cầu thủ Martial Godo trong EA FC 26`,
+  thumbnail: "/mods/face13.jpg",
+  images: [],
+  downloadUrl: "https://www.mediafire.com/file/ml7wz82y65gbckm/Martial+Godo+FC26.fifamod/file",
+  likes: 0,
+  downloads: 0,
+  thumbnailOrientation: "portrait",
+  tags: ["Faces"],
+  featured: false,
+},
+{
+  slug: "noah-raveyre-face",
+  name: "Noah Raveyre - Face Update",
+  author: "Evcn",
+  category: "Faces",
+  version: "TU 1.5.0",
+  updatedAt: "15/03/2026",
+  description: "Update facemod Noah Raveyre",
+  longDescription: `EAFC26 Faces - Noah Raveyre
+
+Face update cho thủ môn Noah Raveyre (Pau FC) trong EA FC 26.
+
+Noah Raveyre (20 tuổi) hiện đang thi đấu cho Pau FC tại Ligue 2, mang áo số 50. Thủ môn người Pháp có chiều cao 195cm và chuyển từ Milan đến Pau vào năm 2025.`,
+  thumbnail: "/mods/face14.jpg",
+  images: [],
+  downloadUrl: "https://www.mediafire.com/file/8pa1udwnr89f502/Noah+Raveyre+FC26.fifamod/file",
+  likes: 0,
+  downloads: 0,
+  thumbnailOrientation: "portrait",
+  tags: ["Faces"],
+  featured: false,
+},
+{
+  slug: "john-anthony-mercado-cuero",
+  name: "John Anthony Mercado Cuero - Face Update",
+  author: "MichalGrau",
+  category: "Faces",
+  version: "TU 1.5.0",
+  updatedAt: "15/03/2026",
+  description: "Update facemod John Anthony Mercado Cuero",
+  longDescription: `EAFC26 Faces - John Anthony Mercado Cuero
+
+Face update cho cầu thủ John Anthony Mercado Cuero (Sparta Prague) trong EA FC 26.
+
+John Anthony Mercado Cuero (23 tuổi) là cầu thủ người Ecuador hiện đang thi đấu cho Sparta Prague tại Czech First League. Sinh ngày 3 tháng 6 năm 2002 tại Guayaquil, Mercado chơi ở vị trí winger và đã có trận ra mắt đội tuyển Ecuador vào tháng 9 năm 2024.`,
+  thumbnail: "/mods/face15.jpg",
+  images: [],
+  downloadUrl: "https://www.mediafire.com/file/m7ztnzanfk9z1hc/EA+FC+26+John+Anthony+Mercado+Cuero.fifamod/file",
+  likes: 0,
+  downloads: 0,
+  thumbnailOrientation: "portrait",
+  tags: ["Faces"],
+  featured: false,
+},
+{
+  slug: "louis-page-face",
+  name: "Louis Page - Face Update",
+  author: "Bruhdreed2123",
+  category: "Faces",
+  version: "TU 1.5.0",
+  updatedAt: "15/03/2026",
+  description: "Update facemod Louis Page",
+  longDescription: `EAFC26 Faces - Louis Page
+
+Face update cho cầu thủ Louis Page (Leicester City) trong EA FC 26.
+
+Louis Page (16 tuổi) là tài năng trẻ người Anh hiện đang thi đấu cho Leicester City tại Championship. Chơi ở vị trí CAM với chiều cao 173cm, Page được đánh giá có tiềm năng lớn với rating 64 và potential 84 trong FC 26.`,
+  thumbnail: "/mods/face16.jpg",
+  images: [],
+  downloadUrl: "https://www.mediafire.com/file/8gjv2ft02xfcspd/165414_Louis_Donald_Page.fifamod/file",
+  likes: 0,
+  downloads: 0,
+  thumbnailOrientation: "portrait",
+  tags: ["Faces"],
+  featured: false,
+},
+{
+  slug: "andres-gomez-face",
+  name: "Andrés Gómez - Face Update",
+  author: "Bruhdreed2123",
+  category: "Faces",
+  version: "TU 1.5.0",
+  updatedAt: "15/03/2026",
+  description: "Update facemod Andrés Gómez",
+  longDescription: `EAFC26 Faces - Andrés Gómez
+
+Face update cho cầu thủ Andrés Gómez (Real Salt Lake) trong EA FC 26.
+
+Andrés Gómez (20 tuổi) là cầu thủ người Colombia hiện đang thi đấu cho Real Salt Lake tại Major League Soccer. Chơi ở vị trí RM với chiều cao 172cm, Gómez có rating 70 và potential 81 trong FC 26.`,
+  thumbnail: "/mods/face17.jpg",
+  images: [],
+  downloadUrl: "https://www.mediafire.com/file/qpzukfn75l7sqda/210424_Andrs_Gmez.fifamod/file",
+  likes: 0,
+  downloads: 0,
+  thumbnailOrientation: "portrait",
+  tags: ["Faces"],
+  featured: false,
+},
+{
+  slug: "pedro-fernandez-face",
+  name: "Pedro Fernández - Face Update",
+  author: "QDV",
+  category: "Faces",
+  version: "TU 1.5.0",
+  updatedAt: "15/03/2026",
+  description: "Update facemod Pedro Fernández",
+  longDescription: `EAFC26 Faces - Pedro Fernández
+
+Face update cho cầu thủ Pedro Fernández (PSG) trong EA FC 26.
+
+Pedro Fernández (18 tuổi) là tài năng trẻ người Tây Ban Nha hiện đang thi đấu cho Paris Saint-Germain. Chơi ở vị trí tiền vệ tấn công, Fernández ký hợp đồng với PSG vào tháng 1 năm 2026 và mang áo số 27.`,
+  thumbnail: "/mods/face18.jpg",
+  images: [],
+  downloadUrl: "https://www.mediafire.com/file/u1jwx8pvylw9pwj/[NEW]+Pedro+Fernandez+%28Dro%29_FC26.fifamod/file",
+  likes: 0,
+  downloads: 0,
+  thumbnailOrientation: "portrait",
+  tags: ["Faces"],
+  featured: false,
+},
+{
+  slug: "gilberto-mora-face",
+  name: "Gilberto Mora - Face Update",
+  author: "Bruhdreed2123",
+  category: "Faces",
+  version: "TU 1.5.0",
+  updatedAt: "15/03/2026",
+  description: "Update facemod Gilberto Mora",
+  longDescription: `EAFC26 Faces - Gilberto Mora
+
+Face update cho cầu thủ Gilberto Mora trong EA FC 26.
+
+Gilberto Rafael Mora Zambrano là một cầu thủ bóng đá chuyên nghiệp người Mexico, thi đấu ở vị trí tiền vệ tấn công cho câu lạc bộ Tijuana tại giải Liga MX và đội tuyển quốc gia Mexico.
+  thumbnail: "/mods/face19.jpg",
+  images: [],
+  downloadUrl: "https://www.mediafire.com/file/547m49ha4rw14ki/193519_Gilberto_Mora_V1.fifamod/file",
+  likes: 0,
+  downloads: 0,
+  thumbnailOrientation: "portrait",
+  tags: ["Faces"],
+  featured: false,
+},
 
 ];
