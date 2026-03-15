@@ -68,7 +68,40 @@ export default function HeroSection() {
         id="home"
         className="relative h-[100vh] min-h-[640px] flex items-center overflow-hidden"
       >
-        <div className="absolute inset-0 grain-overlay">
+        <div className="absolute inset-0">
+          {/* Keyframes nhúng thẳng vào component — không phụ thuộc Tailwind xử lý */}
+          <style>{`
+            @keyframes glowPulse {
+              0%, 100% { opacity: 0.18; transform: scale(1); }
+              50%       { opacity: 0.45; transform: scale(1.1); }
+            }
+            @keyframes glowPulse2 {
+              0%, 100% { opacity: 0.10; transform: scale(1); }
+              50%       { opacity: 0.28; transform: scale(1.15); }
+            }
+            @keyframes glowPulse3 {
+              0%, 100% { opacity: 0.06; }
+              50%       { opacity: 0.20; }
+            }
+            .hero-glow-red {
+              animation: glowPulse 3.5s ease-in-out infinite;
+            }
+            .hero-glow-purple {
+              animation: glowPulse2 5s ease-in-out infinite;
+              animation-delay: 1.5s;
+            }
+            .hero-glow-accent {
+              animation: glowPulse3 7s ease-in-out infinite;
+              animation-delay: 3s;
+            }
+            .hero-grid-lines {
+              background-image:
+                linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+              background-size: 55px 55px;
+            }
+          `}</style>
+
           {/* Ảnh nền */}
           <Image
             src="/games/fc26-banner.jpg"
@@ -78,44 +111,61 @@ export default function HeroSection() {
             priority
           />
 
-          {/* Gradient trái → tối, nền văn bản rõ */}
-          <div className="absolute inset-0 bg-gradient-to-r from-[#080810] via-[#080810]/75 to-[#080810]/10" />
+          {/* Gradient trái → tối */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#080810] via-[#080810]/80 to-[#080810]/10" />
 
-          {/* Gradient dưới → tối, blend vào body */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#080810] via-transparent to-[#080810]/40" />
+          {/* Gradient dưới → tối */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#080810] via-transparent to-[#080810]/50" />
 
-          {/* Vignette xung quanh */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_50%,transparent_40%,rgba(8,8,16,0.7)_100%)]" />
-
-          {/* Glow đỏ/hồng ở vùng text — animated */}
+          {/* Vignette xung quanh viền */}
           <div
-            className="absolute animate-pulse-glow"
+            className="absolute inset-0"
+            style={{ background: "radial-gradient(ellipse 80% 80% at 50% 50%, transparent 35%, rgba(8,8,16,0.75) 100%)" }}
+          />
+
+          {/* Glow đỏ/hồng — animated, nhịp đập rõ */}
+          <div
+            className="absolute hero-glow-red"
             style={{
-              left: "-5%", top: "20%",
-              width: "55%", height: "70%",
-              background: "radial-gradient(ellipse, rgba(206,90,103,0.22) 0%, transparent 65%)",
+              left: "-8%", top: "15%",
+              width: "60%", height: "75%",
+              background: "radial-gradient(ellipse, rgba(206,90,103,0.35) 0%, rgba(206,90,103,0.1) 40%, transparent 70%)",
               borderRadius: "50%",
-              filter: "blur(40px)",
+              filter: "blur(35px)",
             }}
           />
 
-          {/* Glow xanh tím nhạt phía sau — depth */}
+          {/* Glow tím/xanh phía sau — depth */}
           <div
-            className="absolute animate-pulse-glow-2"
+            className="absolute hero-glow-purple"
             style={{
-              right: "5%", top: "10%",
-              width: "50%", height: "60%",
-              background: "radial-gradient(ellipse, rgba(80,60,180,0.12) 0%, transparent 65%)",
+              right: "0%", top: "5%",
+              width: "55%", height: "65%",
+              background: "radial-gradient(ellipse, rgba(100,60,220,0.20) 0%, transparent 65%)",
               borderRadius: "50%",
-              filter: "blur(60px)",
+              filter: "blur(55px)",
             }}
           />
 
-          {/* Grid texture overlay mờ */}
-          <div className="absolute inset-0 hero-grid opacity-60" />
+          {/* Glow cam/vàng nhỏ — accent điểm nhấn */}
+          <div
+            className="absolute hero-glow-accent"
+            style={{
+              left: "30%", bottom: "10%",
+              width: "35%", height: "40%",
+              background: "radial-gradient(ellipse, rgba(255,140,60,0.18) 0%, transparent 65%)",
+              borderRadius: "50%",
+              filter: "blur(50px)",
+            }}
+          />
 
-          {/* Đường kẻ ngang nhẹ — cinematic letterbox top */}
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#ce5a67]/40 to-transparent" />
+          {/* Grid texture */}
+          <div className="absolute inset-0 hero-grid-lines" />
+
+          {/* Đường accent đỏ top */}
+          <div className="absolute top-0 left-0 right-0 h-[2px]"
+            style={{ background: "linear-gradient(90deg, transparent, rgba(206,90,103,0.6) 50%, transparent)" }}
+          />
         </div>
 
         <div className="relative z-10 max-w-6xl mx-auto px-5 md:px-6 w-full">
