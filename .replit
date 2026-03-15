@@ -8,8 +8,6 @@ channel = "stable-25_05"
 [userenv]
 
 [userenv.shared]
-ANTHROPIC_API_KEY = "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"
-ACCESS_KEY_ID = ""
 
 [workflows]
 runButton = "Project"
