@@ -69,94 +69,51 @@ export default function HeroSection() {
         className="relative h-[100vh] min-h-[640px] flex items-center overflow-hidden"
       >
         <div className="absolute inset-0">
-          {/* Keyframes nhúng thẳng vào component — không phụ thuộc Tailwind xử lý */}
-          <style>{`
-            @keyframes glowPulse {
-              0%, 100% { opacity: 0.18; transform: scale(1); }
-              50%       { opacity: 0.45; transform: scale(1.1); }
-            }
-            @keyframes glowPulse2 {
-              0%, 100% { opacity: 0.10; transform: scale(1); }
-              50%       { opacity: 0.28; transform: scale(1.15); }
-            }
-            @keyframes glowPulse3 {
-              0%, 100% { opacity: 0.06; }
-              50%       { opacity: 0.20; }
-            }
-            .hero-glow-red {
-              animation: glowPulse 3.5s ease-in-out infinite;
-            }
-            .hero-glow-purple {
-              animation: glowPulse2 5s ease-in-out infinite;
-              animation-delay: 1.5s;
-            }
-            .hero-glow-accent {
-              animation: glowPulse3 7s ease-in-out infinite;
-              animation-delay: 3s;
-            }
-          `}</style>
-
           {/* Ảnh nền */}
           <Image
             src="/games/fc26-banner.jpg"
             alt="EA FC 26"
             fill
-            className="object-cover object-top opacity-40"
+            className="object-cover object-top opacity-45"
             priority
           />
 
-          {/* Gradient trái → tối */}
-          <div className="absolute inset-0 bg-gradient-to-r from-[#080810] via-[#080810]/80 to-[#080810]/10" />
+          {/* Gradient trái → tối — vùng text luôn đọc được */}
+          <div className="absolute inset-0" style={{ background: "linear-gradient(100deg, #080810 30%, rgba(8,8,16,0.72) 58%, rgba(8,8,16,0.10) 100%)" }} />
 
-          {/* Gradient dưới → tối */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#080810] via-transparent to-[#080810]/50" />
+          {/* Gradient dưới → tối — blend xuống body */}
+          <div className="absolute inset-0" style={{ background: "linear-gradient(to top, #080810 0%, rgba(8,8,16,0.55) 30%, transparent 65%)" }} />
 
-          {/* Vignette xung quanh viền */}
+          {/* Gradient trên → tối nhẹ — navbar blend */}
+          <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(8,8,16,0.55) 0%, transparent 20%)" }} />
+
+          {/* Glow đỏ/hồng tĩnh — phía trái nơi có text */}
           <div
-            className="absolute inset-0"
-            style={{ background: "radial-gradient(ellipse 80% 80% at 50% 50%, transparent 35%, rgba(8,8,16,0.75) 100%)" }}
-          />
-
-          {/* Glow đỏ/hồng — animated, nhịp đập rõ */}
-          <div
-            className="absolute hero-glow-red"
+            className="absolute"
             style={{
-              left: "-8%", top: "15%",
-              width: "60%", height: "75%",
-              background: "radial-gradient(ellipse, rgba(206,90,103,0.35) 0%, rgba(206,90,103,0.1) 40%, transparent 70%)",
+              left: "-5%", top: "10%",
+              width: "55%", height: "80%",
+              background: "radial-gradient(ellipse, rgba(206,90,103,0.22) 0%, rgba(206,90,103,0.06) 50%, transparent 75%)",
               borderRadius: "50%",
-              filter: "blur(35px)",
+              filter: "blur(40px)",
             }}
           />
 
-          {/* Glow tím/xanh phía sau — depth */}
+          {/* Glow tím tĩnh — phía phải, tạo chiều sâu */}
           <div
-            className="absolute hero-glow-purple"
+            className="absolute"
             style={{
-              right: "0%", top: "5%",
-              width: "55%", height: "65%",
-              background: "radial-gradient(ellipse, rgba(100,60,220,0.20) 0%, transparent 65%)",
+              right: "-2%", top: "5%",
+              width: "48%", height: "60%",
+              background: "radial-gradient(ellipse, rgba(90,60,200,0.14) 0%, transparent 65%)",
               borderRadius: "50%",
               filter: "blur(55px)",
             }}
           />
 
-          {/* Glow cam/vàng nhỏ — accent điểm nhấn */}
-          <div
-            className="absolute hero-glow-accent"
-            style={{
-              left: "30%", bottom: "10%",
-              width: "35%", height: "40%",
-              background: "radial-gradient(ellipse, rgba(255,140,60,0.18) 0%, transparent 65%)",
-              borderRadius: "50%",
-              filter: "blur(50px)",
-            }}
-          />
-
-
-          {/* Đường accent đỏ top */}
+          {/* Đường accent đỏ mỏng trên cùng */}
           <div className="absolute top-0 left-0 right-0 h-[2px]"
-            style={{ background: "linear-gradient(90deg, transparent, rgba(206,90,103,0.6) 50%, transparent)" }}
+            style={{ background: "linear-gradient(90deg, transparent 5%, rgba(206,90,103,0.55) 50%, transparent 95%)" }}
           />
         </div>
 

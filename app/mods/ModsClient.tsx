@@ -20,16 +20,19 @@ const parseDate = (str: string) => {
   return new Date(year, month - 1, day).getTime();
 };
 
-const SOURCE = [...MODS, ...FACES]; // giữ mảng gốc để lấy index
+const SOURCE = [...MODS, ...FACES];
 const ALL_MODS = [...SOURCE].sort((a, b) => {
   const dateDiff = parseDate(b.updatedAt) - parseDate(a.updatedAt);
-  if (dateDiff !== 0) return dateDiff; // khác ngày → mới hơn lên trên
-  return SOURCE.indexOf(b) - SOURCE.indexOf(a); // cùng ngày → cuối mảng (mới hơn) lên trên
+  if (dateDiff !== 0) return dateDiff;
+  return SOURCE.indexOf(b) - SOURCE.indexOf(a);
 });
+
+const PAGE_SIZE = 12;
 
 export default function ModsPage() {
   const [activeTag, setActiveTag] = useState("Tất cả");
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
 
   const filtered =
     activeTag === "Tất cả"
@@ -45,32 +48,34 @@ export default function ModsPage() {
       : filtered;
 
   const featured = ALL_MODS.find((m) => m.featured);
-  const rest = displayed.filter((m) => !m.featured);
+  const gridItems = activeTag === "Tất cả" ? displayed.filter((m) => !m.featured) : displayed;
+
+  const totalPages = Math.ceil(gridItems.length / PAGE_SIZE);
+  const paginated = gridItems.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  const handleTagChange = (tag: string) => {
+    setActiveTag(tag);
+    setSearch("");
+    setPage(1);
+  };
+
+  const handlePageChange = (p: number) => {
+    setPage(p);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   return (
     <main className="min-h-screen bg-[#080810] text-white relative overflow-hidden">
 
-      {/* ── Animated background glows ── */}
-      <style>{`
-        @keyframes modsGlowPulse {
-          0%, 100% { opacity: 0.15; transform: scale(1); }
-          50%       { opacity: 0.38; transform: scale(1.08); }
-        }
-        @keyframes modsGlowPulse2 {
-          0%, 100% { opacity: 0.08; transform: scale(1); }
-          50%       { opacity: 0.22; transform: scale(1.12); }
-        }
-        .mods-glow-red   { animation: modsGlowPulse  4s ease-in-out infinite; }
-        .mods-glow-purple { animation: modsGlowPulse2 6s ease-in-out infinite; animation-delay: 2s; }
-      `}</style>
+      {/* ── Static gradient background ── */}
 
       {/* Glow đỏ góc trên trái */}
       <div
-        className="absolute mods-glow-red pointer-events-none"
+        className="absolute pointer-events-none"
         style={{
-          left: "-10%", top: "-5%",
-          width: "50%", height: "50%",
-          background: "radial-gradient(ellipse, rgba(206,90,103,0.28) 0%, rgba(206,90,103,0.08) 45%, transparent 70%)",
+          left: "-8%", top: "-8%",
+          width: "52%", height: "52%",
+          background: "radial-gradient(ellipse, rgba(206,90,103,0.20) 0%, rgba(206,90,103,0.05) 50%, transparent 72%)",
           borderRadius: "50%",
           filter: "blur(50px)",
           zIndex: 0,
@@ -78,11 +83,11 @@ export default function ModsPage() {
       />
       {/* Glow tím góc dưới phải */}
       <div
-        className="absolute mods-glow-purple pointer-events-none"
+        className="absolute pointer-events-none"
         style={{
-          right: "-5%", bottom: "10%",
-          width: "45%", height: "45%",
-          background: "radial-gradient(ellipse, rgba(100,60,220,0.18) 0%, transparent 65%)",
+          right: "-4%", bottom: "5%",
+          width: "46%", height: "46%",
+          background: "radial-gradient(ellipse, rgba(90,60,200,0.14) 0%, transparent 65%)",
           borderRadius: "50%",
           filter: "blur(60px)",
           zIndex: 0,
@@ -91,10 +96,10 @@ export default function ModsPage() {
       {/* Đường accent đỏ top */}
       <div
         className="absolute top-0 left-0 right-0 h-[2px] pointer-events-none"
-        style={{ background: "linear-gradient(90deg, transparent, rgba(206,90,103,0.5) 50%, transparent)", zIndex: 1 }}
+        style={{ background: "linear-gradient(90deg, transparent 5%, rgba(206,90,103,0.50) 50%, transparent 95%)", zIndex: 1 }}
       />
 
-      {/* Header */}
+      {/* Header breadcrumb */}
       <div className="relative z-10 border-b border-white/5 px-4 md:px-6 py-4 flex items-center gap-3">
         <Link href="/" className="text-slate-500 hover:text-white transition-colors text-sm">
           ← Trang chủ
@@ -103,7 +108,7 @@ export default function ModsPage() {
         <span className="text-sm font-bold tracking-widest uppercase text-white">Mod Hub</span>
       </div>
 
-      <div className="relative z-10 max-w-6xl mx-auto px-4 md:px-6 py-8 md:py-12 space-y-10">
+      <div className="relative z-10 max-w-6xl mx-auto px-4 md:px-6 py-8 md:py-12 space-y-8">
 
         {/* Page title */}
         <div className="space-y-1">
@@ -114,7 +119,7 @@ export default function ModsPage() {
         </div>
 
         {/* Featured mod */}
-        {featured && activeTag === "Tất cả" && (
+        {featured && activeTag === "Tất cả" && page === 1 && (
           <Link href={`/mods/${featured.slug}`}>
             <div className="group relative rounded-3xl overflow-hidden border border-white/10 hover:border-[#ce5a67]/40 transition-all cursor-pointer">
               <div className="relative h-56 md:h-80">
@@ -124,8 +129,8 @@ export default function ModsPage() {
                   fill
                   className="object-cover opacity-60 group-hover:opacity-75 group-hover:scale-105 transition-all duration-500"
                 />
-                <div className="absolute inset-0 bg-gradient-to-r from-[#080810] via-[#080810]/50 to-transparent" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#080810] via-transparent to-transparent" />
+                <div className="absolute inset-0" style={{ background: "linear-gradient(100deg, #080810 28%, rgba(8,8,16,0.55) 55%, transparent 100%)" }} />
+                <div className="absolute inset-0" style={{ background: "linear-gradient(to top, #080810 0%, rgba(8,8,16,0.4) 35%, transparent 65%)" }} />
                 <div className="absolute top-4 left-4 flex items-center gap-2 flex-wrap">
                   <span className="px-3 py-1 rounded-full text-[10px] font-black tracking-widest bg-[#ce5a67] text-white">
                     ⭐ FEATURED
@@ -163,10 +168,7 @@ export default function ModsPage() {
           {ALL_TAGS.map((tag) => (
             <button
               key={tag}
-              onClick={() => {
-                setActiveTag(tag);
-                setSearch("");
-              }}
+              onClick={() => handleTagChange(tag)}
               className={`px-4 py-2 rounded-xl text-[11px] font-black tracking-widest transition-all border ${
                 activeTag === tag
                   ? "bg-[#ce5a67] text-white border-[#ce5a67]"
@@ -176,7 +178,7 @@ export default function ModsPage() {
               {tag.toUpperCase()}
             </button>
           ))}
-          <span className="ml-auto text-xs text-slate-600">{displayed.length} mod</span>
+          <span className="ml-auto text-xs text-slate-600">{gridItems.length} mod</span>
         </div>
 
         {/* Search bar — chỉ hiện khi tab Faces */}
@@ -186,13 +188,13 @@ export default function ModsPage() {
             <input
               type="text"
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
               placeholder="Tìm kiếm faces... (tên cầu thủ, mô tả)"
               className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-[#3b82f6]/50 transition-all"
             />
             {search && (
               <button
-                onClick={() => setSearch("")}
+                onClick={() => { setSearch(""); setPage(1); }}
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors text-xs"
               >
                 ✕
@@ -202,7 +204,7 @@ export default function ModsPage() {
         )}
 
         {/* Empty state */}
-        {displayed.length === 0 && (
+        {gridItems.length === 0 && (
           <p className="text-slate-600 text-sm py-10 text-center">
             {search ? `Không tìm thấy faces nào với từ khoá "${search}"` : "Chưa có mod nào trong danh mục này."}
           </p>
@@ -210,7 +212,7 @@ export default function ModsPage() {
 
         {/* Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
-          {(activeTag === "Tất cả" ? rest : displayed).map((mod) => {
+          {paginated.map((mod) => {
             const isPortrait = mod.thumbnailOrientation === "portrait";
             return (
               <Link key={mod.slug} href={`/mods/${mod.slug}`}>
@@ -262,6 +264,50 @@ export default function ModsPage() {
             );
           })}
         </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-2 pt-4 flex-wrap">
+            <button
+              onClick={() => handlePageChange(page - 1)}
+              disabled={page === 1}
+              className="px-4 py-2 rounded-xl text-xs font-black tracking-widest border border-white/10 bg-white/5 text-slate-400 hover:border-white/30 hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              ← Trước
+            </button>
+
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => {
+              const isNear = Math.abs(p - page) <= 2 || p === 1 || p === totalPages;
+              if (!isNear) {
+                if (p === page - 3 || p === page + 3) {
+                  return <span key={p} className="text-slate-600 text-xs px-1">…</span>;
+                }
+                return null;
+              }
+              return (
+                <button
+                  key={p}
+                  onClick={() => handlePageChange(p)}
+                  className={`w-9 h-9 rounded-xl text-xs font-black border transition-all ${
+                    p === page
+                      ? "bg-[#ce5a67] text-white border-[#ce5a67]"
+                      : "bg-white/5 text-slate-400 border-white/10 hover:border-white/30 hover:text-white"
+                  }`}
+                >
+                  {p}
+                </button>
+              );
+            })}
+
+            <button
+              onClick={() => handlePageChange(page + 1)}
+              disabled={page === totalPages}
+              className="px-4 py-2 rounded-xl text-xs font-black tracking-widest border border-white/10 bg-white/5 text-slate-400 hover:border-white/30 hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              Tiếp →
+            </button>
+          </div>
+        )}
       </div>
     </main>
   );
