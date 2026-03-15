@@ -118,45 +118,64 @@ export default function ModsPage() {
           <p className="text-slate-500 text-sm">Các bản mod chất lượng cao được tuyển chọn bởi DungDiBinhLuan</p>
         </div>
 
-        {/* Featured mod */}
-        {featured && activeTag === "Tất cả" && page === 1 && (
+        {/* Featured mod — hiện ở mọi trang */}
+        {featured && activeTag === "Tất cả" && (
           <Link href={`/mods/${featured.slug}`}>
-            <div className="group relative rounded-3xl overflow-hidden border border-white/10 hover:border-[#ce5a67]/40 transition-all cursor-pointer">
-              <div className="relative h-56 md:h-80">
+            <div
+              className="group relative rounded-3xl overflow-hidden cursor-pointer transition-all duration-300"
+              style={{
+                border: "1px solid rgba(206,90,103,0.35)",
+                boxShadow: "0 0 0 1px rgba(206,90,103,0.08), 0 8px 40px rgba(0,0,0,0.5)",
+              }}
+            >
+              {/* Đường accent đỏ trên cùng card */}
+              <div className="absolute top-0 left-0 right-0 h-[2px] z-10"
+                style={{ background: "linear-gradient(90deg, transparent 5%, rgba(206,90,103,0.7) 50%, transparent 95%)" }}
+              />
+
+              <div className="relative h-60 md:h-84">
                 <Image
                   src={featured.thumbnail}
                   alt={featured.name}
                   fill
-                  className="object-cover opacity-60 group-hover:opacity-75 group-hover:scale-105 transition-all duration-500"
+                  className="object-cover opacity-55 group-hover:opacity-70 group-hover:scale-[1.03] transition-all duration-500"
                 />
-                <div className="absolute inset-0" style={{ background: "linear-gradient(100deg, #080810 28%, rgba(8,8,16,0.55) 55%, transparent 100%)" }} />
-                <div className="absolute inset-0" style={{ background: "linear-gradient(to top, #080810 0%, rgba(8,8,16,0.4) 35%, transparent 65%)" }} />
+                <div className="absolute inset-0" style={{ background: "linear-gradient(100deg, #080810 30%, rgba(8,8,16,0.60) 58%, rgba(8,8,16,0.15) 100%)" }} />
+                <div className="absolute inset-0" style={{ background: "linear-gradient(to top, #080810 0%, rgba(8,8,16,0.5) 38%, transparent 68%)" }} />
+
                 <div className="absolute top-4 left-4 flex items-center gap-2 flex-wrap">
                   <span className="px-3 py-1 rounded-full text-[10px] font-black tracking-widest bg-[#ce5a67] text-white">
                     ⭐ FEATURED
                   </span>
-                  <span className="px-3 py-1 rounded-full text-[10px] font-black tracking-widest bg-white/10 text-white border border-white/20">
+                  <span className="px-3 py-1 rounded-full text-[10px] font-black tracking-widest bg-white/8 text-white/80 border border-white/15">
                     {featured.category}
                   </span>
                 </div>
               </div>
+
               <div className="absolute bottom-0 left-0 right-0 p-5 md:p-8">
-                <h2 className="text-xl md:text-3xl font-black leading-tight">{featured.name}</h2>
-                <p className="text-slate-400 text-sm mt-1 max-w-lg">{featured.description}</p>
-                <div className="flex items-center gap-4 mt-3 flex-wrap">
+                <p className="text-[10px] uppercase tracking-[0.25em] text-[#ce5a67]/80 font-bold mb-1">Bản mod nổi bật</p>
+                <h2 className="text-xl md:text-3xl font-black leading-tight text-white group-hover:text-[#ce5a67] transition-colors duration-300">
+                  {featured.name}
+                </h2>
+                <p className="text-slate-400 text-sm mt-2 max-w-lg leading-relaxed">{featured.description}</p>
+                <div className="flex items-center gap-3 mt-4 flex-wrap">
                   {featured.tags.map((tag) => (
                     <span
                       key={tag}
                       className="px-2.5 py-1 rounded-full text-[10px] font-bold"
                       style={{
-                        background: `${TAG_COLORS[tag]}20`,
+                        background: `${TAG_COLORS[tag]}18`,
                         color: TAG_COLORS[tag],
-                        border: `1px solid ${TAG_COLORS[tag]}30`,
+                        border: `1px solid ${TAG_COLORS[tag]}28`,
                       }}
                     >
                       {tag}
                     </span>
                   ))}
+                  <span className="ml-auto text-[10px] text-slate-500 font-bold tracking-widest group-hover:text-white transition-colors">
+                    XEM CHI TIẾT →
+                  </span>
                 </div>
               </div>
             </div>
