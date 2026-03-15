@@ -48,9 +48,54 @@ export default function ModsPage() {
   const rest = displayed.filter((m) => !m.featured);
 
   return (
-    <main className="min-h-screen bg-[#0a0a0a] text-white">
+    <main className="min-h-screen bg-[#080810] text-white relative overflow-hidden">
+
+      {/* ── Animated background glows ── */}
+      <style>{`
+        @keyframes modsGlowPulse {
+          0%, 100% { opacity: 0.15; transform: scale(1); }
+          50%       { opacity: 0.38; transform: scale(1.08); }
+        }
+        @keyframes modsGlowPulse2 {
+          0%, 100% { opacity: 0.08; transform: scale(1); }
+          50%       { opacity: 0.22; transform: scale(1.12); }
+        }
+        .mods-glow-red   { animation: modsGlowPulse  4s ease-in-out infinite; }
+        .mods-glow-purple { animation: modsGlowPulse2 6s ease-in-out infinite; animation-delay: 2s; }
+      `}</style>
+
+      {/* Glow đỏ góc trên trái */}
+      <div
+        className="absolute mods-glow-red pointer-events-none"
+        style={{
+          left: "-10%", top: "-5%",
+          width: "50%", height: "50%",
+          background: "radial-gradient(ellipse, rgba(206,90,103,0.28) 0%, rgba(206,90,103,0.08) 45%, transparent 70%)",
+          borderRadius: "50%",
+          filter: "blur(50px)",
+          zIndex: 0,
+        }}
+      />
+      {/* Glow tím góc dưới phải */}
+      <div
+        className="absolute mods-glow-purple pointer-events-none"
+        style={{
+          right: "-5%", bottom: "10%",
+          width: "45%", height: "45%",
+          background: "radial-gradient(ellipse, rgba(100,60,220,0.18) 0%, transparent 65%)",
+          borderRadius: "50%",
+          filter: "blur(60px)",
+          zIndex: 0,
+        }}
+      />
+      {/* Đường accent đỏ top */}
+      <div
+        className="absolute top-0 left-0 right-0 h-[2px] pointer-events-none"
+        style={{ background: "linear-gradient(90deg, transparent, rgba(206,90,103,0.5) 50%, transparent)", zIndex: 1 }}
+      />
+
       {/* Header */}
-      <div className="border-b border-white/5 px-4 md:px-6 py-4 flex items-center gap-3">
+      <div className="relative z-10 border-b border-white/5 px-4 md:px-6 py-4 flex items-center gap-3">
         <Link href="/" className="text-slate-500 hover:text-white transition-colors text-sm">
           ← Trang chủ
         </Link>
@@ -58,7 +103,7 @@ export default function ModsPage() {
         <span className="text-sm font-bold tracking-widest uppercase text-white">Mod Hub</span>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 md:px-6 py-8 md:py-12 space-y-10">
+      <div className="relative z-10 max-w-6xl mx-auto px-4 md:px-6 py-8 md:py-12 space-y-10">
 
         {/* Page title */}
         <div className="space-y-1">
@@ -79,8 +124,8 @@ export default function ModsPage() {
                   fill
                   className="object-cover opacity-60 group-hover:opacity-75 group-hover:scale-105 transition-all duration-500"
                 />
-                <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-[#0a0a0a]/50 to-transparent" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-r from-[#080810] via-[#080810]/50 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#080810] via-transparent to-transparent" />
                 <div className="absolute top-4 left-4 flex items-center gap-2 flex-wrap">
                   <span className="px-3 py-1 rounded-full text-[10px] font-black tracking-widest bg-[#ce5a67] text-white">
                     ⭐ FEATURED
@@ -170,7 +215,7 @@ export default function ModsPage() {
             return (
               <Link key={mod.slug} href={`/mods/${mod.slug}`}>
                 <div
-                  className={`group relative rounded-2xl overflow-hidden border border-white/10 hover:border-[#ce5a67]/40 transition-all bg-[#111] cursor-pointer ${
+                  className={`group relative rounded-2xl overflow-hidden border border-white/10 hover:border-[#ce5a67]/40 transition-all bg-[#0d0d18] cursor-pointer ${
                     isPortrait ? "flex flex-row h-36" : "flex flex-col"
                   }`}
                 >
@@ -181,7 +226,7 @@ export default function ModsPage() {
                       fill
                       className="object-cover opacity-60 group-hover:opacity-80 group-hover:scale-105 transition-all duration-500 object-center"
                     />
-                    <div className={`absolute inset-0 ${isPortrait ? "bg-gradient-to-r from-transparent via-transparent to-[#111]" : "bg-gradient-to-t from-[#111] via-[#111]/20 to-transparent"}`} />
+                    <div className={`absolute inset-0 ${isPortrait ? "bg-gradient-to-r from-transparent via-transparent to-[#0d0d18]" : "bg-gradient-to-t from-[#0d0d18] via-[#0d0d18]/20 to-transparent"}`} />
                     <span
                       className="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[9px] font-black tracking-widest"
                       style={{
