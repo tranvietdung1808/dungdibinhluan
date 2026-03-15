@@ -1,19 +1,13 @@
 "use client";
-import { useState } from "react";
-import Image from "next/image";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { MODS } from "../data/mods";
 import { FACES } from "../data/faces";
-
-const ALL_TAGS = ["Tất cả", "Faces", "Kits", "Gameplay", "Đồ họa", "Cơ chế game"];
-
-const TAG_COLORS: Record<string, string> = {
-  Faces: "#3b82f6",
-  Kits: "#8b5cf6",
-  Gameplay: "#10b981",
-  "Đồ họa": "#f59e0b",
-  "Cơ chế game": "#ce5a67",
-};
+import FeaturedModCard from "./components/FeaturedModCard";
+import FilterTags from "./components/FilterTags";
+import SearchBar from "./components/SearchBar";
+import ModCard from "./components/ModCard";
+import Pagination from "./components/Pagination";
 
 const parseDate = (str: string) => {
   const [day, month, year] = str.split("/").map(Number);
@@ -34,24 +28,43 @@ export default function ModsPage() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
 
-  const filtered =
-    activeTag === "Tất cả"
+  const filtered = useMemo(() => {
+    return activeTag === "Tất cả"
       ? ALL_MODS
       : ALL_MODS.filter((m) => m.tags.includes(activeTag));
+  }, [activeTag]);
 
-  const displayed =
-    activeTag === "Faces" && search.trim()
-      ? filtered.filter((m) =>
-          m.name.toLowerCase().includes(search.toLowerCase()) ||
-          m.description?.toLowerCase().includes(search.toLowerCase())
-        )
-      : filtered;
+  const displayed = useMemo(() => {
+    if (activeTag === "Faces" && search.trim()) {
+      return filtered.filter((m) =>
+        m.name.toLowerCase().includes(search.toLowerCase()) ||
+        m.description?.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+    return filtered;
+  }, [activeTag, search, filtered]);
 
   const featured = ALL_MODS.find((m) => m.featured);
   const gridItems = activeTag === "Tất cả" ? displayed.filter((m) => !m.featured) : displayed;
 
   const totalPages = Math.ceil(gridItems.length / PAGE_SIZE);
   const paginated = gridItems.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  // Preload featured mod image and first page images
+  useEffect(() => {
+    if (featured?.thumbnail) {
+      const img = new Image();
+      img.src = featured.thumbnail;
+    }
+
+    // Preload first page images
+    paginated.slice(0, 6).forEach((mod) => {
+      if (mod.thumbnail) {
+        const img = new Image();
+        img.src = mod.thumbnail;
+      }
+    });
+  }, [featured?.thumbnail, paginated]);
 
   const handleTagChange = (tag: string) => {
     setActiveTag(tag);
@@ -120,106 +133,23 @@ export default function ModsPage() {
 
         {/* Featured mod — hiện ở mọi trang */}
         {featured && activeTag === "Tất cả" && (
-          <Link href={`/mods/${featured.slug}`}>
-            <div
-              className="group relative rounded-3xl overflow-hidden cursor-pointer transition-all duration-300"
-              style={{
-                border: "1px solid rgba(206,90,103,0.35)",
-                boxShadow: "0 0 0 1px rgba(206,90,103,0.08), 0 8px 40px rgba(0,0,0,0.5)",
-              }}
-            >
-              {/* Đường accent đỏ trên cùng card */}
-              <div className="absolute top-0 left-0 right-0 h-[2px] z-10"
-                style={{ background: "linear-gradient(90deg, transparent 5%, rgba(206,90,103,0.7) 50%, transparent 95%)" }}
-              />
-
-              <div className="relative h-60 md:h-84">
-                <Image
-                  src={featured.thumbnail}
-                  alt={featured.name}
-                  fill
-                  className="object-cover opacity-80 group-hover:opacity-95 group-hover:scale-[1.03] transition-all duration-500"
-                />
-                <div className="absolute inset-0" style={{ background: "linear-gradient(100deg, rgba(8,8,16,0.88) 22%, rgba(8,8,16,0.45) 50%, rgba(8,8,16,0.05) 100%)" }} />
-                <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(8,8,16,0.92) 0%, rgba(8,8,16,0.35) 30%, transparent 58%)" }} />
-
-                <div className="absolute top-4 left-4 flex items-center gap-2 flex-wrap">
-                  <span className="px-3 py-1 rounded-full text-[10px] font-black tracking-widest bg-[#ce5a67] text-white">
-                    ⭐ FEATURED
-                  </span>
-                  <span className="px-3 py-1 rounded-full text-[10px] font-black tracking-widest bg-white/8 text-white/80 border border-white/15">
-                    {featured.category}
-                  </span>
-                </div>
-              </div>
-
-              <div className="absolute bottom-0 left-0 right-0 p-5 md:p-8">
-                <p className="text-[10px] uppercase tracking-[0.25em] text-[#ce5a67]/80 font-bold mb-1">Bản mod nổi bật</p>
-                <h2 className="text-xl md:text-3xl font-black leading-tight text-white group-hover:text-[#ce5a67] transition-colors duration-300">
-                  {featured.name}
-                </h2>
-                <p className="text-slate-400 text-sm mt-2 max-w-lg leading-relaxed">{featured.description}</p>
-                <div className="flex items-center gap-3 mt-4 flex-wrap">
-                  {featured.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="px-2.5 py-1 rounded-full text-[10px] font-bold"
-                      style={{
-                        background: `${TAG_COLORS[tag]}18`,
-                        color: TAG_COLORS[tag],
-                        border: `1px solid ${TAG_COLORS[tag]}28`,
-                      }}
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                  <span className="ml-auto text-[10px] text-slate-500 font-bold tracking-widest group-hover:text-white transition-colors">
-                    XEM CHI TIẾT →
-                  </span>
-                </div>
-              </div>
-            </div>
-          </Link>
+          <FeaturedModCard mod={featured} />
         )}
 
         {/* Filter tags */}
-        <div className="flex items-center gap-2 flex-wrap">
-          {ALL_TAGS.map((tag) => (
-            <button
-              key={tag}
-              onClick={() => handleTagChange(tag)}
-              className={`px-4 py-2 rounded-xl text-[11px] font-black tracking-widest transition-all border ${
-                activeTag === tag
-                  ? "bg-[#ce5a67] text-white border-[#ce5a67]"
-                  : "bg-white/5 text-slate-400 border-white/10 hover:border-white/30 hover:text-white"
-              }`}
-            >
-              {tag.toUpperCase()}
-            </button>
-          ))}
-          <span className="ml-auto text-xs text-slate-600">{gridItems.length} mod</span>
-        </div>
+        <FilterTags 
+          activeTag={activeTag} 
+          onTagChange={handleTagChange} 
+          itemCount={gridItems.length} 
+        />
 
         {/* Search bar — chỉ hiện khi tab Faces */}
         {activeTag === "Faces" && (
-          <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm">🔍</span>
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-              placeholder="Tìm kiếm faces... (tên cầu thủ, mô tả)"
-              className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-[#3b82f6]/50 transition-all"
-            />
-            {search && (
-              <button
-                onClick={() => { setSearch(""); setPage(1); }}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors text-xs"
-              >
-                ✕
-              </button>
-            )}
-          </div>
+          <SearchBar 
+            value={search} 
+            onChange={(value) => { setSearch(value); setPage(1); }}
+            onClear={() => { setSearch(""); setPage(1); }}
+          />
         )}
 
         {/* Empty state */}
@@ -231,102 +161,17 @@ export default function ModsPage() {
 
         {/* Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
-          {paginated.map((mod) => {
-            const isPortrait = mod.thumbnailOrientation === "portrait";
-            return (
-              <Link key={mod.slug} href={`/mods/${mod.slug}`}>
-                <div
-                  className={`group relative rounded-2xl overflow-hidden border border-white/10 hover:border-[#ce5a67]/40 transition-all bg-[#0d0d18] cursor-pointer ${
-                    isPortrait ? "flex flex-row h-36" : "flex flex-col"
-                  }`}
-                >
-                  <div className={`relative flex-shrink-0 overflow-hidden ${isPortrait ? "w-28 h-full" : "h-40 w-full"}`}>
-                    <Image
-                      src={mod.thumbnail}
-                      alt={mod.name}
-                      fill
-                      className="object-cover opacity-85 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500 object-center"
-                    />
-                    <div className={`absolute inset-0 ${isPortrait ? "bg-gradient-to-r from-transparent via-transparent to-[#0d0d18]" : "bg-gradient-to-t from-[#0d0d18] via-[#0d0d18]/20 to-transparent"}`} />
-                    <span
-                      className="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[9px] font-black tracking-widest"
-                      style={{
-                        background: `${TAG_COLORS[mod.tags[0]]}25`,
-                        color: TAG_COLORS[mod.tags[0]],
-                        border: `1px solid ${TAG_COLORS[mod.tags[0]]}40`,
-                      }}
-                    >
-                      {mod.category}
-                    </span>
-                  </div>
-                  <div className={`p-4 flex flex-col justify-center space-y-2 ${isPortrait ? "flex-1 min-w-0" : "w-full"}`}>
-                    <h3 className="font-black text-[15px] leading-snug text-white group-hover:text-[#ce5a67] transition-colors break-words">
-                      {mod.name}
-                    </h3>
-                    <p className="text-slate-400 text-xs leading-relaxed line-clamp-2 italic">{mod.description}</p>
-                    <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                      <span className="text-[9px] px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-slate-300 whitespace-nowrap">
-                        📦 {mod.version}
-                      </span>
-                      <span className="text-[9px] px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-slate-300 whitespace-nowrap">
-                        📅 {mod.updatedAt}
-                      </span>
-                    </div>
-                    <div className="flex items-center pt-2 border-t border-white/5">
-                      <span className="text-[10px] text-slate-500 truncate">
-                        by <span className="text-slate-300">{mod.author}</span>
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
+          {paginated.map((mod) => (
+            <ModCard key={mod.slug} mod={mod} />
+          ))}
         </div>
 
         {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-center gap-2 pt-4 flex-wrap">
-            <button
-              onClick={() => handlePageChange(page - 1)}
-              disabled={page === 1}
-              className="px-4 py-2 rounded-xl text-xs font-black tracking-widest border border-white/10 bg-white/5 text-slate-400 hover:border-white/30 hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-            >
-              ← Trước
-            </button>
-
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => {
-              const isNear = Math.abs(p - page) <= 2 || p === 1 || p === totalPages;
-              if (!isNear) {
-                if (p === page - 3 || p === page + 3) {
-                  return <span key={p} className="text-slate-600 text-xs px-1">…</span>;
-                }
-                return null;
-              }
-              return (
-                <button
-                  key={p}
-                  onClick={() => handlePageChange(p)}
-                  className={`w-9 h-9 rounded-xl text-xs font-black border transition-all ${
-                    p === page
-                      ? "bg-[#ce5a67] text-white border-[#ce5a67]"
-                      : "bg-white/5 text-slate-400 border-white/10 hover:border-white/30 hover:text-white"
-                  }`}
-                >
-                  {p}
-                </button>
-              );
-            })}
-
-            <button
-              onClick={() => handlePageChange(page + 1)}
-              disabled={page === totalPages}
-              className="px-4 py-2 rounded-xl text-xs font-black tracking-widest border border-white/10 bg-white/5 text-slate-400 hover:border-white/30 hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-            >
-              Tiếp →
-            </button>
-          </div>
-        )}
+        <Pagination 
+          currentPage={page} 
+          totalPages={totalPages} 
+          onPageChange={handlePageChange} 
+        />
       </div>
     </main>
   );

@@ -378,5 +378,76 @@ Tương thích hoàn hảo với phiên bản TU 1.5.0.`,
   tags: ["Cơ chế game"],
   featured: false,
 },
+{
+  slug: "anth-james-gameplay-v6",
+  name: "Anth James' FC26 Gameplay Mod V6",
+  author: "Anth James",
+  category: "Gameplay",
+  version: "TU 1.5.0",
+  updatedAt: "15/03/2026",
+  description: "Full Gameplay Package - Mod gameplay toàn diện nhất cho FC 26 với hệ thống chuyển động tiên tiến",
+  longDescription: `Anth James' FC26 Gameplay Mod V6 'Full Gameplay Package' #TU1.5.0
+
+Bản mod gameplay toàn diện nhất cho FC 26, được thiết kế để mang lại trải nghiệm chân thực và sống động nhất.
+
+📖 HƯỚNG DẪN SỬ DỤNG MOD
+
+✅ BƯỚC 1: ĐỌC PDF CÀI ĐẶT CẦN THIẾT
+Trước khi làm bất cứ điều gì khác, hãy đảm bảo bạn đọc PDF CÀI ĐẶT CẦN THIẾT.
+Tài liệu này giải thích cài đặt gameplay chính, hành vi CPU và hướng dẫn slider quan trọng để có trải nghiệm chính xác với mod.
+
+📌 Các cài đặt này cực kỳ quan trọng và là nền tảng cho cách gameplay hoạt động.
+Dành vài phút để đọc sẽ giúp đảm bảo bạn bắt đầu mod đúng cách và tránh nhầm lẫn sau này.
+
+✅ BƯỚC 2: CHỌN MỘT STANDALONE
+Standalone là trải nghiệm gameplay all-in-one cốt lõi.
+Mọi yếu tố của gameplay đều được mod bên trong một standalone.
+Nó plug and play - chỉ cần chọn MỘT standalone và bắt đầu chơi.
+
+🆕 Các standalone NATURAL là nền tảng chuyển động mới nhất trong mod và có công việc chuyển động tiên tiến nhất tôi đã tạo ra, tập trung mạnh vào việc xoay, quán tính và động lượng đáng tin cậy.
+
+💡 Điểm khởi đầu được đề xuất:
+⚖️ NATURAL BALANCE
+Phiên bản này nằm ở giữa phổ NATURAL và là nơi tốt nhất để hiểu triết lý đằng thế hệ standalone mới này.
+
+✅ BƯỚC 3: XEM CÁC LỰA CHỌN NẾU BẠN MUỐN TÙY CHỈNH
+Options tồn tại để bạn có thể tinh chỉnh trải nghiệm gameplay theo sở thích - nhưng bạn chỉ nên khám phá chúng sau khi đã quen với standalone và hiểu cách standalone hoạt động.
+
+Nếu bạn muốn sử dụng options:
+✅ Khám phá các file option.
+✅ Đọc mô tả TXT để hiểu mỗi option thay đổi gì.
+❌ Đừng chọn options chỉ dựa vào tên option.
+
+📦 PRESETS
+Presets là cụm các options đã được kết hợp sẵn cho bạn, cho phép bạn nhanh chóng đạt được một phong cách gameplay cụ thể mà không cần tự xây dựng kết hợp.
+
+Ví dụ, SHORT HALVES PRESET bao gồm một lựa chọn các options được thiết kế để tăng cường phía tấn công của gameplay, tạo ra trải nghiệm cởi mở hơn so với khi không có nó.
+
+❗ Chỉ cần đảm bảo đọc các file TXT bên trong mỗi thư mục preset để bạn hiểu chính xác các options nào đang được sử dụng.
+
+✅ BƯỚC 4: XÂY DỰNG KẾT HỢP TỪ TỪ
+Hệ thống gameplay phức tạp. Khi bạn bắt đầu kết hợp options, bạn có thể nhanh chóng thay đổi hành vi và sự cân bằng theo những cách bạn không nhận ra.
+
+Nếu bạn gặp phải hành vi không thích:
+✅ Quay lại thiết lập của bạn
+✅ Tham khảo tài liệu
+✅ Xây dựng lại chậm từ một thiết lập ổn định
+
+🚨 LƯU Ý QUAN TRỌNG: SỬ DỤNG TÀI LIỆU
+📘 Express Notes & Considerations PDF được thiết kế để tham khảo liên tục, không chỉ đọc một lần.
+✅ Sử dụng CTRL + F để tìm kiếm từ khóa
+✅ Tham khảo lại bất cứ khi nào điều chỉnh standalone hoặc options
+❌ Chọn options chỉ dựa vào tên là điều tồi tệ nhất bạn có thể làm
+
+Thông tin trong tài liệu này sẽ cực kỳ giá trị cho việc sử dụng mod hiệu quả!`,
+  thumbnail: "/mods/anth.jpg",
+  images: [],
+  downloadUrl: "https://pixeldrain.com/u/NsgBymXv",
+  likes: 0,
+  downloads: 0,
+  thumbnailOrientation: "portrait",
+  tags: ["Gameplay"],
+  featured: false,
+},
 
 ];
