@@ -23,7 +23,7 @@ const features = [
 ];
 
 const Features = () => (
-  <section className="bg-[#0d0d0d] border-y border-white/5 py-10 md:py-14">
+  <section className="bg-[#080810] border-y border-white/5 py-10 md:py-14">
     <div className="max-w-6xl mx-auto px-4 md:px-6 grid grid-cols-2 md:grid-cols-4 gap-5 md:gap-8">
       {features.map((f) => (
         <div key={f.title} className="text-center space-y-2 md:space-y-3">
@@ -121,7 +121,7 @@ const GameGrid = () => {
 // ========== PAGE ==========
 export default function HomePage() {
   return (
-    <main className="min-h-screen bg-[#0a0a0a] text-white">
+    <main className="min-h-screen bg-[#080810] text-white">
       <Navbar />
       <div className="pt-14 md:pt-16">
         <HeroSection />

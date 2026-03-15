@@ -68,17 +68,54 @@ export default function HeroSection() {
         id="home"
         className="relative h-[100vh] min-h-[640px] flex items-center overflow-hidden"
       >
-        <div className="absolute inset-0">
+        <div className="absolute inset-0 grain-overlay">
+          {/* Ảnh nền */}
           <Image
             src="/games/fc26-banner.jpg"
             alt="EA FC 26"
             fill
-            className="object-cover object-top opacity-55"
+            className="object-cover object-top opacity-40"
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-[#0a0a0a]/60 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/10 to-transparent" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_20%_60%,rgba(206,90,103,0.12),transparent_55%)]" />
+
+          {/* Gradient trái → tối, nền văn bản rõ */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#080810] via-[#080810]/75 to-[#080810]/10" />
+
+          {/* Gradient dưới → tối, blend vào body */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#080810] via-transparent to-[#080810]/40" />
+
+          {/* Vignette xung quanh */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_50%,transparent_40%,rgba(8,8,16,0.7)_100%)]" />
+
+          {/* Glow đỏ/hồng ở vùng text — animated */}
+          <div
+            className="absolute animate-pulse-glow"
+            style={{
+              left: "-5%", top: "20%",
+              width: "55%", height: "70%",
+              background: "radial-gradient(ellipse, rgba(206,90,103,0.22) 0%, transparent 65%)",
+              borderRadius: "50%",
+              filter: "blur(40px)",
+            }}
+          />
+
+          {/* Glow xanh tím nhạt phía sau — depth */}
+          <div
+            className="absolute animate-pulse-glow-2"
+            style={{
+              right: "5%", top: "10%",
+              width: "50%", height: "60%",
+              background: "radial-gradient(ellipse, rgba(80,60,180,0.12) 0%, transparent 65%)",
+              borderRadius: "50%",
+              filter: "blur(60px)",
+            }}
+          />
+
+          {/* Grid texture overlay mờ */}
+          <div className="absolute inset-0 hero-grid opacity-60" />
+
+          {/* Đường kẻ ngang nhẹ — cinematic letterbox top */}
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#ce5a67]/40 to-transparent" />
         </div>
 
         <div className="relative z-10 max-w-6xl mx-auto px-5 md:px-6 w-full">
