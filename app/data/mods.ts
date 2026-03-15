@@ -356,5 +356,27 @@ Tương thích hoàn hảo: Hoạt động ổn định trên phiên bản TU 1.
   tags: ["Đồ họa"],
   featured: false,
 },
+{
+  slug: "extended-name-pool",
+  name: "Extended Name Pool",
+  author: "PUP",
+  category: "Cơ chế game",
+  version: "TU 1.5.0",
+  updatedAt: "15/03/2026",
+  description: "Mod làm cho tên và họ của các cầu thủ trẻ trong học viện đa dạng và thực tế hơn",
+  longDescription: `Extended Name Pool by PUP – Tăng cường sự đa dạng cho tên cầu thủ trẻ
+
+Mod này làm cho tên và họ của các cầu thủ trẻ trong học viện (Youth Academy) trở nên đa dạng và thực tế hơn, giúp trải nghiệm Career Mode chân thực và hấp dẫn hơn.
+
+Tương thích hoàn hảo với phiên bản TU 1.5.0.`,
+  thumbnail: "/mods/extended-name-pool.jpg",
+  images: [],
+  downloadUrl: "https://modsfire.com/x1LQ1x6tKE8AspZ",
+  likes: 0,
+  downloads: 0,
+  thumbnailOrientation: "portrait",
+  tags: ["Cơ chế game"],
+  featured: false,
+},
 
 ];
