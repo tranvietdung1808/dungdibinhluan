@@ -138,10 +138,10 @@ export default function ModsPage() {
                   src={featured.thumbnail}
                   alt={featured.name}
                   fill
-                  className="object-cover opacity-55 group-hover:opacity-70 group-hover:scale-[1.03] transition-all duration-500"
+                  className="object-cover opacity-80 group-hover:opacity-95 group-hover:scale-[1.03] transition-all duration-500"
                 />
-                <div className="absolute inset-0" style={{ background: "linear-gradient(100deg, #080810 30%, rgba(8,8,16,0.60) 58%, rgba(8,8,16,0.15) 100%)" }} />
-                <div className="absolute inset-0" style={{ background: "linear-gradient(to top, #080810 0%, rgba(8,8,16,0.5) 38%, transparent 68%)" }} />
+                <div className="absolute inset-0" style={{ background: "linear-gradient(100deg, rgba(8,8,16,0.88) 22%, rgba(8,8,16,0.45) 50%, rgba(8,8,16,0.05) 100%)" }} />
+                <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(8,8,16,0.92) 0%, rgba(8,8,16,0.35) 30%, transparent 58%)" }} />
 
                 <div className="absolute top-4 left-4 flex items-center gap-2 flex-wrap">
                   <span className="px-3 py-1 rounded-full text-[10px] font-black tracking-widest bg-[#ce5a67] text-white">
@@ -245,7 +245,7 @@ export default function ModsPage() {
                       src={mod.thumbnail}
                       alt={mod.name}
                       fill
-                      className="object-cover opacity-60 group-hover:opacity-80 group-hover:scale-105 transition-all duration-500 object-center"
+                      className="object-cover opacity-85 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500 object-center"
                     />
                     <div className={`absolute inset-0 ${isPortrait ? "bg-gradient-to-r from-transparent via-transparent to-[#0d0d18]" : "bg-gradient-to-t from-[#0d0d18] via-[#0d0d18]/20 to-transparent"}`} />
                     <span

@@ -74,18 +74,18 @@ export default function HeroSection() {
             src="/games/fc26-banner.jpg"
             alt="EA FC 26"
             fill
-            className="object-cover object-top opacity-45"
+            className="object-cover object-top opacity-65"
             priority
           />
 
           {/* Gradient trái → tối — vùng text luôn đọc được */}
-          <div className="absolute inset-0" style={{ background: "linear-gradient(100deg, #080810 30%, rgba(8,8,16,0.72) 58%, rgba(8,8,16,0.10) 100%)" }} />
+          <div className="absolute inset-0" style={{ background: "linear-gradient(100deg, #080810 22%, rgba(8,8,16,0.60) 50%, rgba(8,8,16,0.02) 100%)" }} />
 
           {/* Gradient dưới → tối — blend xuống body */}
-          <div className="absolute inset-0" style={{ background: "linear-gradient(to top, #080810 0%, rgba(8,8,16,0.55) 30%, transparent 65%)" }} />
+          <div className="absolute inset-0" style={{ background: "linear-gradient(to top, #080810 0%, rgba(8,8,16,0.45) 25%, transparent 55%)" }} />
 
           {/* Gradient trên → tối nhẹ — navbar blend */}
-          <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(8,8,16,0.55) 0%, transparent 20%)" }} />
+          <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(8,8,16,0.45) 0%, transparent 18%)" }} />
 
           {/* Glow đỏ/hồng tĩnh — phía trái nơi có text */}
           <div
