@@ -94,12 +94,6 @@ export default function HeroSection() {
               animation: glowPulse3 7s ease-in-out infinite;
               animation-delay: 3s;
             }
-            .hero-grid-lines {
-              background-image:
-                linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
-              background-size: 55px 55px;
-            }
           `}</style>
 
           {/* Ảnh nền */}
@@ -159,8 +153,6 @@ export default function HeroSection() {
             }}
           />
 
-          {/* Grid texture */}
-          <div className="absolute inset-0 hero-grid-lines" />
 
           {/* Đường accent đỏ top */}
           <div className="absolute top-0 left-0 right-0 h-[2px]"
