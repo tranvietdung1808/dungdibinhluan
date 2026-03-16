@@ -6,10 +6,7 @@ export type Mod = {
   description: string;
   longDescription: string;
   thumbnail: string;
-  images: string[];
   downloadUrl: string;
-  likes: number;
-  downloads: number;
   tags: string[];
   featured?: boolean;
   version: string;
@@ -30,10 +27,7 @@ export const MODS: Mod[] = [
 
 Bao gồm facepack lớn nhất, áo đấu mùa 2025-26, gameplay AI được cải thiện, đồ họa 4K UltraHD và hàng trăm cập nhật khác.`,
     thumbnail: "/mods/mixmods.jpg",
-    images: ["/mods/mixmods.jpg", "/mods/mix-mods-2.jpg"],
     downloadUrl: "https://drive.google.com/file/d/1jP39z0kHDmB7XOLB8c682mpTxBOklXVW/view?usp=sharing",
-    likes: 128,
-    downloads: 1240,
     tags: ["Faces", "Kits", "Gameplay", "Đồ họa", "Cơ chế game"],
     featured: true,
   },
@@ -58,11 +52,8 @@ Bao gồm facepack lớn nhất, áo đấu mùa 2025-26, gameplay AI được c
 
 Đã thêm hơn 30 hình xăm.`,
   thumbnail: "/mods/brx15.jpg",
-  images: [],
-  downloadUrl: "https://modsfire.com/download/8tn5968AG6WW0Pc/32315",
-  likes: 0,
-  downloads: 0,
-  thumbnailOrientation: "portrait",
+    downloadUrl: "https://modsfire.com/download/8tn5968AG6WW0Pc/32315",
+      thumbnailOrientation: "portrait",
   tags: ["Kits"],
   featured: false,
 },
@@ -77,11 +68,8 @@ Bao gồm facepack lớn nhất, áo đấu mùa 2025-26, gameplay AI được c
   description: "Bản eSim cho update 1.5.0",
   longDescription: `Bản eSim cho update 1.5.0`,
   thumbnail: "/mods/esim.jpg",
-  images: [],
-  downloadUrl: "https://drive.google.com/file/d/1et-Extmt2i2Y7pPrjDvvWE5Jpv3vav8w/view?usp=sharing",
-  likes: 0,
-  downloads: 0,
-  thumbnailOrientation: "landscape",
+    downloadUrl: "https://drive.google.com/file/d/1et-Extmt2i2Y7pPrjDvvWE5Jpv3vav8w/view?usp=sharing",
+      thumbnailOrientation: "landscape",
   tags: ["Đồ họa"],
   featured: false,
 },
@@ -114,11 +102,8 @@ Thêm logo World Cup (WC badge) lên áo đấu của Chelsea.
 
 Sửa các lỗi (Bugs) còn tồn đọng.`,
   thumbnail: "/mods/rodek.jpg",
-  images: [],
-  downloadUrl: "https://drive.google.com/file/d/1LoD0Fh2i8aAPyDxiEjRePYxO37ix6Sxu/view?usp=sharing",
-  likes: 0,
-  downloads: 0,
-  thumbnailOrientation: "landscape",
+    downloadUrl: "https://drive.google.com/file/d/1LoD0Fh2i8aAPyDxiEjRePYxO37ix6Sxu/view?usp=sharing",
+      thumbnailOrientation: "landscape",
   tags: ["Kits"],
   featured: false,
 },
@@ -133,11 +118,8 @@ Sửa các lỗi (Bugs) còn tồn đọng.`,
   description: "Bản FIFER cho update 1.5.0",
   longDescription: `Bản FIFER cho update 1.5.0`,
   thumbnail: "/mods/fifer.jpg",
-  images: [],
-  downloadUrl: "https://drive.google.com/file/d/1C9tmI33yNgDRYlFD7-K_PiiJwkojVv75/view?usp=sharing",
-  likes: 0,
-  downloads: 0,
-  thumbnailOrientation: "landscape",
+    downloadUrl: "https://drive.google.com/file/d/1C9tmI33yNgDRYlFD7-K_PiiJwkojVv75/view?usp=sharing",
+      thumbnailOrientation: "landscape",
   tags: ["Faces"],
   featured: false,
 },
@@ -165,11 +147,8 @@ Thị trường chuyển nhượng "Gắt": AI thông minh hơn trong đàm phá
 
 Tương thích: Hoàn hảo cho bản cập nhật TU 1.5.0.`,
   thumbnail: "/mods/fifaman.jpg",
-  images: [],
-  downloadUrl: "https://drive.google.com/file/d/1y1BJXIqXBkL6KVOjFBCJ-sdzNpSQTRZD/view?usp=sharing",
-  likes: 0,
-  downloads: 0,
-  thumbnailOrientation: "portrait",
+    downloadUrl: "https://drive.google.com/file/d/1y1BJXIqXBkL6KVOjFBCJ-sdzNpSQTRZD/view?usp=sharing",
+      thumbnailOrientation: "portrait",
   tags: ["Cơ chế game"],
   featured: false,
 },
@@ -189,11 +168,8 @@ Chất lượng Premium: Đây là bản Bootpack trả phí được tối ưu 
 
 Tương thích hoàn hảo: Hoạt động ổn định trên phiên bản TU 1.5.0.`,
   thumbnail: "/mods/art150.jpg",
-  images: [],
-  downloadUrl: "https://drive.google.com/file/d/11l2P3N14Jkg8NqRFaRTwDqFzX0dPvNhM/view?usp=sharing",
-  likes: 0,
-  downloads: 0,
-  thumbnailOrientation: "landscape",
+    downloadUrl: "https://drive.google.com/file/d/11l2P3N14Jkg8NqRFaRTwDqFzX0dPvNhM/view?usp=sharing",
+      thumbnailOrientation: "landscape",
   tags: ["Kits"],
   featured: false,
 },
@@ -209,11 +185,8 @@ Tương thích hoàn hảo: Hoạt động ổn định trên phiên bản TU 1.
   longDescription: `Một bản Mod gameplay có phong cách khá độc đáo và riêng biệt đến từ các "pháp sư" modder Hàn Quốc, 
   với những cải tiến đáng chú ý về chuyển động của cầu thủ, AI thông minh hơn và phản ứng nhanh hơn trên sân cỏ. Bản mod này hứa hẹn mang đến trải nghiệm chơi game mượt mà và thực tế hơn cho người chơi FC 26.`,
   thumbnail: "/mods/aimotion.jpg",
-  images: [],
-  downloadUrl: "https://pixeldrain.com/u/Bok1fhYV",
-  likes: 0,
-  downloads: 0,
-  thumbnailOrientation: "portrait",
+    downloadUrl: "https://pixeldrain.com/u/Bok1fhYV",
+      thumbnailOrientation: "portrait",
   tags: ["Gameplay"],
   featured: false,
 },
@@ -239,11 +212,8 @@ Tính năng bổ sung: Cho phép bắt đầu chế độ sự nghiệp (Career 
 
 Mod có thể kết hợp với Facepack và các gói Kit khác. Để đồng bộ, hãy sử dụng tệp Squads trong thư mục: 26-27 AIO V1 x Ultimate AIO V5 x FacePack V5.`,
   thumbnail: "/mods/kit1.jpg",
-  images: [],
-  downloadUrl: "https://pixeldrain.com/u/VV561EGT",
-  likes: 0,
-  downloads: 0,
-  thumbnailOrientation: "portrait",
+    downloadUrl: "https://pixeldrain.com/u/VV561EGT",
+      thumbnailOrientation: "portrait",
   tags: ["Kits"],
   featured: false,
 },
@@ -279,11 +249,8 @@ Camera: Hệ thống camera tùy biến góc rộng; Camera mới cho đá phạ
 
 Cá nhân hóa đội bóng: Hệ thống lưới riêng cho từng đội bóng Brazil (có logo, tên đội hoặc sọc màu đặc trưng của CLB đó trên lưới).`,
   thumbnail: "/mods/gvsx.jpg",
-  images: [],
-  downloadUrl: "https://pixeldrain.com/u/8esN9uJp",
-  likes: 0,
-  downloads: 0,
-  thumbnailOrientation: "portrait",
+    downloadUrl: "https://pixeldrain.com/u/8esN9uJp",
+      thumbnailOrientation: "portrait",
   tags: ["Đồ họa"],
   featured: false,
 },
@@ -305,11 +272,8 @@ Tương thích hoàn hảo: Hoạt động ổn định trên phiên bản TU 1.
 
 Nhẹ nhàng & Hiệu quả: Không gây nặng máy, dễ dàng kết hợp với các bản Mod gameplay hay đồ họa khác.`,
   thumbnail: "/mods/mnf1.jpg",
-  images: [],
-  downloadUrl: "https://pixeldrain.com/u/P224marX",
-  likes: 0,
-  downloads: 0,
-  thumbnailOrientation: "portrait",
+    downloadUrl: "https://pixeldrain.com/u/P224marX",
+      thumbnailOrientation: "portrait",
   tags: ["Cơ chế game"],
   featured: false,
 },
@@ -330,11 +294,8 @@ Tăng tính tương tác: Giúp người chơi có thể tùy biến trải nghi
 Tương thích hoàn hảo: Hoạt động ổn định trên phiên bản TU 1.5.0.`,
 
   thumbnail: "/mods/LE.jpg",
-  images: [],
-  downloadUrl: "https://drive.google.com/file/d/13_wBjHXJZipFbrccRsvLDjJYV8mO5cfk/view?usp=sharing",
-  likes: 0,
-  downloads: 0,
-  thumbnailOrientation: "portrait",
+    downloadUrl: "https://drive.google.com/file/d/13_wBjHXJZipFbrccRsvLDjJYV8mO5cfk/view?usp=sharing",
+      thumbnailOrientation: "portrait",
   tags: ["Cơ chế game"],
   featured: false,
 },
@@ -348,11 +309,8 @@ Tương thích hoàn hảo: Hoạt động ổn định trên phiên bản TU 1.
   description: "TV Logo Pack là một bản mod đồ họa dành cho FC 26, bổ sung các logo truyền hình thực tế từ các nhà đài lớn như FOX Sports, Globo, TNT... giúp tăng tính chân thực và sống động cho trải nghiệm xem trận đấu trong game.",
   longDescription: `TV Logo Pack TU 1.5.0 – Bản mod bổ sung logo truyền hình thực tế cho FC 26`,
   thumbnail: "/mods/kotvlogo.jpg",
-  images: [],
-  downloadUrl: "https://pixeldrain.com/u/NjjhcKo4",
-  likes: 0,
-  downloads: 0,
-  thumbnailOrientation: "portrait",
+    downloadUrl: "https://pixeldrain.com/u/NjjhcKo4",
+      thumbnailOrientation: "portrait",
   tags: ["Đồ họa"],
   featured: false,
 },
@@ -370,11 +328,8 @@ Mod này làm cho tên và họ của các cầu thủ trẻ trong học viện 
 
 Tương thích hoàn hảo với phiên bản TU 1.5.0.`,
   thumbnail: "/mods/extended-name-pool.jpg",
-  images: [],
-  downloadUrl: "https://modsfire.com/x1LQ1x6tKE8AspZ",
-  likes: 0,
-  downloads: 0,
-  thumbnailOrientation: "portrait",
+    downloadUrl: "https://modsfire.com/x1LQ1x6tKE8AspZ",
+      thumbnailOrientation: "portrait",
   tags: ["Cơ chế game"],
   featured: false,
 },
@@ -441,12 +396,34 @@ Nếu bạn gặp phải hành vi không thích:
 
 Thông tin trong tài liệu này sẽ cực kỳ giá trị cho việc sử dụng mod hiệu quả!`,
   thumbnail: "/mods/anth.jpg",
-  images: [],
-  downloadUrl: "https://pixeldrain.com/u/NsgBymXv",
-  likes: 0,
-  downloads: 0,
-  thumbnailOrientation: "portrait",
+    downloadUrl: "https://pixeldrain.com/u/NsgBymXv",
+      thumbnailOrientation: "portrait",
   tags: ["Gameplay"],
+  featured: false,
+},
+
+{
+  slug: "realistic-crowd-mod",
+  name: "Realistic Crowd Mod V3.1",
+  author: "Unknown",
+  category: "Đồ họa",
+  version: "TU 1.5.0",
+  updatedAt: "16/03/2026",
+  description: "Mod thay đổi không khí sân vận động với số lượng khán giả thay đổi theo tầm quan trọng của trận đấu",
+  longDescription: `Realistic Crowd Mod V3.1 (Dành cho bản cập nhật TU 1.5.0)
+
+Mod này thay đổi cách bạn cảm nhận không khí sân vận động, đảm bảo rằng sân không còn lúc nào cũng đông kín. Thay vào đó, bạn sẽ thấy kích thước đám đông thay đổi tùy theo tầm quan trọng của trận đấu. Các trận đấu lớn hơn thu hút nhiều khán giả hơn, trong khi các trận đấu ít quan trọng hơn có lượng khán giả ít hơn. Ngoài ra, các yếu tố bên ngoài như điều kiện thời tiết cũng sẽ ảnh hưởng đến số lượng khán giả trên khán đài.
+
+Tính năng nổi bật:
+• Khán giả thay đổi theo tầm quan trọng của trận đấu
+• Trận đấu quan trọng → nhiều khán giả hơn
+• Trận đấu thường → ít khán giả hơn
+• Điều kiện thời tiết ảnh hưởng đến lượng khán giả
+• Tăng tính thực tế cho không khí sân vận động`,
+  thumbnail: "/mods/crowdmod.jpg",
+    downloadUrl: "https://pixeldrain.com/u/qBh8ee91",
+      thumbnailOrientation: "portrait",
+  tags: ["Đồ họa"],
   featured: false,
 },
 
