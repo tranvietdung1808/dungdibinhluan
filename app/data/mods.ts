@@ -427,4 +427,37 @@ Tính năng nổi bật:
   featured: false,
 },
 
+{
+  slug: "26-27-kits-vhzz-v2",
+  name: "26/27 Kits by vhzz V2.0",
+  author: "vhzz",
+  category: "Kits",
+  version: "TU 1.5.0",
+  updatedAt: "16/03/2026",
+  description: "Bộ áo đấu mùa 26/27 với khả năng tương thích cao và nhiều tính năng mới",
+  longDescription: `26/27 Kits by vhzz V2.0 ( TU 1.5.0)
+
+• Đã thêm khả năng tương thích với FIFER's FC26 Realism Mod 1.0
+• Đã thêm áo đấu mùa 26/27 cho Top-5 giải đấu
+• Đã thêm áo đấu cho một số CLB ở các giải khác
+• Một số đội bóng được thêm bộ áo thứ 3 và thứ 4
+• Đã thêm các biến thể mới cho quần và găng tay
+• Đã cập nhật font chữ và số áo
+• Đã cập nhật nhà tài trợ chính trên áo đấu
+• Đã sửa lỗi từ phiên bản trước
+⚠ Có thể sử dụng riêng lẻ hoặc kết hợp với mod của Fifér ⚠
+
+Tính năng nổi bật:
+• Tương thích hoàn hảo với FIFER's FC26 Realism Mod
+• Áo đấu mùa 26/27 cho các giải đấu hàng đầu
+• Bộ áo thứ 3 và thứ 4 cho nhiều đội
+• Font chữ và số áo được cập nhật
+• Nhà tài trợ chính mới nhất`,
+  thumbnail: "/mods/vhzz.jpg",
+  downloadUrl: "https://pixeldrain.com/u/WNuBT3dM",
+  thumbnailOrientation: "landscape",
+  tags: ["Kits"],
+  featured: false,
+},
+
 ];
