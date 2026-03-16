@@ -700,5 +700,43 @@ Gilberto Rafael Mora Zambrano là một cầu thủ bóng đá chuyên nghiệp 
   tags: ["Faces"],
   featured: false,
 },
+{
+  slug: "federico-chiesa-face",
+  name: "EAFC26 Faces - Federico Chiesa",
+  author: "Stalky",
+  category: "Faces",
+  version: "TU 1.5.0",
+  updatedAt: "16/03/2026",
+  description: "Face update cho cầu thủ Federico Chiesa (Liverpool) trong EA FC 26.",
+  longDescription: `EAFC26 Faces - Federico Chiesa
+
+Face update cho cầu thủ Federico Chiesa (Liverpool) trong EA FC 26.
+
+Federico Chiesa là cầu thủ người Ý hiện đang thi đấu cho Liverpool tại Premier League. Con trai của cựu cầu thủ Enrico Chiesa, anh trưởng thành từ học viện Fiorentina và có trận ra mắt đội một vào năm 2016. Chiesa chơi ở vị trí tiền đạo và tiền vệ cánh cho cả Liverpool và đội tuyển quốc gia Ý.`,
+  thumbnail: "/mods/face20.jpg",
+  downloadUrl: "https://www.mediafire.com/file/4r0zbxd0mmgeer0/Federico+Chiesa+EAFC+26.fifamod/file",
+  thumbnailOrientation: "portrait",
+  tags: ["Faces"],
+  featured: false,
+},
+{
+  slug: "rio-ngumoha-face",
+  name: "EAFC26 Faces - Rio Ngumoha",
+  author: "Stalky",
+  category: "Faces",
+  version: "TU 1.5.0",
+  updatedAt: "16/03/2026",
+  description: "Face update cho cầu thủ Rio Ngumoha (Liverpool) trong EA FC 26.",
+  longDescription: `EAFC26 Faces - Rio Ngumoha
+
+Face update cho cầu thủ Rio Ngumoha (Liverpool) trong EA FC 26.
+
+Rio Chima Ngumoha là cầu thủ người Anh hiện đang thi đấu cho Liverpool tại Premier League. Chơi ở vị trí tiền vệ cánh trái hoặc tiền vệ tấn công, Ngumoha là một tài năng trẻ đang phát triển trong hệ thống Liverpool.`,
+  thumbnail: "/mods/face21.jpg",
+  downloadUrl: "https://www.mediafire.com/file/jxb26ktcei9qkwb/Rio+Ngumoha+EAFC+26.fifamod/file",
+  thumbnailOrientation: "portrait",
+  tags: ["Faces"],
+  featured: false,
+},
 
 ];
