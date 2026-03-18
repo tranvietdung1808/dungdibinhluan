@@ -158,7 +158,7 @@ Tương thích: Hoàn hảo cho bản cập nhật TU 1.5.0.`,
   author: "Artisan",
   category: "Kits",
   version: "TU 1.5.0",
-  updatedAt: "12/03/2026",
+  updatedAt: "18/03/2026",
   description: "Đây là gói giày (Bootpack) trả phí có quy mô lớn nhất dành cho FC 26",
   longDescription: `FC 26 Artisan Bootpack V39.0.1 – "Siêu tủ giày" lớn nhất cho FC 26
 
@@ -168,8 +168,8 @@ Chất lượng Premium: Đây là bản Bootpack trả phí được tối ưu 
 
 Tương thích hoàn hảo: Hoạt động ổn định trên phiên bản TU 1.5.0.`,
   thumbnail: "/mods/art150.jpg",
-    downloadUrl: "https://drive.google.com/file/d/11l2P3N14Jkg8NqRFaRTwDqFzX0dPvNhM/view?usp=sharing",
-      thumbnailOrientation: "landscape",
+  downloadUrl: "https://pixeldrain.com/u/RHMA68kQ",
+  thumbnailOrientation: "portrait",
   tags: ["Kits"],
   featured: false,
 },
@@ -455,6 +455,95 @@ Tính năng nổi bật:
 • Nhà tài trợ chính mới nhất`,
   thumbnail: "/mods/vhzz.jpg",
   downloadUrl: "https://pixeldrain.com/u/WNuBT3dM",
+  thumbnailOrientation: "landscape",
+  tags: ["Kits"],
+  featured: false,
+},
+
+{
+  slug: "super-global-path-mod-26-v4",
+  name: "Super Global Path Mod 26 V4",
+  author: "Unknown",
+  category: "Cơ chế game",
+  version: "TU 1.5.0",
+  updatedAt: "18/03/2026",
+  description: "Mod mở rộng giải đấu và giải thưởng quốc tế với hơn 10 giải đấu mới và các giải đấu quốc tế",
+  longDescription: `Super Global Path Mod 26 V4 (For TU 1.5.0 update)
+
+Mod này mở rộng hệ thống giải đấu và giải thưởng quốc tế trong EA FC 26, mang đến trải nghiệm chân thực hơn với các giải đấu từ khắp nơi trên thế giới.
+
+✅ Giải đấu đã thêm:
+• Brasileirão Série A
+• J1 League  
+• Liga MX
+• Super League Greece
+• Qatar Stars League (Đang phát triển...)
+• Brasileirão Série B (Đang phát triển...)
+
+✅ Giải đấu quốc tế (Hoạt động trong Career Mode):
+• World Cup
+• World Cup Europe qualifiers
+• World Cup South America qualifiers
+• World Cup North America qualifiers
+• World Cup North America qualifiers playoff game
+• World Cup Asian qualifiers
+• World Cup Asian qualifiers playoff game
+• World Cup Africa qualifiers
+• World Cup Africa qualifiers playoff game
+• Euro Cup
+• Euro qualifiers
+• Copa America
+• Asian Cup
+• Africa Cup of Nations
+• Concacaf Gold Cup
+• FIFA Intercontinental Cup
+• FIFA Club World Cup
+• AFC Champions League Elite
+• AFC Champions League Two
+• Concacaf Champions Cup
+• Preseason tournaments
+• International Friendly
+
+✅ Đồ họa:
+• Cập nhật áo đấu
+• Cập nhật logo
+• Cập nhật bảng quảng cáo
+• Cập nhật minifaces
+• Thêm cờ và biểu ngữ chân thực
+• Thêm các cúp thưởng chân thực
+
+⃣ Ngôn ngữ:
+• Hỗ trợ tất cả ngôn ngữ
+
+Tính năng nổi bật:
+• Thêm hơn 10 giải đấu quốc nội và quốc tế
+• Hệ thống giải đấu World Cup đầy đủ
+• Các giải châu lục chính thức
+• Đồ họa được cập nhật với các yếu tố chân thực
+• Tương thích với tất cả ngôn ngữ`,
+  thumbnail: "/mods/superglb.jpg",
+  downloadUrl: "https://pixeldrain.com/u/EhNzJqGF",
+  thumbnailOrientation: "portrait",
+  tags: ["Cơ chế game"],
+  featured: false,
+},
+{
+  slug: "art150",
+  name: "FC 26 Artisan Bootpack V39.0.1 TU 1.5.0",
+  author: "Artisan",
+  category: "Kits",
+  version: "TU 1.5.0",
+  updatedAt: "18/03/2026",
+  description: "Đây là gói giày (Bootpack) trả phí có quy mô lớn nhất dành cho FC 26",
+  longDescription: `FC 26 Artisan Bootpack V39.0.1 – "Siêu tủ giày" lớn nhất cho FC 26
+
+Số lượng cực khủng: Bổ sung hơn 940+ mẫu giày từ các thương hiệu hàng đầu, đa dạng mẫu mã và màu sắc.
+
+Chất lượng Premium: Đây là bản Bootpack trả phí được tối ưu hóa cực tốt về hình ảnh, đảm bảo độ chi tiết cao nhất trên sân cỏ.
+
+Tương thích hoàn hảo: Hoạt động ổn định trên phiên bản TU 1.5.0.`,
+  thumbnail: "/mods/art150.jpg",
+  downloadUrl: "https://pixeldrain.com/u/RHMA68kQ",
   thumbnailOrientation: "landscape",
   tags: ["Kits"],
   featured: false,
