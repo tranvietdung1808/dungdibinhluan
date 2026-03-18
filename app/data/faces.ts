@@ -738,5 +738,81 @@ Rio Chima Ngumoha là cầu thủ người Anh hiện đang thi đấu cho Liver
   tags: ["Faces"],
   featured: false,
 },
+{
+  slug: "mathis-jangeal-face",
+  name: "EAFC26 Faces - Mathis Jangeal",
+  author: "Risk",
+  category: "Faces",
+  version: "TU 1.5.0",
+  updatedAt: "18/03/2026",
+  description: "Face update cho cầu thủ Mathis Jangeal (PSG) trong EA FC 26.",
+  longDescription: `EAFC26 Faces - Mathis Jangeal
+
+Face update cho cầu thủ Mathis Jangeal (PSG) trong EA FC 26.
+
+Mathis Jangeal (sinh ngày 24 tháng 6 năm 2008) là cầu thủ bóng đá chuyên nghiệp người Pháp, thi đấu ở vị trí tiền vệ tấn công cho câu lạc bộ Ligue 1 Paris Saint-Germain.`,
+  thumbnail: "/mods/face22.jpg",
+  downloadUrl: "https://www.mediafire.com/file/1dqoczugt9sh1pv/154032_FC26_Mathis_Jangeal.fifamod/file",
+  thumbnailOrientation: "portrait",
+  tags: ["Faces"],
+  featured: false,
+},
+{
+  slug: "quentin-ndjantou-face",
+  name: "EAFC26 Faces - Quentin Ndjantou",
+  author: "Risk",
+  category: "Faces",
+  version: "TU 1.5.0",
+  updatedAt: "18/03/2026",
+  description: "Face update cho cầu thủ Quentin Ndjantou (PSG) trong EA FC 26.",
+  longDescription: `EAFC26 Faces - Quentin Ndjantou
+
+Face update cho cầu thủ Quentin Ndjantou (PSG) trong EA FC 26.
+
+Quentin Ndjantou Mbitcha (sinh ngày 23 tháng 7 năm 2007) là cầu thủ bóng đá chuyên nghiệp người Pháp, thi đấu ở vị trí tiền đạo, tiền vệ cánh trái và tiền vệ tấn công cho câu lạc bộ Ligue 1 Paris Saint-Germain.`,
+  thumbnail: "/mods/face23.jpg",
+  downloadUrl: "https://www.mediafire.com/file/5o8ianb79ag8k7k/214855_FC26_Quentin_Ndjantou.fifamod/file",
+  thumbnailOrientation: "portrait",
+  tags: ["Faces"],
+  featured: false,
+},
+{
+  slug: "charles-vanhoutte-face",
+  name: "EAFC26 Faces - Charles Vanhoutte",
+  author: "Risk",
+  category: "Faces",
+  version: "TU 1.5.0",
+  updatedAt: "18/03/2026",
+  description: "Face update cho cầu thủ Charles Vanhoutte (Nice) trong EA FC 26.",
+  longDescription: `EAFC26 Faces - Charles Vanhoutte
+
+Face update cho cầu thủ Charles Vanhoutte (Nice) trong EA FC 26.
+
+Charles Vanhoutte (sinh ngày 16 tháng 9 năm 1998) là cầu thủ bóng đá chuyên nghiệp người Bỉ, thi đấu ở vị trí tiền vệ cho câu lạc bộ Ligue 1 Nice và đội tuyển quốc gia Bỉ.`,
+  thumbnail: "/mods/face24.jpg",
+  downloadUrl: "https://www.mediafire.com/file/kbel58lvqpd4nt4/165043_FC26_Charles_Vanhoutte.fifamod/file",
+  thumbnailOrientation: "portrait",
+  tags: ["Faces"],
+  featured: false,
+},
+{
+  slug: "thiago-almada-face",
+  name: "EAFC26 Faces - Thiago Almada",
+  author: "Bruhdreed2123",
+  category: "Faces",
+  version: "TU 1.5.0",
+  updatedAt: "18/03/2026",
+  description: "Face update cho cầu thủ Thiago Almada trong EA FC 26.",
+  longDescription: `EAFC26 Faces - Thiago Almada
+
+Face update cho cầu thủ Thiago Almada trong EA FC 26.
+
+Thiago Ezequiel Almada (sinh ngày 26 tháng 4 năm 2001) là một cầu thủ bóng đá chuyên nghiệp người Argentina hiện đang thi đấu ở vị trí tiền vệ tấn công.`,
+  thumbnail: "/mods/face25.jpg",
+  downloadUrl: "https://www.mediafire.com/file/ma9fxe01s1fzpf0/053601_Thiago_Almada.fifamod/file",
+  thumbnailOrientation: "portrait",
+  tags: ["Faces"],
+  featured: false,
+},
 
 ];
