@@ -528,4 +528,27 @@ Tương thích hoàn hảo: Hoạt động ổn định trên phiên bản TU 1.
   featured: false,
 },
 
+{
+  slug: "ballon-dor-remade",
+  name: "Ballon d'Or Remade",
+  author: "Unknown",
+  category: "Cơ chế game",
+  version: "TU 1.5.0",
+  updatedAt: "20/03/2026",
+  description: "Mod thay đổi thuật toán trao giải Quả bóng vàng dựa trên thành tích thực tế",
+  longDescription: `Ballon d'Or Remade ( TU 1.5.0)
+
+Một mod rất thú vị. Tác giả khẳng định đã cải tiến thuật toán trao giải Quả bóng vàng trong game. Trước đây, bất kể kết quả ra sao, giải thưởng vẫn thuộc về Holland, Mbappe hoặc Vini. Bây giờ hệ thống sẽ tính đến thành tích thực sự của cầu thủ và đội bóng trong các giải đấu, không dựa vào tên tuổi nổi tiếng và rating cao.
+
+Tính năng nổi bật:
+• Thuật toán trao giải dựa trên thành tích thực tế
+• Không phụ thuộc vào tên tuổi và rating
+• Thưởng cho những đóng góp thực sự trong giải đấu`,
+  thumbnail: "/mods/BALLOND.jpg",
+  downloadUrl: "https://drive.google.com/file/d/1WynLFVdo7HzPJOz7WGr8DOj4ZbWl1n_y/view?usp=sharing",
+  thumbnailOrientation: "portrait",
+  tags: ["Cơ chế game"],
+  featured: false,
+},
+
 ];
