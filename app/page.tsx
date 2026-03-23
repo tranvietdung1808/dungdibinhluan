@@ -131,8 +131,19 @@ export default function HomePage() {
         <Features />
         <GameGrid />
       </div>
-      <footer className="border-t border-white/5 px-4 md:px-6 py-5 md:py-6 text-center text-[9px] text-slate-600 uppercase tracking-widest">
-        © 2026 DUNGDIBINHLUAN — Powered by Google Antivirus
+      <footer className="border-t border-white/5 px-4 md:px-6 py-5 md:py-6 text-center space-y-3">
+        <div className="flex items-center justify-center gap-4 md:gap-6 text-[10px] md:text-xs">
+          <Link href="/content-policy" className="text-slate-500 hover:text-white transition-colors uppercase tracking-widest">
+            Content Policy
+          </Link>
+          <span className="text-slate-700">|</span>
+          <Link href="/dmca" className="text-slate-500 hover:text-white transition-colors uppercase tracking-widest">
+            DMCA & Abuse
+          </Link>
+        </div>
+        <p className="text-[9px] text-slate-600 uppercase tracking-widest">
+          © 2026 DUNGDIBINHLUAN — Powered by Google Antivirus
+        </p>
       </footer>
     </main>
   );
