@@ -17,12 +17,16 @@ interface FeaturedModCardProps {
     thumbnail: string;
     category: string;
     tags: string[];
+    downloadUrl?: string;
   };
 }
 
 export default function FeaturedModCard({ mod }: FeaturedModCardProps) {
+  const isMixMods = mod.slug === "mix-mods-fc26";
+  const href = isMixMods ? "/mods/mix-mods-fc26/payment" : `/mods/${mod.slug}`;
+
   return (
-    <Link href={`/mods/${mod.slug}`}>
+    <Link href={href}>
       <div
         className="group relative rounded-3xl overflow-hidden cursor-pointer transition-all duration-300"
         style={{
