@@ -76,11 +76,15 @@ export default async function ModDetailPage({
             alt={mod.name}
             fill
             className={`opacity-70 object-cover ${
-              mod.thumbnailOrientation === "portrait" ? "object-top" : "object-center"
+              mod.thumbnailOrientation === "portrait" ? "object-center" : "object-center"
             }`}
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
+          <div className={`absolute inset-0 ${
+              mod.thumbnailOrientation === "portrait"
+                ? "bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/20 to-transparent"
+                : "bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent"
+            }`} />
           <div className="absolute bottom-5 left-5 right-5 flex items-end justify-between gap-4 flex-wrap">
             <div>
               <div className="flex items-center gap-2 mb-2 flex-wrap">
