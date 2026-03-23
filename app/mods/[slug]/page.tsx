@@ -172,7 +172,7 @@ export default async function ModDetailPage({
                   <p>Lưu ý: Bản mod chỉ dành cho anh em đã có game.</p>
                   <p>
                     Chưa có game?{" "}
-                    <Link href="/mods/mix-mods-fc26/payment" className="text-[#ce5a67] hover:underline font-semibold">
+                    <Link href="/games/fc26/select" className="text-[#ce5a67] hover:underline font-semibold">
                       Liên hệ admin mua ngay
                     </Link>
                   </p>
@@ -263,7 +263,7 @@ export default async function ModDetailPage({
             </div>
             {isMixMods ? (
               <Link
-                href="/mods/mix-mods-fc26/payment"
+                href="/games/fc26/select"
                 className="flex items-center gap-2 px-8 py-4 bg-[#ce5a67] rounded-2xl font-black tracking-widest text-sm text-white hover:bg-[#b44c5c] transition-all shadow-[0_8px_30px_rgba(206,90,103,0.3)] whitespace-nowrap"
               >
                 💳 LIÊN HỆ MUA
@@ -284,7 +284,7 @@ export default async function ModDetailPage({
             <p>Lưu ý: Bản mod chỉ dành cho anh em đã có game.</p>
             <p>
               Chưa có game?{" "}
-              <Link href="/mods/mix-mods-fc26/payment" className="text-[#ce5a67] hover:underline font-semibold">
+              <Link href="/games/fc26/select" className="text-[#ce5a67] hover:underline font-semibold">
                 Liên hệ admin mua ngay
               </Link>
             </p>
