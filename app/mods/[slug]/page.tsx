@@ -49,7 +49,7 @@ export default async function ModDetailPage({
   if (!mod) return notFound();
 
   const isMixMods = mod.slug === "mix-mods-fc26";
-  const isFace = mod.thumbnailOrientation === "portrait" || mod.tags.includes("Faces");
+  const isPortrait = mod.thumbnailOrientation === "portrait";
 
   return (
     <main className="min-h-screen bg-[#050507] text-white">
@@ -62,7 +62,7 @@ export default async function ModDetailPage({
         <span className="text-sm font-bold text-white truncate max-w-[200px]">{mod.name}</span>
       </div>
 
-      {isFace ? (
+      {isPortrait ? (
         // ===== FACES LAYOUT =====
         <div className="relative">
           {/* Background glow */}
