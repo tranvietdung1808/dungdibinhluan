@@ -3,15 +3,6 @@ import Link from "next/link";
 import { GAMES } from "./data/games";
 import FeatureSlider from "./components/FeatureSlider";
 import HeroSection from "./components/HeroSection";
-
-// ========== NAVBAR ==========
-const navItems = [
-  { label: "TRANG CHỦ", href: "#home" },
-  { label: "TÍNH NĂNG", href: "#tinh-nang" },
-  { label: "🔥 CHIA SẺ MODS", href: "/mods" },
-  { label: "GAME KHÁC", href: "#games" },
-];
-
 import Navbar from "./components/Navbar";
 
 // ========== QUICK FEATURES ==========
