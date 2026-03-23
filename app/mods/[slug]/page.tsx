@@ -261,7 +261,7 @@ export default async function ModDetailPage({
                 style={{ paddingBottom: "56.25%" }}
               >
                 <iframe
-                  src={`https://player.vimeo.com/video/${mod.videoId}?autoplay=1&loop=1&muted=1&controls=1&title=0&byline=0&portrait=0`}
+                  src={`https://player.vimeo.com/video/${mod.videoId}?autoplay=1&muted=1&loop=1&title=0&byline=0&portrait=0`}
                   className="absolute inset-0 w-full h-full"
                   allow="autoplay; fullscreen; picture-in-picture"
                   allowFullScreen

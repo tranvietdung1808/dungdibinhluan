@@ -209,6 +209,15 @@ export default function HeroSection() {
 
             {/* Scrollable content */}
             <div className="flex-1 overflow-y-auto px-6 md:px-8 py-5 space-y-5">
+              {/* Video Embed */}
+              <div className="mb-6 rounded-xl overflow-hidden border border-white/10 bg-black aspect-video relative">
+                <iframe 
+                  src="https://player.vimeo.com/video/1176297958?autoplay=1&muted=1&loop=1&title=0&byline=0&portrait=0" 
+                  className="absolute top-0 left-0 w-full h-full border-none" 
+                  allow="autoplay; fullscreen; picture-in-picture"
+                />
+              </div>
+
               {modalSections.map((section) => (
                 <div key={section.title}>
                   <div className="flex items-center gap-2 mb-3">

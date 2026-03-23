@@ -5,8 +5,6 @@ import Link from "next/link";
 import CheckUyTinButton from "./CheckUyTinButton";
 
 const navItems = [
-  { label: "TRANG CHỦ", href: "#home" },
-  { label: "TÍNH NĂNG", href: "#tinh-nang" },
   { label: "🔥 CHIA SẺ MODS", href: "/mods" },
   { label: "GAME KHÁC", href: "#games" },
 ];
@@ -19,7 +17,7 @@ export default function Navbar() {
       <div className="max-w-6xl mx-auto px-4 md:px-6 h-14 md:h-16 flex items-center justify-between gap-3">
 
         {/* Logo */}
-        <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
+        <Link href="/" className="flex items-center gap-2 md:gap-3 flex-shrink-0 hover:opacity-80 transition-opacity cursor-pointer">
           <div className="w-8 h-8 md:w-9 md:h-9 rounded-full overflow-hidden ring-1 ring-[#ce5a67]/40">
             <Image src="/logo.png" alt="Logo" width={36} height={36} className="object-cover w-full h-full" />
           </div>
@@ -27,7 +25,7 @@ export default function Navbar() {
             <p className="font-black text-[11px] md:text-sm tracking-widest hidden sm:block">DUNGDIBINHLUAN</p>
             <p className="text-[8px] text-slate-500 tracking-[0.3em] hidden sm:block">ALL IN ONE GAME SET UP</p>
           </div>
-        </div>
+        </Link>
 
         {/* Desktop menu */}
         <div className="hidden md:flex items-center gap-1">
