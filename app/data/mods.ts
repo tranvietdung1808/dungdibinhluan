@@ -551,4 +551,30 @@ Tính năng nổi bật:
   featured: false,
 },
 
+{
+  slug: "fifa-2010-world-cup-rewind",
+  name: "FIFA 2010 World Cup Rewind",
+  author: "Unknown",
+  category: "Cơ chế game",
+  version: "TU 1.5.0",
+  updatedAt: "23/03/2026",
+  description: "Tuyển tập các đội tuyển World Cup 2010 với đồ họa và âm thanh chân thực",
+  longDescription: `FIFA 2010 World Cup Rewind ( TU 1.5.0)
+
+Tuyển tập các đội tuyển quan trọng của World Cup 2010. Bao gồm khuôn mặt chân thực, minifaces, bóng đá thực, bảng quảng cáo và một số vật phẩm. Thêm âm thanh vuvuzela đặc trưng.
+
+⚠ Tất cả mod World Cup 1998, World Cup 2006 và World Cup 2002 của tác giả này chỉ hoạt động với tiếng Anh và tiếng Ba Lan.
+
+Tính năng nổi bật:
+• Các đội tuyển World Cup 2010 với khuôn mặt chân thực
+• Minifaces, bóng đá và bảng quảng cáo chân thực
+• Âm thanh vuvuzela đặc trưng World Cup 2010
+• Chỉ tương thích với tiếng Anh và tiếng Ba Lan`,
+  thumbnail: "/mods/wc1.jpg",
+  downloadUrl: "https://drive.google.com/file/d/1idR6rpxBFJZlJsGXtDytZ0CNYiGbFv9i/view?usp=sharing",
+  thumbnailOrientation: "portrait",
+  tags: ["Cơ chế game"],
+  featured: false,
+},
+
 ];

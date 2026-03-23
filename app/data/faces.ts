@@ -814,5 +814,62 @@ Thiago Ezequiel Almada (sinh ngày 26 tháng 4 năm 2001) là một cầu thủ 
   tags: ["Faces"],
   featured: false,
 },
+{
+  slug: "oscar-murphy-dorley-face",
+  name: "EAFC26 Faces - Oscar Murphy Dorley",
+  author: "Unknown",
+  category: "Faces",
+  version: "TU 1.5.0",
+  updatedAt: "23/03/2026",
+  description: "Face update cho cầu thủ Oscar Murphy Dorley (Slavia Prague) trong EA FC 26.",
+  longDescription: `EAFC26 Faces - Oscar Murphy Dorley
+
+Face update cho cầu thủ Oscar Murphy Dorley (Slavia Prague) trong EA FC 26.
+
+Oscar Murphy Dorley là cầu thủ bóng đá chuyên nghiệp người Liberia, thi đấu ở vị trí tiền vệ phòng ngự cho Slavia Prague và đội tuyển quốc gia Liberia.`,
+  thumbnail: "/mods/face26.jpg",
+  downloadUrl: "https://www.mediafire.com/file/6sjnm24wvct8irx/EA+FC+26+Murphy+Oscar+Dorley.fifamod/file",
+  thumbnailOrientation: "portrait",
+  tags: ["Faces"],
+  featured: false,
+},
+{
+  slug: "mojmir-chytil-face",
+  name: "EAFC26 Faces - Mojmír Chytil",
+  author: "Unknown",
+  category: "Faces",
+  version: "TU 1.5.0",
+  updatedAt: "23/03/2026",
+  description: "Face update cho cầu thủ Mojmír Chytil (Slavia Prague) trong EA FC 26.",
+  longDescription: `EAFC26 Faces - Mojmír Chytil
+
+Face update cho cầu thủ Mojmír Chytil (Slavia Prague) trong EA FC 26.
+
+Mojmír Chytil là cầu thủ bóng đá người Czech, thi đấu ở vị trí tiền đạo cho Slavia Prague và đội tuyển quốc gia Czech.`,
+  thumbnail: "/mods/face27.jpg",
+  downloadUrl: "https://www.mediafire.com/file/uhsef1ysfe18hd8/EA+FC+26+Mojmr+Chytil.fifamod/file",
+  thumbnailOrientation: "portrait",
+  tags: ["Faces"],
+  featured: false,
+},
+{
+  slug: "peter-vindahl-jensen-face",
+  name: "EAFC26 Faces - Peter Vindahl Jensen",
+  author: "Unknown",
+  category: "Faces",
+  version: "TU 1.5.0",
+  updatedAt: "23/03/2026",
+  description: "Face update cho cầu thủ Peter Vindahl Jensen (Sparta Prague) trong EA FC 26.",
+  longDescription: `EAFC26 Faces - Peter Vindahl Jensen
+
+Face update cho cầu thủ Peter Vindahl Jensen (Sparta Prague) trong EA FC 26.
+
+Peter Vindahl Jensen là cầu thủ bóng đá chuyên nghiệp người Đan Mạch, thi đấu ở vị trí thủ môn cho Sparta Prague.`,
+  thumbnail: "/mods/face28.jpg",
+  downloadUrl: "https://www.mediafire.com/file/8tmsyrx75yeq3jp/EA+FC+26+Peter+Vindahl+Jensen.fifamod/file",
+  thumbnailOrientation: "portrait",
+  tags: ["Faces"],
+  featured: false,
+},
 
 ];
