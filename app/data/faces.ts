@@ -1,4 +1,21 @@
 // app/data/faces.ts
+export type Mod = {
+  slug: string;
+  name: string;
+  author: string;
+  category: string;
+  description: string;
+  longDescription: string;
+  thumbnail: string;
+  downloadUrl: string;
+  tags: string[];
+  featured?: boolean;
+  version: string;
+  updatedAt: string;
+  thumbnailOrientation?: "portrait" | "landscape";
+  videoId?: string;
+};
+
 export const FACES = [
   {
   slug: "griezmann-update-face",

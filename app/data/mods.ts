@@ -12,6 +12,7 @@ export type Mod = {
   version: string;
   updatedAt: string;
   thumbnailOrientation?: "portrait" | "landscape";
+  videoId?: string;
 };
 
 export const MODS: Mod[] = [
@@ -30,6 +31,7 @@ Bao gồm facepack lớn nhất, áo đấu mùa 2025-26, gameplay AI được c
     downloadUrl: "https://drive.google.com/file/d/1jP39z0kHDmB7XOLB8c682mpTxBOklXVW/view?usp=sharing",
     tags: ["Faces", "Kits", "Gameplay", "Đồ họa", "Cơ chế game"],
     featured: true,
+    videoId: "1176297958",
   },
 
   
