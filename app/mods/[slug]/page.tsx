@@ -263,7 +263,7 @@ export default async function ModDetailPage({
             </div>
             {isMixMods ? (
               <Link
-                href="/games/fc26/select"
+                href="/mods/mix-mods-fc26/payment"
                 className="flex items-center gap-2 px-8 py-4 bg-[#ce5a67] rounded-2xl font-black tracking-widest text-sm text-white hover:bg-[#b44c5c] transition-all shadow-[0_8px_30px_rgba(206,90,103,0.3)] whitespace-nowrap"
               >
                 💳 LIÊN HỆ MUA
