@@ -186,27 +186,15 @@ export default async function ModDetailPage({
         <div className="max-w-4xl mx-auto px-4 md:px-6 py-8 md:py-12 space-y-8">
 
           {/* Thumbnail hero */}
-          <div
-            className={`relative rounded-3xl overflow-hidden border border-white/10 ${
-              mod.thumbnailOrientation === "portrait"
-                ? "h-[420px] md:h-[560px]"
-                : "h-56 md:h-96"
-            }`}
-          >
+          <div className="relative rounded-3xl overflow-hidden border border-white/10 h-56 md:h-96">
             <Image
               src={mod.thumbnail}
               alt={mod.name}
               fill
-              className={`opacity-70 object-cover ${
-                mod.thumbnailOrientation === "portrait" ? "object-center" : "object-center"
-              }`}
+              className="opacity-70 object-cover object-center"
               priority
             />
-            <div className={`absolute inset-0 ${
-                mod.thumbnailOrientation === "portrait"
-                  ? "bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/20 to-transparent"
-                  : "bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent"
-              }`} />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
             <div className="absolute bottom-5 left-5 right-5 flex items-end justify-between gap-4 flex-wrap">
               <div>
                 <div className="flex items-center gap-2 mb-2 flex-wrap">
