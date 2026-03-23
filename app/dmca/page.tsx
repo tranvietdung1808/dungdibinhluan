@@ -48,7 +48,7 @@ export default function DMCAPage() {
             </h2>
             <div className="bg-[#ce5a67]/10 border border-[#ce5a67]/20 rounded-lg p-4">
               <p className="text-white font-mono text-base md:text-lg">
-                admin@dungdibinhluan.com
+                dungdibinhluan@gmail.com
               </p>
             </div>
             <p className="text-slate-400 text-sm md:text-base leading-relaxed">
