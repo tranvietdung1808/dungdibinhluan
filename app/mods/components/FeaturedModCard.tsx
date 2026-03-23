@@ -22,11 +22,8 @@ interface FeaturedModCardProps {
 }
 
 export default function FeaturedModCard({ mod }: FeaturedModCardProps) {
-  const isMixMods = mod.slug === "mix-mods-fc26";
-  const href = isMixMods ? "/mods/mix-mods-fc26/payment" : `/mods/${mod.slug}`;
-
   return (
-    <Link href={href}>
+    <Link href={`/mods/${mod.slug}`}>
       <div
         className="group relative rounded-3xl overflow-hidden cursor-pointer transition-all duration-300"
         style={{
