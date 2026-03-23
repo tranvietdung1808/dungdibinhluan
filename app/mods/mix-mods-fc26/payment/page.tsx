@@ -1,5 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
+import CheckUyTinButton from "../../../components/CheckUyTinButton";
+import CopyButton from "../../../components/CopyButton";
 
 export default function PaymentPage() {
   return (
@@ -12,6 +14,10 @@ export default function PaymentPage() {
           MIX MODS FC 26 <span className="text-[#ce5a67]">2025–2026</span>
         </h1>
         <p className="text-slate-400 text-sm">Hỗ trợ cập nhật miễn phí sau khi mua</p>
+      </div>
+
+      <div className="mb-8">
+        <CheckUyTinButton />
       </div>
 
       <div className="w-full max-w-md space-y-5">
@@ -49,14 +55,17 @@ export default function PaymentPage() {
           <div className="space-y-2.5">
             {[
               { label: "Ngân hàng", value: "BIDV" },
-              { label: "Số tài khoản", value: "5200501707" },
+              { label: "Số tài khoản", value: "5200501707", showCopy: true },
               { label: "Chủ tài khoản", value: "TRAN VIET DUNG" },
               { label: "Số tiền", value: "169.000đ" },
               { label: "Nội dung CK", value: "MIX MODS FC26 + SĐT của bạn" },
             ].map((item) => (
               <div key={item.label} className="flex items-center justify-between py-2 border-b border-white/5">
                 <span className="text-[11px] text-slate-500">{item.label}</span>
-                <span className="text-[11px] font-bold text-white">{item.value}</span>
+                <div className="flex items-center gap-2 flex-1 justify-end">
+                  <span className="text-[11px] font-bold text-white">{item.value}</span>
+                  {item.showCopy && <CopyButton text={item.value} />}
+                </div>
               </div>
             ))}
           </div>

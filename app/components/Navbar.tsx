@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import CheckUyTinButton from "./CheckUyTinButton";
 
 const navItems = [
   { label: "TRANG CHỦ", href: "#home" },
@@ -51,6 +52,7 @@ export default function Navbar() {
 
         {/* Right side */}
         <div className="flex items-center gap-2">
+          <CheckUyTinButton />
           <Link
             href="/games/fc26/select"
             className="flex-shrink-0 px-4 md:px-5 py-2 md:py-2.5 bg-[#ce5a67] rounded-xl text-[10px] md:text-[11px] font-black tracking-widest text-white hover:bg-[#b44c5c] transition-colors shadow-[0_4px_20px_rgba(206,90,103,0.3)]"

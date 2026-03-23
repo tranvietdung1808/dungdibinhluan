@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Be_Vietnam_Pro } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
+import Navbar from "./components/Navbar";
 
 const beVietnamPro = Be_Vietnam_Pro({
   variable: "--font-be-vietnam",
@@ -88,7 +89,10 @@ export default function RootLayout({
   return (
     <html lang="vi">
       <body className={`${beVietnamPro.variable} antialiased font-sans`}>
-        {children}
+        <Navbar />
+        <div className="pt-14 md:pt-16">
+          {children}
+        </div>
         <Analytics />
       </body>
     </html>

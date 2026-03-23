@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import CheckUyTinButton from "../../../components/CheckUyTinButton";
 
 const editions = [
   {
@@ -36,6 +37,10 @@ export default function SelectEditionPage() {
           CHỌN <span className="text-[#ce5a67]">PHIÊN BẢN</span>
         </h1>
         <p className="text-slate-500 text-xs tracking-widest uppercase">Chọn gói phù hợp với bạn</p>
+      </div>
+
+      <div className="mb-8">
+        <CheckUyTinButton />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl">

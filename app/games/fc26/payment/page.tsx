@@ -3,6 +3,8 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { Suspense } from "react";
+import CheckUyTinButton from "../../../components/CheckUyTinButton";
+import CopyButton from "../../../components/CopyButton";
 
 const EDITIONS: Record<string, { label: string; price: string; color: string }> = {
   normal: { label: "STANDARD EDITION", price: "149.000₫", color: "#ce5a67" },
@@ -33,6 +35,10 @@ function PaymentContent() {
           <p className="text-[10px] text-slate-500 tracking-widest uppercase">{ed.label}</p>
         </div>
 
+        <div className="flex justify-center">
+          <CheckUyTinButton />
+        </div>
+
         {/* Giá */}
         <div
           className="rounded-2xl border p-5 text-center space-y-1"
@@ -56,12 +62,15 @@ function PaymentContent() {
           <p className="text-[10px] font-black tracking-widest text-slate-400 uppercase">Chuyển khoản ngân hàng</p>
           {[
             { label: "Ngân hàng", value: BANK_INFO.bank },
-            { label: "Số tài khoản", value: BANK_INFO.accountNumber },
+            { label: "Số tài khoản", value: BANK_INFO.accountNumber, showCopy: true },
             { label: "Chủ tài khoản", value: BANK_INFO.accountName },
           ].map(row => (
             <div key={row.label} className="flex items-center justify-between gap-4">
               <span className="text-xs text-slate-500 flex-shrink-0">{row.label}</span>
-              <span className="text-xs font-black text-white text-right break-all">{row.value}</span>
+              <div className="flex items-center gap-2 flex-1 justify-end">
+                <span className="text-xs font-black text-white text-right">{row.value}</span>
+                {row.showCopy && <CopyButton text={row.value} />}
+              </div>
             </div>
           ))}
         </div>
