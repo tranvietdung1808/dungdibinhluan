@@ -4,6 +4,7 @@ import Link from "next/link";
 import { MODS, type Mod } from "../../data/mods";
 import { FACES } from "../../data/faces";
 import { notFound } from "next/navigation";
+import { supabaseAdmin } from "@/lib/supabase";
 
 const TAG_COLORS: Record<string, string> = {
   Faces: "#3b82f6",
@@ -35,23 +36,34 @@ interface DbMod {
   created_at: string;
 }
 
-const API_BASE_CANDIDATES = [
-  process.env.NEXT_PUBLIC_BASE_URL,
-  "http://localhost:5000",
-  "http://localhost:3000",
-].filter(Boolean) as string[];
+function mapDbModToMod(dbMod: DbMod): Mod {
+  return {
+    slug: dbMod.slug,
+    name: dbMod.name,
+    author: dbMod.author,
+    category: dbMod.category,
+    version: dbMod.version,
+    updatedAt: dbMod.updated_at,
+    description: dbMod.description || "",
+    longDescription: dbMod.long_description || "",
+    thumbnail: dbMod.thumbnail || "",
+    downloadUrl: dbMod.download_url || "",
+    tags: dbMod.tags || [],
+    thumbnailOrientation: (dbMod.thumbnail_orientation as "portrait" | "landscape") || undefined,
+    featured: dbMod.featured,
+    videoId: dbMod.video_id || undefined,
+  } as unknown as Mod;
+}
 
-async function fetchDbMod(slug: string, noStore = false): Promise<DbMod | null> {
-  for (const baseUrl of API_BASE_CANDIDATES) {
-    try {
-      const response = await fetch(`${baseUrl}/api/mods/${slug}`, noStore ? { cache: "no-store" } : undefined);
-      if (response.ok) return (await response.json()) as DbMod;
-    } catch {
-      // Try next base URL candidate
-    }
-  }
+async function fetchDbMod(slug: string): Promise<DbMod | null> {
+  const { data, error } = await supabaseAdmin
+    .from("mods")
+    .select("*")
+    .eq("slug", slug)
+    .single();
 
-  return null;
+  if (error || !data) return null;
+  return data as DbMod;
 }
 
 export async function generateStaticParams() {
@@ -74,22 +86,7 @@ export async function generateMetadata({
   if (!mod) {
     const dbMod = await fetchDbMod(slug);
     if (dbMod) {
-      mod = {
-        slug: dbMod.slug,
-        name: dbMod.name,
-        author: dbMod.author,
-        category: dbMod.category,
-        version: dbMod.version,
-        updatedAt: dbMod.updated_at,
-        description: dbMod.description || '',
-        longDescription: dbMod.long_description || '',
-        thumbnail: dbMod.thumbnail || '',
-        downloadUrl: dbMod.download_url || '',
-        tags: dbMod.tags,
-        thumbnailOrientation: (dbMod.thumbnail_orientation as 'portrait' | 'landscape') || undefined,
-        featured: dbMod.featured,
-        videoId: dbMod.video_id || undefined,
-      } as unknown as Mod;
+      mod = mapDbModToMod(dbMod);
     }
   }
   
@@ -112,24 +109,9 @@ async function getMod(slug: string): Promise<Mod | null> {
   
   // If not found, try database
   if (!mod) {
-    const dbMod = await fetchDbMod(slug, true);
+    const dbMod = await fetchDbMod(slug);
     if (dbMod) {
-      mod = {
-        slug: dbMod.slug,
-        name: dbMod.name,
-        author: dbMod.author,
-        category: dbMod.category,
-        version: dbMod.version,
-        updatedAt: dbMod.updated_at,
-        description: dbMod.description || '',
-        longDescription: dbMod.long_description || '',
-        thumbnail: dbMod.thumbnail || '',
-        downloadUrl: dbMod.download_url || '',
-        tags: dbMod.tags,
-        thumbnailOrientation: (dbMod.thumbnail_orientation as 'portrait' | 'landscape') || undefined,
-        featured: dbMod.featured,
-        videoId: dbMod.video_id || undefined,
-      } as unknown as Mod;
+      mod = mapDbModToMod(dbMod);
     }
   }
   
