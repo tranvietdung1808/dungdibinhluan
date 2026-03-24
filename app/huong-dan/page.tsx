@@ -3,6 +3,9 @@ import { resolveThumbnailSrc } from '@/utils/r2'
 import Link from 'next/link'
 import Image from 'next/image'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 type Guide = {
   id: string
   title: string
