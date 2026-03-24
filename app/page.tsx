@@ -9,6 +9,8 @@ import Navbar from "./components/Navbar";
 import { createClient } from "@/utils/supabase/server";
 import { resolveThumbnailSrc } from "@/utils/r2";
 
+export const revalidate = 120;
+
 type HomeGuide = {
   id: string;
   title: string;

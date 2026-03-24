@@ -42,12 +42,16 @@ const ALL_STATIC_MODS = [...SOURCE].sort((a, b) => {
 
 const PAGE_SIZE = 12;
 
-export default function ModsPage() {
+interface ModsPageProps {
+  initialDbMods?: Mod[];
+}
+
+export default function ModsPage({ initialDbMods = [] }: ModsPageProps) {
   const [activeTag, setActiveTag] = useState("Tất cả");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  const [dbMods, setDbMods] = useState<Mod[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [dbMods, setDbMods] = useState<Mod[]>(initialDbMods);
+  const [loading, setLoading] = useState(initialDbMods.length === 0);
 
   // Fetch mods from database
   useEffect(() => {

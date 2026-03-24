@@ -148,132 +148,7 @@ export default async function ModDetailPage({
         <span className="text-sm font-bold text-white truncate max-w-[200px]">{mod.name}</span>
       </div>
 
-      {isPortrait ? (
-        // ===== FACES LAYOUT =====
-        <div className="relative">
-          {/* Background glow */}
-          <div className="pointer-events-none absolute inset-0 opacity-60">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(206,90,103,0.22),transparent_60%)]" />
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(59,130,246,0.14),transparent_55%)]" />
-          </div>
-
-          <div className="relative max-w-5xl mx-auto px-4 md:px-6 py-10 md:py-14 flex flex-col items-center gap-8 md:gap-10">
-            
-            {/* Title + meta */}
-            <div className="w-full text-center space-y-3">
-              <div className="flex items-center justify-center gap-2 flex-wrap">
-                <span className="px-3 py-1 rounded-full text-[10px] font-black bg-white/5 border border-white/10">
-                  Faces
-                </span>
-                {mod.featured && (
-                  <span className="px-3 py-1 rounded-full text-[10px] font-black bg-[#ce5a67] text-white">
-                    ⭐ FEATURED
-                  </span>
-                )}
-              </div>
-              <h1 className="text-2xl md:text-3xl font-black leading-tight">
-                {mod.name}
-              </h1>
-              <div className="flex items-center justify-center gap-2 flex-wrap text-[11px] text-slate-300">
-                <span className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
-                  👤 {mod.author}
-                </span>
-                <span className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
-                  📦 {mod.version}
-                </span>
-                <span className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
-                  🔄 {mod.updatedAt}
-                </span>
-              </div>
-            </div>
-
-            {/* Hero section */}
-            <div className="w-full flex flex-col md:flex-row md:items-center md:gap-10">
-              {/* Ảnh */}
-              <div className="w-full md:w-[360px] flex-shrink-0 flex justify-center">
-                <div className="relative w-[260px] md:w-[320px] aspect-[3/4] rounded-[28px] overflow-hidden border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.7)] bg-[#050507]">
-                  {thumbnailSrc ? (
-                    <Image
-                      src={thumbnailSrc}
-                      alt={mod.name}
-                      fill
-                      className="object-cover object-center"
-                      priority
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-slate-500 text-xs">
-                      No thumbnail
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Card info + download */}
-              <div className="mt-6 md:mt-0 flex-1 flex flex-col gap-4">
-                {/* Tags */}
-                <div className="flex flex-wrap gap-2">
-                  {mod.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="px-3 py-1.5 rounded-full text-[11px] font-black"
-                      style={{
-                        background: `${TAG_COLORS[tag]}20`,
-                        color: TAG_COLORS[tag],
-                        border: `1px solid ${TAG_COLORS[tag]}30`,
-                      }}
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-
-                {/* Mô tả */}
-                <div className="bg-[#0c0c10] rounded-2xl border border-white/5 p-5 md:p-6 space-y-3">
-                  <h2 className="text-xs font-black tracking-widest uppercase text-slate-400">
-                    Mô tả
-                  </h2>
-                  <p className="text-slate-300 text-sm leading-relaxed whitespace-pre-line">
-                    {mod.longDescription}
-                  </p>
-                </div>
-
-                {/* Download CTA */}
-                <div className="bg-gradient-to-br from-[#ce5a67]/20 via-[#ce5a67]/5 to-transparent border border-[#ce5a67]/40 rounded-2xl p-5 md:p-6 flex flex-col sm:flex-row items-center gap-4">
-                  <div className="flex-1 text-center sm:text-left">
-                    <p className="text-[11px] text-slate-400 uppercase tracking-widest">
-                      Sẵn sàng cài đặt
-                    </p>
-                    <p className="text-base md:text-lg font-black mt-0.5">
-                      Tải xuống miễn phí
-                    </p>
-                    <p className="text-[11px] text-slate-500 mt-0.5">
-                      An toàn · Miễn phí · Face cho EA FC 26
-                    </p>
-                  </div>
-                  <a
-                    href={mod.downloadUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 px-8 py-3.5 bg-[#ce5a67] rounded-2xl font-black tracking-widest text-xs md:text-sm text-white hover:bg-[#b44c5c] transition-all shadow-[0_12px_40px_rgba(206,90,103,0.45)] whitespace-nowrap"
-                  >
-                    ⬇️ TẢI XUỐNG
-                  </a>
-                </div>
-
-                <div className="text-[11px] text-slate-600 italic text-center sm:text-left space-y-1">
-                  <p>Lưu ý: Bản mod chỉ dành cho anh em đã có game.</p>
-                  <p>
-                    Chưa có game?{" "}
-                    <Link href="/games/fc26/select" className="text-[#ce5a67] hover:underline font-semibold">
-                      Liên hệ admin mua ngay
-                    </Link>
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : isMixMods ? (
+      {isMixMods ? (
         // ===== MIX MODS LAYOUT =====
         <div className="max-w-4xl mx-auto px-4 md:px-6 py-8 md:py-12 space-y-8">
 
@@ -398,6 +273,131 @@ export default async function ModDetailPage({
               Liên hệ admin mua ngay
             </Link>
           </p>
+        </div>
+      ) : isPortrait ? (
+        // ===== FACES LAYOUT =====
+        <div className="relative">
+          {/* Background glow */}
+          <div className="pointer-events-none absolute inset-0 opacity-60">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(206,90,103,0.22),transparent_60%)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(59,130,246,0.14),transparent_55%)]" />
+          </div>
+
+          <div className="relative max-w-5xl mx-auto px-4 md:px-6 py-10 md:py-14 flex flex-col items-center gap-8 md:gap-10">
+            
+            {/* Title + meta */}
+            <div className="w-full text-center space-y-3">
+              <div className="flex items-center justify-center gap-2 flex-wrap">
+                <span className="px-3 py-1 rounded-full text-[10px] font-black bg-white/5 border border-white/10">
+                  Faces
+                </span>
+                {mod.featured && (
+                  <span className="px-3 py-1 rounded-full text-[10px] font-black bg-[#ce5a67] text-white">
+                    ⭐ FEATURED
+                  </span>
+                )}
+              </div>
+              <h1 className="text-2xl md:text-3xl font-black leading-tight">
+                {mod.name}
+              </h1>
+              <div className="flex items-center justify-center gap-2 flex-wrap text-[11px] text-slate-300">
+                <span className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
+                  👤 {mod.author}
+                </span>
+                <span className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
+                  📦 {mod.version}
+                </span>
+                <span className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
+                  🔄 {mod.updatedAt}
+                </span>
+              </div>
+            </div>
+
+            {/* Hero section */}
+            <div className="w-full flex flex-col md:flex-row md:items-center md:gap-10">
+              {/* Ảnh */}
+              <div className="w-full md:w-[360px] flex-shrink-0 flex justify-center">
+                <div className="relative w-[260px] md:w-[320px] aspect-[3/4] rounded-[28px] overflow-hidden border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.7)] bg-[#050507]">
+                  {thumbnailSrc ? (
+                    <Image
+                      src={thumbnailSrc}
+                      alt={mod.name}
+                      fill
+                      className="object-cover object-center"
+                      priority
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-slate-500 text-xs">
+                      No thumbnail
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Card info + download */}
+              <div className="mt-6 md:mt-0 flex-1 flex flex-col gap-4">
+                {/* Tags */}
+                <div className="flex flex-wrap gap-2">
+                  {mod.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="px-3 py-1.5 rounded-full text-[11px] font-black"
+                      style={{
+                        background: `${TAG_COLORS[tag]}20`,
+                        color: TAG_COLORS[tag],
+                        border: `1px solid ${TAG_COLORS[tag]}30`,
+                      }}
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Mô tả */}
+                <div className="bg-[#0c0c10] rounded-2xl border border-white/5 p-5 md:p-6 space-y-3">
+                  <h2 className="text-xs font-black tracking-widest uppercase text-slate-400">
+                    Mô tả
+                  </h2>
+                  <p className="text-slate-300 text-sm leading-relaxed whitespace-pre-line">
+                    {mod.longDescription}
+                  </p>
+                </div>
+
+                {/* Download CTA */}
+                <div className="bg-gradient-to-br from-[#ce5a67]/20 via-[#ce5a67]/5 to-transparent border border-[#ce5a67]/40 rounded-2xl p-5 md:p-6 flex flex-col sm:flex-row items-center gap-4">
+                  <div className="flex-1 text-center sm:text-left">
+                    <p className="text-[11px] text-slate-400 uppercase tracking-widest">
+                      Sẵn sàng cài đặt
+                    </p>
+                    <p className="text-base md:text-lg font-black mt-0.5">
+                      Tải xuống miễn phí
+                    </p>
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                      An toàn · Miễn phí · Face cho EA FC 26
+                    </p>
+                  </div>
+                  <a
+                    href={mod.downloadUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 px-8 py-3.5 bg-[#ce5a67] rounded-2xl font-black tracking-widest text-xs md:text-sm text-white hover:bg-[#b44c5c] transition-all shadow-[0_12px_40px_rgba(206,90,103,0.45)] whitespace-nowrap"
+                  >
+                    ⬇️ TẢI XUỐNG
+                  </a>
+                </div>
+
+                <div className="text-[11px] text-slate-600 italic text-center sm:text-left space-y-1">
+                  <p>Lưu ý: Bản mod chỉ dành cho anh em đã có game.</p>
+                  <p>
+                    Chưa có game?{" "}
+                    <Link href="/games/fc26/select" className="text-[#ce5a67] hover:underline font-semibold">
+                      Liên hệ admin mua ngay
+                    </Link>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       ) : (
         // ===== MOD LANDSCAPE (KHÔNG PHẢI MIX MODS) =====

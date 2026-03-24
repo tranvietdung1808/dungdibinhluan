@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { createClient } from "@/utils/supabase/server";
+import ModsClient from "./ModsClient";
 
 export const metadata: Metadata = {
   title: "Mod Hub",
@@ -10,4 +12,14 @@ export const metadata: Metadata = {
   },
 };
 
-export { default } from "./ModsClient";
+export const revalidate = 120;
+
+export default async function ModsPage() {
+  const supabase = createClient();
+  const { data } = await supabase
+    .from("mods")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  return <ModsClient initialDbMods={(data || []) as any[]} />;
+}

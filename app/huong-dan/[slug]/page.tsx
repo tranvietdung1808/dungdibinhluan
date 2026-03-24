@@ -18,6 +18,8 @@ type Guide = {
   }
 }
 
+export const revalidate = 120
+
 export default async function GuideDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
   const supabase = createClient()
@@ -93,6 +95,8 @@ export default async function GuideDetailPage({ params }: { params: Promise<{ sl
                 src={guideData.profiles.avatar_url}
                 alt=""
                 className="h-7 w-7 shrink-0 rounded-full object-cover"
+                loading="lazy"
+                decoding="async"
               />
             ) : (
               <div className="h-7 w-7 shrink-0 rounded-full bg-[#333] flex items-center justify-center">
@@ -111,6 +115,8 @@ export default async function GuideDetailPage({ params }: { params: Promise<{ sl
                 src={thumbnailSrc}
                 alt={guideData.title}
                 className="block w-full object-cover transition-transform hover:scale-105 duration-300"
+                loading="eager"
+                decoding="async"
               />
             </div>
           )}
