@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
           thumbnail_url,
           author_id: '00000000-0000-0000-0000-000000000001', // Hardcoded admin author
         }
-      ])
+      ] as any)
       .select()
       .single()
 
