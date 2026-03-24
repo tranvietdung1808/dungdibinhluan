@@ -74,12 +74,12 @@ const LatestModsSection = ({ mods }: { mods: HomeModCard[] }) => {
   if (mods.length === 0) return null;
 
   return (
-    <section className="max-w-6xl mx-auto px-4 md:px-6 -mt-6 md:-mt-8 relative z-20">
+    <section className="max-w-6xl mx-auto px-4 md:px-6 -mt-6 md:-mt-8 relative z-20" aria-labelledby="latest-mods-heading">
       <div className="rounded-3xl border border-white/10 bg-[#0d0d14]/95 backdrop-blur-xl p-5 md:p-6">
         <div className="flex items-center justify-between mb-5">
           <div>
             <p className="text-[10px] uppercase tracking-[0.3em] text-slate-500">CHIA SẺ MODS MIỄN PHÍ</p>
-            <h2 className="text-xl md:text-2xl font-black mt-1">MOD MỚI CẬP NHẬT</h2>
+            <h2 id="latest-mods-heading" className="text-xl md:text-2xl font-black mt-1">MOD MỚI CẬP NHẬT</h2>
           </div>
           <Link href="/mods" className="text-[10px] md:text-xs text-[#ce5a67] font-black tracking-widest hover:underline uppercase">
             Xem tất cả
@@ -88,27 +88,33 @@ const LatestModsSection = ({ mods }: { mods: HomeModCard[] }) => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           {mods.slice(0, 8).map((mod) => (
-            <Link
-              key={mod.slug}
-              href={`/mods/${mod.slug}`}
-              className="group rounded-2xl border border-white/10 bg-white/[0.02] overflow-hidden hover:border-[#ce5a67]/45 transition-colors"
-            >
-              <div className="relative h-32 bg-[#111]">
-                {mod.thumbnail ? (
-                  <img src={mod.thumbnail} alt={mod.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-[#1a1a1f] to-[#0a0a0a]" />
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-                <span className="absolute top-2 left-2 px-2 py-1 rounded-full text-[9px] font-black tracking-widest bg-[#ce5a67]/20 text-[#ce5a67] border border-[#ce5a67]/30">
-                  {mod.tag}
-                </span>
-              </div>
-              <div className="p-3">
-                <p className="text-sm font-bold line-clamp-2 leading-snug group-hover:text-[#ce5a67] transition-colors">{mod.name}</p>
-                <p className="mt-2 text-[10px] text-slate-500">Cập nhật: {mod.updatedAt}</p>
-              </div>
-            </Link>
+            <article key={mod.slug}>
+              <Link
+                href={`/mods/${mod.slug}`}
+                className="group rounded-2xl border border-white/10 bg-white/[0.02] overflow-hidden hover:border-[#ce5a67]/45 transition-colors block"
+              >
+                <div className="relative h-32 bg-[#111]">
+                  {mod.thumbnail ? (
+                    <img 
+                      src={mod.thumbnail} 
+                      alt={`Thumbnail mod ${mod.name}`} 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-[#1a1a1f] to-[#0a0a0a]" />
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+                  <span className="absolute top-2 left-2 px-2 py-1 rounded-full text-[9px] font-black tracking-widest bg-[#ce5a67]/20 text-[#ce5a67] border border-[#ce5a67]/30">
+                    {mod.tag}
+                  </span>
+                </div>
+                <div className="p-3">
+                  <h3 className="text-sm font-bold line-clamp-2 leading-snug group-hover:text-[#ce5a67] transition-colors">{mod.name}</h3>
+                  <p className="mt-2 text-[10px] text-slate-500">Cập nhật: {mod.updatedAt}</p>
+                </div>
+              </Link>
+            </article>
           ))}
         </div>
       </div>
@@ -164,10 +170,10 @@ const GameGrid = () => {
   const others = GAMES.filter((g) => !g.spotlight);
 
   return (
-    <section id="games" className="max-w-6xl mx-auto px-4 md:px-6 py-10 md:py-16 space-y-6 md:space-y-8">
+    <section id="games" className="max-w-6xl mx-auto px-4 md:px-6 py-10 md:py-16 space-y-6 md:space-y-8" aria-labelledby="games-heading">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl md:text-2xl font-black tracking-tight">CÁC GAME KHÁC</h2>
+          <h2 id="games-heading" className="text-xl md:text-2xl font-black tracking-tight">CÁC GAME KHÁC</h2>
           <p className="text-[10px] text-slate-500 tracking-widest uppercase mt-1">Liên hệ để mua</p>
         </div>
         <a
@@ -182,7 +188,7 @@ const GameGrid = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
         {others.map((game) => (
-          <div
+          <article
             key={game.slug}
             className="group relative overflow-hidden rounded-2xl border transition-all hover:scale-[1.01] duration-300"
             style={{
@@ -193,10 +199,10 @@ const GameGrid = () => {
             <div className="relative h-36 md:h-44 overflow-hidden">
               <Image
                 src={game.thumbnail ?? `/games/${game.slug}-thumb.jpg`}
-
-                alt={game.name}
+                alt={`Thumbnail game ${game.name}`}
                 fill
                 className="object-cover opacity-60 group-hover:opacity-80 group-hover:scale-105 transition-all duration-500"
+                loading="lazy"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#111] via-transparent to-transparent" />
               <span
@@ -232,7 +238,7 @@ const GameGrid = () => {
                 LIÊN HỆ MUA
               </a>
             </div>
-          </div>
+          </article>
         ))}
       </div>
     </section>
@@ -276,16 +282,27 @@ export default async function HomePage() {
 
   return (
     <main className="min-h-screen bg-[#080810] text-white">
+      <h1 className="sr-only">DungDiBinhLuan - Mod Game FC 26, FIFA, Facepack chất lượng cao</h1>
       <Navbar />
       <div className="pt-14 md:pt-16">
-        <HeroSection latestGuides={heroGuides} />
-        <MobileLatestGuidesSection guides={heroGuides} />
-        <LatestModsSection mods={latestMods} />
+        <section>
+          <HeroSection latestGuides={heroGuides} />
+        </section>
+        <section>
+          <MobileLatestGuidesSection guides={heroGuides} />
+        </section>
+        <section>
+          <LatestModsSection mods={latestMods} />
+        </section>
         <section id="tinh-nang" className="-mt-10 relative z-10">
           <FeatureSlider />
         </section>
-        <Features />
-        <GameGrid />
+        <section>
+          <Features />
+        </section>
+        <section id="games">
+          <GameGrid />
+        </section>
       </div>
       <footer className="border-t border-white/5 px-4 md:px-6 py-5 md:py-6 text-center space-y-3">
         <div className="flex items-center justify-center gap-4 md:gap-6 text-[10px] md:text-xs">

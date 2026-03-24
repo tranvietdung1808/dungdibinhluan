@@ -4,6 +4,7 @@ import { Be_Vietnam_Pro } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 import Navbar from "./components/Navbar";
+import StructuredData from "./components/StructuredData";
 
 const beVietnamPro = Be_Vietnam_Pro({
   variable: "--font-be-vietnam",
@@ -40,6 +41,18 @@ export const metadata: Metadata = {
     "FIFA mods download",
     "game mod",
     "DungDiBinhLuan",
+    "EA FC 26 mod",
+    "EA Sports FC 26",
+    "mod game bóng đá",
+    "face mod FIFA",
+    "kit mod EA FC",
+    "download mod FC 26",
+    "mod FIFA miễn phí",
+    "EA Sports FC 26 Việt Nam",
+    "mod bóng đá PC",
+    "FIFA 26 mod download",
+    "EA FC 26 graphics mod",
+    "gameplay mod FC 26"
   ],
 
   authors: [{ name: "DungDiBinhLuan" }],
@@ -88,6 +101,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="vi">
+      <head>
+        <StructuredData />
+      </head>
       <body className={`${beVietnamPro.variable} antialiased font-sans`}>
         <Navbar />
         <div className="pt-14 md:pt-16">

@@ -1,6 +1,7 @@
 import { MetadataRoute } from "next";
 import { MODS } from "./data/mods";
 import { FACES } from "./data/faces";
+import { GAMES } from "./data/games";
 
 const parseDate = (str: string) => {
   try {
@@ -22,6 +23,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
   }));
 
+  const games = GAMES.map((game) => ({
+    url: `https://dungdibinhluan.com/games/${game.slug}`,
+    lastModified: new Date(),
+    changeFrequency: "monthly" as const,
+    priority: 0.7,
+  }));
+
   return [
     {
       url: "https://dungdibinhluan.com",
@@ -35,6 +43,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "daily" as const,
       priority: 0.9,
     },
+    {
+      url: "https://dungdibinhluan.com/games",
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
+    },
+    {
+      url: "https://dungdibinhluan.com/dmca",
+      lastModified: new Date(),
+      changeFrequency: "yearly" as const,
+      priority: 0.3,
+    },
+    ...games,
     ...mods,
   ];
 }
