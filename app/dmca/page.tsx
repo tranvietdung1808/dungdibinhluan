@@ -4,6 +4,9 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "DMCA & Abuse | DungDiBinhLuan",
   description: "Báo cáo vi phạm bản quyền và lạm dụng trên website DungDiBinhLuan.",
+  alternates: {
+    canonical: "https://dungdibinhluan.com/dmca",
+  },
 };
 
 export default function DMCAPage() {

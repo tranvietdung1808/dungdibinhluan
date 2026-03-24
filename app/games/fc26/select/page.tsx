@@ -1,6 +1,15 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import CheckUyTinButton from "../../../components/CheckUyTinButton";
+
+export const metadata: Metadata = {
+  title: "Chọn phiên bản EA FC 26",
+  description: "So sánh và chọn phiên bản EA FC 26 phù hợp trước khi thanh toán.",
+  alternates: {
+    canonical: "https://dungdibinhluan.com/games/fc26/select",
+  },
+};
 
 const editions = [
   {

@@ -1,12 +1,11 @@
 interface FilterTagsProps {
   activeTag: string;
   onTagChange: (tag: string) => void;
-  itemCount: number;
 }
 
 const ALL_TAGS = ["Tất cả", "Faces", "Kits", "Gameplay", "Đồ họa", "Cơ chế game"];
 
-export default function FilterTags({ activeTag, onTagChange, itemCount }: FilterTagsProps) {
+export default function FilterTags({ activeTag, onTagChange }: FilterTagsProps) {
   return (
     <div className="flex items-center gap-2 flex-wrap">
       {ALL_TAGS.map((tag) => (
@@ -22,7 +21,6 @@ export default function FilterTags({ activeTag, onTagChange, itemCount }: Filter
           {tag.toUpperCase()}
         </button>
       ))}
-      <span className="ml-auto text-xs text-slate-600">{itemCount} mod</span>
     </div>
   );
 }

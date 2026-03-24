@@ -15,6 +15,7 @@ const TAG_COLORS: Record<string, string> = {
 };
 
 const ALL_STATIC_MODS = [...FACES, ...MODS];
+const SITE_URL = "https://dungdibinhluan.com";
 
 // Database mod interface
 interface DbMod {
@@ -66,6 +67,43 @@ async function fetchDbMod(slug: string): Promise<DbMod | null> {
   return data as DbMod;
 }
 
+function getAbsoluteImageUrl(image?: string) {
+  if (!image) return `${SITE_URL}/og-image.jpg`;
+  if (image.startsWith("http://") || image.startsWith("https://")) return image;
+  return `${SITE_URL}${image.startsWith("/") ? image : `/${image}`}`;
+}
+
+function getSoftwareApplicationSchema(mod: Mod) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: mod.name,
+    description: mod.description || mod.longDescription,
+    applicationCategory: "GameApplication",
+    operatingSystem: "Windows",
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "VND",
+      availability: "https://schema.org/InStock",
+    },
+    author: {
+      "@type": "Person",
+      name: mod.author || "DungDiBinhLuan",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "DungDiBinhLuan",
+      url: SITE_URL,
+    },
+    softwareVersion: mod.version || "1.0",
+    screenshot: getAbsoluteImageUrl(mod.thumbnail),
+    downloadUrl: mod.downloadUrl,
+    keywords: mod.tags?.join(", ") || "FC 26 mod, FIFA mod, game mod",
+    url: `${SITE_URL}/mods/${mod.slug}`,
+  };
+}
+
 export async function generateStaticParams() {
   // Only generate static params for static mods
   // Database mods will be dynamically rendered
@@ -91,14 +129,27 @@ export async function generateMetadata({
   }
   
   if (!mod) return { title: "Mod không tồn tại" };
+  const canonical = `${SITE_URL}/mods/${mod.slug}`;
+  const imageUrl = getAbsoluteImageUrl(mod.thumbnail);
+  const description = mod.description || mod.longDescription;
 
   return {
     title: mod.name,
-    description: mod.description,
+    description,
+    alternates: {
+      canonical,
+    },
     openGraph: {
       title: `${mod.name} | DungDiBinhLuan`,
-      description: mod.description,
-      images: [{ url: `https://dungdibinhluan.com${mod.thumbnail}` }],
+      description,
+      url: canonical,
+      images: [{ url: imageUrl }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${mod.name} | DungDiBinhLuan`,
+      description,
+      images: [imageUrl],
     },
   };
 }
@@ -131,6 +182,7 @@ export default async function ModDetailPage({
   const isMixMods = mod.slug === "mix-mods-fc26";
   const isPortrait = mod.thumbnailOrientation !== "landscape";
   const thumbnailSrc = mod.thumbnail?.trim() ? mod.thumbnail : null;
+  const softwareApplicationSchema = getSoftwareApplicationSchema(mod);
   
   // Luôn hiển thị ngày hôm nay cho MIX MODS
   const displayUpdatedAt = isMixMods 
@@ -139,6 +191,12 @@ export default async function ModDetailPage({
 
   return (
     <main className="min-h-screen bg-[#050507] text-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(softwareApplicationSchema),
+        }}
+      />
       {/* Header */}
       <div className="border-b border-white/5 px-4 md:px-6 py-4 flex items-center gap-3">
         <Link href="/" className="text-slate-500 hover:text-white transition-colors text-sm">← Trang chủ</Link>

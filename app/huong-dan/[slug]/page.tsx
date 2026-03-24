@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { createClient } from '@/utils/supabase/server'
 import { resolveThumbnailSrc, rewriteImageSrcInHtml } from '@/utils/r2'
 import { notFound } from 'next/navigation'
@@ -20,22 +21,64 @@ type Guide = {
 
 export const revalidate = 120
 
+async function fetchGuideBySlug(slug: string) {
+  const supabase = createClient()
+  return supabase
+    .from('guides')
+    .select(`
+      *,
+      profiles:author_id (
+        username,
+        avatar_url
+      )
+    `)
+    .eq('slug', slug)
+    .single()
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}): Promise<Metadata> {
+  const { slug } = await params
+  const { data: guide } = await fetchGuideBySlug(slug)
+
+  if (!guide) {
+    return {
+      title: 'Bài viết không tồn tại',
+      alternates: {
+        canonical: `https://dungdibinhluan.com/huong-dan/${slug}`,
+      },
+    }
+  }
+
+  const guideData = guide as Guide
+  const plainText = guideData.content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
+  const description = plainText.slice(0, 155) || `Hướng dẫn chi tiết: ${guideData.title}`
+  const thumbnailSrc = resolveThumbnailSrc(guideData.thumbnail_url)
+
+  return {
+    title: guideData.title,
+    description,
+    alternates: {
+      canonical: `https://dungdibinhluan.com/huong-dan/${guideData.slug}`,
+    },
+    openGraph: {
+      title: `${guideData.title} | DungDiBinhLuan`,
+      description,
+      type: 'article',
+      url: `https://dungdibinhluan.com/huong-dan/${guideData.slug}`,
+      images: thumbnailSrc ? [{ url: thumbnailSrc }] : undefined,
+    },
+  }
+}
+
 export default async function GuideDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const supabase = createClient()
 
   try {
-    const { data: guide, error } = await supabase
-      .from('guides')
-      .select(`
-        *,
-        profiles:author_id (
-          username,
-          avatar_url
-        )
-      `)
-      .eq('slug', slug)
-      .single()
+    const { data: guide, error } = await fetchGuideBySlug(slug)
 
     if (error || !guide) {
       console.error('Error fetching guide:', error)
@@ -93,7 +136,7 @@ export default async function GuideDetailPage({ params }: { params: Promise<{ sl
             {guideData.profiles?.avatar_url ? (
               <img
                 src={guideData.profiles.avatar_url}
-                alt=""
+                alt={guideData.profiles?.username ? `Avatar ${guideData.profiles.username}` : 'Avatar tác giả'}
                 className="h-7 w-7 shrink-0 rounded-full object-cover"
                 loading="lazy"
                 decoding="async"

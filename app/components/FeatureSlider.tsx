@@ -78,7 +78,7 @@ export default function FeatureSlider() {
       {/* Preload toàn bộ ảnh ẩn — fix lag khi chuyển slide */}
       <div className="hidden">
         {slides.map((s) => (
-          <Image key={s.img} src={s.img} alt="" fill priority sizes="1px" />
+          <Image key={s.img} src={s.img} alt={s.title} fill priority sizes="1px" />
         ))}
       </div>
 
@@ -113,7 +113,7 @@ export default function FeatureSlider() {
                 {portrait ? (
                   /* ── PORTRAIT ── */
                   <div className="relative h-[460px] md:h-[580px]">
-                    <Image src={s.img} alt="" fill className="object-cover scale-110 blur-3xl opacity-25" />
+                    <Image src={s.img} alt={s.title} fill className="object-cover scale-110 blur-3xl opacity-25" />
                     <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/10 to-black/80" />
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(206,90,103,0.12),transparent_50%)]" />
 

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { GAMES } from "./data/games";
@@ -8,6 +9,12 @@ import HeroSection from "./components/HeroSection";
 import Navbar from "./components/Navbar";
 import { createClient } from "@/utils/supabase/server";
 import { resolveThumbnailSrc } from "@/utils/r2";
+
+export const metadata: Metadata = {
+  alternates: {
+    canonical: "https://dungdibinhluan.com",
+  },
+};
 
 export const revalidate = 120;
 

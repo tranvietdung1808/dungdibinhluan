@@ -1,10 +1,16 @@
 import type { Metadata } from "next";
 import { createClient } from "@/utils/supabase/server";
 import ModsClient from "./ModsClient";
+import type { Database } from "@/utils/supabase/database.types";
+
+type ModRow = Database["public"]["Tables"]["mods"]["Row"];
 
 export const metadata: Metadata = {
   title: "Mod Hub",
   description: "Kho mod FC 26 chất lượng cao — Faces, Kits, Gameplay, Đồ họa 4K được tuyển chọn bởi DungDiBinhLuan.",
+  alternates: {
+    canonical: "https://dungdibinhluan.com/mods",
+  },
   openGraph: {
     title: "Mod Hub | DungDiBinhLuan",
     description: "Kho mod FC 26 chất lượng cao — Faces, Kits, Gameplay, Đồ họa 4K.",
@@ -21,5 +27,5 @@ export default async function ModsPage() {
     .select("*")
     .order("created_at", { ascending: false });
 
-  return <ModsClient initialDbMods={(data || []) as any[]} />;
+  return <ModsClient initialDbMods={(data || []) as ModRow[]} />;
 }

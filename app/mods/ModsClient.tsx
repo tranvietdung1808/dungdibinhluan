@@ -121,21 +121,28 @@ export default function ModsPage({ initialDbMods = [] }: ModsPageProps) {
 
   const totalPages = Math.ceil(gridItems.length / PAGE_SIZE);
   const paginated = gridItems.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const featuredThumbnail = featured?.thumbnail || "";
+  const preloadThumbnailList = useMemo(
+    () =>
+      paginated
+        .slice(0, 6)
+        .map((mod) => mod.thumbnail)
+        .filter((thumbnail): thumbnail is string => Boolean(thumbnail)),
+    [paginated]
+  );
 
   // Preload featured mod image and first page images
   useEffect(() => {
-    if (featured?.thumbnail) {
+    if (featuredThumbnail) {
       const img = new Image();
-      img.src = featured.thumbnail;
+      img.src = featuredThumbnail;
     }
 
-    paginated.slice(0, 6).forEach((mod) => {
-      if (mod.thumbnail) {
-        const img = new Image();
-        img.src = mod.thumbnail;
-      }
+    preloadThumbnailList.forEach((thumbnail) => {
+      const img = new Image();
+      img.src = thumbnail;
     });
-  }, [featured?.thumbnail, paginated]);
+  }, [featuredThumbnail, preloadThumbnailList]);
 
   const handleTagChange = (tag: string) => {
     setActiveTag(tag);
@@ -157,73 +164,74 @@ export default function ModsPage({ initialDbMods = [] }: ModsPageProps) {
   }
 
   return (
-    <>
-      {/* Featured Mod - centered and compact */}
-      {featured && activeTag === "Tất cả" && (
-        <section className="mb-10">
-          <div className="max-w-4xl mx-auto">
-            <FeaturedModCard mod={featured} />
-          </div>
-        </section>
-      )}
-
-      {/* Search and Filter */}
-      <div className="mb-8 space-y-6">
-        {activeTag === "Faces" && (
-          <SearchBar
-            value={search}
-            onChange={(value) => { setSearch(value); setPage(1); }}
-            onClear={() => { setSearch(""); setPage(1); }}
-          />
-        )}
-        <FilterTags
-          activeTag={activeTag}
-          onTagChange={handleTagChange}
-          itemCount={gridItems.length}
-        />
+    <section className="relative overflow-hidden">
+      <div className="pointer-events-none absolute inset-0 opacity-60">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(206,90,103,0.16),transparent_58%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(59,130,246,0.12),transparent_52%)]" />
       </div>
-
-      {/* Results Count */}
-      <div className="mb-6 text-slate-400">
-        {activeTag === "Tất cả" ? (
-          <span>Tất cả mods ({ALL_MODS.length})</span>
-        ) : (
-          <span>
-            {activeTag} ({displayed.length})
-            {activeTag === "Faces" && search.trim() && (
-              <span className="ml-2">cho &quot;{search}&quot;</span>
-            )}
-          </span>
+      <div className="relative max-w-[1560px] mx-auto px-4 md:px-6 xl:px-10 2xl:px-14 py-6 md:py-8">
+        <h1 className="sr-only">Kho mod FC 26, FIFA và facepack mới nhất</h1>
+        {featured && activeTag === "Tất cả" && (
+          <section className="mb-8 md:mb-10">
+            <div className="max-w-[1180px] mx-auto">
+              <FeaturedModCard mod={featured} />
+            </div>
+          </section>
         )}
-      </div>
 
-      {/* Grid */}
-      {paginated.length > 0 ? (
-        <>
-          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 md:gap-5 mb-8">
-            {paginated.map((mod) => (
-              <ModCard key={mod.slug} mod={mod} />
-            ))}
-          </div>
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <Pagination
-              currentPage={page}
-              totalPages={totalPages}
-              onPageChange={handlePageChange}
+        <div className="mb-7 md:mb-8 space-y-5">
+          {activeTag === "Faces" && (
+            <SearchBar
+              value={search}
+              onChange={(value) => { setSearch(value); setPage(1); }}
+              onClear={() => { setSearch(""); setPage(1); }}
             />
           )}
-        </>
-      ) : (
-        <div className="text-center py-12">
-          <p className="text-slate-400">
-            {search.trim()
-              ? `Không tìm thấy mod nào cho "${search}"`
-              : `Không có mod nào trong danh mục ${activeTag}`}
-          </p>
+          <FilterTags
+            activeTag={activeTag}
+            onTagChange={handleTagChange}
+          />
         </div>
-      )}
-    </>
+
+        <div className="mb-5 text-slate-400 text-sm">
+          {activeTag === "Tất cả" ? (
+            <span>Tất cả mods ({ALL_MODS.length})</span>
+          ) : (
+            <span>
+              {activeTag} ({displayed.length})
+              {activeTag === "Faces" && search.trim() && (
+                <span className="ml-2">cho &quot;{search}&quot;</span>
+              )}
+            </span>
+          )}
+        </div>
+
+        {paginated.length > 0 ? (
+          <>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-5 gap-3 md:gap-4 mb-8">
+              {paginated.map((mod) => (
+                <ModCard key={mod.slug} mod={mod} />
+              ))}
+            </div>
+
+            {totalPages > 1 && (
+              <Pagination
+                currentPage={page}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+              />
+            )}
+          </>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-slate-400">
+              {search.trim()
+                ? `Không tìm thấy mod nào cho "${search}"`
+                : `Không có mod nào trong danh mục ${activeTag}`}
+            </p>
+          </div>
+        )}
+      </div>
+    </section>
   );
 }

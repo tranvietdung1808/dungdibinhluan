@@ -26,20 +26,20 @@ interface ModCardProps {
 
 export default function ModCard({ mod }: ModCardProps) {
   const isPortrait = mod.thumbnailOrientation !== "landscape";
-  
+
   return (
     <Link href={`/mods/${mod.slug}`}>
       <div className="group relative rounded-2xl overflow-hidden border border-white/10 bg-[#0a0a0f] hover:border-[#ce5a67]/40 hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(206,90,103,0.15)] transition-all duration-300 flex flex-col h-full cursor-pointer isolate">
-        
+
         {/* Đường sáng viền trên cùng chìm */}
         <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20" />
-        
+
         {/* Liên kết chìm (Shrink text) */}
         <div className="relative w-full aspect-[16/10] flex-shrink-0 bg-[#08080a] overflow-hidden">
           {/* Lớp mờ (Blurred Backdrop) phía sau cho ảnh dọc để không bị viền đen */}
           {isPortrait && (
             <div className="absolute inset-0 z-0 overflow-hidden">
-              <Image 
+              <Image
                 src={mod.thumbnail}
                 alt={mod.name}
                 fill
@@ -60,9 +60,19 @@ export default function ModCard({ mod }: ModCardProps) {
               sizes="(max-width: 768px) 100vw, 25vw"
             />
           </div>
-          
+
+          {isPortrait && (
+            <div
+              className="absolute inset-0 z-10 pointer-events-none"
+              style={{
+                background:
+                  "radial-gradient(ellipse at center, rgba(10,10,15,0) 48%, rgba(10,10,15,0.82) 100%)",
+              }}
+            />
+          )}
+
           <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-transparent to-transparent z-10" />
-          
+
           <span
             className="absolute top-3 left-3 z-20 px-2.5 py-0.5 rounded-full text-[8px] font-black tracking-widest backdrop-blur-md shadow-md"
             style={{
@@ -81,7 +91,7 @@ export default function ModCard({ mod }: ModCardProps) {
             {mod.name}
           </h3>
           <p className="text-slate-400 text-[10px] md:text-[11px] leading-relaxed line-clamp-2 mb-3 flex-1">{mod.description}</p>
-          
+
           {/* Metadata Badges */}
           <div className="flex items-center gap-1.5 mb-3 flex-wrap">
             <span className="text-[9px] px-2 py-0.5 rounded bg-white/5 border border-white/5 text-slate-300 font-bold tracking-widest flex items-center gap-1 uppercase">
@@ -91,7 +101,7 @@ export default function ModCard({ mod }: ModCardProps) {
               <span className="text-[#ce5a67] text-[7px]">●</span>{mod.updatedAt}
             </span>
           </div>
-          
+
           {/* Footer Card */}
           <div className="flex items-center justify-between pt-3 border-t border-white/5 mt-auto">
             <span className="text-[9px] text-slate-500 uppercase tracking-widest font-bold">

@@ -29,10 +29,6 @@ export const metadata: Metadata = {
     apple: "/apple-touch-icon.png",
   },
 
-  alternates: {
-    canonical: "https://dungdibinhluan.com",
-  },
-
   keywords: [
     "FC 26 mod",
     "FIFA mod",
