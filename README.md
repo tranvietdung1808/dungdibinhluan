@@ -1,193 +1,131 @@
-# ⚽ DungDiBinhLuan - Mod Hub cho EA FC 26
+# DungDiBinhLuan - EA FC 26 Modification Hub
 
-> **Trang chia sẻ mod miễn phí cho cộng đồng EA FC 26 Việt Nam**
+DungDiBinhLuan is a high-performance web platform designed to distribute game modifications (faces, kits, gameplay tuning) for EA FC 26. Built with modern web technologies, the application prioritizes speed, SEO, and secure distribution of large file assets.
 
-Website: [dungdibinhluan.com](https://dungdibinhluan.com)
+## System Architecture
 
----
+The project leverages a modern Jamstack approach with Server-Side Rendering (SSR) and Static Site Generation (SSG) provided by Next.js, backed by a scalable Supabase PostgreSQL database and S3-compatible cloud storage for heavy assets.
 
-## 🎮 Giới thiệu
+### Core Technologies
+- **Framework:** Next.js 16 (React 19, App Router)
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS v4
+- **Database & Auth:** Supabase (PostgreSQL) with Row Level Security (RLS)
+- **Asset Storage:** Cloudflare R2 / AWS S3
+- **Caching & Rate Limiting:** Upstash Redis (Serverless KV)
+- **Analytics:** Vercel Analytics
 
-DungDiBinhLuan là nơi anh em game thủ EA FC 26 có thể:
+### Data Flow & Component Interaction
 
-- **Tải mod miễn phí** - Faces, Kits, Gameplay, Graphics...
-- **Cập nhật thường xuyên** - Mod mới mỗi tuần
-- **Giao diện đẹp** - Thiết kế hiện đại, tối ưu cho cả mobile lẫn desktop
+The platform employs a hybrid data-fetching strategy, combining static configuration data with dynamic database entries to optimize TTFB (Time to First Byte) and database load.
 
----
+```mermaid
+sequenceDiagram
+    participant Client
+    participant NextJS as Next.js Server (App Router)
+    participant Supabase as PostgreSQL (Supabase)
+    participant Redis as Upstash (Redis)
+    participant S3 as Object Storage (R2/S3)
 
-## 🚀 Tính năng
+    Note over Client,S3: Read Flow (Content Delivery)
+    Client->>NextJS: GET /mods/[slug]
+    NextJS->>Supabase: Query Mod Metadata
+    Supabase-->>NextJS: Returns JSON Metadata
+    NextJS-->>Client: Renders Page (SSR)
 
-### 📦 Mod Hub
-- Danh sách mod với thumbnail đẹp mắt
-- Phân loại theo category: Faces, Kits, Gameplay, Đồ họa...
-- Tìm kiếm và lọc dễ dàng
+    Note over Client,S3: Secure Download Flow
+    Client->>NextJS: Request Download
+    NextJS->>S3: Generate Presigned URL
+    S3-->>NextJS: Temporary Signed URL (1 hour)
+    NextJS-->>Client: Returns Download Link
+    Client->>S3: Downloads Heavy Asset Directly
 
-### 👤 Face Mods (Special Layout)
-- Layout riêng cho face mod với ảnh portrait
-- Background gradient + vignette đẹp mắt
-- Thông tin chi tiết + nút download nổi bật
-
-### 💳 Mix Mods FC26
-- Gói mod trả phí với 169.000đ
-- Hỗ trợ update miễn phí trọn đời
-- Liên hệ mua qua Zalo
-
-### 🔧 Admin Panel
-- Quản lý mod, face
-- Upload file lên S3
-- Analytics & tracking
-
----
-
-## 🛠️ Tech Stack
-
-| Công nghệ | Mô tả |
-|-----------|-------|
-| **Next.js 16** | Framework React với App Router |
-| **TypeScript** | Type-safe code |
-| **Tailwind CSS 4** | Styling nhanh gọn |
-| **AWS S3** | Lưu trữ file mod |
-| **Upstash Redis** | Cache & rate limiting |
-| **Vercel Analytics** | Theo dõi traffic |
-
----
-
-## 📁 Cấu trúc thư mục
-
-```
-app/
-├── admin/          # Trang admin quản lý
-├── api/            # API routes (download, upload...)
-├── components/     # React components tái sử dụng
-├── data/           # Data files (mods.ts, faces.ts, games.ts)
-├── dmca/           # Trang DMCA policy
-├── games/          # Trang mua game FC26
-├── mods/           # Trang chi tiết từng mod
-│   └── [slug]/     # Dynamic route cho mod detail
-├── page.tsx        # Trang chủ
-├── layout.tsx      # Root layout
-└── sitemap.ts      # SEO sitemap
+    Note over Client,Redis: Verification Flow (Premium Access)
+    Client->>NextJS: Submit Access Code
+    NextJS->>Redis: Validate Code Expiration/Usage
+    Redis-->>NextJS: Authorization Result
+    NextJS-->>Client: Grants/Denies Access
 ```
 
----
+## Key Implementations & Design Decisions
 
-## 🏃 Chạy local
+### 1. Hybrid Content Resolution (`app/mods/[slug]/page.tsx`)
+The platform supports two types of mod content: static (hardcoded in TypeScript data files for zero-latency retrieval) and dynamic (fetched from Supabase). The routing system seamlessly resolves between both data stores, prioritizing static definitions before querying the database.
+
+### 2. Secure File Distribution (`app/api/download/route.ts` & `utils/r2.ts`)
+To prevent direct hotlinking and bandwidth abuse of multimegabyte/gigabyte game modifications, all download requests are routed through a secure API endpoint. This implementation utilizes the AWS SDK to generate presigned URLs with strict TTL (Time to Live) expiration (default: 3600 seconds), offloading the actual bandwidth out of the Node.js process to the S3 bucket.
+
+### 3. Row Level Security (`supabase-schema.sql`)
+The PostgreSQL database is secured using Supabase Row Level Security (RLS) policies. Read operations are permitted publicly for published mods, while write operations (insert/update/delete) strictly require authenticated `Service Role` access or appropriate owner permissions.
+
+### 4. Code Verification System (`app/api/gen-code/route.ts`)
+A serverless key-value store (Upstash Redis) is implemented to handle access code generation and validation for premium or gated content. The system generates unique randomized keys and verifies state atomic transitions to prevent reuse.
+
+## Local Environment Setup
+
+### Prerequisites
+- Node.js 20.x or higher
+- Git
+
+### Installation
 
 ```bash
-# Clone repo
+# Clone the repository
 git clone https://github.com/tranvietdung1808/dungdibinhluan.git
+cd dungdibinhluan
 
-# Cài đặt dependencies
+# Install dependencies
 npm install
+```
 
-# Chạy development server
+### Environment Configuration
+
+Create a `.env.local` file in the root directory and configure the following required services:
+
+```env
+# S3-Compatible Object Storage (AWS/Cloudflare R2)
+R2_ENDPOINT=https://<account_id>.r2.cloudflarestorage.com
+ACCESS_KEY_ID=your_access_key
+SECRET_ACCESS_KEY=your_secret_key
+
+# Supabase Configuration
+NEXT_PUBLIC_SUPABASE_URL=https://<project_ref>.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+
+# Redis/Upstash Configuration
+UPSTASH_REDIS_REST_URL=your_redis_url
+UPSTASH_REDIS_REST_TOKEN=your_redis_token
+
+# Admin Operations
+ADMIN_SECRET=your_secret_passphrase
+```
+
+### Running the Application
+
+```bash
+# Start the development server
 npm run dev
 ```
 
-Mở [http://localhost:5000](http://localhost:5000) để xem.
+The application will be available at `http://localhost:5000`.
 
----
+## Directory Structure
 
-## 🌿 Environment Variables
-
-Tạo file `.env.local` với:
-
-```env
-# AWS S3
-AWS_ACCESS_KEY_ID=your_access_key
-AWS_SECRET_ACCESS_KEY=your_secret_key
-AWS_REGION=your_region
-S3_BUCKET_NAME=your_bucket
-
-# Upstash Redis
-UPSTASH_REDIS_REST_URL=your_redis_url
-UPSTASH_REDIS_REST_TOKEN=your_redis_token
+```text
+c:\dungdibinhluan\
+├── .env.local             # Environment secrets
+├── package.json           # Dependencies and scripts
+├── supabase-schema.sql    # PostgreSQL schema definitions and RLS policies
+├── lib/ & utils/          # Shared utilities (Supabase clients, AWS S3 SDK, Upstash)
+└── app/                   # Next.js App Router root
+    ├── layout.tsx         # Root layout with shared UI and metadata
+    ├── page.tsx           # Landing page with dynamic data fetching
+    ├── api/               # Serverless API endpoints (downloads, verification)
+    ├── data/              # Static content configurations
+    └── mods/              # Dynamic routing block for mod catalog
+        ├── page.tsx       # Mod catalog list
+        └── [slug]/page.tsx# Dynamic mod detail page
 ```
 
----
-
-## 📝 Thêm mod mới
-
-### Thêm Face mod
-
-Mở `app/data/faces.ts`:
-
-```typescript
-{
-  slug: "face-ten-cau-thu",
-  name: "Face Tên Cầu Thủ",
-  description: "Mô tả ngắn",
-  longDescription: "Mô tả chi tiết...",
-  thumbnail: "/mods/anh-thumb.jpg",
-  downloadUrl: "https://s3.../file.exe",
-  author: "Tên tác giả",
-  version: "1.0",
-  updatedAt: "24/03/2026",
-  category: "Faces",
-  tags: ["Faces"],
-  featured: false,
-  thumbnailOrientation: "portrait", // Quan trọng!
-}
-```
-
-### Thêm Mod thường
-
-Mở `app/data/mods.ts`:
-
-```typescript
-{
-  slug: "ten-mod",
-  name: "Tên Mod",
-  // ... tương tự nhưng không cần thumbnailOrientation
-}
-```
-
----
-
-## 🎨 Layout tự động
-
-Website tự động chọn layout dựa trên loại mod:
-
-- **Faces** (`thumbnailOrientation: "portrait"`) → Layout 2 cột với ảnh portrait lớn
-- **Mod thường** → Layout hero banner full-width
-
----
-
-## 📱 Responsive
-
-- Mobile-first design
-- Tối ưu cho mọi kích thước màn hình
-- Touch-friendly buttons
-
----
-
-## 🔒 DMCA
-
-Chúng tôi tôn trọng bản quyền. Nếu mod của bạn bị đăng mà không được xin phép, hãy liên hệ qua [trang DMCA](https://dungdibinhluan.com/dmca).
-
----
-
-## 🤝 Đóng góp
-
-Fork → Tạo branch → Commit → Push → Tạo PR
-
----
-
-## 📞 Liên hệ
-
-- **Website**: [dungdibinhluan.com](https://dungdibinhluan.com)
-- **Facebook**: [Page DungDiBinhLuan](https://facebook.com/dungdibinhluan)
-- **Zalo**: Liên hệ qua website
-
----
-
-## 📜 License
-
-MIT License - Tự do sử dụng và chỉnh sửa
-
----
-
-<p align="center">
-  Made with ❤️ by <a href="https://github.com/tranvietdung1808">tranvietdung1808</a>
-</p>
+## License
+MIT License. See the repository root for full details.

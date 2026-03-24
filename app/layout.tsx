@@ -52,7 +52,12 @@ export const metadata: Metadata = {
     "mod bóng đá PC",
     "FIFA 26 mod download",
     "EA FC 26 graphics mod",
-    "gameplay mod FC 26"
+    "gameplay mod FC 26",
+    "download FC 26 faces",
+    "mod FC 26 PC",
+    "tải mod FC 26",
+    "cài đặt mod FIFA",
+    "mod update EA FC"
   ],
 
   authors: [{ name: "DungDiBinhLuan" }],

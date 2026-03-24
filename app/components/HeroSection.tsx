@@ -129,80 +129,90 @@ export default function HeroSection({ latestGuides = [] }: HeroSectionProps) {
           />
         </div>
 
-        <div className="relative z-10 max-w-[1320px] mx-auto px-5 md:px-6 w-full">
-          <div className="grid xl:grid-cols-[minmax(0,1fr)_360px] 2xl:grid-cols-[minmax(0,1fr)_390px] gap-5 items-center">
-            <div className="max-w-xs sm:max-w-sm md:max-w-xl space-y-4 md:space-y-6 mx-auto xl:mx-0">
-            <div className="flex items-center gap-2 md:gap-3 flex-wrap">
-              <span className="px-2.5 py-1 rounded-full text-[9px] md:text-[10px] font-black tracking-widest bg-[#ce5a67]/20 text-[#ce5a67] border border-[#ce5a67]/30">
-                🔥 HOT
-              </span>
-              <span className="px-2.5 py-1 rounded-full text-[9px] md:text-[10px] font-black tracking-widest bg-white/5 text-slate-400 border border-white/10">
-                SPOTLIGHT
-              </span>
-            </div>
+        <div className="relative z-10 max-w-[1200px] mx-auto px-5 w-full">
+          <div className="flex flex-col xl:flex-row items-center justify-between gap-8 xl:gap-16 w-full">
+            <div className="max-w-xs sm:max-w-sm md:max-w-xl space-y-4 md:space-y-6 mx-auto xl:mx-0 flex-1">
+              <div className="flex items-center gap-2 md:gap-3 flex-wrap">
+                <span className="px-2.5 py-1 rounded-full text-[9px] md:text-[10px] font-black tracking-widest bg-[#ce5a67]/20 text-[#ce5a67] border border-[#ce5a67]/30">
+                  🔥 HOT
+                </span>
+                <span className="px-2.5 py-1 rounded-full text-[9px] md:text-[10px] font-black tracking-widest bg-white/5 text-slate-400 border border-white/10">
+                  SPOTLIGHT
+                </span>
+              </div>
 
-            <div>
-              <h1 className="text-4xl sm:text-5xl md:text-7xl font-black italic tracking-tighter leading-none text-white">
-                EA FC <span className="text-[#ce5a67]">26</span>
-              </h1>
-              <p className="text-slate-400 text-[10px] md:text-sm tracking-[0.2em] md:tracking-[0.3em] uppercase mt-2 md:mt-3">
-                ALL IN ONE GAME SET UP
+              <div>
+                <h1 className="text-4xl sm:text-5xl md:text-7xl font-black italic tracking-tighter leading-none text-white">
+                  EA FC <span className="text-[#ce5a67]">26</span>
+                </h1>
+                <p className="text-slate-400 text-[10px] md:text-sm tracking-[0.2em] md:tracking-[0.3em] uppercase mt-2 md:mt-3">
+                  ALL IN ONE GAME SET UP
+                </p>
+              </div>
+
+              <p className="text-slate-400 text-sm md:text-base leading-relaxed max-w-[260px] md:max-w-sm">
+                Bộ cài đặt đầy đủ, tối ưu hiệu năng. Chơi ngay không cần chờ đợi.
               </p>
-            </div>
 
-            <p className="text-slate-400 text-sm md:text-base leading-relaxed max-w-[260px] md:max-w-sm">
-              Bộ cài đặt đầy đủ, tối ưu hiệu năng. Chơi ngay không cần chờ đợi.
-            </p>
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                <Link
+                  href="/games/fc26/select"
+                  className="group flex items-center justify-center gap-2 px-6 md:px-8 py-3.5 md:py-4 bg-[#ce5a67] rounded-2xl font-black tracking-widest text-sm md:text-base text-white hover:bg-[#b44c5c] transition-all shadow-[0_8px_30px_rgba(206,90,103,0.3)]"
+                >
+                  TẢI FC 26 NGAY
+                  <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
+                </Link>
 
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-              <Link
-                href="/games/fc26/select"
-                className="group flex items-center justify-center gap-2 px-6 md:px-8 py-3.5 md:py-4 bg-[#ce5a67] rounded-2xl font-black tracking-widest text-sm md:text-base text-white hover:bg-[#b44c5c] transition-all shadow-[0_8px_30px_rgba(206,90,103,0.3)]"
-              >
-                TẢI FC 26 NGAY
-                <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                </svg>
-              </Link>
-
-              <button
-                onClick={() => setOpen(true)}
-                className="flex items-center justify-center gap-2 px-6 md:px-8 py-3.5 md:py-4 rounded-2xl font-black tracking-widest text-sm md:text-base text-slate-300 border border-white/10 hover:border-white/30 hover:text-white transition-all"
-              >
-                XEM CHI TIẾT
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 110 20A10 10 0 0112 2z" />
-                </svg>
-              </button>
-            </div>
+                <button
+                  onClick={() => setOpen(true)}
+                  className="flex items-center justify-center gap-2 px-6 md:px-8 py-3.5 md:py-4 rounded-2xl font-black tracking-widest text-sm md:text-base text-slate-300 border border-white/10 hover:border-white/30 hover:text-white transition-all"
+                >
+                  XEM CHI TIẾT
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 110 20A10 10 0 0112 2z" />
+                  </svg>
+                </button>
+              </div>
             </div>
 
             <div className="hidden xl:block">
               {latestGuides.length > 0 && (
-                <div className="rounded-2xl border border-white/10 bg-[#0b0b12]/85 backdrop-blur-sm p-4 space-y-3 xl:ml-20 2xl:ml-28 xl:justify-self-end">
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="text-[10px] uppercase tracking-[0.28em] text-slate-300">BÀI VIẾT MỚI</p>
-                    <Link href="/huong-dan" className="text-[10px] text-[#ce5a67] font-black tracking-widest hover:underline uppercase">
+                <div className="space-y-3 w-[280px] 2xl:w-[320px]">
+                  <div className="flex items-center justify-between px-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-1 h-3.5 rounded-full bg-[#ce5a67]" />
+                      <p className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-white">BÀI VIẾT MỚI</p>
+                    </div>
+                    <Link href="/huong-dan" className="group flex items-center gap-1.5 text-[9px] text-[#ce5a67] hover:text-white font-black tracking-widest uppercase transition-colors">
                       Xem tất cả
+                      <span className="transition-transform group-hover:translate-x-1">→</span>
                     </Link>
                   </div>
-                  <div className="space-y-2.5">
+                  <div className="grid gap-2.5">
                     {latestGuides.map((guide) => (
                       <Link
                         key={guide.id}
                         href={`/huong-dan/${guide.slug}`}
-                        className="flex items-start gap-3 rounded-xl border border-white/5 bg-white/[0.03] p-3 hover:border-[#ce5a67]/40 hover:bg-[#ce5a67]/[0.08] transition-colors"
+                        className="group relative flex items-start gap-3 rounded-[16px] p-2.5 border border-white/5 bg-white/[0.015] backdrop-blur-md overflow-hidden hover:border-[#ce5a67]/40 hover:bg-white/[0.04] hover:-translate-y-[2px] transition-all duration-300 hover:shadow-[0_8px_25px_rgba(206,90,103,0.1)]"
                       >
-                        <div className="w-14 h-20 rounded-lg overflow-hidden bg-[#13131b] flex-shrink-0">
+                        <div className="absolute inset-y-0 left-0 w-[3px] bg-gradient-to-b from-[#ce5a67] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-[0_0_8px_#ce5a67]" />
+                        
+                        <div className="relative w-[56px] h-[72px] rounded-xl overflow-hidden bg-[#13131b] flex-shrink-0 shadow-[0_4px_15px_rgba(0,0,0,0.5)]">
                           {guide.thumbnail ? (
-                            <img src={guide.thumbnail} alt={guide.title} className="w-full h-full object-cover" />
+                            <img src={guide.thumbnail} alt={guide.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" loading="lazy" />
                           ) : (
-                            <div className="w-full h-full bg-gradient-to-b from-[#ce5a67]/25 to-transparent" />
+                            <div className="w-full h-full bg-gradient-to-br from-[#ce5a67]/20 to-[#111]" />
                           )}
                         </div>
-                        <div className="min-w-0">
-                          <p className="text-xs text-white line-clamp-2 leading-snug">{guide.title}</p>
-                          <p className="mt-2 text-[10px] text-slate-500">{guide.createdAt}</p>
+                        
+                        <div className="min-w-0 pr-1 pt-1 pb-0.5 flex flex-col justify-between h-[68px]">
+                          <p className="text-xs font-bold text-slate-200 line-clamp-2 leading-snug group-hover:text-[#ce5a67] transition-colors">{guide.title}</p>
+                          <p className="text-[9px] text-slate-500 font-medium tracking-widest flex items-center gap-1.5 uppercase">
+                            <span className="w-1 h-1 rounded-full bg-[#ce5a67]/60" />
+                            {guide.createdAt}
+                          </p>
                         </div>
                       </Link>
                     ))}

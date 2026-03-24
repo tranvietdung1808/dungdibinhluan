@@ -39,7 +39,7 @@ const ALL_STATIC_MODS = [...SOURCE].sort((a, b) => {
   return SOURCE.indexOf(b) - SOURCE.indexOf(a);
 });
 
-const PAGE_SIZE = 12;
+const PAGE_SIZE = 20;
 
 interface ModsPageProps {
   initialDbMods?: Mod[];
@@ -200,7 +200,7 @@ export default function ModsPage({ initialDbMods = [] }: ModsPageProps) {
       {/* Grid */}
       {paginated.length > 0 ? (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 md:gap-5 mb-8">
             {paginated.map((mod) => (
               <ModCard key={mod.slug} mod={mod} />
             ))}

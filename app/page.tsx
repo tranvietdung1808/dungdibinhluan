@@ -148,7 +148,7 @@ const MobileLatestGuidesSection = ({
             >
               <div className="relative h-36 bg-[#13131b]">
                 {guide.thumbnail ? (
-                  <img src={guide.thumbnail} alt={guide.title} className="w-full h-full object-cover" />
+                  <img src={guide.thumbnail} alt={guide.title} className="w-full h-full object-cover" loading="lazy" />
                 ) : (
                   <div className="w-full h-full bg-gradient-to-b from-[#ce5a67]/25 to-transparent" />
                 )}
