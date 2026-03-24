@@ -75,7 +75,7 @@ export async function PUT(
         content,
         thumbnail_url,
         updated_at: new Date().toISOString(),
-      } as any)
+      })
       .eq('id', id)
       .select()
 
