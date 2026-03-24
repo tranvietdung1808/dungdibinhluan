@@ -3,6 +3,18 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
+type GuideRailItem = {
+  id: string;
+  slug: string;
+  title: string;
+  createdAt: string;
+  thumbnail?: string;
+};
+
+type HeroSectionProps = {
+  latestGuides?: GuideRailItem[];
+};
+
 const modalSections = [
   {
     title: "I. Số lượng faces mới khổng lồ",
@@ -59,14 +71,14 @@ const modalSections = [
   },
 ];
 
-export default function HeroSection() {
+export default function HeroSection({ latestGuides = [] }: HeroSectionProps) {
   const [open, setOpen] = useState(false);
 
   return (
     <>
       <section
         id="home"
-        className="relative h-[100vh] min-h-[640px] flex items-center overflow-hidden"
+        className="relative min-h-[560px] md:min-h-[620px] lg:min-h-[640px] flex items-center overflow-hidden"
       >
         <div className="absolute inset-0">
           {/* Ảnh nền */}
@@ -117,8 +129,9 @@ export default function HeroSection() {
           />
         </div>
 
-        <div className="relative z-10 max-w-6xl mx-auto px-5 md:px-6 w-full">
-          <div className="max-w-xs sm:max-w-sm md:max-w-xl space-y-4 md:space-y-6">
+        <div className="relative z-10 max-w-[1320px] mx-auto px-5 md:px-6 w-full">
+          <div className="grid xl:grid-cols-[minmax(0,1fr)_360px] 2xl:grid-cols-[minmax(0,1fr)_390px] gap-5 items-center">
+            <div className="max-w-xs sm:max-w-sm md:max-w-xl space-y-4 md:space-y-6 mx-auto xl:mx-0">
             <div className="flex items-center gap-2 md:gap-3 flex-wrap">
               <span className="px-2.5 py-1 rounded-full text-[9px] md:text-[10px] font-black tracking-widest bg-[#ce5a67]/20 text-[#ce5a67] border border-[#ce5a67]/30">
                 🔥 HOT
@@ -161,6 +174,41 @@ export default function HeroSection() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 110 20A10 10 0 0112 2z" />
                 </svg>
               </button>
+            </div>
+            </div>
+
+            <div className="hidden xl:block">
+              {latestGuides.length > 0 && (
+                <div className="rounded-2xl border border-white/10 bg-[#0b0b12]/85 backdrop-blur-sm p-4 space-y-3 xl:ml-20 2xl:ml-28 xl:justify-self-end">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-[10px] uppercase tracking-[0.28em] text-slate-300">BÀI VIẾT MỚI</p>
+                    <Link href="/huong-dan" className="text-[10px] text-[#ce5a67] font-black tracking-widest hover:underline uppercase">
+                      Xem tất cả
+                    </Link>
+                  </div>
+                  <div className="space-y-2.5">
+                    {latestGuides.map((guide) => (
+                      <Link
+                        key={guide.id}
+                        href={`/huong-dan/${guide.slug}`}
+                        className="flex items-start gap-3 rounded-xl border border-white/5 bg-white/[0.03] p-3 hover:border-[#ce5a67]/40 hover:bg-[#ce5a67]/[0.08] transition-colors"
+                      >
+                        <div className="w-14 h-20 rounded-lg overflow-hidden bg-[#13131b] flex-shrink-0">
+                          {guide.thumbnail ? (
+                            <img src={guide.thumbnail} alt={guide.title} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full bg-gradient-to-b from-[#ce5a67]/25 to-transparent" />
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs text-white line-clamp-2 leading-snug">{guide.title}</p>
+                          <p className="mt-2 text-[10px] text-slate-500">{guide.createdAt}</p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -1,9 +1,38 @@
 import Image from "next/image";
 import Link from "next/link";
 import { GAMES } from "./data/games";
+import { MODS } from "./data/mods";
+import { FACES } from "./data/faces";
 import FeatureSlider from "./components/FeatureSlider";
 import HeroSection from "./components/HeroSection";
 import Navbar from "./components/Navbar";
+import { createClient } from "@/utils/supabase/server";
+import { resolveThumbnailSrc } from "@/utils/r2";
+
+type HomeGuide = {
+  id: string;
+  title: string;
+  slug: string;
+  created_at: string;
+  thumbnail_url: string | null;
+};
+
+type HomeDbMod = {
+  id: string;
+  slug: string;
+  name: string;
+  updated_at: string;
+  thumbnail: string | null;
+  tags: string[];
+};
+
+type HomeModCard = {
+  slug: string;
+  name: string;
+  updatedAt: string;
+  thumbnail: string;
+  tag: string;
+};
 
 // ========== QUICK FEATURES ==========
 const features = [
@@ -28,6 +57,105 @@ const Features = () => (
     </div>
   </section>
 );
+
+const parseDate = (str: string) => {
+  const [day, month, year] = str.split("/").map(Number);
+  return new Date(year, month - 1, day).getTime();
+};
+
+const sortModsByUpdated = (a: HomeModCard, b: HomeModCard) => {
+  const diff = parseDate(b.updatedAt) - parseDate(a.updatedAt);
+  return Number.isNaN(diff) ? 0 : diff;
+};
+
+const LatestModsSection = ({ mods }: { mods: HomeModCard[] }) => {
+  if (mods.length === 0) return null;
+
+  return (
+    <section className="max-w-6xl mx-auto px-4 md:px-6 -mt-6 md:-mt-8 relative z-20">
+      <div className="rounded-3xl border border-white/10 bg-[#0d0d14]/95 backdrop-blur-xl p-5 md:p-6">
+        <div className="flex items-center justify-between mb-5">
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.3em] text-slate-500">CHIA SẺ MODS MIỄN PHÍ</p>
+            <h2 className="text-xl md:text-2xl font-black mt-1">MOD MỚI CẬP NHẬT</h2>
+          </div>
+          <Link href="/mods" className="text-[10px] md:text-xs text-[#ce5a67] font-black tracking-widest hover:underline uppercase">
+            Xem tất cả
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+          {mods.slice(0, 8).map((mod) => (
+            <Link
+              key={mod.slug}
+              href={`/mods/${mod.slug}`}
+              className="group rounded-2xl border border-white/10 bg-white/[0.02] overflow-hidden hover:border-[#ce5a67]/45 transition-colors"
+            >
+              <div className="relative h-32 bg-[#111]">
+                {mod.thumbnail ? (
+                  <img src={mod.thumbnail} alt={mod.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-[#1a1a1f] to-[#0a0a0a]" />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+                <span className="absolute top-2 left-2 px-2 py-1 rounded-full text-[9px] font-black tracking-widest bg-[#ce5a67]/20 text-[#ce5a67] border border-[#ce5a67]/30">
+                  {mod.tag}
+                </span>
+              </div>
+              <div className="p-3">
+                <p className="text-sm font-bold line-clamp-2 leading-snug group-hover:text-[#ce5a67] transition-colors">{mod.name}</p>
+                <p className="mt-2 text-[10px] text-slate-500">Cập nhật: {mod.updatedAt}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const MobileLatestGuidesSection = ({
+  guides,
+}: {
+  guides: Array<{ id: string; slug: string; title: string; createdAt: string; thumbnail?: string }>;
+}) => {
+  if (guides.length === 0) return null;
+
+  return (
+    <section className="xl:hidden max-w-6xl mx-auto px-4 md:px-6 mt-4">
+      <div className="rounded-2xl border border-white/10 bg-[#0d0d14]/90 p-4">
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-[10px] uppercase tracking-[0.28em] text-slate-300">BÀI VIẾT MỚI</p>
+          <Link href="/huong-dan" className="text-[10px] text-[#ce5a67] font-black tracking-widest hover:underline uppercase">
+            Xem tất cả
+          </Link>
+        </div>
+
+        <div className="flex gap-3 overflow-x-auto pb-1 snap-x snap-mandatory">
+          {guides.map((guide) => (
+            <Link
+              key={guide.id}
+              href={`/huong-dan/${guide.slug}`}
+              className="snap-start min-w-[210px] max-w-[210px] rounded-xl border border-white/10 bg-white/[0.03] overflow-hidden"
+            >
+              <div className="relative h-36 bg-[#13131b]">
+                {guide.thumbnail ? (
+                  <img src={guide.thumbnail} alt={guide.title} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-b from-[#ce5a67]/25 to-transparent" />
+                )}
+              </div>
+              <div className="p-3">
+                <p className="text-xs text-white line-clamp-2 leading-snug">{guide.title}</p>
+                <p className="mt-2 text-[10px] text-slate-500">{guide.createdAt}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
 
 // ========== GAME GRID ==========
 const GameGrid = () => {
@@ -110,12 +238,47 @@ const GameGrid = () => {
 };
 
 // ========== PAGE ==========
-export default function HomePage() {
+export default async function HomePage() {
+  const supabase = createClient();
+  const [guidesRes, dbModsRes] = await Promise.all([
+    supabase.from("guides").select("id,title,slug,created_at,thumbnail_url").order("created_at", { ascending: false }).limit(6),
+    supabase.from("mods").select("id,slug,name,updated_at,thumbnail,tags").order("created_at", { ascending: false }).limit(8),
+  ]);
+
+  const latestGuides: HomeGuide[] = guidesRes.data || [];
+  const heroGuides = latestGuides.slice(0, 6).map((guide) => ({
+    id: guide.id,
+    slug: guide.slug,
+    title: guide.title,
+    createdAt: new Date(guide.created_at).toLocaleDateString("vi-VN"),
+    thumbnail: resolveThumbnailSrc(guide.thumbnail_url) || "",
+  }));
+
+  const staticMods: HomeModCard[] = [...MODS, ...FACES].map((mod) => ({
+    slug: mod.slug,
+    name: mod.name,
+    updatedAt: mod.updatedAt,
+    thumbnail: mod.thumbnail || "",
+    tag: mod.tags?.[0] || "MOD",
+  }));
+
+  const dbMods: HomeModCard[] = ((dbModsRes.data || []) as HomeDbMod[]).map((mod) => ({
+    slug: mod.slug,
+    name: mod.name,
+    updatedAt: mod.updated_at,
+    thumbnail: resolveThumbnailSrc(mod.thumbnail) || "",
+    tag: mod.tags?.[0] || "MOD",
+  }));
+
+  const latestMods = [...dbMods, ...staticMods].sort(sortModsByUpdated);
+
   return (
     <main className="min-h-screen bg-[#080810] text-white">
       <Navbar />
       <div className="pt-14 md:pt-16">
-        <HeroSection />
+        <HeroSection latestGuides={heroGuides} />
+        <MobileLatestGuidesSection guides={heroGuides} />
+        <LatestModsSection mods={latestMods} />
         <section id="tinh-nang" className="-mt-10 relative z-10">
           <FeatureSlider />
         </section>
