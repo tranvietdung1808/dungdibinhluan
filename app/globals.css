@@ -95,6 +95,21 @@ body {
   z-index: 1;
 }
 
+/* ===== PROSE STYLES FOR TIPTAP CONTENT ===== */
+.prose p {
+  margin-bottom: 1.2em;
+}
+
+.prose p:empty::before {
+  content: '';
+  display: block;
+  min-height: 1.5em;
+}
+
+.prose p:empty {
+  min-height: 1.5em;
+}
+
 /* ===== FONT HELPERS ===== */
 @layer base {
   .font-sans {
