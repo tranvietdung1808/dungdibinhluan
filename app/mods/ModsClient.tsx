@@ -118,7 +118,7 @@ export default function ModsPage({ initialDbMods = [] }: ModsPageProps) {
   }, [activeTag, search, filtered]);
 
   const featured = ALL_MODS.find((m) => m.featured);
-  const gridItems = activeTag === "Tất cả" ? displayed.filter((m) => !m.featured) : displayed;
+  const gridItems = activeTag === "Tất cả" ? displayed.filter((m) => m.slug !== featured?.slug) : displayed;
 
   const totalPages = Math.ceil(gridItems.length / PAGE_SIZE);
   const paginated = gridItems.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -130,7 +130,6 @@ export default function ModsPage({ initialDbMods = [] }: ModsPageProps) {
       img.src = featured.thumbnail;
     }
 
-    // Preload first page images
     paginated.slice(0, 6).forEach((mod) => {
       if (mod.thumbnail) {
         const img = new Image();
@@ -160,10 +159,12 @@ export default function ModsPage({ initialDbMods = [] }: ModsPageProps) {
 
   return (
     <>
-      {/* Featured Mod */}
-      {featured && (
-        <section className="mb-12">
-          <FeaturedModCard mod={featured} />
+      {/* Featured Mod - centered and compact */}
+      {featured && activeTag === "Tất cả" && (
+        <section className="mb-10">
+          <div className="max-w-4xl mx-auto">
+            <FeaturedModCard mod={featured} />
+          </div>
         </section>
       )}
 

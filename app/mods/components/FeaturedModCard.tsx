@@ -36,7 +36,7 @@ export default function FeaturedModCard({ mod }: FeaturedModCardProps) {
           style={{ background: "linear-gradient(90deg, transparent 5%, rgba(206,90,103,0.7) 50%, transparent 95%)" }}
         />
 
-        <div className="relative h-60 md:h-84">
+        <div className="relative h-52 md:h-64">
           <Image
             src={mod.thumbnail}
             alt={mod.name}
@@ -56,12 +56,12 @@ export default function FeaturedModCard({ mod }: FeaturedModCardProps) {
           </div>
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 p-5 md:p-8">
+        <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6">
           <p className="text-[10px] uppercase tracking-[0.25em] text-[#ce5a67]/80 font-bold mb-1">Bản mod nổi bật</p>
-          <h2 className="text-xl md:text-3xl font-black leading-tight text-white group-hover:text-[#ce5a67] transition-colors duration-300">
+          <h2 className="text-lg md:text-2xl font-black leading-tight text-white group-hover:text-[#ce5a67] transition-colors duration-300">
             {mod.name}
           </h2>
-          <p className="text-slate-400 text-sm mt-2 max-w-lg leading-relaxed">{mod.description}</p>
+          <p className="text-slate-400 text-xs md:text-sm mt-2 max-w-lg leading-relaxed line-clamp-2">{mod.description}</p>
           <div className="flex items-center gap-3 mt-4 flex-wrap">
             {mod.tags.map((tag) => (
               <span
