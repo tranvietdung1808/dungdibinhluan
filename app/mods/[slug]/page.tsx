@@ -35,6 +35,25 @@ interface DbMod {
   created_at: string;
 }
 
+const API_BASE_CANDIDATES = [
+  process.env.NEXT_PUBLIC_BASE_URL,
+  "http://localhost:5000",
+  "http://localhost:3000",
+].filter(Boolean) as string[];
+
+async function fetchDbMod(slug: string, noStore = false): Promise<DbMod | null> {
+  for (const baseUrl of API_BASE_CANDIDATES) {
+    try {
+      const response = await fetch(`${baseUrl}/api/mods/${slug}`, noStore ? { cache: "no-store" } : undefined);
+      if (response.ok) return (await response.json()) as DbMod;
+    } catch {
+      // Try next base URL candidate
+    }
+  }
+
+  return null;
+}
+
 export async function generateStaticParams() {
   // Only generate static params for static mods
   // Database mods will be dynamically rendered
@@ -53,29 +72,24 @@ export async function generateMetadata({
   
   // If not found, try database
   if (!mod) {
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:5000'}/api/mods/${slug}`);
-      if (response.ok) {
-        const dbMod: DbMod = await response.json();
-        mod = {
-          slug: dbMod.slug,
-          name: dbMod.name,
-          author: dbMod.author,
-          category: dbMod.category,
-          version: dbMod.version,
-          updatedAt: dbMod.updated_at,
-          description: dbMod.description || '',
-          longDescription: dbMod.long_description || '',
-          thumbnail: dbMod.thumbnail || '',
-          downloadUrl: dbMod.download_url || '',
-          tags: dbMod.tags,
-          thumbnailOrientation: (dbMod.thumbnail_orientation as 'portrait' | 'landscape') || undefined,
-          featured: dbMod.featured,
-          videoId: dbMod.video_id || undefined,
-        } as unknown as Mod;
-      }
-    } catch (error) {
-      console.error('Error fetching mod from database:', error);
+    const dbMod = await fetchDbMod(slug);
+    if (dbMod) {
+      mod = {
+        slug: dbMod.slug,
+        name: dbMod.name,
+        author: dbMod.author,
+        category: dbMod.category,
+        version: dbMod.version,
+        updatedAt: dbMod.updated_at,
+        description: dbMod.description || '',
+        longDescription: dbMod.long_description || '',
+        thumbnail: dbMod.thumbnail || '',
+        downloadUrl: dbMod.download_url || '',
+        tags: dbMod.tags,
+        thumbnailOrientation: (dbMod.thumbnail_orientation as 'portrait' | 'landscape') || undefined,
+        featured: dbMod.featured,
+        videoId: dbMod.video_id || undefined,
+      } as unknown as Mod;
     }
   }
   
@@ -98,31 +112,24 @@ async function getMod(slug: string): Promise<Mod | null> {
   
   // If not found, try database
   if (!mod) {
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:5000'}/api/mods/${slug}`, {
-        cache: 'no-store', // Ensure fresh data
-      });
-      if (response.ok) {
-        const dbMod: DbMod = await response.json();
-        mod = {
-          slug: dbMod.slug,
-          name: dbMod.name,
-          author: dbMod.author,
-          category: dbMod.category,
-          version: dbMod.version,
-          updatedAt: dbMod.updated_at,
-          description: dbMod.description || '',
-          longDescription: dbMod.long_description || '',
-          thumbnail: dbMod.thumbnail || '',
-          downloadUrl: dbMod.download_url || '',
-          tags: dbMod.tags,
-          thumbnailOrientation: (dbMod.thumbnail_orientation as 'portrait' | 'landscape') || undefined,
-          featured: dbMod.featured,
-          videoId: dbMod.video_id || undefined,
-        } as unknown as Mod;
-      }
-    } catch (error) {
-      console.error('Error fetching mod from database:', error);
+    const dbMod = await fetchDbMod(slug, true);
+    if (dbMod) {
+      mod = {
+        slug: dbMod.slug,
+        name: dbMod.name,
+        author: dbMod.author,
+        category: dbMod.category,
+        version: dbMod.version,
+        updatedAt: dbMod.updated_at,
+        description: dbMod.description || '',
+        longDescription: dbMod.long_description || '',
+        thumbnail: dbMod.thumbnail || '',
+        downloadUrl: dbMod.download_url || '',
+        tags: dbMod.tags,
+        thumbnailOrientation: (dbMod.thumbnail_orientation as 'portrait' | 'landscape') || undefined,
+        featured: dbMod.featured,
+        videoId: dbMod.video_id || undefined,
+      } as unknown as Mod;
     }
   }
   
@@ -141,6 +148,7 @@ export default async function ModDetailPage({
 
   const isMixMods = mod.slug === "mix-mods-fc26";
   const isPortrait = mod.thumbnailOrientation !== "landscape";
+  const thumbnailSrc = mod.thumbnail?.trim() ? mod.thumbnail : null;
   
   // Luôn hiển thị ngày hôm nay cho MIX MODS
   const displayUpdatedAt = isMixMods 
@@ -202,13 +210,19 @@ export default async function ModDetailPage({
               {/* Ảnh */}
               <div className="w-full md:w-[360px] flex-shrink-0 flex justify-center">
                 <div className="relative w-[260px] md:w-[320px] aspect-[3/4] rounded-[28px] overflow-hidden border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.7)] bg-[#050507]">
-                  <Image
-                    src={mod.thumbnail}
-                    alt={mod.name}
-                    fill
-                    className="object-cover object-center"
-                    priority
-                  />
+                  {thumbnailSrc ? (
+                    <Image
+                      src={thumbnailSrc}
+                      alt={mod.name}
+                      fill
+                      className="object-cover object-center"
+                      priority
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-slate-500 text-xs">
+                      No thumbnail
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -283,13 +297,17 @@ export default async function ModDetailPage({
 
           {/* ===== HERO BANNER ===== */}
           <div className="relative rounded-3xl overflow-hidden border border-white/10 h-64 md:h-[420px]">
-            <Image
-              src={mod.thumbnail}
-              alt={mod.name}
-              fill
-              className="object-cover opacity-50"
-              priority
-            />
+            {thumbnailSrc ? (
+              <Image
+                src={thumbnailSrc}
+                alt={mod.name}
+                fill
+                className="object-cover opacity-50"
+                priority
+              />
+            ) : (
+              <div className="absolute inset-0 bg-gradient-to-br from-[#1a1a1f] to-[#0a0a0a]" />
+            )}
             {/* Gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/40 to-transparent" />
             <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a]/60 via-transparent to-transparent" />
@@ -405,13 +423,17 @@ export default async function ModDetailPage({
 
           {/* Thumbnail hero */}
           <div className="relative rounded-3xl overflow-hidden border border-white/10 h-56 md:h-96">
-            <Image
-              src={mod.thumbnail}
-              alt={mod.name}
-              fill
-              className="opacity-70 object-cover object-center"
-              priority
-            />
+            {thumbnailSrc ? (
+              <Image
+                src={thumbnailSrc}
+                alt={mod.name}
+                fill
+                className="opacity-70 object-cover object-center"
+                priority
+              />
+            ) : (
+              <div className="absolute inset-0 bg-gradient-to-br from-[#1a1a1f] to-[#0a0a0a]" />
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
             <div className="absolute bottom-5 left-5 right-5 flex items-end justify-between gap-4 flex-wrap">
               <div>
