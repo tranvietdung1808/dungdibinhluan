@@ -52,7 +52,7 @@ export default async function GuideDetailPage({ params }: { params: Promise<{ sl
 
     return (
       <div className="min-h-screen bg-[#0d0d0f] text-white">
-        <div className="mx-auto max-w-[960px] px-6 pb-16">
+        <div className="mx-auto max-w-[900px] px-4 sm:px-6 pb-16">
           {/* 1. Breadcrumb */}
           <nav
             className="flex flex-wrap items-center gap-x-2 gap-y-1 pt-8 text-sm text-[#888]"
@@ -80,68 +80,81 @@ export default async function GuideDetailPage({ params }: { params: Promise<{ sl
 
           {/* 3. Tiêu đề */}
           <h1
-            className="mb-3 mt-5 font-bold leading-[1.2] text-white"
-            style={{ fontSize: 'clamp(28px, 4vw, 42px)' }}
+            className="mb-4 mt-6 font-bold leading-tight text-white"
+            style={{ fontSize: 'clamp(32px, 5vw, 48px)' }}
           >
             {guideData.title}
           </h1>
 
           {/* 4. Meta */}
-          <div className="mb-8 flex flex-wrap items-center gap-x-2 gap-y-1 text-[14px] text-[#888]">
+          <div className="mb-8 flex flex-wrap items-center gap-x-3 gap-y-1 text-[14px] text-[#888]">
             {guideData.profiles?.avatar_url ? (
               <img
                 src={guideData.profiles.avatar_url}
                 alt=""
-                className="h-6 w-6 shrink-0 rounded-full object-cover"
+                className="h-7 w-7 shrink-0 rounded-full object-cover"
               />
-            ) : null}
-            <span className="text-[#aaa]">{guideData.profiles?.username || 'Admin'}</span>
+            ) : (
+              <div className="h-7 w-7 shrink-0 rounded-full bg-[#333] flex items-center justify-center">
+                <span className="text-xs text-[#aaa]">A</span>
+              </div>
+            )}
+            <span className="text-[#aaa] font-medium">{guideData.profiles?.username || 'Admin'}</span>
             <span className="text-[#555]">•</span>
-            <span>{created}</span>
+            <time className="text-[#aaa]">{created}</time>
           </div>
 
           {/* 5. Ảnh thumbnail */}
-          {thumbnailSrc ? (
-            <div className="w-full overflow-hidden rounded-[12px]">
+          {thumbnailSrc && (
+            <div className="mb-8 w-full overflow-hidden rounded-[16px] shadow-lg">
               <img
                 src={thumbnailSrc}
-                alt=""
-                className="block w-full object-cover"
+                alt={guideData.title}
+                className="block w-full object-cover transition-transform hover:scale-105 duration-300"
               />
             </div>
-          ) : null}
+          )}
 
           {/* 6. Nội dung */}
-          <div
-            className="prose prose-invert mt-10 max-w-none text-[17px] leading-[1.95] tracking-[0.01em] text-[#e0e0e0]
-              prose-headings:scroll-mt-20 prose-headings:leading-snug
-              prose-h1:mt-[2em] prose-h1:mb-2 prose-h1:border-b prose-h1:border-[#222] prose-h1:pb-2 prose-h1:text-[1.25em] prose-h1:font-bold prose-h1:text-white
-              prose-h2:mt-[2em] prose-h2:mb-2 prose-h2:border-b prose-h2:border-[#222] prose-h2:pb-2 prose-h2:font-bold prose-h2:text-white
-              prose-h3:mt-6 prose-h3:mb-2 prose-h3:font-semibold prose-h3:text-[#ddd]
-              prose-p:mb-[1.35em] prose-p:leading-[1.95] prose-p:text-[#e0e0e0]
-              prose-strong:font-semibold prose-strong:text-white
-              prose-a:text-[#e8535a] prose-a:no-underline hover:prose-a:underline
-              prose-ul:my-4 prose-ul:list-disc prose-ul:pl-6 prose-ul:text-[#e0e0e0]
-              prose-ol:my-4 prose-ol:list-decimal prose-ol:pl-6 prose-ol:text-[#e0e0e0]
-              prose-li:my-2 prose-li:leading-[1.95] prose-li:text-[#e0e0e0]
-              prose-blockquote:my-4 prose-blockquote:border-l-[3px] prose-blockquote:border-solid prose-blockquote:border-[#e8535a] prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:leading-[1.95] prose-blockquote:text-[#aaa]
-              prose-code:rounded prose-code:bg-[#1a1a2e] prose-code:px-1.5 prose-code:py-0.5 prose-code:text-[0.9em] prose-code:text-[#e0e0e0]
-              prose-pre:rounded-lg prose-pre:border prose-pre:border-[#222] prose-pre:bg-[#1a1a2e] prose-pre:text-[#e0e0e0]
-              prose-img:my-6 prose-img:max-w-full prose-img:rounded-lg
-              prose-hr:border-[#222]
-            "
-            dangerouslySetInnerHTML={{ __html: contentHtml }}
-          />
+          <div className="prose prose-lg prose-invert max-w-none text-[#e0e0e0]
+            prose-headings:scroll-mt-24 prose-headings:font-bold prose-headings:text-white
+            prose-h1:text-3xl prose-h1:mt-12 prose-h1:mb-6 prose-h1:border-b prose-h1:border-[#333] prose-h1:pb-4
+            prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-5 prose-h2:border-b prose-h2:border-[#333] prose-h2:pb-3
+            prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-4 prose-h3:text-[#ddd]
+            prose-p:mb-6 prose-p:leading-relaxed prose-p:text-[#e0e0e0]
+            prose-strong:text-white prose-strong:font-semibold
+            prose-a:text-[#e8535a] prose-a:font-medium prose-a:no-underline hover:prose-a:underline hover:prose-a:text-[#ff6b6b]
+            prose-ul:my-6 prose-ul:list-disc prose-ul:space-y-2 prose-ul:pl-6 prose-ul:text-[#e0e0e0]
+            prose-ol:my-6 prose-ol:list-decimal prose-ol:space-y-2 prose-ol:pl-6 prose-ol:text-[#e0e0e0]
+            prose-li:mb-2 prose-li:leading-relaxed prose-li:text-[#e0e0e0]
+            prose-blockquote:my-6 prose-blockquote:border-l-4 prose-blockquote:border-solid prose-blockquote:border-[#e8535a] prose-blockquote:pl-6 prose-blockquote:italic prose-blockquote:leading-relaxed prose-blockquote:text-[#bbb]
+            prose-code:rounded prose-code:bg-[#1a1a2e] prose-code:px-2 prose-code:py-1 prose-code:text-sm prose-code:text-[#e0e0e0] prose-code:font-mono
+            prose-pre:rounded-lg prose-pre:border prose-pre:border-[#333] prose-pre:bg-[#1a1a2e] prose-pre:p-4 prose-pre:overflow-x-auto prose-pre:text-[#e0e0e0]
+            prose-img:my-8 prose-img:max-w-full prose-img:rounded-lg prose-img:shadow-md
+            prose-hr:border-[#333] prose-hr:my-12
+            prose-table:border prose-table:border-[#333] prose-table:text-[#e0e0e0]
+            prose-thead:bg-[#1a1a2e] prose-thead:text-white
+            prose-th:border prose-th:border-[#333] prose-th:px-4 prose-th:py-3 prose-th:font-semibold prose-th:text-left
+            prose-td:border prose-td:border-[#333] prose-td:px-4 prose-td:py-3
+          ">
+            <div dangerouslySetInnerHTML={{ __html: contentHtml }} />
+          </div>
 
           {/* 7. Footer */}
-          <div className="mt-14 border-t border-[#222] pt-10">
-            <Link
-              href="/huong-dan"
-              className="inline-flex items-center gap-2 rounded-lg border border-[#333] px-5 py-2.5 text-sm font-medium text-[#e0e0e0] transition-colors hover:border-[#e8535a] hover:bg-[#e8535a] hover:text-white"
-            >
-              <span aria-hidden>←</span>
-              Quay lại danh sách
-            </Link>
+          <div className="mt-16 border-t border-[#222] pt-8">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <Link
+                href="/huong-dan"
+                className="inline-flex items-center gap-2 rounded-lg border border-[#333] px-5 py-3 text-sm font-medium text-[#e0e0e0] transition-all hover:border-[#e8535a] hover:bg-[#e8535a] hover:text-white hover:shadow-lg"
+              >
+                <span aria-hidden>←</span>
+                Quay lại danh sách
+              </Link>
+              
+              <div className="text-sm text-[#666]">
+                Cảm ơn đã đọc bài viết!
+              </div>
+            </div>
           </div>
         </div>
       </div>
