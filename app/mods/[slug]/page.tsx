@@ -13,10 +13,32 @@ const TAG_COLORS: Record<string, string> = {
   "Cơ chế game": "#ce5a67",
 };
 
-const ALL_MODS = [...FACES, ...MODS];
+const ALL_STATIC_MODS = [...FACES, ...MODS];
+
+// Database mod interface
+interface DbMod {
+  id: string;
+  slug: string;
+  name: string;
+  author: string;
+  category: string;
+  version: string;
+  updated_at: string;
+  description: string | null;
+  long_description: string | null;
+  thumbnail: string | null;
+  download_url: string | null;
+  tags: string[];
+  thumbnail_orientation: string;
+  featured: boolean;
+  video_id: string | null;
+  created_at: string;
+}
 
 export async function generateStaticParams() {
-  return ALL_MODS.map((mod) => ({ slug: mod.slug }));
+  // Only generate static params for static mods
+  // Database mods will be dynamically rendered
+  return ALL_STATIC_MODS.map((mod) => ({ slug: mod.slug }));
 }
 
 export async function generateMetadata({
@@ -25,7 +47,38 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const mod = ALL_MODS.find((m) => m.slug === slug);
+  
+  // Try to find in static mods first
+  let mod = ALL_STATIC_MODS.find((m) => m.slug === slug);
+  
+  // If not found, try database
+  if (!mod) {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:5000'}/api/mods/${slug}`);
+      if (response.ok) {
+        const dbMod: DbMod = await response.json();
+        mod = {
+          slug: dbMod.slug,
+          name: dbMod.name,
+          author: dbMod.author,
+          category: dbMod.category,
+          version: dbMod.version,
+          updatedAt: dbMod.updated_at,
+          description: dbMod.description || '',
+          longDescription: dbMod.long_description || '',
+          thumbnail: dbMod.thumbnail || '',
+          downloadUrl: dbMod.download_url || '',
+          tags: dbMod.tags,
+          thumbnailOrientation: (dbMod.thumbnail_orientation as 'portrait' | 'landscape') || undefined,
+          featured: dbMod.featured,
+          videoId: dbMod.video_id || undefined,
+        } as Mod;
+      }
+    } catch (error) {
+      console.error('Error fetching mod from database:', error);
+    }
+  }
+  
   if (!mod) return { title: "Mod không tồn tại" };
 
   return {
@@ -39,13 +92,51 @@ export async function generateMetadata({
   };
 }
 
+async function getMod(slug: string): Promise<Mod | null> {
+  // Try to find in static mods first
+  let mod = ALL_STATIC_MODS.find((m) => m.slug === slug);
+  
+  // If not found, try database
+  if (!mod) {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:5000'}/api/mods/${slug}`, {
+        cache: 'no-store', // Ensure fresh data
+      });
+      if (response.ok) {
+        const dbMod: DbMod = await response.json();
+        mod = {
+          slug: dbMod.slug,
+          name: dbMod.name,
+          author: dbMod.author,
+          category: dbMod.category,
+          version: dbMod.version,
+          updatedAt: dbMod.updated_at,
+          description: dbMod.description || '',
+          longDescription: dbMod.long_description || '',
+          thumbnail: dbMod.thumbnail || '',
+          downloadUrl: dbMod.download_url || '',
+          tags: dbMod.tags,
+          thumbnailOrientation: (dbMod.thumbnail_orientation as 'portrait' | 'landscape') || undefined,
+          featured: dbMod.featured,
+          videoId: dbMod.video_id || undefined,
+        } as Mod;
+      }
+    } catch (error) {
+      console.error('Error fetching mod from database:', error);
+    }
+  }
+  
+  return mod || null;
+}
+
 export default async function ModDetailPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const mod = ALL_MODS.find((m) => m.slug === slug) as Mod;
+  const mod = await getMod(slug);
+  
   if (!mod) return notFound();
 
   const isMixMods = mod.slug === "mix-mods-fc26";

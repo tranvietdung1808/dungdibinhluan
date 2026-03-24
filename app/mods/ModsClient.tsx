@@ -9,13 +9,32 @@ import SearchBar from "./components/SearchBar";
 import ModCard from "./components/ModCard";
 import Pagination from "./components/Pagination";
 
+interface Mod {
+  id: string;
+  slug: string;
+  name: string;
+  author: string;
+  category: string;
+  version: string;
+  updated_at: string;
+  description: string | null;
+  long_description: string | null;
+  thumbnail: string | null;
+  download_url: string | null;
+  tags: string[];
+  thumbnail_orientation: string;
+  featured: boolean;
+  video_id: string | null;
+  created_at: string;
+}
+
 const parseDate = (str: string) => {
   const [day, month, year] = str.split("/").map(Number);
   return new Date(year, month - 1, day).getTime();
 };
 
 const SOURCE = [...MODS, ...FACES];
-const ALL_MODS = [...SOURCE].sort((a, b) => {
+const ALL_STATIC_MODS = [...SOURCE].sort((a, b) => {
   const dateDiff = parseDate(b.updatedAt) - parseDate(a.updatedAt);
   if (dateDiff !== 0) return dateDiff;
   return SOURCE.indexOf(b) - SOURCE.indexOf(a);
@@ -27,12 +46,62 @@ export default function ModsPage() {
   const [activeTag, setActiveTag] = useState("Tất cả");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [dbMods, setDbMods] = useState<Mod[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch mods from database
+  useEffect(() => {
+    fetchMods();
+  }, []);
+
+  const fetchMods = async () => {
+    try {
+      const response = await fetch('/api/mods');
+      if (response.ok) {
+        const data = await response.json();
+        setDbMods(data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching mods:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Convert DB mods to static format
+  const convertedDbMods = useMemo(() => {
+    return dbMods.map(mod => ({
+      slug: mod.slug,
+      name: mod.name,
+      author: mod.author,
+      category: mod.category,
+      version: mod.version,
+      updatedAt: mod.updated_at,
+      description: mod.description || '',
+      longDescription: mod.long_description || '',
+      thumbnail: mod.thumbnail || '',
+      downloadUrl: mod.download_url || '',
+      tags: mod.tags,
+      thumbnailOrientation: mod.thumbnail_orientation as 'portrait' | 'landscape',
+      featured: mod.featured,
+      videoId: mod.video_id || undefined,
+    }));
+  }, [dbMods]);
+
+  // Combine static and database mods
+  const ALL_MODS = useMemo(() => {
+    return [...ALL_STATIC_MODS, ...convertedDbMods].sort((a, b) => {
+      const dateDiff = parseDate(b.updatedAt) - parseDate(a.updatedAt);
+      if (dateDiff !== 0) return dateDiff;
+      return 0;
+    });
+  }, [convertedDbMods]);
 
   const filtered = useMemo(() => {
     return activeTag === "Tất cả"
       ? ALL_MODS
       : ALL_MODS.filter((m) => m.tags.includes(activeTag));
-  }, [activeTag]);
+  }, [activeTag, ALL_MODS]);
 
   const displayed = useMemo(() => {
     if (activeTag === "Faces" && search.trim()) {
@@ -77,102 +146,80 @@ export default function ModsPage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  return (
-    <main className="min-h-screen bg-[#080810] text-white relative overflow-hidden">
-
-      {/* ── Static gradient background ── */}
-
-      {/* Glow đỏ góc trên trái */}
-      <div
-        className="absolute pointer-events-none"
-        style={{
-          left: "-8%", top: "-8%",
-          width: "52%", height: "52%",
-          background: "radial-gradient(ellipse, rgba(206,90,103,0.20) 0%, rgba(206,90,103,0.05) 50%, transparent 72%)",
-          borderRadius: "50%",
-          filter: "blur(50px)",
-          zIndex: 0,
-        }}
-      />
-      {/* Glow tím góc dưới phải */}
-      <div
-        className="absolute pointer-events-none"
-        style={{
-          right: "-4%", bottom: "5%",
-          width: "46%", height: "46%",
-          background: "radial-gradient(ellipse, rgba(90,60,200,0.14) 0%, transparent 65%)",
-          borderRadius: "50%",
-          filter: "blur(60px)",
-          zIndex: 0,
-        }}
-      />
-      {/* Đường accent đỏ top */}
-      <div
-        className="absolute top-0 left-0 right-0 h-[2px] pointer-events-none"
-        style={{ background: "linear-gradient(90deg, transparent 5%, rgba(206,90,103,0.50) 50%, transparent 95%)", zIndex: 1 }}
-      />
-
-      {/* Header breadcrumb */}
-      <div className="relative z-10 border-b border-white/5 px-4 md:px-6 py-4 flex items-center gap-3">
-        <Link href="/" className="text-slate-500 hover:text-white transition-colors text-sm">
-          ← Trang chủ
-        </Link>
-        <span className="text-slate-700">/</span>
-        <span className="text-sm font-bold tracking-widest uppercase text-white">Mod Hub</span>
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#050507] text-white flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-[#ce5a67] border-t-transparent rounded-full animate-spin"></div>
       </div>
+    );
+  }
 
-      <div className="relative z-10 max-w-6xl mx-auto px-4 md:px-6 py-8 md:py-12 space-y-8">
-
-        {/* Page title */}
-        <div className="space-y-1">
-          <h1 className="text-2xl md:text-4xl font-black tracking-tight">
-            🎮 MOD <span className="text-[#ce5a67]">HUB</span>
-          </h1>
-          <p className="text-slate-500 text-sm">Các bản mod chất lượng cao được tuyển chọn bởi DungDiBinhLuan</p>
-        </div>
-
-        {/* Featured mod — hiện ở mọi trang */}
-        {featured && activeTag === "Tất cả" && (
+  return (
+    <>
+      {/* Featured Mod */}
+      {featured && (
+        <section className="mb-12">
           <FeaturedModCard mod={featured} />
-        )}
+        </section>
+      )}
 
-        {/* Filter tags */}
-        <FilterTags 
-          activeTag={activeTag} 
-          onTagChange={handleTagChange} 
-          itemCount={gridItems.length} 
-        />
-
-        {/* Search bar — chỉ hiện khi tab Faces */}
+      {/* Search and Filter */}
+      <div className="mb-8 space-y-6">
         {activeTag === "Faces" && (
-          <SearchBar 
-            value={search} 
+          <SearchBar
+            value={search}
             onChange={(value) => { setSearch(value); setPage(1); }}
             onClear={() => { setSearch(""); setPage(1); }}
           />
         )}
-
-        {/* Empty state */}
-        {gridItems.length === 0 && (
-          <p className="text-slate-600 text-sm py-10 text-center">
-            {search ? `Không tìm thấy faces nào với từ khoá "${search}"` : "Chưa có mod nào trong danh mục này."}
-          </p>
-        )}
-
-        {/* Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
-          {paginated.map((mod) => (
-            <ModCard key={mod.slug} mod={mod} />
-          ))}
-        </div>
-
-        {/* Pagination */}
-        <Pagination 
-          currentPage={page} 
-          totalPages={totalPages} 
-          onPageChange={handlePageChange} 
+        <FilterTags
+          activeTag={activeTag}
+          onTagChange={handleTagChange}
+          itemCount={gridItems.length}
         />
       </div>
-    </main>
+
+      {/* Results Count */}
+      <div className="mb-6 text-slate-400">
+        {activeTag === "Tất cả" ? (
+          <span>Tất cả mods ({ALL_MODS.length})</span>
+        ) : (
+          <span>
+            {activeTag} ({displayed.length})
+            {activeTag === "Faces" && search.trim() && (
+              <span className="ml-2">cho "{search}"</span>
+            )}
+          </span>
+        )}
+      </div>
+
+      {/* Grid */}
+      {paginated.length > 0 ? (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
+            {paginated.map((mod) => (
+              <ModCard key={mod.slug} mod={mod} />
+            ))}
+          </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <Pagination
+              currentPage={page}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          )}
+        </>
+      ) : (
+        <div className="text-center py-12">
+          <p className="text-slate-400">
+            {search.trim()
+              ? `Không tìm thấy mod nào cho "${search}"`
+              : `Không có mod nào trong danh mục ${activeTag}`}
+          </p>
+        </div>
+      )}
+    </>
   );
 }

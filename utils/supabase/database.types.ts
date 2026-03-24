@@ -53,6 +53,62 @@ export type Database = {
           updated_at?: string
         }
       }
+      mods: {
+        Row: {
+          id: string
+          slug: string
+          name: string
+          author: string
+          category: string
+          version: string
+          updated_at: string
+          description: string | null
+          long_description: string | null
+          thumbnail: string | null
+          download_url: string | null
+          tags: string[]
+          thumbnail_orientation: string
+          featured: boolean
+          video_id: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          slug: string
+          name: string
+          author: string
+          category?: string
+          version: string
+          updated_at: string
+          description?: string | null
+          long_description?: string | null
+          thumbnail?: string | null
+          download_url?: string | null
+          tags?: string[]
+          thumbnail_orientation?: string
+          featured?: boolean
+          video_id?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          slug?: string
+          name?: string
+          author?: string
+          category?: string
+          version?: string
+          updated_at?: string
+          description?: string | null
+          long_description?: string | null
+          thumbnail?: string | null
+          download_url?: string | null
+          tags?: string[]
+          thumbnail_orientation?: string
+          featured?: boolean
+          video_id?: string | null
+          created_at?: string
+        }
+      }
     }
   }
 }

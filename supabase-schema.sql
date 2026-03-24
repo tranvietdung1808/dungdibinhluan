@@ -75,3 +75,36 @@ CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW
   EXECUTE FUNCTION public.handle_new_user();
+
+-- Create mods table
+CREATE TABLE IF NOT EXISTS public.mods (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  slug text UNIQUE NOT NULL,
+  name text NOT NULL,
+  author text NOT NULL,
+  category text DEFAULT 'Faces',
+  version text NOT NULL,
+  updated_at text NOT NULL,
+  description text,
+  long_description text,
+  thumbnail text,
+  download_url text,
+  tags text[] DEFAULT '{}',
+  thumbnail_orientation text DEFAULT 'portrait',
+  featured boolean DEFAULT false,
+  video_id text,
+  created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Create indexes for mods table
+CREATE INDEX IF NOT EXISTS mods_slug_idx ON public.mods(slug);
+CREATE INDEX IF NOT EXISTS mods_category_idx ON public.mods(category);
+CREATE INDEX IF NOT EXISTS mods_featured_idx ON public.mods(featured);
+CREATE INDEX IF NOT EXISTS mods_created_at_idx ON public.mods(created_at DESC);
+
+-- Enable RLS for mods table
+ALTER TABLE public.mods ENABLE ROW LEVEL SECURITY;
+
+-- Mods policies (service role bypasses RLS, so these are for anon/authenticated access)
+CREATE POLICY "Anyone can view mods" ON public.mods FOR SELECT USING (true);
+CREATE POLICY "Service role can manage mods" ON public.mods FOR ALL USING (true);
