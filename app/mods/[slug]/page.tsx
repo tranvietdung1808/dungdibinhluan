@@ -72,7 +72,7 @@ export async function generateMetadata({
           thumbnailOrientation: (dbMod.thumbnail_orientation as 'portrait' | 'landscape') || undefined,
           featured: dbMod.featured,
           videoId: dbMod.video_id || undefined,
-        } as Mod;
+        } as unknown as Mod;
       }
     } catch (error) {
       console.error('Error fetching mod from database:', error);
@@ -119,14 +119,14 @@ async function getMod(slug: string): Promise<Mod | null> {
           thumbnailOrientation: (dbMod.thumbnail_orientation as 'portrait' | 'landscape') || undefined,
           featured: dbMod.featured,
           videoId: dbMod.video_id || undefined,
-        } as Mod;
+        } as unknown as Mod;
       }
     } catch (error) {
       console.error('Error fetching mod from database:', error);
     }
   }
   
-  return mod || null;
+  return (mod || null) as Mod | null;
 }
 
 export default async function ModDetailPage({
