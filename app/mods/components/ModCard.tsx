@@ -25,7 +25,7 @@ interface ModCardProps {
 }
 
 export default function ModCard({ mod }: ModCardProps) {
-  const isPortrait = mod.thumbnailOrientation === "portrait";
+  const isPortrait = mod.thumbnailOrientation !== "landscape";
   
   return (
     <Link href={`/mods/${mod.slug}`}>

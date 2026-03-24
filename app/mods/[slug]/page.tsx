@@ -49,7 +49,7 @@ export default async function ModDetailPage({
   if (!mod) return notFound();
 
   const isMixMods = mod.slug === "mix-mods-fc26";
-  const isPortrait = mod.thumbnailOrientation === "portrait";
+  const isPortrait = mod.thumbnailOrientation !== "landscape";
   
   // Luôn hiển thị ngày hôm nay cho MIX MODS
   const displayUpdatedAt = isMixMods 
