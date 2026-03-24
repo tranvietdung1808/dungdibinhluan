@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
+import { createClient } from '@/utils/supabase/server'
 
 export async function GET() {
   try {
-    const { data, error } = await supabaseAdmin
+    const supabase = createClient()
+    
+    const { data, error } = await supabase
       .from('mods')
       .select('*')
       .order('created_at', { ascending: false })
