@@ -132,6 +132,17 @@ export default function AdminDashboard() {
     }
   }
 
+  const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const url = e.target.value
+    handleChange('thumbnail', url)
+    // Only set preview if it's a valid URL and no file is uploaded
+    if (url && !blobUrlRef.current) {
+      setThumbnailPreview(url)
+    } else if (!url && !blobUrlRef.current) {
+      setThumbnailPreview(null)
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -448,6 +459,7 @@ export default function AdminDashboard() {
                 Thumbnail
               </label>
               <div className="space-y-4">
+                {/* File upload */}
                 <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                   <label className="px-4 py-2 bg-[#111111] border border-white/10 text-white text-sm rounded-lg hover:bg-white/10 transition-colors cursor-pointer text-center">
                     {isUploadingThumbnail ? 'Đang upload...' : 'Chọn ảnh thumbnail'}
@@ -459,17 +471,27 @@ export default function AdminDashboard() {
                       className="hidden"
                     />
                   </label>
-                  {thumbnailPreview && (
+                  {blobUrlRef.current && (
                     <button
                       type="button"
                       onClick={handleClearThumbnail}
                       className="px-3 py-1 bg-red-500/20 text-red-400 text-sm rounded-lg hover:bg-red-500/30 transition-colors"
                     >
-                      Xóa
+                      Xóa ảnh upload
                     </button>
                   )}
                 </div>
 
+                {/* URL input - always show */}
+                <input
+                  type="text"
+                  value={form.thumbnail}
+                  onChange={handleUrlChange}
+                  className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67] transition-colors"
+                  placeholder="/mods/thumbnail.jpg hoặc URL"
+                />
+
+                {/* Preview */}
                 {thumbnailPreview && (
                   <div className="relative w-full aspect-video bg-[#111111] border border-white/10 rounded-lg overflow-hidden">
                     <img
@@ -478,19 +500,6 @@ export default function AdminDashboard() {
                       className="w-full h-full object-cover"
                     />
                   </div>
-                )}
-
-                {!thumbnailPreview && (
-                  <input
-                    type="url"
-                    value={form.thumbnail}
-                    onChange={(e) => {
-                      handleChange('thumbnail', e.target.value)
-                      setThumbnailPreview(e.target.value || null)
-                    }}
-                    className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67] transition-colors"
-                    placeholder="/mods/thumbnail.jpg hoặc URL"
-                  />
                 )}
               </div>
             </div>
