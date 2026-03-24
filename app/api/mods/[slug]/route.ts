@@ -7,6 +7,15 @@ export async function GET(
 ) {
   try {
     const { slug } = await params
+    
+    // Check environment variables
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      return NextResponse.json(
+        { error: 'Server configuration error: Missing Supabase environment variables' },
+        { status: 500 }
+      )
+    }
+    
     const supabase = createClient()
     
     const { data, error } = await supabase
@@ -15,7 +24,15 @@ export async function GET(
       .eq('slug', slug)
       .single()
 
-    if (error || !data) {
+    if (error) {
+      console.error('Supabase error:', error)
+      return NextResponse.json(
+        { error: `Database error: ${error.message}` },
+        { status: 500 }
+      )
+    }
+
+    if (!data) {
       return NextResponse.json(
         { error: 'Mod not found' },
         { status: 404 }
@@ -24,8 +41,9 @@ export async function GET(
 
     return NextResponse.json(data)
   } catch (error) {
+    console.error('Unexpected error:', error)
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: `Internal server error: ${error instanceof Error ? error.message : 'Unknown error'}` },
       { status: 500 }
     )
   }
