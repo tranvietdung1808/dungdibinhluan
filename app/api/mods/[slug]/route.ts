@@ -1,30 +1,19 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
+import { NextRequest } from 'next/server'
+import { getModBySlug } from '@/lib/server/mods'
+import { errorResponse, runRoute, successResponse } from '@/lib/server/api-response'
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
-  try {
+  return runRoute(async () => {
     const { slug } = await params
-    const { data, error } = await supabaseAdmin
-      .from('mods')
-      .select('*')
-      .eq('slug', slug)
-      .single()
+    const { data, error } = await getModBySlug(slug)
 
     if (error || !data) {
-      return NextResponse.json(
-        { error: 'Mod not found' },
-        { status: 404 }
-      )
+      return errorResponse('Mod not found', 404)
     }
 
-    return NextResponse.json(data)
-  } catch (error) {
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
-  }
+    return successResponse(data)
+  })
 }

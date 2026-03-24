@@ -1,25 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
+import { listMods } from '@/lib/server/mods'
+import { errorResponse, runRoute, successResponse } from '@/lib/server/api-response'
 
 export async function GET() {
-  try {
-    const { data, error } = await supabaseAdmin
-      .from('mods')
-      .select('*')
-      .order('created_at', { ascending: false })
+  return runRoute(async () => {
+    const { data, error } = await listMods()
 
     if (error) {
-      return NextResponse.json(
-        { error: 'Failed to fetch mods' },
-        { status: 500 }
-      )
+      return errorResponse('Failed to fetch mods', 500)
     }
 
-    return NextResponse.json(data || [])
-  } catch (error) {
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
-  }
+    return successResponse(data || [])
+  })
 }

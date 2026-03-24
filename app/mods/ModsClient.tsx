@@ -1,6 +1,5 @@
 "use client";
 import { useState, useMemo, useEffect } from "react";
-import Link from "next/link";
 import { MODS } from "../data/mods";
 import { FACES } from "../data/faces";
 import FeaturedModCard from "./components/FeaturedModCard";
@@ -192,7 +191,7 @@ export default function ModsPage({ initialDbMods = [] }: ModsPageProps) {
           <span>
             {activeTag} ({displayed.length})
             {activeTag === "Faces" && search.trim() && (
-              <span className="ml-2">cho "{search}"</span>
+              <span className="ml-2">cho &quot;{search}&quot;</span>
             )}
           </span>
         )}

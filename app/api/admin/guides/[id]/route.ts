@@ -1,138 +1,91 @@
-import { createClient } from '@/utils/supabase/server'
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
+import {
+  deleteGuide,
+  findGuideBySlugExcludingId,
+  getGuideById,
+  missingRequiredGuideFields,
+  normalizeGuideUpdatePayload,
+  type GuidePayload,
+  updateGuide,
+} from '@/lib/server/guides'
+import { errorResponse, parseJsonBody, runRoute, successResponse } from '@/lib/server/api-response'
 
-// GET - Get single guide by ID
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  try {
+  return runRoute(async () => {
     const { id } = await params
-    const supabase = createClient()
+    const { data, error } = await getGuideById(id)
 
-    const { data, error } = await supabase
-      .from('guides')
-      .select('*')
-      .eq('id', id)
-      .single()
-
-    if (error) {
-      return NextResponse.json(
-        { error: 'Guide not found' },
-        { status: 404 }
-      )
+    if (error || !data) {
+      return errorResponse('Guide not found', 404)
     }
 
-    return NextResponse.json({ data })
-  } catch (error) {
-    console.error('Error fetching guide:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
-  }
+    return successResponse({ data })
+  })
 }
 
-// PUT - Update guide
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  try {
+  return runRoute(async () => {
     const { id } = await params
-    const { title, slug, content, thumbnail_url } = await request.json()
-
-    if (!title || !slug || !content) {
-      return NextResponse.json(
-        { error: 'Title, slug, and content are required' },
-        { status: 400 }
-      )
+    const body = await parseJsonBody<GuidePayload>(request)
+    if (!body) {
+      return errorResponse('Invalid request body', 400)
     }
 
-    const supabase = createClient()
-
-    // Check if new slug conflicts with other guides
-    const { data: existingGuide } = await supabase
-      .from('guides')
-      .select('id')
-      .eq('slug', slug)
-      .neq('id', id)
-      .single()
-
-    if (existingGuide) {
-      return NextResponse.json(
-        { error: 'Slug already exists for another guide' },
-        { status: 409 }
-      )
+    const missingFields = missingRequiredGuideFields(body)
+    if (missingFields.length > 0) {
+      return errorResponse('Title, slug, and content are required', 400)
     }
 
-    // Update guide
-    const { data, error } = await supabase
-      .from('guides')
-      .update({
-        title,
-        slug,
-        content,
-        thumbnail_url,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', id)
-      .select()
-
-    if (error) {
-      console.error('Error updating guide:', error)
-      return NextResponse.json(
-        { error: 'Failed to update guide: ' + error.message },
-        { status: 500 }
-      )
-    }
-
-    const row = Array.isArray(data) ? data[0] : data
-    if (!row) {
-      return NextResponse.json(
-        { error: 'Guide not found or update returned no row' },
-        { status: 404 }
-      )
-    }
-
-    return NextResponse.json({ data: row })
-  } catch (error) {
-    console.error('Error in PUT /api/admin/guides/[id]:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
+    const { data: existingGuide, error: existingError } = await findGuideBySlugExcludingId(
+      body.slug!,
+      id
     )
-  }
+
+    if (existingError) {
+      return errorResponse('Failed to verify slug', 500)
+    }
+    if (existingGuide) {
+      return errorResponse('Slug already exists for another guide', 409)
+    }
+
+    const payload = normalizeGuideUpdatePayload(body)
+    const { data, error } = await updateGuide(id, payload)
+    if (error) {
+      return errorResponse(`Failed to update guide: ${error.message}`, 500)
+    }
+    if (!data) {
+      return errorResponse('Guide not found or update returned no row', 404)
+    }
+
+    return successResponse({ data })
+  })
 }
 
-// DELETE - Delete guide
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  try {
+  return runRoute(async () => {
     const { id } = await params
-    const supabase = createClient()
-
-    const { error } = await supabase
-      .from('guides')
-      .delete()
-      .eq('id', id)
-
-    if (error) {
-      console.error('Error deleting guide:', error)
-      return NextResponse.json(
-        { error: 'Failed to delete guide: ' + error.message },
-        { status: 500 }
-      )
+    const { data: existingGuide, error: existingError } = await getGuideById(id)
+    if (existingError) {
+      return errorResponse('Failed to find guide', 500)
+    }
+    if (!existingGuide) {
+      return errorResponse('Guide not found', 404)
     }
 
-    return NextResponse.json({ success: true })
-  } catch (error) {
-    console.error('Error in DELETE /api/admin/guides/[id]:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
-  }
+    const { error } = await deleteGuide(id)
+    if (error) {
+      return errorResponse(`Failed to delete guide: ${error.message}`, 500)
+    }
+
+    return successResponse({ success: true })
+  })
 }

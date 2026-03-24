@@ -1,152 +1,90 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
+import { NextRequest } from 'next/server'
+import {
+  deleteMod,
+  getModBySlug,
+  hasMod,
+  missingRequiredModFields,
+  normalizeUpdateModPayload,
+  REQUIRED_UPDATE_MOD_FIELDS,
+  type ModPayload,
+  updateMod,
+} from '@/lib/server/mods'
+import { errorResponse, parseJsonBody, runRoute, successResponse } from '@/lib/server/api-response'
 
-// GET - Get single mod by slug
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
-  try {
+  return runRoute(async () => {
     const { slug } = await params
-    const { data, error } = await supabaseAdmin
-      .from('mods')
-      .select('*')
-      .eq('slug', slug)
-      .single()
-
+    const { data, error } = await getModBySlug(slug)
     if (error || !data) {
-      return NextResponse.json(
-        { error: 'Mod not found' },
-        { status: 404 }
-      )
+      return errorResponse('Mod not found', 404)
     }
 
-    return NextResponse.json(data)
-  } catch (error) {
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
-  }
+    return successResponse(data)
+  })
 }
 
-// PUT - Update mod by slug
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
-  try {
+  return runRoute(async () => {
     const { slug } = await params
-    const body = await request.json()
-    
-    const {
-      name,
-      author,
-      category,
-      version,
-      updated_at,
-      description,
-      long_description,
-      thumbnail,
-      download_url,
-      tags,
-      thumbnail_orientation,
-      featured,
-      video_id,
-    } = body
-
-    // Check if mod exists
-    const { data: existing } = await supabaseAdmin
-      .from('mods')
-      .select('slug')
-      .eq('slug', slug)
-      .single()
-
-    if (!existing) {
-      return NextResponse.json(
-        { error: `Mod "${slug}" not found` },
-        { status: 404 }
+    const body = await parseJsonBody<ModPayload>(request)
+    if (!body) {
+      return errorResponse('Invalid request body', 400)
+    }
+    const missingFields = missingRequiredModFields(body, REQUIRED_UPDATE_MOD_FIELDS)
+    if (missingFields.length > 0) {
+      return errorResponse(
+        `Missing required fields: ${missingFields.join(', ')}`,
+        400
       )
     }
 
-    // Update mod
-    const { data, error } = await supabaseAdmin
-      .from('mods')
-      .update({
-        name,
-        author,
-        category: category || 'Faces',
-        version,
-        updated_at,
-        description: description || '',
-        long_description: long_description || '',
-        thumbnail: thumbnail || null,
-        download_url: download_url || null,
-        tags: tags || [],
-        thumbnail_orientation: thumbnail_orientation || 'portrait',
-        featured: featured || false,
-        video_id: video_id || null,
-      })
-      .eq('slug', slug)
-      .select()
-      .single()
+    const { data: existing, error: existingError } = await getModBySlug(slug)
+    if (existingError) {
+      return errorResponse('Failed to find mod', 500)
+    }
+    if (!hasMod(existing)) {
+      return errorResponse(`Mod "${slug}" not found`, 404)
+    }
 
+    const payload = normalizeUpdateModPayload(body)
+    const { data, error } = await updateMod(slug, payload)
     if (error) {
-      return NextResponse.json(
-        { error: 'Failed to update mod: ' + error.message },
-        { status: 500 }
-      )
+      return errorResponse(`Failed to update mod: ${error.message}`, 500)
+    }
+    if (!data) {
+      return errorResponse(`Mod "${slug}" not found`, 404)
     }
 
-    return NextResponse.json({ success: true, data })
-  } catch (error) {
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
-  }
+    return successResponse({ success: true, data })
+  })
 }
 
-// DELETE - Delete mod by slug
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
-  try {
+  return runRoute(async () => {
     const { slug } = await params
 
-    // Check if mod exists
-    const { data: existing } = await supabaseAdmin
-      .from('mods')
-      .select('slug')
-      .eq('slug', slug)
-      .single()
-
-    if (!existing) {
-      return NextResponse.json(
-        { error: `Mod "${slug}" not found` },
-        { status: 404 }
-      )
+    const { data: existing, error: existingError } = await getModBySlug(slug)
+    if (existingError) {
+      return errorResponse('Failed to find mod', 500)
+    }
+    if (!hasMod(existing)) {
+      return errorResponse(`Mod "${slug}" not found`, 404)
     }
 
-    // Delete mod
-    const { error } = await supabaseAdmin
-      .from('mods')
-      .delete()
-      .eq('slug', slug)
-
+    const { error } = await deleteMod(slug)
     if (error) {
-      return NextResponse.json(
-        { error: 'Failed to delete mod: ' + error.message },
-        { status: 500 }
-      )
+      return errorResponse(`Failed to delete mod: ${error.message}`, 500)
     }
 
-    return NextResponse.json({ success: true })
-  } catch (error) {
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
-  }
+    return successResponse({ success: true })
+  })
 }
