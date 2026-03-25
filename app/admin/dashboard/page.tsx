@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
+import { createClient } from '@/utils/supabase/client'
 
 const CATEGORIES = ['All-in-One', 'Faces', 'Kits', 'Gameplay', 'Đồ họa', 'Cơ chế game'] as const
 
@@ -62,6 +63,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [toast, setToast] = useState('')
+  const [pendingCommentsCount, setPendingCommentsCount] = useState(0)
   const blobUrlRef = useRef<string | null>(null)
 
   const revokeBlobUrl = () => {
@@ -72,6 +74,33 @@ export default function AdminDashboard() {
   }
 
   useEffect(() => () => revokeBlobUrl(), [])
+
+  // Fetch pending comments count
+  const fetchPendingCommentsCount = async () => {
+    try {
+      const supabase = createClient()
+      const { data } = await supabase.auth.getSession()
+      const token = data.session?.access_token
+      
+      if (!token) return
+      
+      const response = await fetch('/api/admin/pending-comments', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      if (response.ok) {
+        const data = await response.json()
+        setPendingCommentsCount(data.count || 0)
+      }
+    } catch (error) {
+      console.error('Failed to fetch pending comments count:', error)
+    }
+  }
+
+  useEffect(() => {
+    fetchPendingCommentsCount()
+  }, [])
 
   // Auto-hide toast
   useEffect(() => {
@@ -336,7 +365,14 @@ export default function AdminDashboard() {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-white">Kiểm duyệt bình luận</h3>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-lg font-semibold text-white">Kiểm duyệt bình luận</h3>
+                    {pendingCommentsCount > 0 && (
+                      <span className="px-2 py-1 text-xs font-bold text-white bg-[#ce5a67] rounded-full">
+                        {pendingCommentsCount}
+                      </span>
+                    )}
+                  </div>
                   <p className="text-slate-400 text-sm">Duyệt comment bài viết và chia sẻ mod</p>
                 </div>
               </div>
