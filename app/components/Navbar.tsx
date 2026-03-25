@@ -1,8 +1,12 @@
 "use client";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/utils/supabase/client";
+import type { User } from "@supabase/supabase-js";
 import CheckUyTinButton from "./CheckUyTinButton";
+import { isAdminEmail } from "@/lib/admin";
 
 const navItems = [
   { label: "🔥 CHIA SẺ MODS", href: "/mods" },
@@ -11,6 +15,83 @@ const navItems = [
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [authPending, setAuthPending] = useState(false);
+  const router = useRouter();
+
+  const syncAdminSessionCookie = useCallback(async (supabase = createClient()) => {
+    const { data } = await supabase.auth.getSession();
+    const token = data.session?.access_token;
+    if (!token) {
+      await fetch("/api/auth/admin-session", { method: "DELETE" });
+      return;
+    }
+    await fetch("/api/auth/admin-session", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  }, []);
+
+  useEffect(() => {
+    const supabase = createClient();
+    let active = true;
+
+    const loadUser = async () => {
+      const { data } = await supabase.auth.getUser();
+      if (!active) return;
+      setUser(data.user ?? null);
+      setAuthLoading(false);
+      await syncAdminSessionCookie(supabase);
+    };
+
+    loadUser();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!active) return;
+      setUser(session?.user ?? null);
+      setAuthLoading(false);
+      setAuthPending(false);
+      void syncAdminSessionCookie(supabase);
+    });
+
+    return () => {
+      active = false;
+      authListener.subscription.unsubscribe();
+    };
+  }, [syncAdminSessionCookie]);
+
+  const handleGoogleLogin = async () => {
+    setAuthPending(true);
+    const supabase = createClient();
+    const currentPath = `${window.location.pathname}${window.location.search}`;
+    const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(currentPath)}`;
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo },
+    });
+
+    if (error) {
+      setAuthPending(false);
+      alert("Đăng nhập Google thất bại. Vui lòng thử lại.");
+    }
+  };
+
+  const handleLogout = async () => {
+    setAuthPending(true);
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    await fetch("/api/auth/admin-session", { method: "DELETE" });
+    setAuthPending(false);
+    router.refresh();
+  };
+
+  const displayName =
+    user?.user_metadata?.full_name ||
+    user?.user_metadata?.name ||
+    user?.email?.split("@")[0] ||
+    "Tài khoản";
+  const isAdmin = isAdminEmail(user?.email);
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0a]/70 backdrop-blur-xl border-b border-white/5">
@@ -66,6 +147,38 @@ export default function Navbar() {
           >
             TẢI NGAY
           </Link>
+          {authLoading ? (
+            <div className="px-3 py-2 rounded-xl border border-white/10 bg-white/5 text-[10px] text-slate-400 font-bold tracking-wide">
+              ...
+            </div>
+          ) : user ? (
+            <>
+              {isAdmin && (
+                <Link
+                  href="/admin/dashboard"
+                  className="flex-shrink-0 px-3 md:px-4 py-2 rounded-xl text-[10px] md:text-[11px] font-semibold tracking-wide text-slate-200 border border-[#ce5a67]/40 bg-[#ce5a67]/15 hover:bg-[#ce5a67]/25 transition-colors"
+                >
+                  Open Admin Panel
+                </Link>
+              )}
+              <button
+                onClick={handleLogout}
+                disabled={authPending}
+                className="flex-shrink-0 px-3 md:px-4 py-2 rounded-xl text-[10px] md:text-[11px] font-black tracking-wide text-slate-200 border border-white/15 bg-white/5 hover:bg-white/10 transition-colors disabled:opacity-60"
+              >
+                <span className="hidden lg:inline mr-2">{displayName}</span>
+                {authPending ? "..." : "ĐĂNG XUẤT"}
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={handleGoogleLogin}
+              disabled={authPending}
+              className="flex-shrink-0 px-3 md:px-4 py-2 rounded-xl text-[10px] md:text-[11px] font-semibold tracking-wide text-slate-200 border border-white/20 bg-white/5 hover:bg-white/10 transition-colors disabled:opacity-60"
+            >
+              {authPending ? "..." : "Login with Google"}
+            </button>
+          )}
 
           {/* Hamburger — chỉ hiện trên mobile */}
           <button

@@ -4,6 +4,7 @@ import { resolveThumbnailSrc, rewriteImageSrcInHtml } from '@/utils/r2'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { stripHtml } from '@/lib/related-content'
+import CommunityComments from '@/app/components/CommunityComments'
 
 type Guide = {
   id: string
@@ -263,6 +264,13 @@ export default async function GuideDetailPage({ params }: { params: Promise<{ sl
               </div>
             </aside>
           </div>
+
+          <CommunityComments
+            scopeType="guide"
+            scopeId={guideData.id}
+            title="Bình luận bài viết"
+            emptyText="Chưa có bình luận nào cho bài viết này."
+          />
 
           <div className="mt-16 border-t border-[#222] pt-8">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

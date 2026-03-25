@@ -1,38 +1,55 @@
 'use client'
 
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { createClient } from '@/utils/supabase/client'
 
 export default function AdminLogin() {
-  const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirect = searchParams.get('redirect') || '/admin'
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const syncAndRedirectIfAdmin = useCallback(async () => {
+    const supabase = createClient()
+    const { data } = await supabase.auth.getSession()
+    const token = data.session?.access_token
+    if (!token) return false
+    const response = await fetch('/api/auth/admin-session', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    if (!response.ok) {
+      return false
+    }
+    router.push(redirect)
+    return true
+  }, [redirect, router])
+
+  useEffect(() => {
+    void syncAndRedirectIfAdmin()
+  }, [syncAndRedirectIfAdmin])
+
+  const handleGoogleAdminLogin = async () => {
     setLoading(true)
     setError('')
 
     try {
-      const response = await fetch('/api/admin/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const done = await syncAndRedirectIfAdmin()
+      if (done) return
+      const supabase = createClient()
+      const callback = `/auth/callback?next=${encodeURIComponent(redirect)}`
+      const { error: loginError } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}${callback}`,
         },
-        body: JSON.stringify({ password }),
       })
-
-      if (response.ok) {
-        // Set cookie and redirect
-        document.cookie = `admin_secret=${password}; path=/; max-age=86400` // 24 hours
-        router.push(redirect)
-      } else {
-        setError('Mật khẩu không đúng!')
+      if (loginError) {
+        setError('Không thể khởi động đăng nhập Google.')
       }
-    } catch (err) {
+    } catch {
       setError('Có lỗi xảy ra. Vui lòng thử lại.')
     } finally {
       setLoading(false)
@@ -44,25 +61,10 @@ export default function AdminLogin() {
       <div className="bg-[#111111] border border-white/10 rounded-xl p-8 w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-white mb-2">Admin Login</h1>
-          <p className="text-slate-400">Nhập mật khẩu để truy cập trang quản trị</p>
+          <p className="text-slate-400">Đăng nhập Google bằng email admin để truy cập trang quản trị</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-white mb-2">
-              Mật khẩu
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 bg-[#1a1a1a] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67] transition-colors"
-              placeholder="Nhập mật khẩu admin"
-              required
-            />
-          </div>
-
+        <div className="space-y-6">
           {error && (
             <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-3">
               <p className="text-red-400 text-sm">{error}</p>
@@ -70,13 +72,14 @@ export default function AdminLogin() {
           )}
 
           <button
-            type="submit"
+            type="button"
+            onClick={handleGoogleAdminLogin}
             disabled={loading}
             className="w-full px-4 py-3 bg-[#ce5a67] text-white font-semibold rounded-lg hover:bg-[#b44c5c] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
+            {loading ? 'Đang xử lý...' : 'Login with Google (Admin)'}
           </button>
-        </form>
+        </div>
       </div>
     </div>
   )

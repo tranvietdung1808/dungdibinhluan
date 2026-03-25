@@ -7,6 +7,7 @@ import FilterTags from "./components/FilterTags";
 import SearchBar from "./components/SearchBar";
 import ModCard from "./components/ModCard";
 import Pagination from "./components/Pagination";
+import CommunityComments from "../components/CommunityComments";
 
 interface Mod {
   id: string;
@@ -209,6 +210,12 @@ export default function ModsPage({ initialDbMods = [] }: ModsPageProps) {
             </p>
           </div>
         )}
+        <CommunityComments
+          scopeType="mods"
+          scopeId="global"
+          title="Chia sẻ mod chung"
+          emptyText="Chưa có chia sẻ nào từ cộng đồng."
+        />
       </div>
     </section>
   );

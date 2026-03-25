@@ -7,18 +7,21 @@ export type Database = {
           username: string | null
           avatar_url: string | null
           created_at: string
+          updated_at: string
         }
         Insert: {
           id: string
           username?: string | null
           avatar_url?: string | null
           created_at?: string
+          updated_at?: string
         }
         Update: {
           id?: string
           username?: string | null
           avatar_url?: string | null
           created_at?: string
+          updated_at?: string
         }
       }
       guides: {
@@ -110,6 +113,53 @@ export type Database = {
           featured?: boolean
           video_id?: string | null
           created_at?: string
+        }
+      }
+      community_comments: {
+        Row: {
+          id: string
+          scope_type: string
+          scope_id: string
+          parent_id: string | null
+          user_id: string | null
+          author_name: string
+          author_avatar: string | null
+          content: string
+          is_admin_comment: boolean
+          is_pinned: boolean
+          status: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          scope_type: string
+          scope_id: string
+          parent_id?: string | null
+          user_id?: string | null
+          author_name: string
+          author_avatar?: string | null
+          content: string
+          is_admin_comment?: boolean
+          is_pinned?: boolean
+          status?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          scope_type?: string
+          scope_id?: string
+          parent_id?: string | null
+          user_id?: string | null
+          author_name?: string
+          author_avatar?: string | null
+          content?: string
+          is_admin_comment?: boolean
+          is_pinned?: boolean
+          status?: string
+          created_at?: string
+          updated_at?: string
         }
       }
     }

@@ -112,3 +112,48 @@ ALTER TABLE public.mods ENABLE ROW LEVEL SECURITY;
 -- Mods policies (service role bypasses RLS, so these are for anon/authenticated access)
 CREATE POLICY "Anyone can view mods" ON public.mods FOR SELECT USING (true);
 CREATE POLICY "Service role can manage mods" ON public.mods FOR ALL USING (true);
+
+CREATE TABLE IF NOT EXISTS public.community_comments (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  scope_type text NOT NULL CHECK (scope_type IN ('guide', 'mods')),
+  scope_id text NOT NULL,
+  parent_id uuid REFERENCES public.community_comments(id) ON DELETE CASCADE,
+  user_id uuid REFERENCES auth.users(id) ON DELETE SET NULL,
+  author_name text NOT NULL,
+  author_avatar text,
+  content text NOT NULL,
+  is_admin_comment boolean NOT NULL DEFAULT false,
+  is_pinned boolean NOT NULL DEFAULT false,
+  status text NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
+  created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+  updated_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.community_comments
+  ADD COLUMN IF NOT EXISTS is_admin_comment boolean NOT NULL DEFAULT false;
+ALTER TABLE public.community_comments
+  ADD COLUMN IF NOT EXISTS is_pinned boolean NOT NULL DEFAULT false;
+
+CREATE INDEX IF NOT EXISTS community_comments_scope_idx
+  ON public.community_comments(scope_type, scope_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS community_comments_status_idx
+  ON public.community_comments(status, created_at DESC);
+CREATE INDEX IF NOT EXISTS community_comments_parent_idx
+  ON public.community_comments(parent_id);
+
+ALTER TABLE public.community_comments ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Approved comments are visible to everyone"
+  ON public.community_comments
+  FOR SELECT
+  USING (status = 'approved' OR auth.uid() = user_id);
+
+CREATE POLICY "Authenticated users can submit comments"
+  ON public.community_comments
+  FOR INSERT
+  WITH CHECK (auth.role() = 'authenticated' AND auth.uid() = user_id);
+
+CREATE TRIGGER handle_community_comments_updated_at
+  BEFORE UPDATE ON public.community_comments
+  FOR EACH ROW
+  EXECUTE FUNCTION public.handle_updated_at();

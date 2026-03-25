@@ -324,6 +324,29 @@ export default function AdminDashboard() {
                 </svg>
               </div>
             </Link>
+
+            <Link
+              href="/admin/community"
+              className="group bg-[#111111] border border-white/10 rounded-xl p-6 hover:border-[#ce5a67]/50 transition-all duration-300 hover:shadow-[0_8px_32px_rgba(206,90,103,0.15)]"
+            >
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-12 h-12 bg-[#ce5a67]/20 rounded-lg flex items-center justify-center group-hover:bg-[#ce5a67]/30 transition-colors">
+                  <svg className="w-6 h-6 text-[#ce5a67]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 4v-4z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-white">Kiểm duyệt bình luận</h3>
+                  <p className="text-slate-400 text-sm">Duyệt comment bài viết và chia sẻ mod</p>
+                </div>
+              </div>
+              <div className="flex items-center text-[#ce5a67] group-hover:text-[#b44c5c] transition-colors">
+                <span className="text-sm font-medium">Mở kiểm duyệt</span>
+                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </Link>
           </div>
         </div>
 

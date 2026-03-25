@@ -4,12 +4,10 @@ import type { NextRequest } from 'next/server'
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Protect admin routes
   if (pathname.startsWith('/admin')) {
-    const adminSecret = request.cookies.get('admin_secret')?.value
-    
-    if (!adminSecret || adminSecret !== process.env.ADMIN_SECRET) {
-      // Redirect to login page
+    const adminSession = request.cookies.get('admin_user')?.value
+
+    if (adminSession !== '1') {
       const loginUrl = new URL('/admin/login', request.url)
       loginUrl.searchParams.set('redirect', pathname)
       return NextResponse.redirect(loginUrl)
