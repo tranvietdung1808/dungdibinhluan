@@ -104,7 +104,7 @@ export default function Navbar() {
           </div>
           <div>
             <p className="font-black text-[11px] md:text-sm tracking-widest hidden sm:block">DUNGDIBINHLUAN</p>
-            <p className="text-[8px] text-slate-500 tracking-[0.3em] hidden sm:block">ALL IN ONE GAME SET UP</p>
+            <p className="text-[8px] text-slate-500 tracking-[0.3em] hidden sm:block">FC MODDING AND CAREER MODE</p>
           </div>
         </Link>
 

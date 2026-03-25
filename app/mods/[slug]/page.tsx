@@ -454,7 +454,7 @@ export default async function ModDetailPage({
                       Tải xuống miễn phí
                     </p>
                     <p className="text-[11px] text-slate-500 mt-0.5">
-                      An toàn · Miễn phí · Face cho EA FC 26
+                      An toàn · Miễn phí
                     </p>
                   </div>
                   <a
@@ -583,9 +583,6 @@ export default async function ModDetailPage({
           <div className="flex items-end justify-between gap-3">
             <div>
               <h2 className="text-xl md:text-2xl font-black text-white">Mods liên quan</h2>
-              <p className="text-xs text-slate-400 mt-1">
-                Ưu tiên mod cùng tag và cùng thể loại, tối đa 8 mục.
-              </p>
             </div>
             <Link href="/mods" className="text-[11px] uppercase tracking-widest text-[#ce5a67] hover:underline font-black">
               Xem tất cả
