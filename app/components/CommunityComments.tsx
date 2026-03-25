@@ -110,9 +110,19 @@ export default function CommunityComments({ scopeType, scopeId, title, emptyText
     setSubmitting(true);
     setMessage("");
     try {
+      const supabase = createClient();
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+      if (!token) {
+        setMessage("Bạn cần đăng nhập để bình luận");
+        return;
+      }
       const response = await fetch("/api/community", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({
           scopeType,
           scopeId,

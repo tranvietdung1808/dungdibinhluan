@@ -17,10 +17,13 @@ function AuthCallbackContent() {
     const finalizeAuth = async () => {
       if (code) {
         await supabase.auth.exchangeCodeForSession(code);
-        await fetch("/api/auth/profile-sync", { method: "POST" });
         const { data } = await supabase.auth.getSession();
         const token = data.session?.access_token;
         if (token) {
+          await fetch("/api/auth/profile-sync", {
+            method: "POST",
+            headers: { Authorization: `Bearer ${token}` },
+          });
           await fetch("/api/auth/admin-session", {
             method: "POST",
             headers: { Authorization: `Bearer ${token}` },

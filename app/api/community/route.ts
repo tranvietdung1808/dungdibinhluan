@@ -3,6 +3,7 @@ import { createClient } from "@/utils/supabase/server";
 import { errorResponse, parseJsonBody, runRoute, successResponse } from "@/lib/server/api-response";
 import type { Database } from "@/utils/supabase/database.types";
 import { isAdminEmail } from "@/lib/admin";
+import { supabaseAdmin } from "@/lib/supabase";
 
 type CommunityInsert = Database["public"]["Tables"]["community_comments"]["Insert"];
 
@@ -63,11 +64,16 @@ export async function POST(request: NextRequest) {
       return errorResponse("Nội dung bình luận phải từ 2 đến 2000 ký tự", 400);
     }
 
-    const supabase = createClient();
-    const { data: authData } = await supabase.auth.getUser();
+    const authorization = request.headers.get("authorization") || "";
+    const token = authorization.startsWith("Bearer ") ? authorization.slice(7).trim() : "";
+    if (!token) {
+      return errorResponse("Bạn cần đăng nhập để bình luận", 401);
+    }
+
+    const { data: authData, error: authError } = await supabaseAdmin.auth.getUser(token);
     const user = authData.user;
 
-    if (!user) {
+    if (authError || !user) {
       return errorResponse("Bạn cần đăng nhập để bình luận", 401);
     }
 
@@ -96,7 +102,7 @@ export async function POST(request: NextRequest) {
       status: "pending",
     };
 
-    const { data, error } = await supabase
+    const { data, error } = await createClient()
       .from("community_comments")
       .insert(insertPayload)
       .select("id, status")

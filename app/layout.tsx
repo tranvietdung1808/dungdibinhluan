@@ -54,6 +54,7 @@ export const metadata: Metadata = {
     "download FC 26 faces",
     "mod FC 26 PC",
     "tải mod FC 26",
+    "career mode FC 26",
     "cài đặt mod FIFA",
     "mod update EA FC"
   ],

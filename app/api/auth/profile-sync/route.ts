@@ -1,13 +1,19 @@
-import { createClient } from "@/utils/supabase/server";
+import type { NextRequest } from "next/server";
 import { errorResponse, runRoute, successResponse } from "@/lib/server/api-response";
+import { supabaseAdmin } from "@/lib/supabase";
 
-export async function POST() {
+export async function POST(request: NextRequest) {
   return runRoute(async () => {
-    const supabase = createClient();
-    const { data: authData } = await supabase.auth.getUser();
+    const authorization = request.headers.get("authorization") || "";
+    const token = authorization.startsWith("Bearer ") ? authorization.slice(7).trim() : "";
+    if (!token) {
+      return errorResponse("Unauthorized", 401);
+    }
+
+    const { data: authData, error: authError } = await supabaseAdmin.auth.getUser(token);
     const user = authData.user;
 
-    if (!user) {
+    if (authError || !user) {
       return errorResponse("Unauthorized", 401);
     }
 
@@ -23,7 +29,7 @@ export async function POST() {
       user.user_metadata?.picture ||
       null;
 
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from("profiles")
       .upsert(
         {
