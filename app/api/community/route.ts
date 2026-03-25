@@ -26,24 +26,14 @@ export async function GET(request: NextRequest) {
     }
 
     const supabase = createClient();
-    const { data: authData } = await supabase.auth.getUser();
-    const user = authData?.user;
-
-    let query = supabase
+    const { data, error } = await supabase
       .from("community_comments")
       .select("id, scope_type, scope_id, parent_id, author_name, author_avatar, content, is_admin_comment, is_pinned, status, created_at")
       .eq("scope_type", scopeType)
       .eq("scope_id", scopeId)
+      .eq("status", "approved")
       .order("is_pinned", { ascending: false })
       .order("created_at", { ascending: true });
-
-    if (user) {
-      query = query.or(`status.eq.approved,user_id.eq.${user.id}`);
-    } else {
-      query = query.eq("status", "approved");
-    }
-
-    const { data, error } = await query;
 
     if (error) {
       return errorResponse("Không tải được bình luận", 500);

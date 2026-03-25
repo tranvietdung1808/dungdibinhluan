@@ -28,6 +28,7 @@ type Props = {
 
 export default function CommunityComments({ scopeType, scopeId, title, emptyText }: Props) {
   const [items, setItems] = useState<CommentItem[]>([]);
+  const [pendingItems, setPendingItems] = useState<CommentItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [user, setUser] = useState<User | null>(null);
@@ -78,17 +79,24 @@ export default function CommunityComments({ scopeType, scopeId, title, emptyText
     loadComments();
   }, [loadComments]);
 
-  const roots = useMemo(() => items.filter((item) => !item.parent_id), [items]);
+  const allItems = useMemo(() => {
+    // Merge server items + optimistic pending items (deduplicate by id)
+    const serverIds = new Set(items.map((i) => i.id));
+    const extra = pendingItems.filter((p) => !serverIds.has(p.id));
+    return [...items, ...extra];
+  }, [items, pendingItems]);
+
+  const roots = useMemo(() => allItems.filter((item) => !item.parent_id), [allItems]);
   const repliesByParent = useMemo(() => {
     const map = new Map<string, CommentItem[]>();
-    for (const item of items) {
+    for (const item of allItems) {
       if (!item.parent_id) continue;
       const prev = map.get(item.parent_id) || [];
       prev.push(item);
       map.set(item.parent_id, prev);
     }
     return map;
-  }, [items]);
+  }, [allItems]);
   const isAdmin = isAdminEmail(user?.email);
 
   const handleLogin = async () => {
@@ -137,10 +145,26 @@ export default function CommunityComments({ scopeType, scopeId, title, emptyText
         return;
       }
 
+      // Optimistically insert the comment so user sees it immediately
+      const isAdmin = isAdminEmail(user?.email);
+      const newPending: CommentItem = {
+        id: data?.id || `pending-${Date.now()}`,
+        scope_type: scopeType,
+        scope_id: scopeId,
+        parent_id: replyToId,
+        author_name: isAdmin ? "ADMIN" : (user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split("@")[0] || "Người dùng"),
+        author_avatar: isAdmin ? "/favicon.ico" : (user?.user_metadata?.avatar_url || user?.user_metadata?.picture || null),
+        content: trimmed,
+        is_admin_comment: isAdmin,
+        is_pinned: false,
+        status: isAdmin ? "approved" : "pending",
+        created_at: new Date().toISOString(),
+      };
+      setPendingItems((prev) => [...prev, newPending]);
+
       setContent("");
       setReplyToId(null);
       setMessage("");
-      await loadComments();
     } finally {
       setSubmitting(false);
     }
@@ -168,6 +192,8 @@ export default function CommunityComments({ scopeType, scopeId, title, emptyText
         setMessage(data?.error || "Không xóa được bình luận");
         return;
       }
+      // Remove from pending list too in case it was optimistic
+      setPendingItems((prev) => prev.filter((p) => p.id !== id));
       await loadComments();
     } catch (error) {
       setMessage("Lỗi kết nối khi xóa");
@@ -269,8 +295,13 @@ export default function CommunityComments({ scopeType, scopeId, title, emptyText
         ) : (
           roots.map((root) => {
             const replies = repliesByParent.get(root.id) || [];
+            const isPendingRoot = root.status === "pending";
             return (
-              <article key={root.id} className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
+              <article key={root.id} className={`rounded-xl border p-3 ${
+                isPendingRoot
+                  ? "border-white/5 bg-white/[0.01] opacity-60"
+                  : "border-white/10 bg-white/[0.02]"
+              }`}>
                 <div className="flex items-center gap-2">
                   <div className="h-7 w-7 overflow-hidden rounded-full bg-[#1e1e2b]">
                     {root.author_avatar ? (
@@ -297,6 +328,11 @@ export default function CommunityComments({ scopeType, scopeId, title, emptyText
                   <p className="text-[11px] text-slate-500">
                     {new Date(root.created_at).toLocaleString("vi-VN")}
                   </p>
+                  {isPendingRoot && (
+                    <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-slate-500">
+                      Đang chờ duyệt
+                    </span>
+                  )}
                 </div>
                 <p className="mt-2 whitespace-pre-wrap text-sm text-slate-200">{root.content}</p>
                 <div className="mt-2 flex items-center gap-3">
