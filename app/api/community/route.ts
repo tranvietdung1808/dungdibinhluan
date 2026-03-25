@@ -77,17 +77,20 @@ export async function POST(request: NextRequest) {
       return errorResponse("Bạn cần đăng nhập để bình luận", 401);
     }
 
-    const authorName =
+    const isAdmin = isAdminEmail(user.email);
+
+    const authorName = isAdmin ? "ADMIN" : (
       user.user_metadata?.full_name ||
       user.user_metadata?.name ||
       user.email?.split("@")[0] ||
-      "Người dùng";
+      "Người dùng"
+    );
 
-    const authorAvatar =
+    const authorAvatar = isAdmin ? "/favicon.ico" : (
       user.user_metadata?.avatar_url ||
       user.user_metadata?.picture ||
-      null;
-    const isAdmin = isAdminEmail(user.email);
+      null
+    );
 
     const insertPayload: CommunityInsert = {
       scope_type: scopeType,

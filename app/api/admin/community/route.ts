@@ -95,3 +95,30 @@ export async function PATCH(request: NextRequest) {
     return successResponse(data);
   });
 }
+
+export async function DELETE(request: NextRequest) {
+  return runRoute(async () => {
+    const adminUser = await ensureAdmin(request);
+    if (!adminUser) {
+      return errorResponse("Forbidden", 403);
+    }
+
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id")?.trim() || "";
+
+    if (!id) {
+      return errorResponse("Thiếu ID bình luận", 400);
+    }
+
+    const { error } = await supabaseAdmin
+      .from("community_comments")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      return errorResponse("Không xóa được bình luận", 500);
+    }
+
+    return successResponse({ id });
+  });
+}

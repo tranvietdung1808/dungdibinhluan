@@ -146,6 +146,34 @@ export default function CommunityComments({ scopeType, scopeId, title, emptyText
     }
   };
 
+  const deleteComment = async (id: string) => {
+    if (!isAdmin) return;
+    if (!window.confirm("Bạn có chắc chắn muốn xóa bình luận này?")) return;
+    setMessage("");
+    try {
+      const supabase = createClient();
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+      if (!token) return;
+
+      const response = await fetch(`/api/admin/community?id=${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => null);
+        setMessage(data?.error || "Không xóa được bình luận");
+        return;
+      }
+      await loadComments();
+    } catch (error) {
+      setMessage("Lỗi kết nối khi xóa");
+    }
+  };
+
   const togglePin = async (id: string, nextPinned: boolean) => {
     if (!isAdmin) return;
     setPinPendingId(id);
@@ -283,14 +311,23 @@ export default function CommunityComments({ scopeType, scopeId, title, emptyText
                     </button>
                   )}
                   {isAdmin && (
-                    <button
-                      type="button"
-                      disabled={pinPendingId === root.id}
-                      onClick={() => togglePin(root.id, !root.is_pinned)}
-                      className="text-[11px] font-semibold text-amber-300 hover:underline disabled:opacity-60"
-                    >
-                      {pinPendingId === root.id ? "..." : root.is_pinned ? "Bỏ ghim" : "Ghim"}
-                    </button>
+                    <>
+                      <button
+                        type="button"
+                        disabled={pinPendingId === root.id}
+                        onClick={() => togglePin(root.id, !root.is_pinned)}
+                        className="text-[11px] font-semibold text-amber-300 hover:underline disabled:opacity-60"
+                      >
+                        {pinPendingId === root.id ? "..." : root.is_pinned ? "Bỏ ghim" : "Ghim"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => deleteComment(root.id)}
+                        className="text-[11px] font-semibold text-[#ce5a67] hover:underline"
+                      >
+                        Xóa
+                      </button>
+                    </>
                   )}
                 </div>
                 {replies.length > 0 && (
@@ -316,6 +353,17 @@ export default function CommunityComments({ scopeType, scopeId, title, emptyText
                           </p>
                         </div>
                         <p className="mt-1 whitespace-pre-wrap text-xs text-slate-300">{reply.content}</p>
+                        {isAdmin && (
+                          <div className="mt-1.5 flex items-center gap-3">
+                            <button
+                              type="button"
+                              onClick={() => deleteComment(reply.id)}
+                              className="text-[10px] font-semibold text-[#ce5a67] hover:underline"
+                            >
+                              Xóa
+                            </button>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
