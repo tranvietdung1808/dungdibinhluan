@@ -2,6 +2,7 @@
 import type { Metadata } from "next";
 import { Be_Vietnam_Pro } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
+import { Suspense } from "react";
 import "./globals.css";
 import Navbar from "./components/Navbar";
 import StructuredData from "./components/StructuredData";
@@ -107,7 +108,9 @@ export default function RootLayout({
         <StructuredData />
       </head>
       <body className={`${beVietnamPro.variable} antialiased font-sans`}>
-        <TopProgressBar />
+        <Suspense fallback={null}>
+          <TopProgressBar />
+        </Suspense>
         <Navbar />
         <div className="pt-14 md:pt-16">
           {children}
