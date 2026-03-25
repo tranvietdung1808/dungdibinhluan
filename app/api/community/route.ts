@@ -102,13 +102,14 @@ export async function POST(request: NextRequest) {
       status: "pending",
     };
 
-    const { data, error } = await createClient()
+    const { data, error } = await supabaseAdmin
       .from("community_comments")
       .insert(insertPayload)
       .select("id, status")
       .single();
 
     if (error) {
+      console.error("Insert comment error:", error);
       return errorResponse("Không gửi được bình luận", 500);
     }
 
@@ -116,7 +117,6 @@ export async function POST(request: NextRequest) {
       {
         id: data.id,
         status: data.status,
-        message: "Đã gửi bình luận, chờ admin duyệt",
       },
       201
     );
