@@ -24,9 +24,9 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://dungdibinhluan.com"),
 
   icons: {
-    icon: "/favicon.png",
-    shortcut: "/favicon.png",
-    apple: "/apple-touch-icon.png",
+    icon: "/favicon.ico?v=20260325",
+    shortcut: "/favicon.ico?v=20260325",
+    apple: "/favicon.ico?v=20260325",
   },
 
   keywords: [

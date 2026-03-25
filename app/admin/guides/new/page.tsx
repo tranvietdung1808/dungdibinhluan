@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import RichTextEditor from '@/app/components/RichTextEditor'
 import { slugFromTitle } from '@/utils/slug'
+import { GUIDE_FIXED_TAGS } from '@/lib/related-content'
 
 export default function NewGuidePage() {
   const [title, setTitle] = useState('')
@@ -13,6 +14,7 @@ export default function NewGuidePage() {
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null)
   const [isUploadingThumbnail, setIsUploadingThumbnail] = useState(false)
   const [content, setContent] = useState('')
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const router = useRouter()
@@ -106,6 +108,7 @@ export default function NewGuidePage() {
           slug,
           content,
           thumbnail_url: thumbnailUrl || null,
+          tags: selectedTags,
         }),
       })
 
@@ -121,6 +124,12 @@ export default function NewGuidePage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const toggleTag = (tag: string) => {
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((item) => item !== tag) : [...prev, tag]
+    )
   }
 
   return (
@@ -145,6 +154,24 @@ export default function NewGuidePage() {
       {/* Form */}
       <div className="max-w-4xl mx-auto px-4 py-8">
         <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="rounded-xl border border-[#ce5a67]/35 bg-[#ce5a67]/10 px-4 py-4">
+            <h2 className="text-sm font-semibold text-white">Vận hành mục Bài viết liên quan</h2>
+            <p className="mt-1 text-xs text-slate-300">
+              Chọn tag thủ công để hệ thống hiển thị bài viết liên quan đúng nhóm.
+            </p>
+            <p className="mt-1 text-xs text-slate-400">
+              Có thể chọn một hoặc nhiều tag tùy nội dung bài.
+            </p>
+          </div>
+          <div className="flex justify-end">
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-5 py-2.5 bg-[#ce5a67] text-white font-semibold rounded-lg hover:bg-[#b44c5c] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? 'Đang lưu...' : 'Lưu bài viết'}
+            </button>
+          </div>
           {/* Title */}
           <div>
             <label htmlFor="title" className="block text-sm font-medium text-white mb-2">
@@ -178,6 +205,27 @@ export default function NewGuidePage() {
             <p className="text-slate-500 text-sm mt-1">
               Slug sẽ được tự động tạo từ tiêu đề
             </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-white mb-2">
+              Tags cho bài viết liên quan
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {GUIDE_FIXED_TAGS.map((tag) => {
+                const selected = selectedTags.includes(tag)
+                return (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => toggleTag(tag)}
+                    className={`rounded-full border px-3 py-1.5 text-xs transition-colors ${selected ? 'border-[#ce5a67] bg-[#ce5a67]/20 text-white' : 'border-white/20 bg-white/5 text-slate-300 hover:border-white/40'}`}
+                  >
+                    {tag}
+                  </button>
+                )
+              })}
+            </div>
           </div>
 
           {/* Thumbnail */}

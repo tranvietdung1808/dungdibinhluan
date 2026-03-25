@@ -8,6 +8,7 @@ interface Guide {
   slug: string
   content: string
   thumbnail_url: string | null
+  tags: string[]
   created_at: string
   updated_at: string
 }

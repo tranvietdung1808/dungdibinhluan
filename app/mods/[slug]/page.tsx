@@ -5,6 +5,7 @@ import { MODS, type Mod } from "../../data/mods";
 import { FACES } from "../../data/faces";
 import { notFound } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabase";
+import { extractTopicTerms, overlapScore, parseFlexibleDate, stripHtml } from "@/lib/related-content";
 
 const TAG_COLORS: Record<string, string> = {
   Faces: "#3b82f6",
@@ -14,7 +15,7 @@ const TAG_COLORS: Record<string, string> = {
   "Cơ chế game": "#ce5a67",
 };
 
-const ALL_STATIC_MODS = [...FACES, ...MODS];
+const ALL_STATIC_MODS: Mod[] = [...(FACES as Mod[]), ...MODS];
 const SITE_URL = "https://dungdibinhluan.com";
 
 // Database mod interface
@@ -65,6 +66,49 @@ async function fetchDbMod(slug: string): Promise<DbMod | null> {
 
   if (error || !data) return null;
   return data as DbMod;
+}
+
+async function fetchDbMods(): Promise<DbMod[]> {
+  const { data, error } = await supabaseAdmin.from("mods").select("*");
+  if (error || !data) return [];
+  return data as DbMod[];
+}
+
+type RelatedModCandidate = {
+  mod: Mod;
+  sortDate: number;
+  score: number;
+};
+
+function getModTopicTerms(mod: Mod) {
+  const fullText = `${mod.name} ${mod.description || ""} ${stripHtml(mod.longDescription || "")}`;
+  return extractTopicTerms(fullText);
+}
+
+function getRelatedScore(currentMod: Mod, candidateMod: Mod) {
+  const sharedTags = overlapScore(currentMod.tags || [], candidateMod.tags || []);
+  const sameCategory = currentMod.category === candidateMod.category ? 1 : 0;
+  const sharedTerms = overlapScore(getModTopicTerms(currentMod), getModTopicTerms(candidateMod));
+  return sharedTags * 24 + sameCategory * 12 + sharedTerms * 3;
+}
+
+async function getRelatedMods(currentMod: Mod) {
+  const dbMods = (await fetchDbMods()).map(mapDbModToMod);
+  const merged = new Map<string, Mod>();
+  for (const item of ALL_STATIC_MODS) merged.set(item.slug, item);
+  for (const item of dbMods) merged.set(item.slug, item);
+  merged.delete(currentMod.slug);
+
+  const ranked: RelatedModCandidate[] = [...merged.values()]
+    .map((candidateMod) => ({
+      mod: candidateMod,
+      sortDate: parseFlexibleDate(candidateMod.updatedAt),
+      score: getRelatedScore(currentMod, candidateMod),
+    }))
+    .filter((item) => item.score > 0);
+
+  ranked.sort((left, right) => right.score - left.score || right.sortDate - left.sortDate);
+  return ranked.slice(0, 8).map((item) => item.mod);
 }
 
 function getAbsoluteImageUrl(image?: string) {
@@ -183,9 +227,10 @@ export default async function ModDetailPage({
   const isPortrait = mod.thumbnailOrientation !== "landscape";
   const thumbnailSrc = mod.thumbnail?.trim() ? mod.thumbnail : null;
   const softwareApplicationSchema = getSoftwareApplicationSchema(mod);
+  const relatedMods = await getRelatedMods(mod);
   
   // Luôn hiển thị ngày hôm nay cho MIX MODS
-  const displayUpdatedAt = isMixMods 
+  const displayUpdatedAt = isMixMods
     ? new Date().toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
     : mod.updatedAt;
 
@@ -197,7 +242,6 @@ export default async function ModDetailPage({
           __html: JSON.stringify(softwareApplicationSchema),
         }}
       />
-      {/* Header */}
       <div className="border-b border-white/5 px-4 md:px-6 py-4 flex items-center gap-3">
         <Link href="/" className="text-slate-500 hover:text-white transition-colors text-sm">← Trang chủ</Link>
         <span className="text-slate-700">/</span>
@@ -207,10 +251,7 @@ export default async function ModDetailPage({
       </div>
 
       {isMixMods ? (
-        // ===== MIX MODS LAYOUT =====
         <div className="max-w-4xl mx-auto px-4 md:px-6 py-8 md:py-12 space-y-8">
-
-          {/* ===== HERO BANNER ===== */}
           <div className="relative rounded-3xl overflow-hidden border border-white/10 h-64 md:h-[420px]">
             {thumbnailSrc ? (
               <Image
@@ -223,11 +264,9 @@ export default async function ModDetailPage({
             ) : (
               <div className="absolute inset-0 bg-gradient-to-br from-[#1a1a1f] to-[#0a0a0a]" />
             )}
-            {/* Gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/40 to-transparent" />
             <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a]/60 via-transparent to-transparent" />
 
-            {/* Badges */}
             <div className="absolute top-5 left-5 flex items-center gap-2 flex-wrap">
               {mod.featured && (
                 <span className="px-3 py-1 rounded-full text-[10px] font-black bg-[#ce5a67] text-white tracking-widest">
@@ -239,7 +278,6 @@ export default async function ModDetailPage({
               </span>
             </div>
 
-            {/* Title overlay */}
             <div className="absolute bottom-5 left-5 right-5">
               <h1 className="text-2xl md:text-4xl font-black leading-tight drop-shadow-lg">
                 {mod.name}
@@ -247,7 +285,6 @@ export default async function ModDetailPage({
             </div>
           </div>
 
-          {/* ===== META INFO ===== */}
           <div className="flex items-center gap-3 flex-wrap text-xs border-b border-white/5 pb-5">
             <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-slate-300">
               👤 <span className="font-bold">{mod.author}</span>
@@ -257,7 +294,6 @@ export default async function ModDetailPage({
             </span>
           </div>
 
-          {/* ===== TAGS ===== */}
           <div className="flex items-center gap-2 flex-wrap">
             {mod.tags.map((tag) => (
               <span
@@ -274,7 +310,6 @@ export default async function ModDetailPage({
             ))}
           </div>
 
-          {/* ===== VIDEO PREVIEW ===== */}
           {mod.videoId && (
             <div className="space-y-3">
               <h2 className="text-xs font-black tracking-widest uppercase text-slate-400">
@@ -294,7 +329,6 @@ export default async function ModDetailPage({
             </div>
           )}
 
-          {/* ===== DESCRIPTION ===== */}
           <div className="bg-[#111] rounded-2xl border border-white/5 p-5 md:p-7 space-y-3">
             <h2 className="text-sm font-black tracking-widest uppercase text-slate-400">Mô tả</h2>
             <p className="text-slate-300 text-sm md:text-base leading-relaxed whitespace-pre-line">
@@ -302,9 +336,7 @@ export default async function ModDetailPage({
             </p>
           </div>
 
-          {/* ===== PRICING + CTA ===== */}
           <div className="relative overflow-hidden bg-gradient-to-br from-[#ce5a67]/20 via-[#0a0a0a] to-[#a855f7]/10 border border-[#ce5a67]/30 rounded-3xl p-6 md:p-8">
-            {/* Background glow */}
             <div className="pointer-events-none absolute -top-10 -right-10 w-48 h-48 rounded-full bg-[#ce5a67]/20 blur-3xl" />
             
             <div className="relative flex flex-col sm:flex-row items-center gap-6">
@@ -333,9 +365,7 @@ export default async function ModDetailPage({
           </p>
         </div>
       ) : isPortrait ? (
-        // ===== FACES LAYOUT =====
         <div className="relative">
-          {/* Background glow */}
           <div className="pointer-events-none absolute inset-0 opacity-60">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(206,90,103,0.22),transparent_60%)]" />
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(59,130,246,0.14),transparent_55%)]" />
@@ -343,7 +373,6 @@ export default async function ModDetailPage({
 
           <div className="relative max-w-5xl mx-auto px-4 md:px-6 py-10 md:py-14 flex flex-col items-center gap-8 md:gap-10">
             
-            {/* Title + meta */}
             <div className="w-full text-center space-y-3">
               <div className="flex items-center justify-center gap-2 flex-wrap">
                 <span className="px-3 py-1 rounded-full text-[10px] font-black bg-white/5 border border-white/10">
@@ -371,9 +400,7 @@ export default async function ModDetailPage({
               </div>
             </div>
 
-            {/* Hero section */}
             <div className="w-full flex flex-col md:flex-row md:items-center md:gap-10">
-              {/* Ảnh */}
               <div className="w-full md:w-[360px] flex-shrink-0 flex justify-center">
                 <div className="relative w-[260px] md:w-[320px] aspect-[3/4] rounded-[28px] overflow-hidden border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.7)] bg-[#050507]">
                   {thumbnailSrc ? (
@@ -392,9 +419,7 @@ export default async function ModDetailPage({
                 </div>
               </div>
 
-              {/* Card info + download */}
               <div className="mt-6 md:mt-0 flex-1 flex flex-col gap-4">
-                {/* Tags */}
                 <div className="flex flex-wrap gap-2">
                   {mod.tags.map((tag) => (
                     <span
@@ -411,7 +436,6 @@ export default async function ModDetailPage({
                   ))}
                 </div>
 
-                {/* Mô tả */}
                 <div className="bg-[#0c0c10] rounded-2xl border border-white/5 p-5 md:p-6 space-y-3">
                   <h2 className="text-xs font-black tracking-widest uppercase text-slate-400">
                     Mô tả
@@ -421,7 +445,6 @@ export default async function ModDetailPage({
                   </p>
                 </div>
 
-                {/* Download CTA */}
                 <div className="bg-gradient-to-br from-[#ce5a67]/20 via-[#ce5a67]/5 to-transparent border border-[#ce5a67]/40 rounded-2xl p-5 md:p-6 flex flex-col sm:flex-row items-center gap-4">
                   <div className="flex-1 text-center sm:text-left">
                     <p className="text-[11px] text-slate-400 uppercase tracking-widest">
@@ -458,10 +481,7 @@ export default async function ModDetailPage({
           </div>
         </div>
       ) : (
-        // ===== MOD LANDSCAPE (KHÔNG PHẢI MIX MODS) =====
         <div className="max-w-4xl mx-auto px-4 md:px-6 py-8 md:py-12 space-y-8">
-
-          {/* Thumbnail hero */}
           <div className="relative rounded-3xl overflow-hidden border border-white/10 h-56 md:h-96">
             {thumbnailSrc ? (
               <Image
@@ -492,7 +512,6 @@ export default async function ModDetailPage({
             </div>
           </div>
 
-          {/* Info row */}
           <div className="flex items-center gap-3 flex-wrap text-xs border-b border-white/5 pb-5">
             <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-slate-300">
               👤 <span className="font-bold">{mod.author}</span>
@@ -505,7 +524,6 @@ export default async function ModDetailPage({
             </span>
           </div>
 
-          {/* Tags */}
           <div className="flex items-center gap-2 flex-wrap">
             {mod.tags.map((tag) => (
               <span
@@ -522,7 +540,6 @@ export default async function ModDetailPage({
             ))}
           </div>
 
-          {/* Description */}
           <div className="bg-[#111] rounded-2xl border border-white/5 p-5 md:p-7 space-y-3">
             <h2 className="text-sm font-black tracking-widest uppercase text-slate-400">Mô tả</h2>
             <p className="text-slate-300 text-sm md:text-base leading-relaxed whitespace-pre-line">
@@ -530,7 +547,6 @@ export default async function ModDetailPage({
             </p>
           </div>
 
-          {/* Download CTA */}
           <div className="bg-gradient-to-br from-[#ce5a67]/10 to-transparent border border-[#ce5a67]/20 rounded-3xl p-6 md:p-8 flex flex-col sm:flex-row items-center gap-5">
             <div className="flex-1 text-center sm:text-left">
               <p className="text-xs text-slate-500 uppercase tracking-widest">Sẵn sàng cài đặt</p>
@@ -562,6 +578,65 @@ export default async function ModDetailPage({
           </div>
         </div>
       )}
+      <section className="mx-auto max-w-6xl px-4 md:px-6 pb-14">
+        <div className="rounded-3xl border border-white/10 bg-[#0f0f14] p-5 md:p-6">
+          <div className="flex items-end justify-between gap-3">
+            <div>
+              <h2 className="text-xl md:text-2xl font-black text-white">Mods liên quan</h2>
+              <p className="text-xs text-slate-400 mt-1">
+                Ưu tiên mod cùng tag và cùng thể loại, tối đa 8 mục.
+              </p>
+            </div>
+            <Link href="/mods" className="text-[11px] uppercase tracking-widest text-[#ce5a67] hover:underline font-black">
+              Xem tất cả
+            </Link>
+          </div>
+          <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+            {relatedMods.length > 0 ? (
+              relatedMods.map((relatedMod) => (
+                <Link
+                  key={relatedMod.slug}
+                  href={`/mods/${relatedMod.slug}`}
+                  className="group rounded-2xl border border-white/10 bg-white/[0.02] overflow-hidden transition-colors hover:border-[#ce5a67]/50"
+                >
+                  <div className="h-36 bg-[#16161d]">
+                    {relatedMod.thumbnail ? (
+                      <img src={relatedMod.thumbnail} alt={relatedMod.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" loading="lazy" />
+                    ) : (
+                      <div className="h-full w-full" />
+                    )}
+                  </div>
+                  <div className="p-3">
+                    <div className="flex flex-wrap gap-1">
+                      {relatedMod.tags.slice(0, 2).map((tag) => (
+                        <span
+                          key={`${relatedMod.slug}-${tag}`}
+                          className="rounded-full border px-2 py-0.5 text-[10px] font-semibold"
+                          style={{
+                            color: TAG_COLORS[tag] || "#cbd5e1",
+                            borderColor: `${TAG_COLORS[tag] || "#64748b"}66`,
+                            background: `${TAG_COLORS[tag] || "#64748b"}1f`,
+                          }}
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                    <h3 className="mt-2 line-clamp-2 text-sm font-bold text-white">{relatedMod.name}</h3>
+                    <p className="mt-2 text-[11px] text-slate-400">
+                      {relatedMod.category} · {relatedMod.updatedAt}
+                    </p>
+                  </div>
+                </Link>
+              ))
+            ) : (
+              <div className="col-span-full rounded-2xl border border-dashed border-white/10 bg-white/[0.02] p-6 text-center text-sm text-slate-400">
+                Chưa có mod liên quan phù hợp để hiển thị.
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
     </main>
   );
 }

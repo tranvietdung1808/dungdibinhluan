@@ -14,10 +14,14 @@ CREATE TABLE IF NOT EXISTS public.guides (
   slug text UNIQUE NOT NULL,
   content text NOT NULL,
   thumbnail_url text,
+  tags text[] DEFAULT '{}',
   author_id uuid REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
   created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
   updated_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
 );
+
+ALTER TABLE public.guides
+  ADD COLUMN IF NOT EXISTS tags text[] DEFAULT '{}';
 
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS profiles_username_idx ON public.profiles(username);

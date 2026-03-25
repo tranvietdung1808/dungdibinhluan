@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import RichTextEditor from '@/app/components/RichTextEditor'
+import { GUIDE_FIXED_TAGS } from '@/lib/related-content'
 
 interface Guide {
   id: string
@@ -11,6 +12,7 @@ interface Guide {
   slug: string
   content: string
   thumbnail_url: string | null
+  tags: string[]
   created_at: string
   updated_at: string
 }
@@ -26,6 +28,7 @@ export default function EditGuideForm({ guide }: { guide: Guide }) {
   )
   const [isUploadingThumbnail, setIsUploadingThumbnail] = useState(false)
   const [content, setContent] = useState(guide.content)
+  const [selectedTags, setSelectedTags] = useState<string[]>(guide.tags || [])
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const router = useRouter()
@@ -44,6 +47,7 @@ export default function EditGuideForm({ guide }: { guide: Guide }) {
     setTitle(guide.title)
     setSlug(guide.slug)
     setContent(guide.content)
+    setSelectedTags(guide.tags || [])
     revokeBlobUrl()
     setStoredThumbnailUrl(guide.thumbnail_url || '')
     setThumbnailPreview(guide.thumbnail_url || null)
@@ -52,6 +56,7 @@ export default function EditGuideForm({ guide }: { guide: Guide }) {
     guide.title,
     guide.slug,
     guide.content,
+    guide.tags,
     guide.thumbnail_url,
   ])
 
@@ -123,6 +128,7 @@ export default function EditGuideForm({ guide }: { guide: Guide }) {
           slug,
           content,
           thumbnail_url: storedThumbnailUrl || null,
+          tags: selectedTags,
         }),
       })
 
@@ -139,8 +145,32 @@ export default function EditGuideForm({ guide }: { guide: Guide }) {
     }
   }
 
+  const toggleTag = (tag: string) => {
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((item) => item !== tag) : [...prev, tag]
+    )
+  }
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="rounded-xl border border-[#ce5a67]/35 bg-[#ce5a67]/10 px-4 py-4">
+        <h2 className="text-sm font-semibold text-white">Vận hành mục Bài viết liên quan</h2>
+        <p className="mt-1 text-xs text-slate-300">
+          Chọn tag thủ công để bài được xếp đúng nhóm liên quan.
+        </p>
+        <p className="mt-1 text-xs text-slate-400">
+          Có thể chọn một hoặc nhiều tag cho cùng bài viết.
+        </p>
+      </div>
+      <div className="flex justify-end">
+        <button
+          type="submit"
+          disabled={saving}
+          className="px-5 py-2.5 bg-[#ce5a67] text-white font-semibold rounded-lg hover:bg-[#b44c5c] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {saving ? 'Đang lưu...' : 'Lưu thay đổi'}
+        </button>
+      </div>
       {/* Title */}
       <div>
         <label htmlFor="title" className="block text-sm font-medium text-white mb-2">
@@ -174,6 +204,27 @@ export default function EditGuideForm({ guide }: { guide: Guide }) {
         <p className="text-slate-500 text-sm mt-1">
           Slug sẽ được dùng trong URL: /huong-dan/{slug}
         </p>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-white mb-2">
+          Tags cho bài viết liên quan
+        </label>
+        <div className="flex flex-wrap gap-2">
+          {GUIDE_FIXED_TAGS.map((tag) => {
+            const selected = selectedTags.includes(tag)
+            return (
+              <button
+                key={tag}
+                type="button"
+                onClick={() => toggleTag(tag)}
+                className={`rounded-full border px-3 py-1.5 text-xs transition-colors ${selected ? 'border-[#ce5a67] bg-[#ce5a67]/20 text-white' : 'border-white/20 bg-white/5 text-slate-300 hover:border-white/40'}`}
+              >
+                {tag}
+              </button>
+            )
+          })}
+        </div>
       </div>
 
       {/* Thumbnail */}

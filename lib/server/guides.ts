@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import type { Database } from '@/utils/supabase/database.types'
+import { GUIDE_FIXED_TAGS } from '@/lib/related-content'
 
 type GuideInsert = Database['public']['Tables']['guides']['Insert']
 type GuideUpdate = Database['public']['Tables']['guides']['Update']
@@ -9,6 +10,7 @@ export type GuidePayload = {
   slug?: string
   content?: string
   thumbnail_url?: string | null
+  tags?: string[]
 }
 
 const REQUIRED_GUIDE_FIELDS: Array<keyof GuidePayload> = ['title', 'slug', 'content']
@@ -27,21 +29,27 @@ export function missingRequiredGuideFields(payload: GuidePayload) {
 }
 
 export function normalizeGuideInsertPayload(payload: GuidePayload): GuideInsert {
+  const allowedTags = new Set<string>(GUIDE_FIXED_TAGS)
+  const normalizedTags = [...new Set((payload.tags || []).filter((tag) => allowedTags.has(tag)))]
   return {
     title: payload.title!,
     slug: payload.slug!,
     content: payload.content!,
     thumbnail_url: payload.thumbnail_url || null,
+    tags: normalizedTags,
     author_id: ADMIN_AUTHOR_ID,
   }
 }
 
 export function normalizeGuideUpdatePayload(payload: GuidePayload): GuideUpdate {
+  const allowedTags = new Set<string>(GUIDE_FIXED_TAGS)
+  const normalizedTags = [...new Set((payload.tags || []).filter((tag) => allowedTags.has(tag)))]
   return {
     title: payload.title!,
     slug: payload.slug!,
     content: payload.content!,
     thumbnail_url: payload.thumbnail_url || null,
+    tags: normalizedTags,
     updated_at: new Date().toISOString(),
   }
 }

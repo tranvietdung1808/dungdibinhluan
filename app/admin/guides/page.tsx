@@ -99,6 +99,15 @@ export default function AdminGuidesPage() {
 
       {/* Content */}
       <div className="max-w-6xl mx-auto px-4 py-8">
+        <div className="mb-6 rounded-xl border border-[#ce5a67]/35 bg-[#ce5a67]/10 px-4 py-4">
+          <h2 className="text-sm font-semibold text-white">Hướng dẫn vận hành nội dung liên quan</h2>
+          <p className="mt-1 text-xs text-slate-300">
+            Khi tạo hoặc sửa bài, admin cần chọn tag: Hướng dẫn mods, Hướng dẫn Career Mode, hoặc Thông tin game.
+          </p>
+          <p className="mt-1 text-xs text-slate-400">
+            Mục Bài viết liên quan sẽ lấy theo tag đã chọn và ưu tiên bài mới hơn.
+          </p>
+        </div>
         {error ? (
           <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-4">
             <p className="text-red-400">{error}</p>
