@@ -1,33 +1,21 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
+  const isLoginPage = pathname === '/admin'
+  const hasAuth = typeof window !== 'undefined' && Boolean(sessionStorage.getItem('admin_authenticated'))
 
   useEffect(() => {
-    // Check if on login page - exempt from auth check
-    if (pathname === '/admin') {
-      setIsLoading(false)
-      return
+    if (!isLoginPage && !hasAuth) {
+      router.replace('/admin')
     }
+  }, [hasAuth, isLoginPage, router])
 
-    // Check authentication
-    const adminAuth = sessionStorage.getItem('admin_authenticated')
-    if (!adminAuth) {
-      router.push('/admin')
-    } else {
-      setIsAuthenticated(true)
-      setIsLoading(false)
-    }
-  }, [pathname, router])
-
-  // Show loading state
-  if (isLoading && pathname !== '/admin') {
+  if (!isLoginPage && !hasAuth) {
     return (
       <div className="min-h-screen bg-[#0a0a0a] text-white flex items-center justify-center">
         <div className="text-center">

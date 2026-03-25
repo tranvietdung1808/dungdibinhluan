@@ -121,28 +121,6 @@ export default function ModsPage({ initialDbMods = [] }: ModsPageProps) {
 
   const totalPages = Math.ceil(gridItems.length / PAGE_SIZE);
   const paginated = gridItems.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-  const featuredThumbnail = featured?.thumbnail || "";
-  const preloadThumbnailList = useMemo(
-    () =>
-      paginated
-        .slice(0, 6)
-        .map((mod) => mod.thumbnail)
-        .filter((thumbnail): thumbnail is string => Boolean(thumbnail)),
-    [paginated]
-  );
-
-  // Preload featured mod image and first page images
-  useEffect(() => {
-    if (featuredThumbnail) {
-      const img = new Image();
-      img.src = featuredThumbnail;
-    }
-
-    preloadThumbnailList.forEach((thumbnail) => {
-      const img = new Image();
-      img.src = thumbnail;
-    });
-  }, [featuredThumbnail, preloadThumbnailList]);
 
   const handleTagChange = (tag: string) => {
     setActiveTag(tag);

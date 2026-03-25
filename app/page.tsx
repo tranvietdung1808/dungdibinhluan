@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { GAMES } from "./data/games";
 import { MODS } from "./data/mods";
 import { FACES } from "./data/faces";
-import FeatureSlider from "./components/FeatureSlider";
 import HeroSection from "./components/HeroSection";
-import Navbar from "./components/Navbar";
 import { createClient } from "@/utils/supabase/server";
 import { resolveThumbnailSrc } from "@/utils/r2";
 
@@ -17,6 +16,8 @@ export const metadata: Metadata = {
 };
 
 export const revalidate = 120;
+
+const FeatureSlider = dynamic(() => import("./components/FeatureSlider"));
 
 type HomeGuide = {
   id: string;
@@ -102,10 +103,12 @@ const LatestModsSection = ({ mods }: { mods: HomeModCard[] }) => {
               >
                 <div className="relative h-32 bg-[#111]">
                   {mod.thumbnail ? (
-                    <img 
-                      src={mod.thumbnail} 
-                      alt={`Thumbnail mod ${mod.name}`} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                    <Image
+                      src={mod.thumbnail}
+                      alt={`Thumbnail mod ${mod.name}`}
+                      fill
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 25vw"
                       loading="lazy"
                     />
                   ) : (
@@ -155,7 +158,14 @@ const MobileLatestGuidesSection = ({
             >
               <div className="relative h-36 bg-[#13131b]">
                 {guide.thumbnail ? (
-                  <img src={guide.thumbnail} alt={guide.title} className="w-full h-full object-cover" loading="lazy" />
+                  <Image
+                    src={guide.thumbnail}
+                    alt={guide.title}
+                    fill
+                    className="w-full h-full object-cover"
+                    sizes="210px"
+                    loading="lazy"
+                  />
                 ) : (
                   <div className="w-full h-full bg-gradient-to-b from-[#ce5a67]/25 to-transparent" />
                 )}
@@ -209,6 +219,7 @@ const GameGrid = () => {
                 alt={`Thumbnail game ${game.name}`}
                 fill
                 className="object-cover opacity-60 group-hover:opacity-80 group-hover:scale-105 transition-all duration-500"
+                sizes="(max-width: 640px) 100vw, 50vw"
                 loading="lazy"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#111] via-transparent to-transparent" />
@@ -290,7 +301,6 @@ export default async function HomePage() {
   return (
     <main className="min-h-screen bg-[#080810] text-white">
       <h1 className="sr-only">DungDiBinhLuan - Mod Game FC 26, FIFA, Facepack chất lượng cao</h1>
-      <Navbar />
       <div className="pt-14 md:pt-16">
         <section>
           <HeroSection latestGuides={heroGuides} />

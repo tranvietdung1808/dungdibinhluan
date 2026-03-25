@@ -87,6 +87,8 @@ export default function HeroSection({ latestGuides = [] }: HeroSectionProps) {
             alt="EA FC 26"
             fill
             className="object-cover object-top opacity-65"
+            sizes="100vw"
+            quality={75}
             priority
           />
 
@@ -201,7 +203,14 @@ export default function HeroSection({ latestGuides = [] }: HeroSectionProps) {
                         
                         <div className="relative w-[56px] h-[72px] rounded-xl overflow-hidden bg-[#13131b] flex-shrink-0 shadow-[0_4px_15px_rgba(0,0,0,0.5)]">
                           {guide.thumbnail ? (
-                            <img src={guide.thumbnail} alt={guide.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" loading="lazy" />
+                            <Image
+                              src={guide.thumbnail}
+                              alt={guide.title}
+                              fill
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                              sizes="56px"
+                              loading="lazy"
+                            />
                           ) : (
                             <div className="w-full h-full bg-gradient-to-br from-[#ce5a67]/20 to-[#111]" />
                           )}

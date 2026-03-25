@@ -42,6 +42,8 @@ export default function FeaturedModCard({ mod }: FeaturedModCardProps) {
             alt={mod.name}
             fill
             className="object-cover opacity-90 group-hover:opacity-95 group-hover:scale-[1.04] transition-all duration-500"
+            sizes="100vw"
+            priority
           />
           <div className="absolute inset-0" style={{ background: "linear-gradient(100deg, rgba(8,8,16,0.70) 22%, rgba(8,8,16,0.30) 50%, rgba(8,8,16,0.02) 100%)" }} />
           <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(8,8,16,0.75) 0%, rgba(8,8,16,0.25) 30%, transparent 58%)" }} />

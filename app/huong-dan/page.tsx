@@ -91,10 +91,13 @@ export default async function GuidesPage() {
               >
                 {thumbSrc ? (
                   <div className="relative aspect-video w-full overflow-hidden bg-black">
-                    <img
+                    <Image
                       src={thumbSrc}
                       alt={guide.title}
+                      fill
                       className="h-full w-full object-cover object-center"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      loading="lazy"
                     />
                     <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 to-transparent" />
                   </div>
