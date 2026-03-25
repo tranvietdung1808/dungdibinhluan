@@ -139,7 +139,7 @@ export default function CommunityComments({ scopeType, scopeId, title, emptyText
 
       setContent("");
       setReplyToId(null);
-      setMessage("Đã gửi, chờ admin duyệt.");
+      setMessage("");
       await loadComments();
     } finally {
       setSubmitting(false);
@@ -210,7 +210,6 @@ export default function CommunityComments({ scopeType, scopeId, title, emptyText
       <div className="flex items-end justify-between gap-3">
         <div>
           <h2 className="text-lg font-black text-white">{title}</h2>
-          <p className="text-xs text-slate-400 mt-1">Bình luận chỉ hiển thị sau khi admin duyệt.</p>
         </div>
       </div>
 
