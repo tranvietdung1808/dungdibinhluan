@@ -208,7 +208,9 @@ export default function HeroSection({ latestGuides = [] }: HeroSectionProps) {
                               alt={guide.title}
                               fill
                               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                              sizes="56px"
+                              sizes="(max-width: 1536px) 72px, 56px"
+                              quality={95}
+                              unoptimized={guide.thumbnail.startsWith("/api/media/")}
                               loading="lazy"
                             />
                           ) : (

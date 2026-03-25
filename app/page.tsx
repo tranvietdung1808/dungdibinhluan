@@ -163,7 +163,9 @@ const MobileLatestGuidesSection = ({
                     alt={guide.title}
                     fill
                     className="w-full h-full object-cover"
-                    sizes="210px"
+                    sizes="(max-width: 768px) 240px, 210px"
+                    quality={95}
+                    unoptimized={guide.thumbnail.startsWith("/api/media/")}
                     loading="lazy"
                   />
                 ) : (
