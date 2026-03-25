@@ -62,6 +62,11 @@ body {
   to   { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes progress-sheen {
+  0% { transform: translate3d(-130%, 0, 0); }
+  100% { transform: translate3d(340%, 0, 0); }
+}
+
 /* ===== UTILITY CLASSES ===== */
 .animate-pulse-glow {
   animation: pulse-glow 4s ease-in-out infinite;
@@ -74,6 +79,11 @@ body {
 
 .animate-fade-in-up {
   animation: fade-in-up 0.7s ease-out both;
+}
+
+.animate-progress-sheen {
+  animation: progress-sheen 1.15s linear infinite;
+  will-change: transform;
 }
 
 /* Hero grid texture overlay */
