@@ -18,7 +18,7 @@ const editions = [
     subtitle: "STANDARD EDITION",
     description: "Bộ cài đặt game đầy đủ, tối ưu hiệu năng theo máy của anh em. Hỗ trợ cài đặt full qua teamview/ultraview.",
     features: ["✅ Game bản quyền", "✅Tối ưu FPS sẵn", "✅ Hỗ trợ cài đặt 1:1"],
-    tag: "PHỔ BIẾN",
+    tag: "GAME GỐC",
     tagColor: "#ce5a67",
     img: "/games/fc26n.jpg",
     price: "149.000₫",
