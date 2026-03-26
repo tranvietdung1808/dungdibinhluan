@@ -82,8 +82,8 @@ const LatestModsSection = ({ mods }: { mods: HomeModCard[] }) => {
   if (mods.length === 0) return null;
 
   return (
-    <section className="max-w-6xl mx-auto px-4 md:px-6 -mt-6 md:-mt-8 relative z-20" aria-labelledby="latest-mods-heading">
-      <div className="rounded-3xl border border-white/10 bg-[#0d0d14]/95 backdrop-blur-xl p-5 md:p-6">
+    <section className="max-w-6xl mx-auto px-4 md:px-6 mt-6 lg:mt-8 relative z-20" aria-labelledby="latest-mods-heading">
+      <div className="rounded-3xl border border-white/10 bg-[#0d0d14]/95 backdrop-blur-xl p-4 md:p-6">
         <div className="flex items-center justify-between mb-5">
           <div>
             <p className="text-[10px] uppercase tracking-[0.3em] text-slate-500">CHIA SẺ MODS MIỄN PHÍ</p>
@@ -94,14 +94,14 @@ const LatestModsSection = ({ mods }: { mods: HomeModCard[] }) => {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
           {mods.slice(0, 8).map((mod) => (
             <article key={mod.slug}>
               <Link
                 href={`/mods/${mod.slug}`}
                 className="group rounded-2xl border border-white/10 bg-white/[0.02] overflow-hidden hover:border-[#ce5a67]/45 transition-colors block"
               >
-                <div className="relative h-32 bg-[#111]">
+                <div className="relative h-28 md:h-32 bg-[#111]">
                   {mod.thumbnail ? (
                     <Image
                       src={mod.thumbnail}
@@ -119,9 +119,9 @@ const LatestModsSection = ({ mods }: { mods: HomeModCard[] }) => {
                     {mod.tag}
                   </span>
                 </div>
-                <div className="p-3">
-                  <h3 className="text-sm font-bold line-clamp-2 leading-snug group-hover:text-[#ce5a67] transition-colors">{mod.name}</h3>
-                  <p className="mt-2 text-[10px] text-slate-500">Cập nhật: {mod.updatedAt}</p>
+                <div className="p-2.5 md:p-3">
+                  <h3 className="text-xs md:text-sm font-bold line-clamp-2 leading-snug group-hover:text-[#ce5a67] transition-colors">{mod.name}</h3>
+                  <p className="mt-1.5 md:mt-2 text-[9px] md:text-[10px] text-slate-500">Cập nhật: {mod.updatedAt}</p>
                 </div>
               </Link>
             </article>
@@ -149,14 +149,14 @@ const MobileLatestGuidesSection = ({
           </Link>
         </div>
 
-        <div className="flex gap-3 overflow-x-auto pb-1 snap-x snap-mandatory">
+        <div className="flex gap-3 overflow-x-auto pb-1 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {guides.map((guide) => (
             <Link
               key={guide.id}
               href={`/huong-dan/${guide.slug}`}
-              className="snap-start min-w-[210px] max-w-[210px] rounded-xl border border-white/10 bg-white/[0.03] overflow-hidden"
+              className="snap-start min-w-[200px] max-w-[200px] md:min-w-[210px] md:max-w-[210px] rounded-xl border border-white/10 bg-white/[0.03] overflow-hidden"
             >
-              <div className="relative h-36 bg-[#13131b]">
+              <div className="relative h-32 md:h-36 bg-[#13131b]">
                 {guide.thumbnail ? (
                   <Image
                     src={guide.thumbnail}

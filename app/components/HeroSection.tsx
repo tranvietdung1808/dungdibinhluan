@@ -131,7 +131,7 @@ export default function HeroSection({ latestGuides = [] }: HeroSectionProps) {
           />
         </div>
 
-        <div className="relative z-10 max-w-[1200px] mx-auto px-5 w-full">
+        <div className="relative z-10 max-w-[1200px] xl:max-w-[1320px] mx-auto px-5 py-20 xl:py-24 w-full">
           <div className="flex flex-col xl:flex-row items-center justify-between gap-8 xl:gap-16 w-full">
             <div className="max-w-xs sm:max-w-sm md:max-w-xl space-y-4 md:space-y-6 mx-auto xl:mx-0 flex-1">
               <div className="flex items-center gap-2 md:gap-3 flex-wrap">
@@ -179,7 +179,7 @@ export default function HeroSection({ latestGuides = [] }: HeroSectionProps) {
               </div>
             </div>
 
-            <div className="hidden xl:block">
+            <div className="hidden xl:block xl:-mr-4 2xl:-mr-10">
               {latestGuides.length > 0 && (
                 <div className="space-y-3 w-[280px] 2xl:w-[320px]">
                   <div className="flex items-center justify-between px-2">
