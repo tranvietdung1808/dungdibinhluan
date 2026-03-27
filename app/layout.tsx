@@ -7,6 +7,7 @@ import "./globals.css";
 import Navbar from "./components/Navbar";
 import StructuredData from "./components/StructuredData";
 import TopProgressBar from "./components/TopProgressBar";
+import MessengerButton from "./components/MessengerButton";
 
 const beVietnamPro = Be_Vietnam_Pro({
   variable: "--font-be-vietnam",
@@ -116,6 +117,7 @@ export default function RootLayout({
         <div className="pt-14 md:pt-16">
           {children}
         </div>
+        <MessengerButton />
         <Analytics />
       </body>
     </html>
