@@ -263,7 +263,10 @@ export default function HeroSection({ latestGuides = [] }: HeroSectionProps) {
                   MIX MODS FC 26 <span className="text-[#ce5a67]">2025–2026</span>
                 </h3>
                 <p className="mt-2 text-xs md:text-sm text-slate-400 leading-relaxed">
-                  Siêu phẩm MIX MODS FC 26 đã chính thức ra mắt! Bản mod hoàn thiện nhất trên thị trường với hàng trăm mod mất phí được chọn lọc kĩ càng.
+                  Siêu phẩm MIX MODS FC 26 đã chính thức ra mắt!<br /><br />
+                  Bản mod hoàn thiện nhất trên thị trường với hàng trăm mod mất phí được chọn lọc kĩ càng. Bao gồm tối ưu bằng những bản mod chất lượng nhất, facemods chất lượng nhất!<br /><br />
+                  Gần 2000 faces mới được thêm vào, update về đồ họa, gameplay AI, tất tần tật mọi thứ bạn cần để hòa mình vào FC 26 một cách chân thực nhất!<br /><br />
+                  Hỗ trợ tối ưu đồ họa cho máy của từng khách hàng! Hỗ trợ cài đặt 1:1 qua Teamview/Ultraview! Update miễn phí!
                 </p>
               </div>
               <button

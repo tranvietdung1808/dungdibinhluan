@@ -24,9 +24,13 @@ export const MODS: Mod[] = [
     version: "v1.0",
     updatedAt: "11/03/2026",
     description: "Bộ mod tổng hợp hoàn chỉnh nhất thị trường — Faces, Kits, Gameplay, Đồ họa 4K.",
-    longDescription: `Siêu phẩm MIX MODS FC 26 đã chính thức ra mắt! Bản mod hoàn thiện nhất trên thị trường với hàng trăm mod mất phí được chọn lọc kĩ càng.
+    longDescription: `Siêu phẩm MIX MODS FC 26 đã chính thức ra mắt!
 
-Bao gồm facepack lớn nhất, áo đấu mùa 2025-26, gameplay AI được cải thiện, đồ họa 4K UltraHD và hàng trăm cập nhật khác.`,
+Bản mod hoàn thiện nhất trên thị trường với hàng trăm mod mất phí được chọn lọc kĩ càng. Bao gồm tối ưu bằng những bản mod chất lượng nhất, facemods chất lượng nhất!
+
+Gần 2000 faces mới được thêm vào, update về đồ họa, gameplay AI, tất tần tật mọi thứ bạn cần để hòa mình vào FC 26 một cách chân thực nhất!
+
+Hỗ trợ tối ưu đồ họa cho máy của từng khách hàng! Hỗ trợ cài đặt 1:1 qua Teamview/Ultraview! Update miễn phí!`,
     thumbnail: "/mods/mixmods.jpg",
     downloadUrl: "https://drive.google.com/file/d/1jP39z0kHDmB7XOLB8c682mpTxBOklXVW/view?usp=sharing",
     tags: ["Faces", "Kits", "Gameplay", "Đồ họa", "Cơ chế game"],
