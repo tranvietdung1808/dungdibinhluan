@@ -69,21 +69,35 @@ export async function getUserRoles(supabaseClient: any, email?: string | null): 
  */
 export async function hasRole(supabaseClient: any, email: string | null | undefined, role: UserRole): Promise<boolean> {
   const normalized = normalizeEmail(email);
-  if (!normalized) return false;
+  if (!normalized) {
+    console.log("[hasRole] Email không hợp lệ:", email);
+    return false;
+  }
 
   // Static admin check (only for admin role)
-  if (role === "admin" && getStaticAdminEmails().has(normalized)) return true;
+  if (role === "admin" && getStaticAdminEmails().has(normalized)) {
+    console.log("[hasRole] Email là static admin:", normalized);
+    return true;
+  }
 
   try {
-    const { data } = await supabaseClient
+    console.log("[hasRole] Kiểm tra role trong DB:", { email: normalized, role });
+    const { data, error } = await supabaseClient
       .from("user_roles")
       .select("role")
       .eq("email", normalized)
       .eq("role", role)
       .maybeSingle();
 
+    if (error) {
+      console.error("[hasRole] Lỗi truy vấn Supabase:", error);
+      return false;
+    }
+
+    console.log("[hasRole] Kết quả truy vấn:", { data, hasRole: !!data });
     return !!data;
-  } catch {
+  } catch (error) {
+    console.error("[hasRole] Lỗi không xác định:", error);
     return false;
   }
 }
@@ -120,5 +134,8 @@ export async function hasAnyRole(supabaseClient: any, email: string | null | und
  * Check if a user is an admin (backward compatible)
  */
 export async function checkIsAdminEmail(supabaseClient: any, email?: string | null): Promise<boolean> {
-  return hasRole(supabaseClient, email, "admin");
+  console.log("[checkIsAdminEmail] Kiểm tra admin cho email:", email);
+  const result = await hasRole(supabaseClient, email, "admin");
+  console.log("[checkIsAdminEmail] Kết quả:", result);
+  return result;
 }

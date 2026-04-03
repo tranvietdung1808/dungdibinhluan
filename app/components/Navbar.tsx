@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import type { User } from "@supabase/supabase-js";
 import CheckUyTinButton from "./CheckUyTinButton";
-import { checkIsAdminEmail, isStaticAdminEmail } from "@/lib/admin";
 
 const navItems = [
   { label: "🔥 CHIA SẺ MODS", href: "/mods" },
@@ -22,17 +21,22 @@ export default function Navbar() {
   const router = useRouter();
 
   const syncAdminSessionCookie = useCallback(async (supabase = createClient()) => {
-    const { data } = await supabase.auth.getSession();
-    const token = data.session?.access_token;
-    if (!token) {
-      await fetch("/api/auth/admin-session", { method: "DELETE" });
+    try {
+      const { data } = await supabase.auth.getSession();
+      const token = data.session?.access_token;
+      if (!token) {
+        await fetch("/api/auth/admin-session", { method: "DELETE" });
+        return false;
+      }
+      const res = await fetch("/api/auth/admin-session", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return res.ok;
+    } catch (error) {
+      console.error("Admin session sync error:", error);
       return false;
     }
-    const res = await fetch("/api/auth/admin-session", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    return res.ok;
   }, []);
 
   useEffect(() => {
@@ -43,9 +47,11 @@ export default function Navbar() {
       const { data } = await supabase.auth.getUser();
       if (!active) return;
       const currentUser = data.user ?? null;
+      console.log("[Navbar] loadUser - currentUser:", currentUser?.email);
       setUser(currentUser);
       
       const adminStatus = await syncAdminSessionCookie(supabase);
+      console.log("[Navbar] loadUser - adminStatus:", adminStatus);
       if (active) setIsAdmin(adminStatus);
       
       setAuthLoading(false);
@@ -56,9 +62,11 @@ export default function Navbar() {
     const { data: authListener } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (!active) return;
       const currentUser = session?.user ?? null;
+      console.log("[Navbar] authStateChange - currentUser:", currentUser?.email);
       setUser(currentUser);
       
       const adminStatus = await syncAdminSessionCookie(supabase);
+      console.log("[Navbar] authStateChange - adminStatus:", adminStatus);
       if (active) setIsAdmin(adminStatus);
       
       setAuthLoading(false);
@@ -72,6 +80,7 @@ export default function Navbar() {
   }, [syncAdminSessionCookie]);
 
   const handleGoogleLogin = async () => {
+    console.log("[Navbar] handleGoogleLogin triggered");
     setAuthPending(true);
     const supabase = createClient();
     const currentPath = `${window.location.pathname}${window.location.search}`;
@@ -88,11 +97,17 @@ export default function Navbar() {
   };
 
   const handleLogout = async () => {
+    console.log("Logout triggered");
     try {
       setAuthPending(true);
       const supabase = createClient();
       await supabase.auth.signOut();
-      await fetch("/api/auth/admin-session", { method: "DELETE" });
+      console.log("Supabase signOut successful");
+      try {
+        await fetch("/api/auth/admin-session", { method: "DELETE" });
+      } catch (fetchError) {
+        console.warn("Failed to delete admin session cookie:", fetchError);
+      }
       sessionStorage.removeItem("admin_authenticated");
     } catch (e) {
       console.error("Logout error:", e);

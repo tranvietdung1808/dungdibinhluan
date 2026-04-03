@@ -16,22 +16,32 @@ function buildCookieResponse(status: number, body: Record<string, unknown>, isAd
 }
 
 export async function POST(request: NextRequest) {
+  console.log("[admin-session] POST request received");
   const authorization = request.headers.get("authorization") || "";
   const token = authorization.startsWith("Bearer ") ? authorization.slice(7).trim() : "";
+  console.log("[admin-session] Token present:", !!token);
 
   if (!token) {
+    console.log("[admin-session] No token, returning 401");
     return buildCookieResponse(401, { error: "Unauthorized" }, false);
   }
 
   const { data, error } = await supabaseAdmin.auth.getUser(token);
   if (error || !data.user) {
+    console.error("[admin-session] getUser error:", error, "data:", data);
     return buildCookieResponse(401, { error: "Unauthorized" }, false);
   }
 
-  if (!(await checkIsAdminEmail(supabaseAdmin, data.user.email))) {
+  console.log("[admin-session] User email:", data.user.email);
+  const isAdmin = await checkIsAdminEmail(supabaseAdmin, data.user.email);
+  console.log("[admin-session] isAdmin result:", isAdmin);
+
+  if (!isAdmin) {
+    console.log("[admin-session] User is not admin, returning 403");
     return buildCookieResponse(403, { error: "Forbidden" }, false);
   }
 
+  console.log("[admin-session] User is admin, setting cookie");
   return buildCookieResponse(200, { ok: true }, true);
 }
 
