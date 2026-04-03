@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import type { User } from "@supabase/supabase-js";
 import CheckUyTinButton from "./CheckUyTinButton";
-import { isAdminEmail } from "@/lib/admin";
+import { checkIsAdminEmail, isStaticAdminEmail } from "@/lib/admin";
 
 const navItems = [
   { label: "🔥 CHIA SẺ MODS", href: "/mods" },
@@ -16,6 +16,7 @@ const navItems = [
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
   const [authPending, setAuthPending] = useState(false);
   const router = useRouter();
@@ -40,7 +41,21 @@ export default function Navbar() {
     const loadUser = async () => {
       const { data } = await supabase.auth.getUser();
       if (!active) return;
-      setUser(data.user ?? null);
+      const currentUser = data.user ?? null;
+      setUser(currentUser);
+      
+      if (currentUser) {
+        if (isStaticAdminEmail(currentUser.email)) {
+          setIsAdmin(true);
+        } else {
+          checkIsAdminEmail(supabase, currentUser.email).then(isAdmin => {
+            if (active) setIsAdmin(isAdmin);
+          });
+        }
+      } else {
+        setIsAdmin(false);
+      }
+      
       setAuthLoading(false);
       await syncAdminSessionCookie(supabase);
     };
@@ -49,7 +64,21 @@ export default function Navbar() {
 
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!active) return;
-      setUser(session?.user ?? null);
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+      
+      if (currentUser) {
+        if (isStaticAdminEmail(currentUser.email)) {
+          setIsAdmin(true);
+        } else {
+          checkIsAdminEmail(supabase, currentUser.email).then(isAdmin => {
+            if (active) setIsAdmin(isAdmin);
+          });
+        }
+      } else {
+        setIsAdmin(false);
+      }
+      
       setAuthLoading(false);
       setAuthPending(false);
       void syncAdminSessionCookie(supabase);
@@ -91,7 +120,6 @@ export default function Navbar() {
     user?.user_metadata?.name ||
     user?.email?.split("@")[0] ||
     "Tài khoản";
-  const isAdmin = isAdminEmail(user?.email);
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0a]/70 backdrop-blur-xl border-b border-white/5">

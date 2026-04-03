@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { errorResponse, runRoute, successResponse } from "@/lib/server/api-response";
-import { isAdminEmail } from "@/lib/admin";
+import { checkIsAdminEmail } from "@/lib/admin";
 
 async function ensureAdmin(request: NextRequest) {
   const authorization = request.headers.get("authorization") || "";
@@ -10,7 +10,7 @@ async function ensureAdmin(request: NextRequest) {
     return null;
   }
   const { data, error } = await supabaseAdmin.auth.getUser(token);
-  if (error || !data.user || !isAdminEmail(data.user.email)) {
+  if (error || !data.user || !(await checkIsAdminEmail(supabaseAdmin, data.user.email))) {
     return null;
   }
   return data.user;

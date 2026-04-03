@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { errorResponse, parseJsonBody, runRoute, successResponse } from "@/lib/server/api-response";
 import type { Database } from "@/utils/supabase/database.types";
-import { isAdminEmail } from "@/lib/admin";
+import { checkIsAdminEmail } from "@/lib/admin";
 import { supabaseAdmin } from "@/lib/supabase";
 
 type CommunityInsert = Database["public"]["Tables"]["community_comments"]["Insert"];
@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
       return errorResponse("Bạn cần đăng nhập để bình luận", 401);
     }
 
-    const isAdmin = isAdminEmail(user.email);
+    const isAdmin = await checkIsAdminEmail(supabaseAdmin, user.email);
 
     const authorName = isAdmin ? "ADMIN" : (
       user.user_metadata?.full_name ||

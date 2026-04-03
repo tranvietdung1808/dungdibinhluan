@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import type { User } from "@supabase/supabase-js";
-import { isAdminEmail } from "@/lib/admin";
+import { checkIsAdminEmail, isStaticAdminEmail } from "@/lib/admin";
 
 type CommentItem = {
   id: string;
@@ -32,6 +32,7 @@ export default function CommunityComments({ scopeType, scopeId, title, emptyText
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [content, setContent] = useState("");
   const [replyToId, setReplyToId] = useState<string | null>(null);
   const [message, setMessage] = useState("");
@@ -44,13 +45,39 @@ export default function CommunityComments({ scopeType, scopeId, title, emptyText
     const loadUser = async () => {
       const { data } = await supabase.auth.getUser();
       if (!active) return;
-      setUser(data.user ?? null);
+      const currentUser = data.user ?? null;
+      setUser(currentUser);
+      
+      if (currentUser) {
+        if (isStaticAdminEmail(currentUser.email)) {
+          setIsAdmin(true);
+        } else {
+          checkIsAdminEmail(supabase, currentUser.email).then(isAdmin => {
+            if (active) setIsAdmin(isAdmin);
+          });
+        }
+      } else {
+        setIsAdmin(false);
+      }
     };
 
     loadUser();
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!active) return;
-      setUser(session?.user ?? null);
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+      
+      if (currentUser) {
+        if (isStaticAdminEmail(currentUser.email)) {
+          setIsAdmin(true);
+        } else {
+          checkIsAdminEmail(supabase, currentUser.email).then(isAdmin => {
+            if (active) setIsAdmin(isAdmin);
+          });
+        }
+      } else {
+        setIsAdmin(false);
+      }
     });
 
     return () => {
@@ -97,7 +124,6 @@ export default function CommunityComments({ scopeType, scopeId, title, emptyText
     }
     return map;
   }, [allItems]);
-  const isAdmin = isAdminEmail(user?.email);
 
   const handleLogin = async () => {
     const supabase = createClient();
@@ -146,7 +172,6 @@ export default function CommunityComments({ scopeType, scopeId, title, emptyText
       }
 
       // Optimistically insert the comment so user sees it immediately
-      const isAdmin = isAdminEmail(user?.email);
       const newPending: CommentItem = {
         id: data?.id || `pending-${Date.now()}`,
         scope_type: scopeType,

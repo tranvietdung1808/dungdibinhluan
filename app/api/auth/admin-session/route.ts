@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
-import { isAdminEmail } from "@/lib/admin";
+import { checkIsAdminEmail } from "@/lib/admin";
 
 function buildCookieResponse(status: number, body: Record<string, unknown>, isAdmin: boolean) {
   const response = NextResponse.json(body, { status });
@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     return buildCookieResponse(401, { error: "Unauthorized" }, false);
   }
 
-  if (!isAdminEmail(data.user.email)) {
+  if (!(await checkIsAdminEmail(supabaseAdmin, data.user.email))) {
     return buildCookieResponse(403, { error: "Forbidden" }, false);
   }
 
