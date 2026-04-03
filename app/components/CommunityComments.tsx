@@ -43,18 +43,26 @@ export default function CommunityComments({ scopeType, scopeId, title, emptyText
     let active = true;
 
     const loadUser = async () => {
-      const { data } = await supabase.auth.getUser();
+      const { data: sessionData } = await supabase.auth.getSession();
       if (!active) return;
-      const currentUser = data.user ?? null;
+      const session = sessionData.session;
+      const currentUser = session?.user ?? null;
       setUser(currentUser);
       
       if (currentUser) {
         if (isStaticAdminEmail(currentUser.email)) {
           setIsAdmin(true);
         } else {
-          checkIsAdminEmail(supabase, currentUser.email).then(isAdmin => {
-            if (active) setIsAdmin(isAdmin);
-          });
+          const token = session?.access_token;
+          if (token) {
+            const res = await fetch("/api/auth/admin-session", {
+              method: "POST",
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            if (active) setIsAdmin(res.ok);
+          } else {
+            setIsAdmin(false);
+          }
         }
       } else {
         setIsAdmin(false);
@@ -62,7 +70,7 @@ export default function CommunityComments({ scopeType, scopeId, title, emptyText
     };
 
     loadUser();
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (!active) return;
       const currentUser = session?.user ?? null;
       setUser(currentUser);
@@ -71,9 +79,16 @@ export default function CommunityComments({ scopeType, scopeId, title, emptyText
         if (isStaticAdminEmail(currentUser.email)) {
           setIsAdmin(true);
         } else {
-          checkIsAdminEmail(supabase, currentUser.email).then(isAdmin => {
-            if (active) setIsAdmin(isAdmin);
-          });
+          const token = session?.access_token;
+          if (token) {
+            const res = await fetch("/api/auth/admin-session", {
+              method: "POST",
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            if (active) setIsAdmin(res.ok);
+          } else {
+            setIsAdmin(false);
+          }
         }
       } else {
         setIsAdmin(false);

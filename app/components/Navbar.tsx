@@ -26,12 +26,13 @@ export default function Navbar() {
     const token = data.session?.access_token;
     if (!token) {
       await fetch("/api/auth/admin-session", { method: "DELETE" });
-      return;
+      return false;
     }
-    await fetch("/api/auth/admin-session", {
+    const res = await fetch("/api/auth/admin-session", {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
     });
+    return res.ok;
   }, []);
 
   useEffect(() => {
@@ -44,44 +45,24 @@ export default function Navbar() {
       const currentUser = data.user ?? null;
       setUser(currentUser);
       
-      if (currentUser) {
-        if (isStaticAdminEmail(currentUser.email)) {
-          setIsAdmin(true);
-        } else {
-          checkIsAdminEmail(supabase, currentUser.email).then(isAdmin => {
-            if (active) setIsAdmin(isAdmin);
-          });
-        }
-      } else {
-        setIsAdmin(false);
-      }
+      const adminStatus = await syncAdminSessionCookie(supabase);
+      if (active) setIsAdmin(adminStatus);
       
       setAuthLoading(false);
-      await syncAdminSessionCookie(supabase);
     };
 
     loadUser();
 
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (!active) return;
       const currentUser = session?.user ?? null;
       setUser(currentUser);
       
-      if (currentUser) {
-        if (isStaticAdminEmail(currentUser.email)) {
-          setIsAdmin(true);
-        } else {
-          checkIsAdminEmail(supabase, currentUser.email).then(isAdmin => {
-            if (active) setIsAdmin(isAdmin);
-          });
-        }
-      } else {
-        setIsAdmin(false);
-      }
+      const adminStatus = await syncAdminSessionCookie(supabase);
+      if (active) setIsAdmin(adminStatus);
       
       setAuthLoading(false);
       setAuthPending(false);
-      void syncAdminSessionCookie(supabase);
     });
 
     return () => {
