@@ -55,9 +55,18 @@ export default function GenerateCodePage() {
     alert('Đã copy tất cả!')
   }
 
-  const logout = () => {
-    sessionStorage.removeItem('admin_authenticated')
-    window.location.href = '/admin'
+  const logout = async () => {
+    try {
+      const { createClient } = await import('@/utils/supabase/client');
+      const supabase = createClient();
+      await supabase.auth.signOut();
+      await fetch('/api/auth/admin-session', { method: 'DELETE' });
+    } catch (e) {
+      console.error(e);
+    } finally {
+      sessionStorage.removeItem('admin_authenticated');
+      window.location.href = '/admin';
+    }
   }
 
   return (

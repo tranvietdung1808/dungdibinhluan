@@ -88,12 +88,22 @@ export default function Navbar() {
   };
 
   const handleLogout = async () => {
-    setAuthPending(true);
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    await fetch("/api/auth/admin-session", { method: "DELETE" });
-    setAuthPending(false);
-    router.refresh();
+    try {
+      setAuthPending(true);
+      const supabase = createClient();
+      await supabase.auth.signOut();
+      await fetch("/api/auth/admin-session", { method: "DELETE" });
+      sessionStorage.removeItem("admin_authenticated");
+    } catch (e) {
+      console.error("Logout error:", e);
+    } finally {
+      setAuthPending(false);
+      router.refresh();
+      // If we're in an admin route, reloading might be necessary to clear state
+      if (window.location.pathname.startsWith('/admin')) {
+        window.location.href = '/'; 
+      }
+    }
   };
 
   const displayName =
