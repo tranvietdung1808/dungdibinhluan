@@ -157,3 +157,34 @@ CREATE TRIGGER handle_community_comments_updated_at
   BEFORE UPDATE ON public.community_comments
   FOR EACH ROW
   EXECUTE FUNCTION public.handle_updated_at();
+
+-- =====================================================
+-- User Roles table – flexible role system
+-- Supports: admin, vip, moderator, or any custom role
+-- =====================================================
+CREATE TABLE IF NOT EXISTS public.user_roles (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  email text NOT NULL,
+  role text NOT NULL DEFAULT 'user',
+  note text,  -- optional note, e.g. "VIP đến 2026-12-31"
+  created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+  updated_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+  UNIQUE(email, role)  -- one user can have multiple roles, but no duplicates
+);
+
+-- Indexes for fast lookups
+CREATE INDEX IF NOT EXISTS user_roles_email_idx ON public.user_roles(email);
+CREATE INDEX IF NOT EXISTS user_roles_role_idx ON public.user_roles(role);
+CREATE INDEX IF NOT EXISTS user_roles_email_role_idx ON public.user_roles(email, role);
+
+-- Enable RLS
+ALTER TABLE public.user_roles ENABLE ROW LEVEL SECURITY;
+
+-- Only service_role can read/write (admin operations only)
+CREATE POLICY "Service role full access" ON public.user_roles FOR ALL USING (true);
+
+-- Auto-update updated_at
+CREATE TRIGGER handle_user_roles_updated_at
+  BEFORE UPDATE ON public.user_roles
+  FOR EACH ROW
+  EXECUTE FUNCTION public.handle_updated_at();
