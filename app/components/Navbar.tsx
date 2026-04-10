@@ -56,10 +56,23 @@ export default function Navbar() {
       setAuthLoading(false);
       
       // Fetch admin status in the background
-      if (currentUser) {
+      if (currentUser && currentUser.email) {
+        // Fast UI Load: Check cache and static email first for 0ms latency
+        const cacheKey = `isAdmin_${currentUser.email}`;
+        const isStaticAdmin = currentUser.email === "dungba66@gmail.com";
+        const hasCache = localStorage.getItem(cacheKey) === "true";
+        
+        if (isStaticAdmin || hasCache) {
+          setIsAdmin(true);
+        }
+
+        // Background synchronization
         const adminStatus = await syncAdminSessionCookie(supabase);
         console.log("[Navbar] loadUser - adminStatus:", adminStatus);
-        if (active) setIsAdmin(adminStatus);
+        if (active) {
+          setIsAdmin(adminStatus);
+          localStorage.setItem(cacheKey, String(adminStatus));
+        }
       } else {
         if (active) setIsAdmin(false);
       }
@@ -78,10 +91,21 @@ export default function Navbar() {
       setAuthPending(false);
       
       // Fetch admin status in the background
-      if (currentUser) {
+      if (currentUser && currentUser.email) {
+        const cacheKey = `isAdmin_${currentUser.email}`;
+        const isStaticAdmin = currentUser.email === "dungba66@gmail.com";
+        const hasCache = localStorage.getItem(cacheKey) === "true";
+        
+        if (isStaticAdmin || hasCache) {
+          setIsAdmin(true);
+        }
+
         const adminStatus = await syncAdminSessionCookie(supabase);
         console.log("[Navbar] authStateChange - adminStatus:", adminStatus);
-        if (active) setIsAdmin(adminStatus);
+        if (active) {
+          setIsAdmin(adminStatus);
+          localStorage.setItem(cacheKey, String(adminStatus));
+        }
       } else {
         if (active) setIsAdmin(false);
       }
