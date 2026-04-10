@@ -44,17 +44,25 @@ export default function Navbar() {
     let active = true;
 
     const loadUser = async () => {
-      const { data } = await supabase.auth.getUser();
+      // Use getSession for immediate local data instead of getUser which makes a network request
+      const { data: { session } } = await supabase.auth.getSession();
       if (!active) return;
-      const currentUser = data.user ?? null;
+      
+      const currentUser = session?.user ?? null;
       console.log("[Navbar] loadUser - currentUser:", currentUser?.email);
       setUser(currentUser);
       
-      const adminStatus = await syncAdminSessionCookie(supabase);
-      console.log("[Navbar] loadUser - adminStatus:", adminStatus);
-      if (active) setIsAdmin(adminStatus);
-      
+      // Stop showing '...' so user can log out or see their profile immediately
       setAuthLoading(false);
+      
+      // Fetch admin status in the background
+      if (currentUser) {
+        const adminStatus = await syncAdminSessionCookie(supabase);
+        console.log("[Navbar] loadUser - adminStatus:", adminStatus);
+        if (active) setIsAdmin(adminStatus);
+      } else {
+        if (active) setIsAdmin(false);
+      }
     };
 
     loadUser();
@@ -65,12 +73,18 @@ export default function Navbar() {
       console.log("[Navbar] authStateChange - currentUser:", currentUser?.email);
       setUser(currentUser);
       
-      const adminStatus = await syncAdminSessionCookie(supabase);
-      console.log("[Navbar] authStateChange - adminStatus:", adminStatus);
-      if (active) setIsAdmin(adminStatus);
-      
+      // Stop showing '...' immediately on auth state change
       setAuthLoading(false);
       setAuthPending(false);
+      
+      // Fetch admin status in the background
+      if (currentUser) {
+        const adminStatus = await syncAdminSessionCookie(supabase);
+        console.log("[Navbar] authStateChange - adminStatus:", adminStatus);
+        if (active) setIsAdmin(adminStatus);
+      } else {
+        if (active) setIsAdmin(false);
+      }
     });
 
     return () => {
