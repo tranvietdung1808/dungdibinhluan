@@ -110,7 +110,7 @@ export default function GenerateCodePage() {
           <div className="text-center">
             <h1 className="text-xl font-black tracking-widest">GENERATE CODE</h1>
             <p className="text-[10px] text-slate-500 tracking-widest uppercase mt-1">
-              Code hiệu lực 30 ngày
+              Code hiệu lực 24h & không giới hạn
             </p>
           </div>
 

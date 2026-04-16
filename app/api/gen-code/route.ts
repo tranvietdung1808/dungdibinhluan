@@ -13,7 +13,7 @@ export async function POST(req: Request) {
   const rand = () => Math.random().toString(36).substring(2, 6).toUpperCase();
   const code = `${prefix}-${rand()}-${rand()}`;
 
-  await kv.set(`code:${code}`, { used: false, type }, { ex: 60 * 60 * 24 * 30 });
+  await kv.set(`code:${code}`, { type }, { ex: 60 * 60 * 24 });
 
   return Response.json({ code });
 }
