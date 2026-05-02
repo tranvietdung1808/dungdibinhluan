@@ -29,8 +29,13 @@ interface Mod {
 }
 
 const parseDate = (str: string) => {
-  const [day, month, year] = str.split("/").map(Number);
-  return new Date(year, month - 1, day).getTime();
+  if (!str) return 0;
+  if (str.includes("/")) {
+    const [day, month, year] = str.split("/").map(Number);
+    return new Date(year, month - 1, day).getTime();
+  }
+  const t = new Date(str).getTime();
+  return Number.isNaN(t) ? 0 : t;
 };
 
 const SOURCE = [...MODS, ...FACES];
