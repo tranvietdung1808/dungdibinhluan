@@ -331,9 +331,10 @@ export default async function ModDetailPage({
 
           <div className="bg-[#111] rounded-2xl border border-white/5 p-5 md:p-7 space-y-3">
             <h2 className="text-sm font-black tracking-widest uppercase text-slate-400">Mô tả</h2>
-            <p className="text-slate-300 text-sm md:text-base leading-relaxed whitespace-pre-line">
-              {mod.longDescription}
-            </p>
+            <div 
+              className="text-slate-300 text-sm md:text-base leading-relaxed whitespace-pre-line overflow-hidden"
+              dangerouslySetInnerHTML={{ __html: mod.longDescription || "" }}
+            />
           </div>
 
           <div className="relative overflow-hidden bg-gradient-to-br from-[#ce5a67]/20 via-[#0a0a0a] to-[#a855f7]/10 border border-[#ce5a67]/30 rounded-3xl p-6 md:p-8">
@@ -440,9 +441,10 @@ export default async function ModDetailPage({
                   <h2 className="text-xs font-black tracking-widest uppercase text-slate-400">
                     Mô tả
                   </h2>
-                  <p className="text-slate-300 text-sm leading-relaxed whitespace-pre-line">
-                    {mod.longDescription}
-                  </p>
+                  <div 
+                    className="text-slate-300 text-sm leading-relaxed whitespace-pre-line overflow-hidden"
+                    dangerouslySetInnerHTML={{ __html: mod.longDescription || "" }}
+                  />
                 </div>
 
                 <div className="bg-gradient-to-br from-[#ce5a67]/20 via-[#ce5a67]/5 to-transparent border border-[#ce5a67]/40 rounded-2xl p-5 md:p-6 flex flex-col sm:flex-row items-center gap-4">
@@ -542,9 +544,10 @@ export default async function ModDetailPage({
 
           <div className="bg-[#111] rounded-2xl border border-white/5 p-5 md:p-7 space-y-3">
             <h2 className="text-sm font-black tracking-widest uppercase text-slate-400">Mô tả</h2>
-            <p className="text-slate-300 text-sm md:text-base leading-relaxed whitespace-pre-line">
-              {mod.longDescription}
-            </p>
+            <div 
+              className="text-slate-300 text-sm md:text-base leading-relaxed whitespace-pre-line overflow-hidden"
+              dangerouslySetInnerHTML={{ __html: mod.longDescription || "" }}
+            />
           </div>
 
           <div className="bg-gradient-to-br from-[#ce5a67]/10 to-transparent border border-[#ce5a67]/20 rounded-3xl p-6 md:p-8 flex flex-col sm:flex-row items-center gap-5">
