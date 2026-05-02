@@ -1,7 +1,7 @@
 require('dotenv').config({ path: '.env.local' });
 const { createClient } = require('@supabase/supabase-js');
 const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const OpenAI = require('openai');
 const cheerio = require('cheerio');
 
 // ─────────────────────────────────────────────
@@ -23,11 +23,12 @@ const r2 = new S3Client({
 
 const R2_BUCKET = process.env.R2_BUCKET_NAME || 'dungdibinhluan-images';
 
-let genAI = null;
-let aiModel = null;
-if (process.env.GEMINI_API_KEY) {
-  genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-  aiModel = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+let openaiClient = null;
+if (process.env.DEEPSEEK_API_KEY) {
+  openaiClient = new OpenAI({
+    apiKey: process.env.DEEPSEEK_API_KEY,
+    baseURL: 'https://api.deepseek.com/v1',
+  });
 }
 
 const BASE_URL = 'https://gamekot.pro';
@@ -79,9 +80,9 @@ async function uploadImageFromUrl(imageUrl) {
 }
 
 /**
- * Dịch văn bản với Google Translate API (Fallback)
+ * Dịch văn bản ngắn gọn (Fallback)
  */
-async function translate(text, targetLang = 'en') {
+async function translateFallback(text, targetLang = 'en') {
   if (!text || text.trim().length < 3) return text;
   try {
     const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
@@ -90,51 +91,54 @@ async function translate(text, targetLang = 'en') {
     const data = await res.json();
     return data[0]?.map((seg) => seg[0]).join('') || text;
   } catch (err) {
-    console.error(`  ⚠️  Translate error: ${err.message}`);
+    console.error(`  ⚠️  Translate fallback error: ${err.message}`);
     return text;
   }
 }
 
 /**
- * AI dịch thuật và phân loại Tags chuẩn chỉ trong 1 lần gọi duy nhất
+ * Sử dụng DeepSeek Chat để dịch bài viết và phân loại tags
  */
-async function aiTranslateAndProcess(rawContent) {
-  // Fallback default
+async function aiDeepSeekTranslateAndProcess(rawContent) {
   const fallback = {
     short_description: rawContent.substring(0, 150),
     long_description: rawContent,
     tags: ['Cơ chế game']
   };
 
-  if (!aiModel || !rawContent) return fallback;
+  if (!openaiClient || !rawContent) return fallback;
 
   try {
-    const prompt = `Bạn là một AI dịch thuật chuyên nghiệp về game bóng đá (FC 24, FC 26, FIFA). Hãy đọc đoạn văn bài viết về mod game dưới đây và làm đúng các nhiệm vụ sau:
+    const prompt = `Bạn là một AI chuyên dịch thuật về game bóng đá (FC 24, FC 26, FIFA). Hãy đọc bài viết giới thiệu mod sau và thực hiện 2 việc sau:
+1. Dịch bài viết sang tiếng Việt chuẩn xác và tự nhiên:
+   - "long_description": Dịch toàn bộ nội dung này sang tiếng Việt rõ ràng, mượt mà.
+   - "short_description": Viết đúng 1 câu mô tả ngắn tiếng Việt (dưới 150 ký tự) từ bài dịch.
 
-1. Dịch thuật sang tiếng Việt chuẩn xác, tự nhiên:
-   - "long_description": Hãy dịch toàn bộ nội dung này sang tiếng Việt rõ ràng, giữ nguyên ý nghĩa.
-   - "short_description": Trích xuất 1-2 câu tóm tắt nội dung chính đã dịch sang tiếng Việt (dưới 150 ký tự, ngắn gọn).
+2. Chọn thẻ (tags) chính xác:
+   Hãy phân loại mod này vào 1 hoặc tối đa 3 thẻ phù hợp. Danh sách thẻ ĐƯỢC PHÉP dùng: ["Kits", "Gameplay", "Đồ họa", "Cơ chế game"].
+   - "Kits": Áo đấu, trang phục, quần áo, tài trợ...
+   - "Gameplay": Lối chơi, cách di chuyển, tốc độ, AI...
+   - "Đồ họa": Giao diện, menu, sân cỏ, mặt, giày, găng tay, hình ảnh...
+   - "Cơ chế game": Chuyển nhượng (transfers), sự nghiệp (career), mở khóa (unlock), squad, database, file chỉnh sửa hệ thống...
+   * Tuyệt đối KHÔNG DÙNG thẻ "Faces". Hãy chọn thẻ thật khách quan. Không được chỉ chọn "Cơ chế game" nếu nội dung nói về áo đấu hoặc lối chơi.
 
-2. Chọn thẻ (tags) chính xác cho mod:
-   Hãy phân loại mod này vào 1 hoặc tối đa 3 thẻ phù hợp nhất. Danh sách thẻ ĐƯỢC PHÉP dùng: ["Kits", "Gameplay", "Đồ họa", "Cơ chế game"].
-   - "Kits": Nếu nội dung nói về áo đấu, trang phục, quần áo, nhà tài trợ...
-   - "Gameplay": Nếu nội dung nói về lối chơi, cách di chuyển, AI, tốc độ...
-   - "Đồ họa": Nếu nội dung nói về hình ảnh, menu, sân cỏ, logo, giày, găng tay, mặt...
-   - "Cơ chế game": Nếu nội dung nói về chuyển nhượng (transfer), sự nghiệp (career), mở khóa (unlock), squad, database...
-   * Tuyệt đối KHÔNG DÙNG thẻ "Faces". Hãy chọn thẻ thật khách quan dựa trên nội dung, không được mặc định chọn "Cơ chế game".
-
-Trả về chính xác duy nhất định dạng chuỗi JSON nguyên bản (không chứa markdown \`\`\`json hay \`\`\`):
+Hãy trả về chính xác định dạng chuỗi JSON nguyên bản (không chứa markdown \`\`\`json):
 {
-  "short_description": "Nội dung dịch ngắn tiếng Việt",
-  "long_description": "Nội dung dịch đầy đủ tiếng Việt",
+  "short_description": "Mô tả ngắn tiếng Việt",
+  "long_description": "Mô tả dài tiếng Việt đầy đủ",
   "tags": ["Tag1", "Tag2"]
 }
 
 Nội dung bài viết:
 ${rawContent.substring(0, 3000)}`;
 
-    const result = await aiModel.generateContent(prompt);
-    let rawText = result.response.text().trim();
+    const response = await openaiClient.chat.completions.create({
+      model: 'deepseek-chat', // 'deepseek-chat' handles deepseek-v3/deepseek-v4 tasks via their API
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.3,
+    });
+
+    let rawText = response.choices[0]?.message?.content?.trim() || '';
     rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
 
     const parsed = JSON.parse(rawText);
@@ -142,19 +146,19 @@ ${rawContent.substring(0, 3000)}`;
     if (!parsed.long_description) parsed.long_description = fallback.long_description;
     if (!parsed.tags || !Array.isArray(parsed.tags) || parsed.tags.length === 0) parsed.tags = fallback.tags;
 
-    // Lọc bỏ 'Faces' hoặc tag rác
+    // Lọc tags
     parsed.tags = parsed.tags.filter(t => VALID_TAGS.includes(t));
     if (parsed.tags.length === 0) parsed.tags = ['Cơ chế game'];
 
     return parsed;
   } catch (err) {
-    console.error(`  ⚠️  AI Process error: ${err.message}`);
+    console.error(`  ⚠️  DeepSeek AI Process error: ${err.message}`);
     return fallback;
   }
 }
 
 /**
- * Lấy link tải modsfire (bỏ qua telegram, gamekot nội bộ)
+ * Lấy link tải modsfire
  */
 function extractDownloadLink($) {
   let link = null;
@@ -269,13 +273,13 @@ async function main() {
     // Tên tiếng Anh
     let finalTitle = post.title;
     if (hasCyrillic(post.title)) {
-      finalTitle = await translate(post.title, 'en');
+      finalTitle = await translateFallback(post.title, 'en');
     }
     console.log(`  📝 Title : ${finalTitle}`);
 
-    // Dịch bằng AI + Trích xuất tóm tắt + Cấp Tag trong 1 lần duy nhất
-    console.log(`  🤖 AI processing translation and tags...`);
-    const aiResult = await aiTranslateAndProcess(post.originalContentText);
+    // Dịch bằng DeepSeek
+    console.log(`  🤖 DeepSeek AI processing translation and tags...`);
+    const aiResult = await aiDeepSeekTranslateAndProcess(post.originalContentText);
     console.log(`  🏷️  Tags : ${aiResult.tags.join(', ')}`);
 
     // Ghép HTML mô tả dài
