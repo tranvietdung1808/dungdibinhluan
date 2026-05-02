@@ -57,7 +57,7 @@ const hasCyrillic = (text) => /[\u0400-\u04FF]/.test(text);
 async function uploadImageFromUrl(imageUrl) {
   if (!imageUrl) return null;
   try {
-    const res = await fetch(imageUrl, { headers: FETCH_HEADERS });
+    const res = await fetch(encodeURI(imageUrl), { headers: FETCH_HEADERS });
     if (!res.ok) throw new Error(`Image fetch ${res.status}`);
 
     const contentType = res.headers.get('content-type') || 'image/webp';
@@ -183,7 +183,7 @@ async function scrapeCategory() {
     const url = page === 1 ? `${BASE_URL}/category/fc26/` : `${BASE_URL}/category/fc26/page/${page}/`;
     console.log(`\n📋 Page ${page}: ${url}`);
 
-    const res = await fetch(url, { headers: FETCH_HEADERS });
+    const res = await fetch(encodeURI(url), { headers: FETCH_HEADERS });
     if (!res.ok) continue;
 
     const html = await res.text();
@@ -214,7 +214,7 @@ async function scrapeCategory() {
 
 async function scrapePost(url) {
   try {
-    const res = await fetch(url, { headers: FETCH_HEADERS });
+    const res = await fetch(encodeURI(url), { headers: FETCH_HEADERS });
     if (!res.ok) return null;
     const html = await res.text();
     const $ = cheerio.load(html);
