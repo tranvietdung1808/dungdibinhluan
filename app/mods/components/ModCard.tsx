@@ -76,9 +76,9 @@ export default function ModCard({ mod }: ModCardProps) {
           <span
             className="absolute top-3 left-3 z-20 px-2.5 py-0.5 rounded-full text-[8px] font-black tracking-widest backdrop-blur-md shadow-md"
             style={{
-              background: `${TAG_COLORS[mod.tags[0]]}1A`, // 10% opacity
-              color: TAG_COLORS[mod.tags[0]],
-              border: `1px solid ${TAG_COLORS[mod.tags[0]]}4D`, // 30% opacity
+              background: `${TAG_COLORS[mod.tags?.[0] || "Cơ chế game"] || "#ce5a67"}1A`, // 10% opacity
+              color: TAG_COLORS[mod.tags?.[0] || "Cơ chế game"] || "#ce5a67",
+              border: `1px solid ${TAG_COLORS[mod.tags?.[0] || "Cơ chế game"] || "#ce5a67"}4D`, // 30% opacity
             }}
           >
             {mod.category}

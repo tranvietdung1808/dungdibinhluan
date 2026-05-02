@@ -90,7 +90,7 @@ export default function ModsPage({ initialDbMods = [] }: ModsPageProps) {
       longDescription: mod.long_description || '',
       thumbnail: mod.thumbnail || '',
       downloadUrl: mod.download_url || '',
-      tags: mod.tags,
+      tags: Array.isArray(mod.tags) ? mod.tags : [],
       thumbnailOrientation: mod.thumbnail_orientation as 'portrait' | 'landscape',
       featured: mod.featured,
       videoId: mod.video_id || undefined,
