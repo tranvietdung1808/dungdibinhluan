@@ -215,27 +215,14 @@ async function scrapePost(url) {
     const rawImageUrl = $('meta[property="og:image"]').attr('content') || $('article img').first().attr('src') || null;
 
     const contentParts = [];
-    $('.entry-content p, .elementor-widget-text-editor p, .entry-content img, article img').each((_, el) => {
+    $('.entry-content p, .elementor-widget-text-editor p').each((_, el) => {
       if ($(el).closest('.elementor-button, .sharedaddy, .comment-respond').length) return;
       
-      if (el.tagName.toLowerCase() === 'img') {
-        let src = $(el).attr('src') || $(el).attr('data-src') || '';
-        if (src.startsWith('//')) src = 'https:' + src;
-        if (src.startsWith('/')) src = BASE_URL + src;
-        if (src && !src.includes('avatar') && !src.includes('icon') && !src.includes('logo')) {
-           contentParts.push({ type: 'img', src: src });
-        }
-      } else {
-        const text = $(el).text().trim();
-        if (text && text.length > 5 && !text.includes('No Comments')) {
-           contentParts.push({ type: 'text', text: text });
-        }
+      const text = $(el).text().trim();
+      if (text && text.length > 5 && !text.includes('No Comments')) {
+         contentParts.push({ type: 'text', text: text });
       }
     });
-
-    if (rawImageUrl && contentParts[0] && contentParts[0].type === 'img' && contentParts[0].src === rawImageUrl) {
-        contentParts.shift();
-    }
 
     return { 
       title, 
@@ -297,9 +284,7 @@ async function main() {
     // Ghép HTML
     let finalHtml = '', textIndex = 0;
     for (const part of post.contentParts) {
-       if (part.type === 'img') {
-           finalHtml += `<img src="${part.src}" class="w-full h-auto rounded-lg my-4 shadow-lg" loading="lazy" />\n`;
-       } else if (part.type === 'text') {
+       if (part.type === 'text') {
            const translatedP = translatedParagraphs[textIndex] || part.text;
            finalHtml += `<p class="my-3 text-gray-200 leading-relaxed">${translatedP}</p>\n`;
            textIndex++;
