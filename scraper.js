@@ -177,18 +177,19 @@ function extractDownloadLink($) {
 // SCRAPING LOGIC
 // ─────────────────────────────────────────────
 
-async function scrapeCategory(maxPages = 3) {
+async function scrapeCategory() {
   const postLinks = [];
-  for (let page = 1; page <= maxPages; page++) {
+  for (let page = 2; page >= 1; page--) {
     const url = page === 1 ? `${BASE_URL}/category/fc26/` : `${BASE_URL}/category/fc26/page/${page}/`;
     console.log(`\n📋 Page ${page}: ${url}`);
 
     const res = await fetch(url, { headers: FETCH_HEADERS });
-    if (!res.ok) break;
+    if (!res.ok) continue;
 
     const html = await res.text();
     const $ = cheerio.load(html);
 
+    const pageLinks = [];
     $('a[href]').each((_, el) => {
       const href = $(el).attr('href') || '';
       if (!href.startsWith(BASE_URL + '/')) return;
@@ -200,10 +201,13 @@ async function scrapeCategory(maxPages = 3) {
       if (BLOCKED_SLUGS.some(b => slug === b)) return;
       if (!/^[a-z0-9][a-z0-9-]+[a-z0-9]$/.test(slug)) return;
 
-      if (!postLinks.includes(href)) {
-        postLinks.push(href);
+      if (!pageLinks.includes(href) && !postLinks.includes(href)) {
+        pageLinks.push(href);
       }
     });
+
+    // Reversing pageLinks makes it process the older posts on the page first
+    postLinks.push(...pageLinks.reverse());
   }
   return postLinks;
 }
@@ -247,7 +251,7 @@ async function scrapePost(url) {
 // MAIN EXECUTION
 // ─────────────────────────────────────────────
 async function main() {
-  const postLinks = await scrapeCategory(3);
+  const postLinks = await scrapeCategory();
   let stats = { success: 0, skip: 0, fail: 0 };
 
   console.log(`\n📦 Total URLs found: ${postLinks.length}`);
