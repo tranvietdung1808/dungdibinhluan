@@ -35,14 +35,12 @@ const FETCH_HEADERS = {
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/115.0 Safari/537.36',
 };
 
-// URL/slug rác cần bỏ qua
 const BLOCKED_SLUGS = [
   'wishlist', 'my-account', 'faqs', 'about-us', 'contact-us',
   'send-us-mod', 'privacy-policy', 'refund_returns', 'cart',
   'checkout', 'payment-page', 'kak-pokypat', 'reshenie-problem'
 ];
 
-// Các tags hợp lệ (KHÔNG CÓ "Faces")
 const VALID_TAGS = ['Kits', 'Gameplay', 'Đồ họa', 'Cơ chế game'];
 
 // ─────────────────────────────────────────────
@@ -81,80 +79,78 @@ async function uploadImageFromUrl(imageUrl) {
 }
 
 /**
- * Dịch văn bản sang tiếng Anh (Dành cho Title) bằng Google Translate
+ * Dịch văn bản với Google Translate API (Fallback)
  */
-async function translateToEnglish(text) {
+async function translate(text, targetLang = 'en') {
   if (!text || text.trim().length < 3) return text;
   try {
-    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q=${encodeURIComponent(text)}`;
+    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
     const res = await fetch(url, { headers: FETCH_HEADERS });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     return data[0]?.map((seg) => seg[0]).join('') || text;
   } catch (err) {
+    console.error(`  ⚠️  Translate error: ${err.message}`);
     return text;
   }
 }
 
 /**
- * Dịch văn bản sang tiếng Việt cực mượt bằng AI Gemini
+ * AI dịch thuật và phân loại Tags chuẩn chỉ trong 1 lần gọi duy nhất
  */
-async function translateToVietnameseAI(text) {
-  if (!aiModel || !text) return text; // Fallback nếu không có API key
+async function aiTranslateAndProcess(rawContent) {
+  // Fallback default
+  const fallback = {
+    short_description: rawContent.substring(0, 150),
+    long_description: rawContent,
+    tags: ['Cơ chế game']
+  };
+
+  if (!aiModel || !rawContent) return fallback;
+
   try {
-    const prompt = `Dịch đoạn văn bản tiếng Anh/Nga sau sang tiếng Việt thật tự nhiên, dùng văn phong của game thủ Việt Nam khi nói về bản mod game FC 24/FC 26. Giữ nguyên các thuật ngữ chuyên ngành (như TU, Title Update, Manager, Career Mode, Kit, Face...). Chỉ trả về nội dung đã dịch, không thêm bất kỳ bình luận nào:\n\n${text}`;
+    const prompt = `Bạn là một AI dịch thuật chuyên nghiệp về game bóng đá (FC 24, FC 26, FIFA). Hãy đọc đoạn văn bài viết về mod game dưới đây và làm đúng các nhiệm vụ sau:
+
+1. Dịch thuật sang tiếng Việt chuẩn xác, tự nhiên:
+   - "long_description": Hãy dịch toàn bộ nội dung này sang tiếng Việt rõ ràng, giữ nguyên ý nghĩa.
+   - "short_description": Trích xuất 1-2 câu tóm tắt nội dung chính đã dịch sang tiếng Việt (dưới 150 ký tự, ngắn gọn).
+
+2. Chọn thẻ (tags) chính xác cho mod:
+   Hãy phân loại mod này vào 1 hoặc tối đa 3 thẻ phù hợp nhất. Danh sách thẻ ĐƯỢC PHÉP dùng: ["Kits", "Gameplay", "Đồ họa", "Cơ chế game"].
+   - "Kits": Nếu nội dung nói về áo đấu, trang phục, quần áo, nhà tài trợ...
+   - "Gameplay": Nếu nội dung nói về lối chơi, cách di chuyển, AI, tốc độ...
+   - "Đồ họa": Nếu nội dung nói về hình ảnh, menu, sân cỏ, logo, giày, găng tay, mặt...
+   - "Cơ chế game": Nếu nội dung nói về chuyển nhượng (transfer), sự nghiệp (career), mở khóa (unlock), squad, database...
+   * Tuyệt đối KHÔNG DÙNG thẻ "Faces". Hãy chọn thẻ thật khách quan dựa trên nội dung, không được mặc định chọn "Cơ chế game".
+
+Trả về chính xác duy nhất định dạng chuỗi JSON nguyên bản (không chứa markdown \`\`\`json hay \`\`\`):
+{
+  "short_description": "Nội dung dịch ngắn tiếng Việt",
+  "long_description": "Nội dung dịch đầy đủ tiếng Việt",
+  "tags": ["Tag1", "Tag2"]
+}
+
+Nội dung bài viết:
+${rawContent.substring(0, 3000)}`;
+
     const result = await aiModel.generateContent(prompt);
-    return result.response.text().trim();
+    let rawText = result.response.text().trim();
+    rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+
+    const parsed = JSON.parse(rawText);
+    if (!parsed.short_description) parsed.short_description = fallback.short_description;
+    if (!parsed.long_description) parsed.long_description = fallback.long_description;
+    if (!parsed.tags || !Array.isArray(parsed.tags) || parsed.tags.length === 0) parsed.tags = fallback.tags;
+
+    // Lọc bỏ 'Faces' hoặc tag rác
+    parsed.tags = parsed.tags.filter(t => VALID_TAGS.includes(t));
+    if (parsed.tags.length === 0) parsed.tags = ['Cơ chế game'];
+
+    return parsed;
   } catch (err) {
-    console.error(`  ⚠️  AI Translate error: ${err.message}`);
-    // Fallback sang Google Translate
-    try {
-      const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=vi&dt=t&q=${encodeURIComponent(text.substring(0, 3000))}`;
-      const res = await fetch(url, { headers: FETCH_HEADERS });
-      const data = await res.json();
-      return data[0]?.map((seg) => seg[0]).join('') || text;
-    } catch {
-      return text;
-    }
+    console.error(`  ⚠️  AI Process error: ${err.message}`);
+    return fallback;
   }
-}
-
-/**
- * Tự động phân loại tag bằng TỪ KHÓA (nhanh và chính xác 100%)
- */
-function autoCategorizeTags(title, desc) {
-  const text = (title + ' ' + desc).toLowerCase();
-  const tags = [];
-  
-  if (text.includes('kit') || text.includes('shirt') || text.includes('áo') || text.includes('trang phục') || text.includes('uniform') || text.includes('sponser')) {
-    tags.push('Kits');
-  }
-  if (text.includes('gameplay') || text.includes('lối chơi') || text.includes('cách chơi') || text.includes('physics')) {
-    tags.push('Gameplay');
-  }
-  if (text.includes('graphic') || text.includes('texture') || text.includes('visual') || text.includes('đồ họa') || text.includes('menu') || text.includes('sân cỏ') || text.includes('pitch') || text.includes('boot') || text.includes('glove') || text.includes('tv logo') || text.includes('scoreboard') || text.includes('tatu') || text.includes('tattoo')) {
-    tags.push('Đồ họa');
-  }
-  if (text.includes('career') || text.includes('manager') || text.includes('transfer') || text.includes('squad') || text.includes('unlock') || text.includes('chuyển nhượng') || text.includes('cơ chế') || text.includes('edit player') || text.includes('database')) {
-    tags.push('Cơ chế game');
-  }
-  
-  if (tags.length === 0) tags.push('Cơ chế game');
-  return tags;
-}
-
-/**
- * Tóm tắt thủ công (dự phòng khi AI hỏng)
- */
-function smartSummarize(text, maxLength = 200) {
-  if (!text) return '';
-  let cleanText = text.replace(/\n+/g, ' ').replace(/\s+/g, ' ').trim();
-  if (cleanText.length <= maxLength) return cleanText;
-  let snippet = cleanText.substring(0, maxLength);
-  const lastPunctuation = snippet.match(/.*[.!?]/);
-  if (lastPunctuation) return lastPunctuation[0];
-  const lastSpace = snippet.lastIndexOf(' ');
-  return lastSpace > 0 ? snippet.substring(0, lastSpace) + '...' : snippet + '...';
 }
 
 /**
@@ -218,20 +214,23 @@ async function scrapePost(url) {
     const title = $('h1.entry-title, h1').first().text().trim() || '';
     const rawImageUrl = $('meta[property="og:image"]').attr('content') || $('article img').first().attr('src') || null;
 
-    const contentParts = [];
+    let originalContentText = '';
     $('.entry-content p, .elementor-widget-text-editor p').each((_, el) => {
       if ($(el).closest('.elementor-button, .sharedaddy, .comment-respond').length) return;
-      
       const text = $(el).text().trim();
       if (text && text.length > 5 && !text.includes('No Comments')) {
-         contentParts.push({ type: 'text', text: text });
+         originalContentText += text + '\n\n';
       }
     });
+
+    if (!originalContentText.trim()) {
+       originalContentText = $('.entry-content').text().trim().substring(0, 2000);
+    }
 
     return { 
       title, 
       rawImageUrl, 
-      contentParts, 
+      originalContentText, 
       downloadLink: extractDownloadLink($), 
       slug: url.replace(BASE_URL + '/', '').replace(/\/$/, '') 
     };
@@ -270,30 +269,22 @@ async function main() {
     // Tên tiếng Anh
     let finalTitle = post.title;
     if (hasCyrillic(post.title)) {
-      finalTitle = await translateToEnglish(post.title);
+      finalTitle = await translate(post.title, 'en');
     }
     console.log(`  📝 Title : ${finalTitle}`);
 
-    // Dịch các đoạn text bằng AI Gemini
-    console.log(`  🤖 AI is translating content...`);
-    const textsToTranslate = post.contentParts.filter(p => p.type === 'text').map(p => p.text);
-    const translatedCombined = await translateToVietnameseAI(textsToTranslate.join('\n\n').substring(0, 3000));
-    const translatedParagraphs = translatedCombined.split('\n\n');
+    // Dịch bằng AI + Trích xuất tóm tắt + Cấp Tag trong 1 lần duy nhất
+    console.log(`  🤖 AI processing translation and tags...`);
+    const aiResult = await aiTranslateAndProcess(post.originalContentText);
+    console.log(`  🏷️  Tags : ${aiResult.tags.join(', ')}`);
 
-    // Phân loại tag dựa trên Keyword (Chuẩn xác 100%)
-    const generatedTags = autoCategorizeTags(finalTitle, translatedCombined);
-    console.log(`  🏷️  Tags : ${generatedTags.join(', ')}`);
-
-    // Ghép HTML
-    let finalHtml = '', textIndex = 0;
-    for (const part of post.contentParts) {
-       if (part.type === 'text') {
-           const translatedP = translatedParagraphs[textIndex] || part.text;
-           finalHtml += `<p class="my-3 text-gray-200 leading-relaxed">${translatedP}</p>\n`;
-           textIndex++;
-       }
+    // Ghép HTML mô tả dài
+    let finalHtml = '';
+    if (aiResult.long_description) {
+      finalHtml = aiResult.long_description.split('\n\n').map(p => `<p class="my-3 text-gray-200 leading-relaxed">${p}</p>`).join('\n');
+    } else {
+      finalHtml = `<p class="my-3 text-gray-200">Không có mô tả chi tiết cho bản mod này.</p>`;
     }
-    if (!finalHtml.trim()) finalHtml = `<p class="my-3 text-gray-200">Không có mô tả chi tiết cho bản mod này.</p>`;
 
     // Upload Thumbnail R2
     const thumbnailPath = await uploadImageFromUrl(post.rawImageUrl);
@@ -304,16 +295,16 @@ async function main() {
       slug: post.slug,
       name: finalTitle,
       author: 'FIFA MODS',
-      category: generatedTags[0] || 'Cơ chế game',
+      category: aiResult.tags[0] || 'Cơ chế game',
       version: '1.0',
       updated_at: `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()}`,
-      description: smartSummarize(translatedCombined, 180), // Cắt mượt câu thay vì dùng AI bị ảo
+      description: aiResult.short_description || finalTitle,
       long_description: finalHtml,
       thumbnail: thumbnailPath || '',
       thumbnail_orientation: 'landscape',
       download_url: post.downloadLink,
       featured: false,
-      tags: generatedTags,
+      tags: aiResult.tags,
     };
 
     const { error } = await supabase.from('mods').insert([modData]);
