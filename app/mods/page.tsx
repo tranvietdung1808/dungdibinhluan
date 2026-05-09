@@ -6,14 +6,14 @@ import type { Database } from "@/utils/supabase/database.types";
 type ModRow = Database["public"]["Tables"]["mods"]["Row"];
 
 export const metadata: Metadata = {
-  title: "Mod Hub",
-  description: "Kho mod FC 26 chất lượng cao — Faces, Kits, Gameplay, Đồ họa 4K được tuyển chọn bởi DungDiBinhLuan.",
+  title: "Mod Hub - Kho Mod Miễn Phí",
+  description: "Kho mod FC 26 miễn phí — Faces, Kits, Gameplay, Đồ họa 4K được chia sẻ bởi DungDiBinhLuan.",
   alternates: {
     canonical: "https://dungdibinhluan.com/mods",
   },
   openGraph: {
-    title: "Mod Hub | DungDiBinhLuan",
-    description: "Kho mod FC 26 chất lượng cao — Faces, Kits, Gameplay, Đồ họa 4K.",
+    title: "Mod Hub - Kho Mod Miễn Phí | DungDiBinhLuan",
+    description: "Kho mod FC 26 miễn phí — Faces, Kits, Gameplay, Đồ họa 4K.",
     images: [{ url: "/og-image.jpg" }],
   },
 };

@@ -13,7 +13,7 @@ export default function PaymentPage() {
         <h1 className="text-2xl md:text-3xl font-black">
           MIX MODS FC 26 <span className="text-[#ce5a67]">2025–2026</span>
         </h1>
-        <p className="text-slate-400 text-sm">Hỗ trợ cập nhật miễn phí sau khi mua</p>
+        <p className="text-slate-400 text-sm">Hỗ trợ cập nhật miễn phí sau khi nhận key</p>
       </div>
 
       <div className="mb-8">
@@ -24,7 +24,7 @@ export default function PaymentPage() {
 
         {/* Giá */}
         <div className="bg-[#ce5a67]/10 border border-[#ce5a67]/30 rounded-2xl p-4 flex items-center justify-between">
-          <span className="text-sm text-slate-300">Tổng thanh toán</span>
+          <span className="text-sm text-slate-300">Phí chia sẻ key offline + mod</span>
           <span className="text-2xl font-black text-[#ce5a67]">169.000đ</span>
         </div>
 

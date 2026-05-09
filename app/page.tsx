@@ -46,10 +46,10 @@ type HomeModCard = {
 
 // ========== QUICK FEATURES ==========
 const features = [
-  { icon: "🛒", title: "MUA HÀNG DỄ DÀNG", desc: "Nhanh chóng, thuận tiện. Với nhiều mẫu mã cho anh em lựa chọn." },
+  { icon: "🎨", title: "MOD CHẤT LƯỢNG CAO", desc: "Hàng trăm faces, kits, đồ họa được tuyển chọn kĩ càng từ các modder hàng đầu." },
   { icon: "💬", title: "HỖ TRỢ NHANH CHÓNG", desc: "Đội ngũ admin luôn sẵn sàng xử lí những vấn đề anh em gặp phải." },
-  { icon: "🛡️", title: "BẢO HÀNH TRỌN ĐỜI", desc: "Cam kết bảo hành trọn đời với những sản phẩm đã mua." },
-  { icon: "⚙️", title: "DỄ DÀNG CÀI ĐẶT", desc: "Hỗ trợ cài đặt 1:1 qua Teamviewer bất cứ lúc nào." },
+  { icon: "🔄", title: "CẬP NHẬT LIÊN TỤC", desc: "Mod mới được cập nhật thường xuyên, bám sát mùa giải và chuyển nhượng." },
+  { icon: "⚙️", title: "HỖ TRỢ CÀI ĐẶT 1:1", desc: "Hỗ trợ cài đặt mod qua Teamviewer tận tình, chu đáo." },
 ];
 
 const Features = () => (
@@ -91,7 +91,7 @@ const LatestModsSection = ({ mods }: { mods: HomeModCard[] }) => {
       <div className="rounded-3xl border border-white/10 bg-[#0d0d14]/95 backdrop-blur-xl p-4 md:p-6">
         <div className="flex items-center justify-between mb-5">
           <div>
-            <p className="text-[10px] uppercase tracking-[0.3em] text-slate-500">CHIA SẺ MODS MIỄN PHÍ</p>
+            <p className="text-[10px] uppercase tracking-[0.3em] text-slate-500">KHO MOD CHIA SẺ MIỄN PHÍ</p>
             <h2 id="latest-mods-heading" className="text-xl md:text-2xl font-black mt-1">MOD MỚI CẬP NHẬT</h2>
           </div>
           <Link href="/mods" className="text-[10px] md:text-xs text-[#ce5a67] font-black tracking-widest hover:underline uppercase">
@@ -198,7 +198,7 @@ const GameGrid = () => {
       <div className="flex items-center justify-between">
         <div>
           <h2 id="games-heading" className="text-xl md:text-2xl font-black tracking-tight">CÁC GAME KHÁC</h2>
-          <p className="text-[10px] text-slate-500 tracking-widest uppercase mt-1">Liên hệ để mua</p>
+          <p className="text-[10px] text-slate-500 tracking-widest uppercase mt-1">Liên hệ tư vấn thêm</p>
         </div>
         <a
           href="https://web.facebook.com/dungbinhluan/"
@@ -260,7 +260,7 @@ const GameGrid = () => {
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
                 </svg>
-                LIÊN HỆ MUA
+                LIÊN HỆ TƯ VẤN
               </a>
             </div>
           </article>
@@ -313,10 +313,10 @@ export default async function HomePage() {
           <HeroSection latestGuides={heroGuides} />
         </section>
         <section>
-          <MobileLatestGuidesSection guides={heroGuides} />
+          <LatestModsSection mods={latestMods} />
         </section>
         <section>
-          <LatestModsSection mods={latestMods} />
+          <MobileLatestGuidesSection guides={heroGuides} />
         </section>
         <section id="tinh-nang" className="-mt-10 relative z-10">
           <FeatureSlider />
@@ -331,11 +331,16 @@ export default async function HomePage() {
       <footer className="border-t border-white/5 px-4 md:px-6 py-5 md:py-6 text-center space-y-3">
         <div className="flex items-center justify-center gap-4 md:gap-6 text-[10px] md:text-xs">
           <Link href="/dmca" className="text-slate-500 hover:text-white transition-colors uppercase tracking-widest">
-            DMCA & Abuse
+            DMCA & Bản Quyền
           </Link>
         </div>
+        <p className="text-[9px] md:text-[10px] text-slate-400 max-w-xl mx-auto leading-relaxed">
+          ⚠️ Website chia sẻ <strong>mod miễn phí</strong> do cộng đồng sáng tạo — Faces, Kits, Gameplay, Đồ họa. 
+          Chúng tôi <em>không</em> phân phối, crack hay phá khóa bản quyền game. 
+          Liên hệ Facebook để được tư vấn thêm.
+        </p>
         <p className="text-[9px] text-slate-600 uppercase tracking-widest">
-          © 2026 DUNGDIBINHLUAN — Powered by Google Antivirus
+          © 2026 DUNGDIBINHLUAN — Kho Mod & Dịch Vụ Cài Đặt
         </p>
       </footer>
     </main>

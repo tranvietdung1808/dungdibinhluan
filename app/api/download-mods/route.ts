@@ -15,12 +15,12 @@ export async function GET() {
     try {
         const command = new GetObjectCommand({
             Bucket: "fc26download",
-            Key: "FC26-MODS.rar", // ← đổi tên file mods sau khi upload
+            Key: "FC26-MODS.rar",
         });
 
         const url = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
         return NextResponse.json({ url });
     } catch (error) {
-        return NextResponse.json({ error: "Lỗi tạo link" }, { status: 500 });
+        return NextResponse.json({ error: "Không thể tạo link tải mod" }, { status: 500 });
     }
 }

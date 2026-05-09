@@ -14,14 +14,13 @@ export async function GET() {
 
     try {
         const command = new GetObjectCommand({
-            Bucket: "fc26download", // Tên bucket của bạn
-            Key: "FC26.rar",         // Tên file trên R2
+            Bucket: "fc26download",
+            Key: "FC26.rar",
         });
 
-        // Tạo link tải có hiệu lực trong 1 giờ (3600 giây)
         const url = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
         return NextResponse.json({ url });
     } catch (error) {
-        return NextResponse.json({ error: "Lỗi tạo link" }, { status: 500 });
+        return NextResponse.json({ error: "Lỗi tạo link tải mod" }, { status: 500 });
     }
 }
