@@ -9,7 +9,7 @@ import CheckUyTinButton from "./CheckUyTinButton";
 
 const navItems = [
   { label: "🔥 CHIA SẺ MODS", href: "/mods" },
-  { label: "KEY KHÁC", href: "#games" },
+  { label: "GAME KHÁC", href: "#games" },
 ];
 
 export default function Navbar() {
@@ -176,7 +176,7 @@ export default function Navbar() {
           </div>
           <div>
             <p className="font-black text-[11px] md:text-sm tracking-widest hidden sm:block">DUNGDIBINHLUAN</p>
-            <p className="text-[8px] text-slate-500 tracking-[0.3em] hidden sm:block">KHO MOD & DỊCH VỤ CÀI ĐẶT</p>
+            <p className="text-[8px] text-slate-500 tracking-[0.3em] hidden sm:block">FC MODDING AND CAREER MODE</p>
           </div>
         </Link>
 
@@ -213,14 +213,12 @@ export default function Navbar() {
         {/* Right side */}
         <div className="flex items-center gap-2">
           <CheckUyTinButton />
-          <a
-            href="https://web.facebook.com/dungbinhluan/"
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            href="/games/fc26/select"
             className="flex-shrink-0 px-4 md:px-5 py-2 md:py-2.5 bg-[#ce5a67] rounded-xl text-[10px] md:text-[11px] font-black tracking-widest text-white hover:bg-[#b44c5c] transition-colors shadow-[0_4px_20px_rgba(206,90,103,0.3)]"
           >
-            LIÊN HỆ
-          </a>
+            TẢI NGAY
+          </Link>
           {authLoading ? (
             <div className="px-3 py-2 rounded-xl border border-white/10 bg-white/5 text-[10px] text-slate-400 font-bold tracking-wide">
               ...

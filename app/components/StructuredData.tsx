@@ -3,9 +3,9 @@ export default function StructuredData() {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: "DungDiBinhLuan",
-    alternateName: "DungDiBinhLuan - Key Bản Quyền Offline & Mod Hub",
+    alternateName: "DungDiBinhLuan Mod Hub",
     url: "https://dungdibinhluan.com",
-    description: "Trang chia sẻ key bản quyền offline và mod miễn phí cho cộng đồng EA FC 26 Việt Nam",
+    description: "Trang chia sẻ mod miễn phí cho cộng đồng EA FC 26 Việt Nam",
     inLanguage: "vi-VN",
     potentialAction: {
       "@type": "SearchAction",
@@ -27,7 +27,7 @@ export default function StructuredData() {
     "@type": "Organization",
     name: "DungDiBinhLuan",
     url: "https://dungdibinhluan.com",
-    description: "Chia sẻ key bản quyền offline EA FC 26 và mod chất lượng cao",
+    description: "Chuyên cung cấp mod game EA FC 26 chất lượng cao",
     foundingDate: "2024",
     areaServed: {
       "@type": "Country",

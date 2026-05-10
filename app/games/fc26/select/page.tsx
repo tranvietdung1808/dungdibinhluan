@@ -15,26 +15,26 @@ const editions = [
   {
     id: "normal",
     title: "EA FC 26",
-    subtitle: "KEY BẢN QUYỀN OFFLINE",
-    description: "Key bản quyền offline, kích hoạt nhanh. Hỗ trợ cài đặt full qua teamview/ultraview.",
-    features: ["✅ Key bản quyền offline", "✅ Hỗ trợ kích hoạt nhanh", "✅ Hỗ trợ cài đặt 1:1"],
-    tag: "KEY OFFLINE",
+    subtitle: "STANDARD EDITION",
+    description: "Bộ cài đặt game đầy đủ, tối ưu hiệu năng theo máy của anh em. Hỗ trợ cài đặt full qua teamview/ultraview.",
+    features: ["✅ Game bản quyền", "✅Tối ưu FPS sẵn", "✅ Hỗ trợ cài đặt 1:1"],
+    tag: "GAME GỐC",
     tagColor: "#ce5a67",
     img: "/games/fc26n.jpg",
     price: "149.000₫",
-    href: "/games/fc26/payment?edition=normal",
+    href: "/games/fc26/payment?edition=normal", // 👈 đổi href
   },
   {
     id: "mods",
     title: "EA FC 26",
-    subtitle: "KEY BẢN QUYỀN OFFLINE + FULL MODS",
+    subtitle: "FULL MODS EDITION",
     description: "Tất cả những gì bản thường có, kèm thêm bộ mods đỉnh cao: đồ họa đỉnh cao, gần 3000 faces mới được thêm vào, chuyển nhượng luôn mới nhất.",
     features: ["✅ Tất cả từ bản thường", "✅ Face mods cao cấp", "✅ Kits + Đồ họa và hàng chục tính năng bổ sung khác tăng tính chân thực cho game"],
-    tag: "KEY + FULL MODS",
+    tag: "EXCLUSIVE",
     tagColor: "#a855f7",
     img: "/games/fc26-banner.jpg",
     price: "269.000₫",
-    href: "/games/fc26/payment?edition=mods",
+    href: "/games/fc26/payment?edition=mods", // 👈 đổi href
   },
 ];
 
@@ -45,7 +45,7 @@ export default function SelectEditionPage() {
         <h1 className="text-3xl md:text-4xl font-black">
           CHỌN <span className="text-[#ce5a67]">PHIÊN BẢN</span>
         </h1>
-        <p className="text-slate-500 text-xs tracking-widest uppercase">Chọn gói key bản quyền offline phù hợp với bạn</p>
+        <p className="text-slate-500 text-xs tracking-widest uppercase">Chọn gói phù hợp với bạn</p>
       </div>
 
       <div className="mb-8">
@@ -84,12 +84,12 @@ export default function SelectEditionPage() {
 
               {/* Giá */}
               <div className="flex items-center justify-between border-t border-white/5 pt-3">
-                <span className="text-xs text-slate-500 uppercase tracking-widest">Phí key offline</span>
+                <span className="text-xs text-slate-500 uppercase tracking-widest">Giá</span>
                 <span className="text-xl font-black" style={{ color: ed.tagColor }}>{ed.price}</span>
               </div>
 
               <div className="w-full py-3.5 rounded-2xl font-black text-xs tracking-widest text-center text-white transition-all" style={{ background: ed.tagColor }}>
-                NHẬN KEY NGAY →
+                MUA NGAY →
               </div>
             </div>
           </Link>

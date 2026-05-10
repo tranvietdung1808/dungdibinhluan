@@ -16,8 +16,8 @@ export async function GET() {
 
     try {
         const command = new GetObjectCommand({
-            Bucket: "fc26download",
-            Key: "FC26.rar",
+            Bucket: "fc26download", //
+            Key: "FC26.rar",         //
         });
 
         const url = await getSignedUrl(s3Client, command, { expiresIn: 3600 });

@@ -128,7 +128,7 @@ function DashboardView({ type }: { type: string }) {
   };
 
   const buttonContent = {
-    idle: <span className="relative z-10 tracking-widest">TẢI MOD BỔ TRỢ</span>,
+    idle: <span className="relative z-10 tracking-widest">BẮT ĐẦU TẢI XUỐNG</span>,
     loading: (
       <span className="relative z-10 flex items-center justify-center gap-3">
         <Spinner />
@@ -157,7 +157,7 @@ function DashboardView({ type }: { type: string }) {
             <div>
               <p className="text-sm font-black tracking-wider">{game.name}</p>
               <p className="text-[9px] text-[#ce5a67] tracking-[0.3em] uppercase">
-                {type === "mods" ? "KEY OFFLINE + FULL MODS" : game.subtitle}
+                {type === "mods" ? "FULL MODS EDITION" : game.subtitle}
               </p>
             </div>
           </div>
@@ -170,7 +170,7 @@ function DashboardView({ type }: { type: string }) {
         <div className="px-8 py-8 space-y-6">
           <div className="grid grid-cols-2 gap-4">
             <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/5 space-y-2">
-              <p className="text-[9px] text-slate-500 uppercase tracking-widest">Dung lượng mod</p>
+              <p className="text-[9px] text-slate-500 uppercase tracking-widest">Dung lượng file</p>
               <p className="text-2xl font-black text-[#ce5a67]">{game.fileSize}</p>
             </div>
             <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/5 space-y-2">
@@ -179,7 +179,7 @@ function DashboardView({ type }: { type: string }) {
             </div>
           </div>
 
-          {/* Nút tải mod bổ trợ — luôn hiện */}
+          {/* Nút tải game — luôn hiện */}
           <button
             onClick={handleDownload}
             disabled={status !== "idle"}
@@ -204,7 +204,7 @@ function DashboardView({ type }: { type: string }) {
           )}
 
           <footer className="pt-4 border-t border-white/5 flex justify-between items-center text-[9px] text-slate-600 uppercase tracking-widest">
-            <span>Key bản quyền offline</span>
+            <span>Powered by Google Antivirus</span>
             <Link href="/" className="hover:text-slate-400 transition-colors">← Trang chủ</Link>
           </footer>
         </div>

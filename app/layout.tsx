@@ -5,7 +5,6 @@ import { Analytics } from "@vercel/analytics/react";
 import { Suspense } from "react";
 import "./globals.css";
 import Navbar from "./components/Navbar";
-import NoticeBanner from "./components/NoticeBanner";
 import StructuredData from "./components/StructuredData";
 import TopProgressBar from "./components/TopProgressBar";
 import MessengerButton from "./components/MessengerButton";
@@ -18,12 +17,12 @@ const beVietnamPro = Be_Vietnam_Pro({
 
 export const metadata: Metadata = {
   title: {
-    default: "DungDiBinhLuan — Chia Sẻ Key Bản Quyền Offline FC 26, Mod Game Chất Lượng Cao",
+    default: "DungDiBinhLuan — Mod Game FC 26, FIFA, Facepack",
     template: "%s | DungDiBinhLuan",
   },
 
   description:
-    "Website chia sẻ key bản quyền offline FC 26, FIFA, kèm facepack, kits và các bản mod bổ trợ. Mod chất lượng cao được tuyển chọn bởi DungDiBinhLuan.",
+    "Tải mod FC 26, FIFA, facepack, kits và bộ cài đặt game tối ưu hiệu năng. Mod chất lượng cao được tuyển chọn bởi DungDiBinhLuan.",
 
   metadataBase: new URL("https://dungdibinhluan.com"),
 
@@ -34,20 +33,19 @@ export const metadata: Metadata = {
   },
 
   keywords: [
-    "FC 26 key bản quyền offline",
-    "key FC 26 offline",
     "FC 26 mod",
     "FIFA mod",
     "FC 26 facepack",
     "FC 26 kits",
-    "chia sẻ key bản quyền offline game",
+    "FIFA mods download",
+    "game mod",
     "DungDiBinhLuan",
-    "EA FC 26 key",
+    "EA FC 26 mod",
     "EA Sports FC 26",
     "mod game bóng đá",
     "face mod FIFA",
     "kit mod EA FC",
-    "key EA FC 26",
+    "download mod FC 26",
     "mod FIFA miễn phí",
     "EA Sports FC 26 Việt Nam",
     "mod bóng đá PC",
@@ -56,7 +54,7 @@ export const metadata: Metadata = {
     "gameplay mod FC 26",
     "download FC 26 faces",
     "mod FC 26 PC",
-    "key bản quyền offline FC 26",
+    "tải mod FC 26",
     "career mode FC 26",
     "cài đặt mod FIFA",
     "mod update EA FC"
@@ -70,23 +68,23 @@ export const metadata: Metadata = {
     locale: "vi_VN",
     url: "https://dungdibinhluan.com",
     siteName: "DungDiBinhLuan",
-    title: "DungDiBinhLuan — Chia Sẻ Key Bản Quyền Offline FC 26, Mod FIFA chất lượng cao",
+    title: "DungDiBinhLuan — Mod FC 26, FIFA chất lượng cao",
     description:
-      "Website chia sẻ key bản quyền offline FC 26, FIFA, kèm facepack, kits và các bản mod bổ trợ.",
+      "Website chia sẻ mod FC 26, FIFA, facepack, kits và bộ cài đặt game tối ưu hiệu năng.",
     images: [
       {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "DungDiBinhLuan - Key Bản Quyền Offline & Mods",
+        alt: "DungDiBinhLuan Game Mods",
       },
     ],
   },
 
   twitter: {
     card: "summary_large_image",
-    title: "DungDiBinhLuan — Chia Sẻ Key Bản Quyền Offline FC 26",
-    description: "Website chia sẻ key bản quyền offline và mod chất lượng cao.",
+    title: "DungDiBinhLuan — Mod FC 26, FIFA",
+    description: "Website chia sẻ mod game chất lượng cao.",
     images: ["/og-image.jpg"],
   },
 
@@ -120,7 +118,6 @@ export default function RootLayout({
           {children}
         </div>
         <MessengerButton />
-        <NoticeBanner />
         <Analytics />
       </body>
     </html>

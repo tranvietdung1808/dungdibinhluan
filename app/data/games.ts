@@ -19,8 +19,8 @@ export const GAMES: Game[] = [
   {
     slug: "fc26",
     name: "EA FC 26",
-    subtitle: "KEY BẢN QUYỀN OFFLINE + MOD",
-    description: "Key bản quyền offline, kèm mod bổ trợ.",
+    subtitle: "ALL IN ONE GAME SET UP",
+    description: "Bộ cài đặt đầy đủ, sẵn sàng chơi ngay.",
     tag: "🔥 HOT",
     spotlight: true,
     hasDownload: true,

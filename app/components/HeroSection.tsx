@@ -148,26 +148,24 @@ export default function HeroSection({ latestGuides = [] }: HeroSectionProps) {
                   EA FC <span className="text-[#ce5a67]">26</span>
                 </h1>
                 <p className="text-slate-400 text-[10px] md:text-sm tracking-[0.2em] md:tracking-[0.3em] uppercase mt-2 md:mt-3">
-                  KHO MOD & DỊCH VỤ CÀI ĐẶT
+                  ALL IN ONE GAME SET UP
                 </p>
               </div>
 
               <p className="text-slate-400 text-sm md:text-base leading-relaxed max-w-[260px] md:max-w-sm">
-                Kho mod FC 26 miễn phí lớn nhất — Faces, Kits, Gameplay, Đồ họa. Hỗ trợ cài đặt tận tình.
+                Bộ cài đặt đầy đủ, tối ưu hiệu năng. Chơi ngay không cần chờ đợi.
               </p>
 
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                <a
-                  href="https://web.facebook.com/dungbinhluan/"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <Link
+                  href="/games/fc26/select"
                   className="group flex items-center justify-center gap-2 px-6 md:px-8 py-3.5 md:py-4 bg-[#ce5a67] rounded-2xl font-black tracking-widest text-sm md:text-base text-white hover:bg-[#b44c5c] transition-all shadow-[0_8px_30px_rgba(206,90,103,0.3)]"
                 >
-                  LIÊN HỆ TƯ VẤN
+                  TẢI FC 26 NGAY
                   <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                   </svg>
-                </a>
+                </Link>
 
                 <button
                   onClick={() => setOpen(true)}
@@ -260,13 +258,13 @@ export default function HeroSection({ latestGuides = [] }: HeroSectionProps) {
             {/* Header */}
             <div className="flex-shrink-0 px-6 md:px-8 pt-6 md:pt-7 pb-4 border-b border-white/5 flex items-start justify-between gap-4">
               <div>
-                <p className="text-[10px] uppercase tracking-[0.3em] text-slate-500">KHO MOD FC26 + DỊCH VỤ CÀI ĐẶT</p>
+                <p className="text-[10px] uppercase tracking-[0.3em] text-slate-500">FC26 MOD SHOWCASE</p>
                 <h3 className="mt-1 text-xl md:text-2xl font-black text-white leading-tight">
                   MIX MODS FC 26 <span className="text-[#ce5a67]">2025–2026</span>
                 </h3>
                 <p className="mt-2 text-xs md:text-sm text-slate-400 leading-relaxed">
                   Siêu phẩm MIX MODS FC 26 đã chính thức ra mắt!<br /><br />
-                  Bộ mod hoàn thiện nhất thị trường với hàng trăm mod chất lượng được chọn lọc kĩ càng. Bao gồm tối ưu bằng những bản mod chất lượng nhất, facemods chất lượng nhất!<br /><br />
+                  Bản mod hoàn thiện nhất trên thị trường với hàng trăm mod mất phí được chọn lọc kĩ càng. Bao gồm tối ưu bằng những bản mod chất lượng nhất, facemods chất lượng nhất!<br /><br />
                   Gần 2000 faces mới được thêm vào, update về đồ họa, gameplay AI, tất tần tật mọi thứ bạn cần để hòa mình vào FC 26 một cách chân thực nhất!<br /><br />
                   Hỗ trợ tối ưu đồ họa cho máy của từng khách hàng! Hỗ trợ cài đặt 1:1 qua Teamview/Ultraview! Update miễn phí!
                 </p>
@@ -321,15 +319,13 @@ export default function HeroSection({ latestGuides = [] }: HeroSectionProps) {
 
             {/* Footer */}
             <div className="flex-shrink-0 px-6 md:px-8 py-4 md:py-5 border-t border-white/5 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-              <a
-                href="https://web.facebook.com/dungbinhluan/"
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                href="/games/fc26/select"
                 onClick={() => setOpen(false)}
                 className="flex items-center justify-center gap-2 flex-1 py-3 bg-[#ce5a67] rounded-2xl font-black tracking-widest text-sm text-white hover:bg-[#b44c5c] transition-all"
               >
-                LIÊN HỆ TƯ VẤN
-              </a>
+                TẢI NGAY
+              </Link>
               <button
                 onClick={() => setOpen(false)}
                 className="flex items-center justify-center gap-2 flex-1 py-3 rounded-2xl font-black tracking-widest text-sm text-slate-400 border border-white/10 hover:border-white/20 hover:text-white transition-all"

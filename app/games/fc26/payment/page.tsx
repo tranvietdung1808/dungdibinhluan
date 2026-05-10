@@ -7,8 +7,8 @@ import CheckUyTinButton from "../../../components/CheckUyTinButton";
 import CopyButton from "../../../components/CopyButton";
 
 const EDITIONS: Record<string, { label: string; price: string; color: string }> = {
-  normal: { label: "KEY BẢN QUYỀN OFFLINE", price: "149.000₫", color: "#ce5a67" },
-  mods:   { label: "KEY BẢN QUYỀN OFFLINE + FULL MODS", price: "269.000₫", color: "#a855f7" },
+  normal: { label: "STANDARD EDITION", price: "149.000₫", color: "#ce5a67" },
+  mods:   { label: "FULL MODS EDITION", price: "269.000₫", color: "#a855f7" },
 };
 
 const BANK_INFO = {
@@ -33,7 +33,6 @@ function PaymentContent() {
             THÔNG TIN <span style={{ color: ed.color }}>THANH TOÁN</span>
           </h1>
           <p className="text-[10px] text-slate-500 tracking-widest uppercase">{ed.label}</p>
-          <p className="text-[9px] text-slate-600 mt-1">Nhận key bản quyền offline sau khi thanh toán</p>
         </div>
 
         <div className="flex justify-center">
@@ -45,7 +44,7 @@ function PaymentContent() {
           className="rounded-2xl border p-5 text-center space-y-1"
           style={{ borderColor: `${ed.color}30`, background: `${ed.color}10` }}
         >
-          <p className="text-xs text-slate-400 tracking-widest uppercase">Phí chia sẻ key offline</p>
+          <p className="text-xs text-slate-400 tracking-widest uppercase">Tổng thanh toán</p>
           <p className="text-4xl font-black" style={{ color: ed.color }}>{ed.price}</p>
         </div>
 
@@ -83,8 +82,8 @@ function PaymentContent() {
             {[
               "Chuyển khoản đúng số tiền",
               "Nhắn tin cho admin kèm ảnh chụp màn hình giao dịch",
-              "Admin xác nhận & gửi key bản quyền offline cho bạn",
-              "Nhập key để kích hoạt và tải mod",
+              "Admin xác nhận & gửi code kích hoạt cho bạn",
+              "Nhập code để tải và cài đặt game",
             ].map((step, i) => (
               <li key={i} className="flex items-start gap-3 text-xs text-slate-300">
                 <span
@@ -118,7 +117,7 @@ function PaymentContent() {
           href={`/games/fc26?edition=${edition}`}
           className="flex items-center justify-center w-full py-4 rounded-2xl font-black text-xs tracking-widest border border-white/10 text-slate-400 hover:text-white hover:border-white/30 transition-all"
         >
-          ĐÃ CÓ KEY → NHẬP NGAY
+          ĐÃ CÓ CODE → NHẬP NGAY
         </Link>
 
         <Link href="/games/fc26/select" className="block text-center text-[10px] text-slate-600 hover:text-slate-400 transition-colors tracking-widest uppercase">

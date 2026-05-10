@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "DMCA & Bản Quyền | DungDiBinhLuan",
-  description: "Báo cáo vi phạm bản quyền và lạm dụng trên website DungDiBinhLuan - Chia sẻ key bản quyền offline và mod.",
+  title: "DMCA & Abuse | DungDiBinhLuan",
+  description: "Báo cáo vi phạm bản quyền và lạm dụng trên website DungDiBinhLuan.",
   alternates: {
     canonical: "https://dungdibinhluan.com/dmca",
   },
@@ -18,7 +18,7 @@ export default function DMCAPage() {
           ← Trang chủ
         </Link>
         <span className="text-slate-700">/</span>
-        <span className="text-sm font-bold tracking-widest uppercase text-white">DMCA & Bản Quyền</span>
+        <span className="text-sm font-bold tracking-widest uppercase text-white">DMCA & Abuse</span>
       </div>
 
       <div className="max-w-4xl mx-auto px-4 md:px-6 py-10 md:py-16 space-y-8">

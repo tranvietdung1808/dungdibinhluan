@@ -61,7 +61,7 @@ export default function MessengerButton() {
               <Image src="/logo.png" alt="" width={28} height={28} className="rounded-full object-cover" />
             </div>
             <div className="bg-white dark:bg-[#1f1f26] p-3 rounded-2xl rounded-tl-sm shadow-sm border border-black/5 dark:border-white/5 text-slate-700 dark:text-slate-300 text-[13px] md:text-sm leading-relaxed max-w-[85%]">
-              Chào bạn! Bạn cần hỗ trợ key bản quyền offline FC 26, mod hay có thắc mắc gì không? Vui lòng chat với Admin qua Messenger nhé! 👇
+              Chào bạn! Bạn cần hỗ trợ bản Mod FC 26, tải game hay có thắc mắc gì không? Vui lòng chat với Admin qua Messenger nhé! 👇
             </div>
           </div>
         </div>

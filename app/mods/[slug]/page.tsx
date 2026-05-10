@@ -361,7 +361,7 @@ export default async function ModDetailPage({
           <p className="text-xs text-slate-600 italic text-center">
             Lưu ý: Bản mod chỉ dành cho anh em đã có game. Chưa có game?{" "}
             <Link href="/games/fc26/select" className="text-[#ce5a67] hover:underline">
-              Nhận key bản quyền offline tại đây
+              Liên hệ admin mua ngay
             </Link>
           </p>
         </div>
@@ -474,7 +474,7 @@ export default async function ModDetailPage({
                   <p>
                     Chưa có game?{" "}
                     <Link href="/games/fc26/select" className="text-[#ce5a67] hover:underline font-semibold">
-                      Nhận key bản quyền offline tại đây
+                      Liên hệ admin mua ngay
                     </Link>
                   </p>
                 </div>
@@ -575,7 +575,7 @@ export default async function ModDetailPage({
             <p>
               Chưa có game?{" "}
               <Link href="/games/fc26/select" className="text-[#ce5a67] hover:underline font-semibold">
-                Nhận key bản quyền offline tại đây
+                Liên hệ admin mua ngay
               </Link>
             </p>
           </div>
