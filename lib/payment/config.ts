@@ -6,7 +6,10 @@ export interface ProductConfig {
   price: number
   codePrefix: 'DUNG' | 'MODS'
   returnUrl: string
+  codeEntryUrl: string
 }
+
+const BASE = "https://www.dungdibinhluan.com"
 
 export const PRODUCTS: Record<ProductId, ProductConfig> = {
   'fc26-normal': {
@@ -15,6 +18,7 @@ export const PRODUCTS: Record<ProductId, ProductConfig> = {
     price: 149000,
     codePrefix: 'DUNG',
     returnUrl: '/games/fc26?edition=normal',
+    codeEntryUrl: `${BASE}/games/fc26?edition=normal`,
   },
   'fc26-mods': {
     id: 'fc26-mods',
@@ -22,6 +26,7 @@ export const PRODUCTS: Record<ProductId, ProductConfig> = {
     price: 269000,
     codePrefix: 'MODS',
     returnUrl: '/games/fc26?edition=mods',
+    codeEntryUrl: `${BASE}/games/fc26?edition=mods`,
   },
   'mix-mods': {
     id: 'mix-mods',
@@ -29,6 +34,7 @@ export const PRODUCTS: Record<ProductId, ProductConfig> = {
     price: 169000,
     codePrefix: 'MODS',
     returnUrl: '/mods/mix-mods-fc26',
+    codeEntryUrl: `${BASE}/mods/mix-mods-fc26`,
   },
 }
 

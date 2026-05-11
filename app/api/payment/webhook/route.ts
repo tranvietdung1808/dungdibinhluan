@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
     }
 
     const generatedCode = await createCode(product.codePrefix);
-    const emailSent = await sendCodeEmail(order.email, generatedCode, product.name);
+    const emailSent = await sendCodeEmail(order.email, generatedCode, product.name, product.codeEntryUrl);
 
     await kv.set(orderKey, {
       ...order,
