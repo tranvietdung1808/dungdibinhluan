@@ -7,6 +7,8 @@ export interface ProductConfig {
   codePrefix: 'DUNG' | 'MODS'
   returnUrl: string
   codeEntryUrl: string
+  noCode?: boolean
+  directDownloadUrl?: string
 }
 
 const BASE = "https://www.dungdibinhluan.com"
@@ -35,6 +37,8 @@ export const PRODUCTS: Record<ProductId, ProductConfig> = {
     codePrefix: 'MODS',
     returnUrl: '/mods/mix-mods-fc26',
     codeEntryUrl: `${BASE}/mods/mix-mods-fc26`,
+    noCode: true,
+    directDownloadUrl: 'https://drive.google.com/file/d/1PSa5JSNOyEZlKJ2onJksdM9t-1fz_trh/view?usp=drive_link',
   },
 }
 

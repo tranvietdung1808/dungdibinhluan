@@ -59,8 +59,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true });
     }
 
-    const generatedCode = await createCode(product.codePrefix);
-    const emailSent = await sendCodeEmail(order.email, generatedCode, product.name, product.codeEntryUrl);
+    let generatedCode = "";
+    let emailSent = false;
+
+    if (product.noCode) {
+      emailSent = await sendCodeEmail(order.email, "", product.name, product.codeEntryUrl, product.directDownloadUrl);
+    } else {
+      generatedCode = await createCode(product.codePrefix);
+      emailSent = await sendCodeEmail(order.email, generatedCode, product.name, product.codeEntryUrl);
+    }
 
     await kv.set(orderKey, {
       ...order,
