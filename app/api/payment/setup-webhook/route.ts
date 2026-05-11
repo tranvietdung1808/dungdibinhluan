@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { PayOS } from "@payos/node";
 
 let payos: PayOS | null = null;

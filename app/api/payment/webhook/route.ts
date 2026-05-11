@@ -31,51 +31,53 @@ export async function OPTIONS() {
 }
 
 export async function GET() {
-  return NextResponse.json({ message: "ok" });
+  return NextResponse.json({ success: true, message: "webhook alive" });
 }
 
 export async function POST(req: NextRequest) {
-  const respond = (data: unknown, status = 200) =>
-    NextResponse.json(data, { status });
+  let body: Record<string, unknown>;
+  try {
+    const text = await req.text();
+    body = text ? JSON.parse(text) : {};
+  } catch {
+    return NextResponse.json({ success: false, message: "Invalid JSON" });
+  }
+
+  if (!body.data || !body.signature) {
+    if (body.webhookUrl) {
+      return NextResponse.json({ success: true, message: "Webhook URL is valid" });
+    }
+    return NextResponse.json({ success: false, message: "Not a webhook payload" });
+  }
 
   try {
-    const body = await req.json();
-
-    if (!body || !body.data || !body.signature) {
-      if (body && body.webhookUrl) {
-        return respond({ message: "Webhook URL validated" });
-      }
-      return respond({ success: false, message: "Invalid webhook payload" });
-    }
-
-    const webhookData = await getPayOS().webhooks.verify(body);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const webhookData = await getPayOS().webhooks.verify(body as any);
 
     if (!webhookData || webhookData.code !== "00") {
       console.log("Payment not successful:", webhookData);
-      return respond({ success: false });
+      return NextResponse.json({ success: false });
     }
 
     const { orderCode } = webhookData;
     const orderKey = `order:${orderCode}`;
 
-    const order: { productId: string; email: string; status: string } | null = await kv.get(orderKey);
+    const order = await kv.get<{ productId: string; email: string; status: string }>(orderKey);
     if (!order) {
-      console.error("Order not found:", orderCode);
-      return respond({ error: "Order not found" }, 404);
+      console.log("Order not found (test or expired):", orderCode);
+      return NextResponse.json({ success: true, message: "Order not found - test OK" });
     }
 
     if (order.status === "COMPLETED") {
-      return respond({ success: true, message: "Already processed" });
+      return NextResponse.json({ success: true, message: "Already processed" });
     }
 
     const product = getProduct(order.productId);
     if (!product) {
-      console.error("Product not found:", order.productId);
-      return respond({ error: "Product not found" }, 400);
+      return NextResponse.json({ error: "Product not found" }, { status: 400 });
     }
 
     const code = await createCode(product.codePrefix);
-
     const emailSent = await sendCodeEmail(order.email, code, product.name);
 
     await kv.set(orderKey, {
@@ -86,11 +88,9 @@ export async function POST(req: NextRequest) {
     });
 
     console.log(`Payment done - order:${orderCode}, email:${emailSent ? "sent" : "failed"}`);
-
-    return respond({ success: true });
+    return NextResponse.json({ success: true });
   } catch (error: unknown) {
     console.error("Webhook error:", error);
-    const message = error instanceof Error ? error.message : "Webhook error";
-    return respond({ error: message });
+    return NextResponse.json({ success: false, error: String(error) });
   }
 }
