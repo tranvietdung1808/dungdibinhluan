@@ -7,9 +7,9 @@ import CheckUyTinButton from "../../../components/CheckUyTinButton";
 import CopyButton from "../../../components/CopyButton";
 import PayOSButton from "../../../components/PayOSButton";
 
-const EDITIONS: Record<string, { label: string; price: string; color: string; productId: string }> = {
-  normal: { label: "STANDARD EDITION", price: "149.000₫", color: "#ce5a67", productId: "fc26-normal" },
-  mods:   { label: "FULL MODS EDITION", price: "269.000₫", color: "#a855f7", productId: "fc26-mods" },
+const EDITIONS: Record<string, { label: string; price: string; color: string; productId: string; ckContent: string }> = {
+  normal: { label: "STANDARD EDITION", price: "149.000₫", color: "#ce5a67", productId: "fc26-normal", ckContent: "quacuoi" },
+  mods:   { label: "FULL MODS EDITION", price: "269.000₫", color: "#a855f7", productId: "fc26-mods", ckContent: "quaque" },
 };
 
 const BANK_INFO = {
@@ -28,7 +28,6 @@ function PaymentContent() {
     <main className="min-h-screen bg-[#0a0a0a] text-white flex flex-col items-center justify-center px-4 py-16">
       <div className="w-full max-w-md space-y-6">
 
-        {/* Header */}
         <div className="text-center space-y-1">
           <h1 className="text-2xl md:text-3xl font-black">
             THÔNG TIN <span style={{ color: ed.color }}>THANH TOÁN</span>
@@ -40,7 +39,6 @@ function PaymentContent() {
           <CheckUyTinButton />
         </div>
 
-        {/* Giá */}
         <div
           className="rounded-2xl border p-5 text-center space-y-1"
           style={{ borderColor: `${ed.color}30`, background: `${ed.color}10` }}
@@ -49,52 +47,68 @@ function PaymentContent() {
           <p className="text-4xl font-black" style={{ color: ed.color }}>{ed.price}</p>
         </div>
 
-        {/* Auto Payment */}
+        {/* Auto Payment PayOS - nổi bật */}
         <div
-          className="rounded-2xl border p-5 space-y-4"
-          style={{ borderColor: `${ed.color}30`, background: "#111" }}
+          className="rounded-3xl border-2 p-6 space-y-5 relative overflow-hidden"
+          style={{ borderColor: ed.color, background: `${ed.color}08` }}
         >
-          <div className="text-center">
-            <p className="text-xs font-black uppercase tracking-widest" style={{ color: ed.color }}>Thanh toán tự động</p>
-            <p className="text-[10px] text-slate-500 mt-1">Nhập email → Thanh toán → Nhận code ngay</p>
-          </div>
+          <div
+            className="absolute -top-6 -right-6 w-24 h-24 rounded-full blur-2xl opacity-20"
+            style={{ background: ed.color }}
+          />
+          <div className="relative space-y-4">
+            <div className="text-center space-y-2">
+              <span
+                className="inline-block px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest"
+                style={{ background: `${ed.color}20`, color: ed.color, border: `1px solid ${ed.color}40` }}
+              >
+                ⚡ Tự động — Nhận key ngay
+              </span>
+              <h2 className="text-lg font-black uppercase tracking-widest" style={{ color: ed.color }}>
+                Thanh toán QR nhận key tự động
+              </h2>
+              <p className="text-[11px] text-slate-400">
+                Nhập email → Quét QR thanh toán → Nhận code qua email ngay lập tức
+              </p>
+            </div>
 
-          <PayOSButton productId={ed.productId} price={ed.price} color={ed.color} />
+            <PayOSButton productId={ed.productId} price={ed.price} color={ed.color} />
+          </div>
         </div>
 
         <div className="flex items-center gap-3">
           <div className="flex-1 h-[1px] bg-white/5" />
-          <span className="text-[10px] text-slate-600 uppercase tracking-widest">hoặc chuyển khoản thủ công</span>
+          <span className="text-[9px] text-slate-700 uppercase tracking-widest">hoặc chuyển khoản thủ công</span>
           <div className="flex-1 h-[1px] bg-white/5" />
         </div>
 
-        {/* QR Code */}
-        <div className="rounded-2xl border border-white/10 bg-[#111] p-5 flex flex-col items-center gap-3">
-          <p className="text-[10px] font-black tracking-widest text-slate-400 uppercase">Quét QR để thanh toán</p>
-          <div className="relative w-52 h-52 rounded-xl overflow-hidden border border-white/10">
-            <Image src="/qrbidv.jpg" alt="QR BIDV" fill className="object-contain" />
-          </div>
-        </div>
-
-        {/* Thông tin ngân hàng */}
-        <div className="rounded-2xl border border-white/10 bg-[#111] p-5 space-y-4">
-          <p className="text-[10px] font-black tracking-widest text-slate-400 uppercase">Chuyển khoản ngân hàng</p>
+        {/* Chuyển khoản thủ công - nhỏ hơn */}
+        <div className="rounded-2xl border border-white/5 bg-[#0d0d0d] p-4 space-y-4 opacity-70 hover:opacity-100 transition-opacity">
+          <p className="text-[9px] font-bold tracking-widest text-slate-500 uppercase">Chuyển khoản ngân hàng</p>
           {[
             { label: "Ngân hàng", value: BANK_INFO.bank },
             { label: "Số tài khoản", value: BANK_INFO.accountNumber, showCopy: true },
             { label: "Chủ tài khoản", value: BANK_INFO.accountName },
+            { label: "Số tiền", value: ed.price },
+            { label: "Nội dung CK", value: ed.ckContent },
           ].map(row => (
             <div key={row.label} className="flex items-center justify-between gap-4">
-              <span className="text-xs text-slate-500 flex-shrink-0">{row.label}</span>
+              <span className="text-[10px] text-slate-600 flex-shrink-0">{row.label}</span>
               <div className="flex items-center gap-2 flex-1 justify-end">
-                <span className="text-xs font-black text-white text-right">{row.value}</span>
+                <span className="text-[10px] font-bold text-slate-400 text-right">{row.value}</span>
                 {row.showCopy && <CopyButton text={row.value} />}
               </div>
             </div>
           ))}
+
+          <div className="flex flex-col items-center gap-2 pt-2 border-t border-white/5">
+            <p className="text-[9px] text-slate-600">Quét QR BIDV</p>
+            <div className="relative w-36 h-36 rounded-xl overflow-hidden border border-white/5">
+              <Image src="/qrbidv.jpg" alt="QR BIDV" fill className="object-contain" />
+            </div>
+          </div>
         </div>
 
-        {/* Bước tiếp theo */}
         <div className="rounded-2xl border border-white/10 bg-[#111] p-5 space-y-3">
           <p className="text-[10px] font-black tracking-widest text-slate-400 uppercase">Các bước tiếp theo</p>
           <ol className="space-y-2.5">
@@ -118,7 +132,6 @@ function PaymentContent() {
           </ol>
         </div>
 
-        {/* IB Admin */}
         <a
           href={BANK_INFO.adminFb}
           target="_blank"
@@ -132,7 +145,6 @@ function PaymentContent() {
           NHẮN TIN CHO ADMIN →
         </a>
 
-        {/* Nhập code */}
         <Link
           href={`/games/fc26?edition=${edition}`}
           className="flex items-center justify-center w-full py-4 rounded-2xl font-black text-xs tracking-widest border border-white/10 text-slate-400 hover:text-white hover:border-white/30 transition-all"
