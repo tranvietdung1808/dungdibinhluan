@@ -19,9 +19,18 @@ function getPayOS(): PayOS {
   return payos;
 }
 
+export async function GET() {
+  return NextResponse.json({ message: "Webhook endpoint is active" });
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
+
+    if (body.webhookUrl) {
+      return NextResponse.json({ message: "Webhook validated" });
+    }
+
     const webhookData = await getPayOS().webhooks.verify(body);
 
     if (!webhookData || webhookData.code !== "00") {
