@@ -7,16 +7,22 @@ import { getProduct } from "@/lib/payment/config";
 
 const kv = Redis.fromEnv();
 
-const payos = new PayOS({
-  clientId: process.env.PAYOS_CLIENT_ID!,
-  apiKey: process.env.PAYOS_API_KEY!,
-  checksumKey: process.env.PAYOS_CHECKSUM_KEY!,
-});
+let payos: PayOS | null = null;
+function getPayOS(): PayOS {
+  if (!payos) {
+    payos = new PayOS({
+      clientId: process.env.PAYOS_CLIENT_ID!,
+      apiKey: process.env.PAYOS_API_KEY!,
+      checksumKey: process.env.PAYOS_CHECKSUM_KEY!,
+    });
+  }
+  return payos;
+}
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const webhookData = await payos.webhooks.verify(body);
+    const webhookData = await getPayOS().webhooks.verify(body);
 
     if (!webhookData || webhookData.code !== "00") {
       console.log("Webhook payment not successful:", webhookData);

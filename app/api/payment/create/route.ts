@@ -5,11 +5,17 @@ import { getProduct } from "@/lib/payment/config";
 
 const kv = Redis.fromEnv();
 
-const payos = new PayOS({
-  clientId: process.env.PAYOS_CLIENT_ID!,
-  apiKey: process.env.PAYOS_API_KEY!,
-  checksumKey: process.env.PAYOS_CHECKSUM_KEY!,
-});
+let payos: PayOS | null = null;
+function getPayOS(): PayOS {
+  if (!payos) {
+    payos = new PayOS({
+      clientId: process.env.PAYOS_CLIENT_ID!,
+      apiKey: process.env.PAYOS_API_KEY!,
+      checksumKey: process.env.PAYOS_CHECKSUM_KEY!,
+    });
+  }
+  return payos;
+}
 
 const ORDER_TTL = 60 * 60;
 
@@ -55,7 +61,7 @@ export async function POST(req: NextRequest) {
       expiredAt: Math.floor(Date.now() / 1000) + 1800,
     };
 
-    const paymentLink = await payos.paymentRequests.create(paymentData);
+    const paymentLink = await getPayOS().paymentRequests.create(paymentData);
 
     await kv.set(
       `order:${orderCode}`,
