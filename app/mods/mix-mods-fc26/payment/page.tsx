@@ -74,6 +74,26 @@ export default function PaymentPage() {
           </div>
         </div>
 
+        <div className="bg-[#111] border border-white/10 rounded-3xl p-5 space-y-3">
+          <p className="text-[10px] font-black tracking-widest text-slate-400 uppercase">Các bước tiếp theo</p>
+          <ol className="space-y-2.5">
+            {[
+              "Chuyển khoản đúng số tiền",
+              "Nhắn tin cho admin kèm ảnh chụp màn hình giao dịch",
+              "Admin xác nhận & gửi code kích hoạt cho bạn",
+              "Nhập code để tải và cài đặt game",
+              "Tải game, giải nén và nhắn tin cho admin để cài đặt",
+            ].map((step, i) => (
+              <li key={i} className="flex items-start gap-3 text-xs text-slate-300">
+                <span className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black bg-[#ce5a67]/20 text-[#ce5a67] border border-[#ce5a67]/40">
+                  {i + 1}
+                </span>
+                {step}
+              </li>
+            ))}
+          </ol>
+        </div>
+
         <div className="bg-white/5 rounded-2xl p-4 space-y-1.5">
           <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Lưu ý</p>
           <ul className="space-y-1">

@@ -103,6 +103,7 @@ function PaymentContent() {
               "Nhắn tin cho admin kèm ảnh chụp màn hình giao dịch",
               "Admin xác nhận & gửi code kích hoạt cho bạn",
               "Nhập code để tải và cài đặt game",
+              "Tải game, giải nén và nhắn tin cho admin để cài đặt",
             ].map((step, i) => (
               <li key={i} className="flex items-start gap-3 text-xs text-slate-300">
                 <span
