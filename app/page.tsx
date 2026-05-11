@@ -312,18 +312,6 @@ export default async function HomePage() {
         <section>
           <HeroSection latestGuides={heroGuides} />
         </section>
-        <section className="max-w-6xl mx-auto px-4 md:px-6 -mt-6 relative z-20">
-          <div className="rounded-2xl border border-[#ce5a67]/30 bg-[#ce5a67]/5 backdrop-blur-xl p-4 md:p-5 flex items-start gap-3">
-            <span className="text-lg mt-0.5">🛡️</span>
-            <div>
-              <p className="text-xs md:text-sm text-slate-200 leading-relaxed">
-                <strong className="text-[#ce5a67]">Lưu ý:</strong> Website cung cấp <strong>key bản quyền offline chính hãng</strong> — <em>không phải crack</em>. 
-                EA FC 26 sử dụng công nghệ <strong>Denuvo Anti-Tamper</strong> chống crack, do đó <u>không thể bẻ khóa</u>. 
-                Toàn bộ key được kích hoạt hợp lệ, chơi offline ổn định.
-              </p>
-            </div>
-          </div>
-        </section>
         <section>
           <MobileLatestGuidesSection guides={heroGuides} />
         </section>
@@ -346,13 +334,8 @@ export default async function HomePage() {
             DMCA & Abuse
           </Link>
         </div>
-        <p className="text-[9px] md:text-[10px] text-slate-400 max-w-xl mx-auto leading-relaxed">
-          ⚠️ Website cung cấp <strong>key bản quyền offline chính hãng</strong> — không phải crack. 
-          EA FC 26 được bảo vệ bởi <strong>Denuvo</strong>, không thể bẻ khóa. 
-          Chúng tôi <em>không</em> phân phối phần mềm lậu.
-        </p>
         <p className="text-[9px] text-slate-600 uppercase tracking-widest">
-          © 2026 DUNGDIBINHLUAN — Key Bản Quyền Offline Chính Hãng
+          © 2026 DUNGDIBINHLUAN — Powered by Google Antivirus
         </p>
       </footer>
     </main>

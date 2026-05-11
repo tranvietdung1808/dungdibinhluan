@@ -5,10 +5,11 @@ import Image from "next/image";
 import { Suspense } from "react";
 import CheckUyTinButton from "../../../components/CheckUyTinButton";
 import CopyButton from "../../../components/CopyButton";
+import PayOSButton from "../../../components/PayOSButton";
 
-const EDITIONS: Record<string, { label: string; price: string; color: string }> = {
-  normal: { label: "STANDARD EDITION", price: "149.000₫", color: "#ce5a67" },
-  mods:   { label: "FULL MODS EDITION", price: "269.000₫", color: "#a855f7" },
+const EDITIONS: Record<string, { label: string; price: string; color: string; productId: string }> = {
+  normal: { label: "STANDARD EDITION", price: "149.000₫", color: "#ce5a67", productId: "fc26-normal" },
+  mods:   { label: "FULL MODS EDITION", price: "269.000₫", color: "#a855f7", productId: "fc26-mods" },
 };
 
 const BANK_INFO = {
@@ -48,13 +49,31 @@ function PaymentContent() {
           <p className="text-4xl font-black" style={{ color: ed.color }}>{ed.price}</p>
         </div>
 
+        {/* Auto Payment */}
+        <div
+          className="rounded-2xl border p-5 space-y-4"
+          style={{ borderColor: `${ed.color}30`, background: "#111" }}
+        >
+          <div className="text-center">
+            <p className="text-xs font-black uppercase tracking-widest" style={{ color: ed.color }}>Thanh toán tự động</p>
+            <p className="text-[10px] text-slate-500 mt-1">Nhập email → Thanh toán → Nhận code ngay</p>
+          </div>
+
+          <PayOSButton productId={ed.productId} price={ed.price} color={ed.color} />
+        </div>
+
+        <div className="flex items-center gap-3">
+          <div className="flex-1 h-[1px] bg-white/5" />
+          <span className="text-[10px] text-slate-600 uppercase tracking-widest">hoặc chuyển khoản thủ công</span>
+          <div className="flex-1 h-[1px] bg-white/5" />
+        </div>
+
         {/* QR Code */}
         <div className="rounded-2xl border border-white/10 bg-[#111] p-5 flex flex-col items-center gap-3">
           <p className="text-[10px] font-black tracking-widest text-slate-400 uppercase">Quét QR để thanh toán</p>
           <div className="relative w-52 h-52 rounded-xl overflow-hidden border border-white/10">
             <Image src="/qrbidv.jpg" alt="QR BIDV" fill className="object-contain" />
           </div>
-          <p className="text-[10px] text-slate-500">Hoặc chuyển khoản thủ công bên dưới</p>
         </div>
 
         {/* Thông tin ngân hàng */}

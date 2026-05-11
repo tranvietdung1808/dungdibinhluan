@@ -2,12 +2,12 @@ import Link from "next/link";
 import Image from "next/image";
 import CheckUyTinButton from "../../../components/CheckUyTinButton";
 import CopyButton from "../../../components/CopyButton";
+import PayOSButton from "../../../components/PayOSButton";
 
 export default function PaymentPage() {
   return (
     <main className="min-h-screen bg-[#0a0a0a] text-white flex flex-col items-center justify-center px-4 py-16">
 
-      {/* Header */}
       <div className="text-center space-y-2 mb-8">
         <p className="text-[10px] uppercase tracking-[0.3em] text-slate-500">Thanh toán</p>
         <h1 className="text-2xl md:text-3xl font-black">
@@ -22,16 +22,27 @@ export default function PaymentPage() {
 
       <div className="w-full max-w-md space-y-5">
 
-        {/* Giá */}
         <div className="bg-[#ce5a67]/10 border border-[#ce5a67]/30 rounded-2xl p-4 flex items-center justify-between">
           <span className="text-sm text-slate-300">Tổng thanh toán</span>
           <span className="text-2xl font-black text-[#ce5a67]">169.000đ</span>
         </div>
 
-        {/* QR + STK */}
-        <div className="bg-[#111] border border-white/10 rounded-3xl p-6 space-y-5">
+        <div className="bg-[#111] border border-[#ce5a67]/30 rounded-3xl p-6 space-y-4">
+          <div className="text-center">
+            <p className="text-xs font-black uppercase tracking-widest text-[#ce5a67]">Thanh toán tự động</p>
+            <p className="text-[10px] text-slate-500 mt-1">Nhập email → Thanh toán → Nhận code ngay</p>
+          </div>
 
-          {/* QR */}
+          <PayOSButton productId="mix-mods" price="169.000đ" color="#ce5a67" />
+        </div>
+
+        <div className="flex items-center gap-3">
+          <div className="flex-1 h-[1px] bg-white/5" />
+          <span className="text-[10px] text-slate-600 uppercase tracking-widest">hoặc chuyển khoản thủ công</span>
+          <div className="flex-1 h-[1px] bg-white/5" />
+        </div>
+
+        <div className="bg-[#111] border border-white/10 rounded-3xl p-6 space-y-5">
           <div className="flex flex-col items-center gap-3">
             <p className="text-xs text-slate-500 uppercase tracking-widest">Quét mã QR để thanh toán</p>
             <div className="relative w-52 h-52 rounded-2xl overflow-hidden border border-white/10">
@@ -44,14 +55,6 @@ export default function PaymentPage() {
             </div>
           </div>
 
-          {/* Divider */}
-          <div className="flex items-center gap-3">
-            <div className="flex-1 h-[1px] bg-white/5" />
-            <span className="text-[10px] text-slate-600 uppercase tracking-widest">hoặc chuyển khoản thủ công</span>
-            <div className="flex-1 h-[1px] bg-white/5" />
-          </div>
-
-          {/* STK */}
           <div className="space-y-2.5">
             {[
               { label: "Ngân hàng", value: "BIDV" },
@@ -71,24 +74,20 @@ export default function PaymentPage() {
           </div>
         </div>
 
-        {/* Lưu ý */}
         <div className="bg-white/5 rounded-2xl p-4 space-y-1.5">
           <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Lưu ý</p>
           <ul className="space-y-1">
-            {[
-              "Ghi đúng nội dung chuyển khoản để admin xác nhận nhanh hơn.",
-              "Sau khi chuyển khoản, nhấn nút bên dưới để gửi bill cho page.",
-              "Admin sẽ phản hồi và gửi link tải trong vòng 24h.",
-            ].map((note, i) => (
-              <li key={i} className="text-[11px] text-slate-500 flex items-start gap-1.5">
-                <span className="text-[#ce5a67] mt-0.5">•</span>
-                {note}
-              </li>
-            ))}
+            <li className="text-[11px] text-slate-500 flex items-start gap-1.5">
+              <span className="text-[#ce5a67] mt-0.5">•</span>
+              Chọn "Thanh toán tự động" để nhận code qua email ngay lập tức.
+            </li>
+            <li className="text-[11px] text-slate-500 flex items-start gap-1.5">
+              <span className="text-[#ce5a67] mt-0.5">•</span>
+              Nếu chuyển khoản thủ công, nhấn nút bên dưới để gửi bill.
+            </li>
           </ul>
         </div>
 
-        {/* CTA */}
         <a
           href="https://web.facebook.com/dungbinhluan/"
           target="_blank"

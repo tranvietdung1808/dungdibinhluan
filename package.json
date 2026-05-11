@@ -13,6 +13,7 @@
     "@aws-sdk/s3-request-presigner": "^3.1004.0",
     "@google/generative-ai": "^0.24.1",
     "@payloadcms/richtext-slate": "^3.80.0",
+    "@payos/node": "^2.0.5",
     "@supabase/ssr": "^0.9.0",
     "@supabase/supabase-js": "^2.105.1",
     "@tiptap/extension-bullet-list": "^3.20.4",
@@ -27,6 +28,7 @@
     "dotenv": "^17.4.2",
     "mongodb": "^7.1.0",
     "next": "16.1.6",
+    "nodemailer": "^8.0.7",
     "openai": "^6.35.0",
     "payload": "^3.80.0",
     "react": "19.2.3",
@@ -35,6 +37,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
+    "@types/nodemailer": "^8.0.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
