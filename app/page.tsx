@@ -328,6 +328,16 @@ export default async function HomePage() {
           <GameGrid />
         </section>
       </div>
+
+      <div className="border-t border-white/5 px-4 md:px-6 py-6 md:py-8 max-w-3xl mx-auto">
+        <p className="text-[10px] md:text-xs text-slate-600 text-center leading-relaxed">
+          <strong className="text-slate-500">TUYÊN BỐ MIỄN TRỪ TRÁCH NHIỆM:</strong> DungDiBinhLuan là nền tảng chia sẻ mod, bản vá và
+          tiện ích hỗ trợ người dùng trải nghiệm game. Chúng tôi không phát triển, phân phối hoặc quảng bá bất kỳ phần mềm
+          crack, hack hay vi phạm bản quyền nào. Tất cả nội dung trên website được đóng góp từ cộng đồng và chỉ dành cho mục
+          đích tham khảo, học tập. Người dùng tự chịu trách nhiệm về việc sử dụng các tệp tin tải về.
+        </p>
+      </div>
+
       <footer className="border-t border-white/5 px-4 md:px-6 py-5 md:py-6 text-center space-y-3">
         <div className="flex items-center justify-center gap-4 md:gap-6 text-[10px] md:text-xs">
           <Link href="/dmca" className="text-slate-500 hover:text-white transition-colors uppercase tracking-widest">
