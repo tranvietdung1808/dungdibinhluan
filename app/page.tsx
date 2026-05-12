@@ -312,6 +312,18 @@ export default async function HomePage() {
         <section>
           <HeroSection latestGuides={heroGuides} />
         </section>
+        <section className="max-w-6xl mx-auto px-4 md:px-6 -mt-6 relative z-20">
+          <div className="rounded-2xl border border-[#ce5a67]/30 bg-[#ce5a67]/5 backdrop-blur-xl p-4 md:p-5 flex items-start gap-3">
+            <span className="text-lg mt-0.5">🛡️</span>
+            <div>
+              <p className="text-xs md:text-sm text-slate-200 leading-relaxed">
+                <strong className="text-[#ce5a67]">Lưu ý:</strong> Website cung cấp <strong>key bản quyền offline chính hãng</strong> — <em>không phải crack</em>. 
+                EA FC 26 sử dụng công nghệ <strong>Denuvo Anti-Tamper</strong> chống crack, do đó <u>không thể bẻ khóa</u>. 
+                Toàn bộ key được kích hoạt hợp lệ, chơi offline ổn định.
+              </p>
+            </div>
+          </div>
+        </section>
         <section>
           <MobileLatestGuidesSection guides={heroGuides} />
         </section>
@@ -328,24 +340,19 @@ export default async function HomePage() {
           <GameGrid />
         </section>
       </div>
-
-      <div className="border-t border-white/5 px-4 md:px-6 py-6 md:py-8 max-w-3xl mx-auto">
-        <p className="text-[10px] md:text-xs text-slate-600 text-center leading-relaxed">
-          <strong className="text-slate-500">TUYÊN BỐ MIỄN TRỪ TRÁCH NHIỆM:</strong> DungDiBinhLuan là nền tảng chia sẻ mod, bản vá và
-          tiện ích hỗ trợ người dùng trải nghiệm game. Chúng tôi không phát triển, phân phối hoặc quảng bá bất kỳ phần mềm
-          crack, hack hay vi phạm bản quyền nào. Tất cả nội dung trên website được đóng góp từ cộng đồng và chỉ dành cho mục
-          đích tham khảo, học tập. Người dùng tự chịu trách nhiệm về việc sử dụng các tệp tin tải về.
-        </p>
-      </div>
-
       <footer className="border-t border-white/5 px-4 md:px-6 py-5 md:py-6 text-center space-y-3">
         <div className="flex items-center justify-center gap-4 md:gap-6 text-[10px] md:text-xs">
           <Link href="/dmca" className="text-slate-500 hover:text-white transition-colors uppercase tracking-widest">
             DMCA & Abuse
           </Link>
         </div>
+        <p className="text-[9px] md:text-[10px] text-slate-400 max-w-xl mx-auto leading-relaxed">
+          ⚠️ Website cung cấp <strong>key bản quyền offline chính hãng</strong> — không phải crack. 
+          EA FC 26 được bảo vệ bởi <strong>Denuvo</strong>, không thể bẻ khóa. 
+          Chúng tôi <em>không</em> phân phối phần mềm lậu.
+        </p>
         <p className="text-[9px] text-slate-600 uppercase tracking-widest">
-          © 2026 DUNGDIBINHLUAN — Powered by Google Antivirus
+          © 2026 DUNGDIBINHLUAN — Key Bản Quyền Offline Chính Hãng
         </p>
       </footer>
     </main>
