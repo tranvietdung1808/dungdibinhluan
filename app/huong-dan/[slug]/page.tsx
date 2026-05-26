@@ -26,13 +26,12 @@ type GuideSummary = {
   id: string
   slug: string
   title: string
-  content: string
   thumbnail_url: string | null
   tags: string[]
   created_at: string
 }
 
-export const revalidate = 120
+export const revalidate = 86400
 
 async function fetchGuideBySlug(slug: string) {
   const supabase = createClient()
@@ -53,10 +52,10 @@ async function fetchRelatedGuideCandidates(currentGuideId: string) {
   const supabase = createClient()
   return supabase
     .from('guides')
-    .select('id, slug, title, content, thumbnail_url, tags, created_at')
+    .select('id, slug, title, thumbnail_url, tags, created_at')
     .neq('id', currentGuideId)
     .order('created_at', { ascending: false })
-    .limit(60)
+    .limit(20)
 }
 
 export async function generateMetadata({

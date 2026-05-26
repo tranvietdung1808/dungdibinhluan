@@ -68,10 +68,17 @@ async function fetchDbMod(slug: string): Promise<DbMod | null> {
   return data as DbMod;
 }
 
+let _dbModsCache: { data: DbMod[]; ts: number } | null = null;
+const DB_MODS_CACHE_TTL = 60000;
+
 async function fetchDbMods(): Promise<DbMod[]> {
+  if (_dbModsCache && Date.now() - _dbModsCache.ts < DB_MODS_CACHE_TTL) {
+    return _dbModsCache.data;
+  }
   const { data, error } = await supabaseAdmin.from("mods").select("*");
   if (error || !data) return [];
-  return data as DbMod[];
+  _dbModsCache = { data: data as DbMod[], ts: Date.now() };
+  return _dbModsCache.data;
 }
 
 type RelatedModCandidate = {

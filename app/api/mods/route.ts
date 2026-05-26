@@ -1,9 +1,9 @@
-import { listMods } from '@/lib/server/mods'
+import { listModsPublic } from '@/lib/server/mods'
 import { errorResponse, runRoute, successResponse } from '@/lib/server/api-response'
 
 export async function GET() {
   return runRoute(async () => {
-    const { data, error } = await listMods()
+    const { data, error } = await listModsPublic()
 
     if (error) {
       return errorResponse('Failed to fetch mods', 500)

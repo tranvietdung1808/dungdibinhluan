@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const revalidate = 120;
+export const revalidate = 86400;
 
 const FeatureSlider = dynamic(() => import("./components/FeatureSlider"));
 

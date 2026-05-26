@@ -102,6 +102,13 @@ export async function listMods() {
     .order('created_at', { ascending: false })
 }
 
+export async function listModsPublic() {
+  return supabaseAdmin
+    .from('mods')
+    .select('id, slug, name, author, category, version, updated_at, description, thumbnail, download_url, tags, thumbnail_orientation, featured, video_id, created_at')
+    .order('created_at', { ascending: false })
+}
+
 export async function getModBySlug(slug: string) {
   return supabaseAdmin.from('mods').select('*').eq('slug', slug).maybeSingle()
 }

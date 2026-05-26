@@ -12,14 +12,14 @@ export const metadata: Metadata = {
   },
 }
 
-export const revalidate = 120
+export const revalidate = 86400
 
 type Guide = {
   id: string
   title: string
   slug: string
-  content: string
   thumbnail_url: string | null
+  tags: string[]
   author_id: string
   created_at: string
   updated_at: string
@@ -29,7 +29,7 @@ type GuideWithProfile = Guide & {
   profiles?: {
     username: string | null
     avatar_url: string | null
-  } | null
+  }[]
 }
 
 export default async function GuidesPage() {
@@ -38,7 +38,14 @@ export default async function GuidesPage() {
   const { data: guides, error } = await supabase
     .from('guides')
     .select(`
-      *,
+      id,
+      title,
+      slug,
+      thumbnail_url,
+      tags,
+      author_id,
+      created_at,
+      updated_at,
       profiles:author_id (
         username,
         avatar_url
@@ -114,15 +121,15 @@ export default async function GuidesPage() {
                     {guide.title}
                   </h3>
                   <p className="text-slate-400 text-sm mb-4 line-clamp-3">
-                    {guide.content.replace(/<[^>]*>/g, '').substring(0, 150)}...
+                    {guide.title}
                   </p>
 
                   <div className="flex items-center justify-between text-xs text-slate-500">
                     <div className="flex items-center gap-2">
-                      {guide.profiles?.avatar_url ? (
+                      {guide.profiles?.[0]?.avatar_url ? (
                         <Image
-                          src={guide.profiles.avatar_url}
-                          alt={guide.profiles.username || 'Author'}
+                          src={guide.profiles[0].avatar_url}
+                          alt={guide.profiles[0].username || 'Author'}
                           width={20}
                           height={20}
                           className="rounded-full"
@@ -130,7 +137,7 @@ export default async function GuidesPage() {
                       ) : (
                         <div className="w-5 h-5 rounded-full bg-[#ce5a67]/20" />
                       )}
-                      <span>{guide.profiles?.username || 'Admin'}</span>
+                      <span>{guide.profiles?.[0]?.username || 'Admin'}</span>
                     </div>
                     <span>
                       {new Date(guide.created_at).toLocaleDateString('vi-VN')}
