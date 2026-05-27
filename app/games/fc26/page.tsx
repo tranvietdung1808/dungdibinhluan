@@ -203,6 +203,28 @@ function DashboardView({ type }: { type: string }) {
             </button>
           )}
 
+          <div className="p-5 rounded-2xl bg-amber-500/[0.06] border border-amber-500/20 space-y-3">
+            <div className="flex items-start gap-3">
+              <span className="text-amber-400 text-base mt-0.5 flex-shrink-0">⚠️</span>
+              <div className="space-y-2">
+                <p className="text-xs text-amber-200/80 leading-relaxed">
+                  <span className="font-bold text-amber-400">LƯU Ý QUAN TRỌNG KHI TẢI GAME (FILE NẶNG {game.fileSize}):</span>
+                  <br />
+                  Do dung lượng file game rất lớn, nếu bạn tải trực tiếp bằng trình duyệt mặc định (Chrome, Edge, Cốc Cốc...) khi mạng yếu hoặc chập chờn sẽ rất dễ bị nghẽn, lỗi hoặc ngắt kết nối giữa chừng.
+                </p>
+                <p className="text-xs text-amber-200/80 leading-relaxed">
+                  <span className="font-bold text-amber-400">Khuyến nghị:</span> Để quá trình tải không bị lỗi và đạt tốc độ tối đa, bạn nên sử dụng các phần mềm hỗ trợ download chuyên dụng như <span className="text-white font-semibold">IDM (Internet Download Manager)</span> hoặc <span className="text-white font-semibold">Neat Download Manager</span>.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => window.open("https://www.youtube.com/results?search_query=c%C3%A1ch+s%E1%BB%AD+d%E1%BB%A5ng+IDM", "_blank")}
+              className="w-full py-3 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-bold tracking-widest hover:bg-amber-500/25 transition-colors"
+            >
+              📺 XEM HƯỚNG DẪN SỬ DỤNG IDM
+            </button>
+          </div>
+
           <footer className="pt-4 border-t border-white/5 flex justify-between items-center text-[9px] text-slate-600 uppercase tracking-widest">
             <span>Powered by Google Antivirus</span>
             <Link href="/" className="hover:text-slate-400 transition-colors">← Trang chủ</Link>
