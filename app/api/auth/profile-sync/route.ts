@@ -27,7 +27,8 @@ export async function POST(request: NextRequest) {
       user.user_metadata?.picture ||
       null;
 
-    const { error } = await supabaseAdmin
+    // Sync profile
+    const { error: profileError } = await supabaseAdmin
       .from("profiles")
       .upsert(
         {
@@ -38,8 +39,29 @@ export async function POST(request: NextRequest) {
         { onConflict: "id" }
       );
 
-    if (error) {
+    if (profileError) {
       return errorResponse("Không đồng bộ được profile", 500);
+    }
+
+    // Auto-assign default "user" role if none exists
+    if (user.email) {
+      const email = user.email.toLowerCase();
+      const { data: existingRoles } = await supabaseAdmin
+        .from("user_roles")
+        .select("id")
+        .eq("email", email)
+        .limit(1);
+
+      if (!existingRoles || existingRoles.length === 0) {
+        // First time — assign default "user" role
+        await supabaseAdmin
+          .from("user_roles")
+          .insert({
+            email,
+            role: "user",
+            note: "Tự động thêm khi đăng ký",
+          });
+      }
     }
 
     return successResponse({ ok: true });

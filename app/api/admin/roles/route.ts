@@ -2,7 +2,6 @@ import type { NextRequest } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { errorResponse, parseJsonBody, runRoute, successResponse } from "@/lib/server/api-response";
 import { ensureAdmin } from "@/lib/server/auth";
-import type { UserRole } from "@/lib/admin";
 
 type RolePayload = {
   email?: string;
@@ -13,7 +12,7 @@ type RolePayload = {
 
 const VALID_ROLES: Set<string> = new Set(["admin", "vip", "moderator", "user"]);
 
-// GET /api/admin/roles — list all user roles
+// GET /api/admin/roles — list ALL registered users + their roles
 export async function GET(request: NextRequest) {
   return runRoute(async () => {
     const adminUser = await ensureAdmin(request);
@@ -21,17 +20,77 @@ export async function GET(request: NextRequest) {
       return errorResponse("Forbidden", 403);
     }
 
-    const { data, error } = await supabaseAdmin
-      .from("user_roles")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(500);
+    // 1. Get ALL registered users from Auth
+    const { data: authUsers, error: authError } = await supabaseAdmin.auth.admin.listUsers({
+      perPage: 1000,
+    });
 
-    if (error) {
-      return errorResponse("Không tải được danh sách roles", 500);
+    if (authError) {
+      return errorResponse("Không tải được danh sách người dùng", 500);
     }
 
-    return successResponse(data || []);
+    // 2. Get ALL role assignments from user_roles
+    const { data: roleAssignments, error: roleError } = await supabaseAdmin
+      .from("user_roles")
+      .select("*")
+      .limit(1000);
+
+    if (roleError) {
+      return errorResponse("Không tải được danh sách phân quyền", 500);
+    }
+
+    // 3. Index roles by email for O(1) lookup
+    const rolesByEmail = new Map<string, typeof roleAssignments>();
+    for (const ra of roleAssignments || []) {
+      const email = (ra.email || "").toLowerCase();
+      if (!rolesByEmail.has(email)) rolesByEmail.set(email, []);
+      rolesByEmail.get(email)!.push(ra);
+    }
+
+    // 4. Merge: each user appears with all their roles, or "member" badge if none
+    const members: Record<string, unknown>[] = [];
+
+    for (const u of authUsers.users) {
+      const email = (u.email || "").toLowerCase();
+      const userRoles = rolesByEmail.get(email) || [];
+
+      if (userRoles.length === 0) {
+        // User has no explicit roles → show as "member" only
+        members.push({
+          id: u.id,
+          email,
+          roles: [],
+          roleNames: [],
+          note: null,
+          created_at: u.created_at,
+          last_sign_in: u.last_sign_in_at,
+        });
+      } else {
+        // User has one or more roles → one row per role
+        for (const r of userRoles) {
+          members.push({
+            id: u.id,
+            email,
+            roles: [r.role],
+            roleNames: [r.role],
+            roleEntryId: r.id,
+            note: r.note,
+            created_at: r.created_at,
+            last_sign_in: u.last_sign_in_at,
+          });
+        }
+      }
+    }
+
+    // Sort: users with roles first, then by email
+    members.sort((a, b) => {
+      const aHas = (a as any).roleNames?.length > 0 ? 0 : 1;
+      const bHas = (b as any).roleNames?.length > 0 ? 0 : 1;
+      if (aHas !== bHas) return aHas - bHas;
+      return String(a.email).localeCompare(String(b.email));
+    });
+
+    return successResponse(members);
   });
 }
 

@@ -26,10 +26,12 @@ interface ModForm {
 interface UserRoleEntry {
   id: string
   email: string
-  role: string
+  roles: string[]
+  roleNames: string[]
+  roleEntryId?: string
   note: string | null
   created_at: string
-  updated_at: string
+  last_sign_in: string | null
 }
 
 interface MemberForm {
@@ -266,16 +268,19 @@ export default function AdminDashboard() {
   }
 
   const handleEditRole = (entry: UserRoleEntry) => {
-    setEditingId(entry.id)
-    setMemberForm({ email: entry.email, role: entry.role, note: entry.note || '' })
+    if (entry.roleEntryId) {
+      setEditingId(entry.roleEntryId)
+    }
+    setMemberForm({ email: entry.email, role: entry.roleNames[0] || 'vip', note: entry.note || '' })
   }
 
-  const handleDeleteRole = async (id: string) => {
-    if (!window.confirm('Bạn có chắc muốn xóa role này?')) return
+  const handleDeleteRole = async (entry: UserRoleEntry) => {
+    if (!entry.roleEntryId) return
+    if (!window.confirm(`Bạn có chắc muốn xóa role "${entry.roleNames[0]}" của ${entry.email}?`)) return
     const headers = await getAuthHeaders()
     if (!headers) return
     try {
-      const res = await fetch(`/api/admin/roles?id=${id}`, { method: 'DELETE', headers })
+      const res = await fetch(`/api/admin/roles?id=${entry.roleEntryId}`, { method: 'DELETE', headers })
       if (res.ok) {
         setToast('Đã xóa role!')
         await fetchRoles()
@@ -288,13 +293,38 @@ export default function AdminDashboard() {
     }
   }
 
+  const handleBulkSync = async () => {
+    if (!window.confirm('Đồng bộ tất cả người dùng chưa có role thành "user"? Việc này có thể mất vài giây.')) return
+    setRolesLoading(true)
+    setRolesError('')
+    const headers = await getAuthHeaders()
+    if (!headers) { setRolesLoading(false); return }
+    try {
+      const res = await fetch('/api/admin/roles/sync', { method: 'POST', headers })
+      const d = await res.json().catch(() => ({}))
+      if (res.ok) {
+        setToast(`Đã đồng bộ! Thêm ${d.added || 0} role, bỏ qua ${d.skipped || 0}`)
+        await fetchRoles()
+      } else {
+        setRolesError(d.error || 'Đồng bộ thất bại')
+      }
+    } catch {
+      setRolesError('Lỗi kết nối')
+    } finally {
+      setRolesLoading(false)
+    }
+  }
+
   const handleCancelEdit = () => {
     setEditingId(null)
     setMemberForm({ email: '', role: 'vip', note: '' })
   }
 
   const filteredRoles = memberSearch
-    ? roles.filter(r => r.email.includes(memberSearch.toLowerCase()) || r.role.includes(memberSearch.toLowerCase()))
+    ? roles.filter(r => {
+        const search = memberSearch.toLowerCase()
+        return r.email.includes(search) || r.roleNames.some(rn => rn.includes(search))
+      })
     : roles
 
   const roleBadgeColor = (role: string) => {
@@ -466,12 +496,21 @@ export default function AdminDashboard() {
           <section className="mb-12 border border-[#ce5a67]/20 rounded-2xl bg-[#111117] p-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold">Quản lý Member &amp; Phân quyền</h2>
-              <button
-                onClick={() => { setMemberOpen(false); setEditingId(null); setMemberForm({ email: '', role: 'vip', note: '' }) }}
-                className="text-slate-400 hover:text-white text-sm"
-              >
-                ✕ Đóng
-              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleBulkSync}
+                  disabled={rolesLoading}
+                  className="px-3 py-1.5 text-xs font-semibold text-slate-300 border border-white/15 rounded-lg hover:bg-white/5 disabled:opacity-50 transition-colors"
+                >
+                  {rolesLoading ? 'Đang đồng bộ...' : '🔄 Đồng bộ tất cả'}
+                </button>
+                <button
+                  onClick={() => { setMemberOpen(false); setEditingId(null); setMemberForm({ email: '', role: 'vip', note: '' }) }}
+                  className="text-slate-400 hover:text-white text-sm"
+                >
+                  ✕ Đóng
+                </button>
+              </div>
             </div>
 
             {/* Add / Edit form */}
@@ -552,7 +591,7 @@ export default function AdminDashboard() {
                     <th className="text-left px-4 py-3 text-xs font-bold text-slate-400 uppercase tracking-wider">Email</th>
                     <th className="text-left px-4 py-3 text-xs font-bold text-slate-400 uppercase tracking-wider">Role</th>
                     <th className="text-left px-4 py-3 text-xs font-bold text-slate-400 uppercase tracking-wider hidden md:table-cell">Ghi chú</th>
-                    <th className="text-left px-4 py-3 text-xs font-bold text-slate-400 uppercase tracking-wider hidden md:table-cell">Ngày tạo</th>
+                    <th className="text-left px-4 py-3 text-xs font-bold text-slate-400 uppercase tracking-wider hidden md:table-cell">Đăng nhập cuối</th>
                     <th className="text-right px-4 py-3 text-xs font-bold text-slate-400 uppercase tracking-wider">Thao tác</th>
                   </tr>
                 </thead>
@@ -560,36 +599,64 @@ export default function AdminDashboard() {
                   {rolesLoading ? (
                     <tr><td colSpan={5} className="px-4 py-8 text-center text-slate-500">Đang tải...</td></tr>
                   ) : filteredRoles.length === 0 ? (
-                    <tr><td colSpan={5} className="px-4 py-8 text-center text-slate-500">Chưa có member nào được phân quyền</td></tr>
+                    <tr><td colSpan={5} className="px-4 py-8 text-center text-slate-500">Chưa có người dùng nào đăng ký</td></tr>
                   ) : (
-                    filteredRoles.map(entry => (
-                      <tr key={entry.id} className="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
+                    filteredRoles.map(entry => {
+                      const hasRoles = entry.roleNames.length > 0
+                      return (
+                      <tr key={`${entry.id}-${entry.roleNames.join('-') || 'none'}`} className="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
                         <td className="px-4 py-3 font-mono text-xs text-slate-300">{entry.email}</td>
                         <td className="px-4 py-3">
-                          <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border ${roleBadgeColor(entry.role)}`}>
-                            {entry.role.toUpperCase()}
-                          </span>
+                          {hasRoles ? (
+                            entry.roleNames.map(r => (
+                              <span key={r} className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border mr-1 ${roleBadgeColor(r)}`}>
+                                {r.toUpperCase()}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border bg-slate-500/10 text-slate-500 border-slate-500/20">
+                              CHƯA PHÂN QUYỀN
+                            </span>
+                          )}
                         </td>
                         <td className="px-4 py-3 text-xs text-slate-400 hidden md:table-cell max-w-[200px] truncate">{entry.note || '—'}</td>
-                        <td className="px-4 py-3 text-xs text-slate-500 hidden md:table-cell">{new Date(entry.created_at).toLocaleDateString('vi-VN')}</td>
+                        <td className="px-4 py-3 text-xs text-slate-500 hidden md:table-cell">
+                          {entry.last_sign_in ? new Date(entry.last_sign_in).toLocaleDateString('vi-VN') : '—'}
+                        </td>
                         <td className="px-4 py-3 text-right">
                           <div className="flex items-center justify-end gap-1.5">
-                            <button
-                              onClick={() => handleEditRole(entry)}
-                              className="px-2.5 py-1 text-[11px] font-semibold text-amber-400 border border-amber-500/30 rounded-lg hover:bg-amber-500/10 transition-colors"
-                            >
-                              Sửa
-                            </button>
-                            <button
-                              onClick={() => handleDeleteRole(entry.id)}
-                              className="px-2.5 py-1 text-[11px] font-semibold text-red-400 border border-red-500/30 rounded-lg hover:bg-red-500/10 transition-colors"
-                            >
-                              Xóa
-                            </button>
+                            {hasRoles && (
+                              <button
+                                onClick={() => handleEditRole(entry)}
+                                className="px-2.5 py-1 text-[11px] font-semibold text-amber-400 border border-amber-500/30 rounded-lg hover:bg-amber-500/10 transition-colors"
+                              >
+                                Sửa
+                              </button>
+                            )}
+                            {hasRoles && (
+                              <button
+                                onClick={() => handleDeleteRole(entry)}
+                                className="px-2.5 py-1 text-[11px] font-semibold text-red-400 border border-red-500/30 rounded-lg hover:bg-red-500/10 transition-colors"
+                              >
+                                Xóa
+                              </button>
+                            )}
+                            {!hasRoles && (
+                              <button
+                                onClick={() => {
+                                  setEditingId(null)
+                                  setMemberForm({ email: entry.email, role: 'vip', note: '' })
+                                }}
+                                className="px-2.5 py-1 text-[11px] font-semibold text-[#ce5a67] border border-[#ce5a67]/30 rounded-lg hover:bg-[#ce5a67]/10 transition-colors"
+                              >
+                                + Thêm role
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>
-                    ))
+                      )
+                    })
                   )}
                 </tbody>
               </table>
