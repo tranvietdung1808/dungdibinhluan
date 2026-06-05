@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/utils/supabase/client'
 
 const CATEGORIES = ['All-in-One', 'Faces', 'Kits', 'Gameplay', 'Đồ họa', 'Cơ chế game'] as const
+const VALID_ROLES = ['admin', 'vip', 'moderator', 'user'] as const
 
 interface ModForm {
   name: string
@@ -22,12 +23,27 @@ interface ModForm {
   videoId: string
 }
 
-const initialForm: ModForm = {
+interface UserRoleEntry {
+  id: string
+  email: string
+  role: string
+  note: string | null
+  created_at: string
+  updated_at: string
+}
+
+interface MemberForm {
+  email: string
+  role: string
+  note: string
+}
+
+const initialModForm: ModForm = {
   name: '',
   author: '',
   category: 'Faces',
   version: '',
-  updatedAt: new Date().toISOString().split('T')[0], // Today's date in YYYY-MM-DD format
+  updatedAt: new Date().toISOString().split('T')[0],
   description: '',
   longDescription: '',
   thumbnail: '',
@@ -38,18 +54,16 @@ const initialForm: ModForm = {
   videoId: '',
 }
 
-// Function to generate slug from name
 const generateSlug = (name: string): string => {
   return name
     .toLowerCase()
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
-    .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric with hyphens
-    .replace(/^-+|-+$/g, '') // Remove leading/trailing hyphens
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
     .trim()
 }
 
-// Function to format date from YYYY-MM-DD to dd/mm/yyyy
 const formatDateForDisplay = (dateString: string): string => {
   if (!dateString) return ''
   const [year, month, day] = dateString.split('-')
@@ -57,191 +71,239 @@ const formatDateForDisplay = (dateString: string): string => {
 }
 
 export default function AdminDashboard() {
-  const [form, setForm] = useState<ModForm>(initialForm)
+  // ── Mod form state ──
+  const [modOpen, setModOpen] = useState(false)
+  const [form, setForm] = useState<ModForm>(initialModForm)
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null)
   const [isUploadingThumbnail, setIsUploadingThumbnail] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [modLoading, setModLoading] = useState(false)
+  const [modError, setModError] = useState('')
+
+  // ── Member management state ──
+  const [memberOpen, setMemberOpen] = useState(false)
+  const [roles, setRoles] = useState<UserRoleEntry[]>([])
+  const [rolesLoading, setRolesLoading] = useState(false)
+  const [rolesError, setRolesError] = useState('')
+  const [memberForm, setMemberForm] = useState<MemberForm>({ email: '', role: 'vip', note: '' })
+  const [memberSubmitting, setMemberSubmitting] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [memberSearch, setMemberSearch] = useState('')
+
   const [toast, setToast] = useState('')
   const [pendingCommentsCount, setPendingCommentsCount] = useState(0)
   const blobUrlRef = useRef<string | null>(null)
 
   const revokeBlobUrl = () => {
-    if (blobUrlRef.current) {
-      URL.revokeObjectURL(blobUrlRef.current)
-      blobUrlRef.current = null
-    }
+    if (blobUrlRef.current) { URL.revokeObjectURL(blobUrlRef.current); blobUrlRef.current = null }
   }
-
   useEffect(() => () => revokeBlobUrl(), [])
 
-  // Fetch pending comments count
-  const fetchPendingCommentsCount = async () => {
-    try {
-      const supabase = createClient()
-      const { data } = await supabase.auth.getSession()
-      const token = data.session?.access_token
-      
-      if (!token) return
-      
-      const response = await fetch('/api/admin/pending-comments', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
-      if (response.ok) {
-        const data = await response.json()
-        setPendingCommentsCount(data.count || 0)
-      }
-    } catch (error) {
-      console.error('Failed to fetch pending comments count:', error)
-    }
-  }
-
+  // ── Toast ──
   useEffect(() => {
-    fetchPendingCommentsCount()
-  }, [])
-
-  // Auto-hide toast
-  useEffect(() => {
-    if (toast) {
-      const timer = setTimeout(() => setToast(''), 3000)
-      return () => clearTimeout(timer)
-    }
+    if (toast) { const t = setTimeout(() => setToast(''), 3000); return () => clearTimeout(t) }
   }, [toast])
 
+  // ── Auth helper ──
+  const getAuthHeaders = useCallback(async () => {
+    const supabase = createClient()
+    const { data } = await supabase.auth.getSession()
+    const token = data.session?.access_token
+    if (!token) return null
+    return { Authorization: `Bearer ${token}` }
+  }, [])
+
+  // ── Fetch pending comments ──
+  const fetchPendingCommentsCount = async () => {
+    const headers = await getAuthHeaders()
+    if (!headers) return
+    try {
+      const res = await fetch('/api/admin/pending-comments', { headers })
+      if (res.ok) {
+        const d = await res.json()
+        setPendingCommentsCount(d.count || 0)
+      }
+    } catch { /* ignore */ }
+  }
+  useEffect(() => { fetchPendingCommentsCount() }, [])
+
+  // ── Fetch roles ──
+  const fetchRoles = useCallback(async () => {
+    setRolesLoading(true)
+    setRolesError('')
+    const headers = await getAuthHeaders()
+    if (!headers) { setRolesLoading(false); return }
+    try {
+      const res = await fetch('/api/admin/roles', { headers })
+      if (res.ok) {
+        const d = await res.json()
+        setRoles(d || [])
+      } else {
+        setRolesError('Không tải được danh sách member')
+      }
+    } catch {
+      setRolesError('Lỗi kết nối')
+    } finally {
+      setRolesLoading(false)
+    }
+  }, [getAuthHeaders])
+
+  useEffect(() => {
+    if (memberOpen) fetchRoles()
+  }, [memberOpen, fetchRoles])
+
+  // ── Mod form helpers ──
   const handleChange = (field: keyof ModForm, value: string | boolean) => {
     setForm(prev => ({ ...prev, [field]: value }))
-  }
-
-  const handleNameChange = (value: string) => {
-    setForm(prev => ({ 
-      ...prev, 
-      name: value,
-      // Auto-generate slug when name changes
-      slug: generateSlug(value)
-    }))
   }
 
   const handleThumbnailChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-
     revokeBlobUrl()
     const localUrl = URL.createObjectURL(file)
     blobUrlRef.current = localUrl
     setThumbnailPreview(localUrl)
     setForm(prev => ({ ...prev, thumbnail: '' }))
-
     setIsUploadingThumbnail(true)
-
     try {
-      const formData = new FormData()
-      formData.append('file', file)
-
-      const response = await fetch('/api/admin/upload', {
-        method: 'POST',
-        body: formData,
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        if (data?.url) {
-          setForm(prev => ({ ...prev, thumbnail: data.url }))
-        }
+      const fd = new FormData()
+      fd.append('file', file)
+      const res = await fetch('/api/admin/upload', { method: 'POST', body: fd })
+      if (res.ok) {
+        const d = await res.json()
+        if (d?.url) setForm(prev => ({ ...prev, thumbnail: d.url }))
       } else {
-        const errorData = await response.json().catch(() => ({}))
-        setError('Upload failed: ' + (errorData.error || response.statusText))
+        const ed = await res.json().catch(() => ({}))
+        setModError('Upload failed: ' + (ed.error || res.statusText))
       }
     } catch (err) {
-      setError('Upload failed: ' + err)
+      setModError('Upload failed: ' + err)
     } finally {
       setIsUploadingThumbnail(false)
       e.target.value = ''
     }
   }
 
-  const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const url = e.target.value
-    handleChange('thumbnail', url)
-    // Only set preview if it's a valid URL and no file is uploaded
-    if (url && !blobUrlRef.current) {
-      setThumbnailPreview(url)
-    } else if (!url && !blobUrlRef.current) {
-      setThumbnailPreview(null)
-    }
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleModSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
-    setError('')
-
-    // Validate required fields
+    setModLoading(true)
+    setModError('')
     if (!form.name || !form.author || !form.version || !form.updatedAt) {
-      setError('Vui lòng điền đầy đủ các trường bắt buộc')
-      setLoading(false)
+      setModError('Vui lòng điền đầy đủ các trường bắt buộc')
+      setModLoading(false)
       return
     }
-
-    // Generate slug from name
     const slug = generateSlug(form.name)
-
-    // Parse tags
-    const tags = form.tags
-      .split(',')
-      .map(t => t.trim())
-      .filter(t => t.length > 0)
-
+    const tags = form.tags.split(',').map(t => t.trim()).filter(t => t.length > 0)
     try {
-      const response = await fetch('/api/admin/mods', {
+      const res = await fetch('/api/admin/mods', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          slug,
-          name: form.name,
-          author: form.author,
-          category: form.category,
-          version: form.version,
-          updated_at: formatDateForDisplay(form.updatedAt),
-          description: form.description,
-          long_description: form.longDescription,
-          thumbnail: form.thumbnail || null,
-          download_url: form.downloadUrl || null,
-          tags,
-          thumbnail_orientation: form.thumbnailOrientation,
-          featured: form.featured,
-          video_id: form.videoId || null,
+          slug, name: form.name, author: form.author, category: form.category,
+          version: form.version, updated_at: formatDateForDisplay(form.updatedAt),
+          description: form.description, long_description: form.longDescription,
+          thumbnail: form.thumbnail || null, download_url: form.downloadUrl || null,
+          tags, thumbnail_orientation: form.thumbnailOrientation,
+          featured: form.featured, video_id: form.videoId || null,
         }),
       })
-
-      const data = await response.json()
-
-      if (response.ok && data.success) {
+      const d = await res.json()
+      if (res.ok && d.success) {
         setToast('Thêm mod thành công!')
-        // Reset form
-        setForm({
-          ...initialForm,
-          updatedAt: new Date().toISOString().split('T')[0],
-        })
+        setForm({ ...initialModForm, updatedAt: new Date().toISOString().split('T')[0] })
         setThumbnailPreview(null)
         revokeBlobUrl()
+        setModOpen(false)
       } else {
-        setError(data.error || 'Có lỗi xảy ra khi thêm mod')
+        setModError(d.error || 'Có lỗi xảy ra khi thêm mod')
       }
-    } catch (err) {
-      setError('Có lỗi xảy ra. Vui lòng thử lại.')
+    } catch {
+      setModError('Có lỗi xảy ra. Vui lòng thử lại.')
     } finally {
-      setLoading(false)
+      setModLoading(false)
     }
   }
 
-  const handleClearThumbnail = () => {
-    revokeBlobUrl()
-    setForm(prev => ({ ...prev, thumbnail: '' }))
-    setThumbnailPreview(null)
+  // ── Member CRUD ──
+  const handleMemberSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const email = memberForm.email.trim().toLowerCase()
+    if (!email) { setRolesError('Email là bắt buộc'); return }
+    if (!VALID_ROLES.includes(memberForm.role as any)) { setRolesError('Role không hợp lệ'); return }
+    setMemberSubmitting(true)
+    setRolesError('')
+    const headers = await getAuthHeaders()
+    if (!headers) { setRolesError('Không xác thực được'); setMemberSubmitting(false); return }
+    try {
+      if (editingId) {
+        // Update existing
+        const res = await fetch('/api/admin/roles', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', ...headers },
+          body: JSON.stringify({ id: editingId, role: memberForm.role, note: memberForm.note }),
+        })
+        if (!res.ok) { const d = await res.json().catch(() => ({})); setRolesError(d.error || 'Cập nhật thất bại'); return }
+        setToast('Đã cập nhật role!')
+      } else {
+        // Add new
+        const res = await fetch('/api/admin/roles', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...headers },
+          body: JSON.stringify({ email, role: memberForm.role, note: memberForm.note }),
+        })
+        if (!res.ok) { const d = await res.json().catch(() => ({})); setRolesError(d.error || 'Thêm thất bại'); return }
+        setToast('Đã thêm role!')
+      }
+      setMemberForm({ email: '', role: 'vip', note: '' })
+      setEditingId(null)
+      await fetchRoles()
+    } catch {
+      setRolesError('Lỗi kết nối')
+    } finally {
+      setMemberSubmitting(false)
+    }
+  }
+
+  const handleEditRole = (entry: UserRoleEntry) => {
+    setEditingId(entry.id)
+    setMemberForm({ email: entry.email, role: entry.role, note: entry.note || '' })
+  }
+
+  const handleDeleteRole = async (id: string) => {
+    if (!window.confirm('Bạn có chắc muốn xóa role này?')) return
+    const headers = await getAuthHeaders()
+    if (!headers) return
+    try {
+      const res = await fetch(`/api/admin/roles?id=${id}`, { method: 'DELETE', headers })
+      if (res.ok) {
+        setToast('Đã xóa role!')
+        await fetchRoles()
+      } else {
+        const d = await res.json().catch(() => ({}))
+        setRolesError(d.error || 'Xóa thất bại')
+      }
+    } catch {
+      setRolesError('Lỗi kết nối')
+    }
+  }
+
+  const handleCancelEdit = () => {
+    setEditingId(null)
+    setMemberForm({ email: '', role: 'vip', note: '' })
+  }
+
+  const filteredRoles = memberSearch
+    ? roles.filter(r => r.email.includes(memberSearch.toLowerCase()) || r.role.includes(memberSearch.toLowerCase()))
+    : roles
+
+  const roleBadgeColor = (role: string) => {
+    switch (role) {
+      case 'admin': return 'bg-red-500/20 text-red-400 border-red-500/30'
+      case 'vip': return 'bg-amber-500/20 text-amber-400 border-amber-500/30'
+      case 'moderator': return 'bg-blue-500/20 text-blue-400 border-blue-500/30'
+      default: return 'bg-slate-500/20 text-slate-400 border-slate-500/30'
+    }
   }
 
   return (
@@ -255,38 +317,25 @@ export default function AdminDashboard() {
 
       {/* Header */}
       <div className="bg-[#111111] border-b border-white/10">
-        <div className="max-w-6xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link
-                href="/"
-                className="text-slate-400 hover:text-white transition-colors"
-              >
-                ← Trang chủ
-              </Link>
-              <h1 className="text-xl font-bold">Admin Dashboard</h1>
-            </div>
-            <Link
-              href="/admin/mods"
-              className="px-4 py-2 bg-[#111111] border border-white/10 text-sm rounded-lg hover:bg-white/10 transition-colors"
-            >
-              Quản lý Mods
-            </Link>
+        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link href="/" className="text-slate-400 hover:text-white transition-colors">← Trang chủ</Link>
+            <h1 className="text-xl font-bold">Admin Dashboard</h1>
           </div>
+          <Link href="/admin/mods" className="px-4 py-2 bg-[#111111] border border-white/10 text-sm rounded-lg hover:bg-white/10 transition-colors">
+            Quản lý Mods
+          </Link>
         </div>
       </div>
 
-      {/* Content */}
       <div className="max-w-6xl mx-auto px-4 py-8">
-        {/* Quick Actions */}
-        <div className="mb-12">
+        {/* ── Quick Actions Grid ── */}
+        <section className="mb-12">
           <h2 className="text-2xl font-bold mb-6">Truy cập nhanh</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
             {/* Quản lý bài viết */}
-            <Link
-              href="/admin/guides"
-              className="group bg-[#111111] border border-white/10 rounded-xl p-6 hover:border-[#ce5a67]/50 transition-all duration-300 hover:shadow-[0_8px_32px_rgba(206,90,103,0.15)]"
-            >
+            <Link href="/admin/guides" className="group bg-[#111111] border border-white/10 rounded-xl p-6 hover:border-[#ce5a67]/50 transition-all duration-300 hover:shadow-[0_8px_32px_rgba(206,90,103,0.15)]">
               <div className="flex items-center gap-4 mb-4">
                 <div className="w-12 h-12 bg-[#ce5a67]/20 rounded-lg flex items-center justify-center group-hover:bg-[#ce5a67]/30 transition-colors">
                   <svg className="w-6 h-6 text-[#ce5a67]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -300,17 +349,12 @@ export default function AdminDashboard() {
               </div>
               <div className="flex items-center text-[#ce5a67] group-hover:text-[#b44c5c] transition-colors">
                 <span className="text-sm font-medium">Quản lý ngay</span>
-                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
+                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
               </div>
             </Link>
 
             {/* Generate Code */}
-            <Link
-              href="/admin/generate"
-              className="group bg-[#111111] border border-white/10 rounded-xl p-6 hover:border-[#ce5a67]/50 transition-all duration-300 hover:shadow-[0_8px_32px_rgba(206,90,103,0.15)]"
-            >
+            <Link href="/admin/generate" className="group bg-[#111111] border border-white/10 rounded-xl p-6 hover:border-[#ce5a67]/50 transition-all duration-300 hover:shadow-[0_8px_32px_rgba(206,90,103,0.15)]">
               <div className="flex items-center gap-4 mb-4">
                 <div className="w-12 h-12 bg-[#ce5a67]/20 rounded-lg flex items-center justify-center group-hover:bg-[#ce5a67]/30 transition-colors">
                   <svg className="w-6 h-6 text-[#ce5a67]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -324,17 +368,12 @@ export default function AdminDashboard() {
               </div>
               <div className="flex items-center text-[#ce5a67] group-hover:text-[#b44c5c] transition-colors">
                 <span className="text-sm font-medium">Tạo ngay</span>
-                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
+                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
               </div>
             </Link>
 
             {/* Quản lý Mods List */}
-            <Link
-              href="/admin/mods"
-              className="group bg-[#111111] border border-white/10 rounded-xl p-6 hover:border-[#ce5a67]/50 transition-all duration-300 hover:shadow-[0_8px_32px_rgba(206,90,103,0.15)]"
-            >
+            <Link href="/admin/mods" className="group bg-[#111111] border border-white/10 rounded-xl p-6 hover:border-[#ce5a67]/50 transition-all duration-300 hover:shadow-[0_8px_32px_rgba(206,90,103,0.15)]">
               <div className="flex items-center gap-4 mb-4">
                 <div className="w-12 h-12 bg-[#ce5a67]/20 rounded-lg flex items-center justify-center group-hover:bg-[#ce5a67]/30 transition-colors">
                   <svg className="w-6 h-6 text-[#ce5a67]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -348,16 +387,12 @@ export default function AdminDashboard() {
               </div>
               <div className="flex items-center text-[#ce5a67] group-hover:text-[#b44c5c] transition-colors">
                 <span className="text-sm font-medium">Xem danh sách</span>
-                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
+                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
               </div>
             </Link>
 
-            <Link
-              href="/admin/community"
-              className="group bg-[#111111] border border-white/10 rounded-xl p-6 hover:border-[#ce5a67]/50 transition-all duration-300 hover:shadow-[0_8px_32px_rgba(206,90,103,0.15)]"
-            >
+            {/* Kiểm duyệt bình luận */}
+            <Link href="/admin/community" className="group bg-[#111111] border border-white/10 rounded-xl p-6 hover:border-[#ce5a67]/50 transition-all duration-300 hover:shadow-[0_8px_32px_rgba(206,90,103,0.15)]">
               <div className="flex items-center gap-4 mb-4">
                 <div className="w-12 h-12 bg-[#ce5a67]/20 rounded-lg flex items-center justify-center group-hover:bg-[#ce5a67]/30 transition-colors">
                   <svg className="w-6 h-6 text-[#ce5a67]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -368,9 +403,7 @@ export default function AdminDashboard() {
                   <div className="flex items-center gap-2">
                     <h3 className="text-lg font-semibold text-white">Kiểm duyệt bình luận</h3>
                     {pendingCommentsCount > 0 && (
-                      <span className="px-2 py-1 text-xs font-bold text-white bg-[#ce5a67] rounded-full">
-                        {pendingCommentsCount}
-                      </span>
+                      <span className="px-2 py-1 text-xs font-bold text-white bg-[#ce5a67] rounded-full">{pendingCommentsCount}</span>
                     )}
                   </div>
                   <p className="text-slate-400 text-sm">Duyệt comment bài viết và chia sẻ mod</p>
@@ -378,310 +411,323 @@ export default function AdminDashboard() {
               </div>
               <div className="flex items-center text-[#ce5a67] group-hover:text-[#b44c5c] transition-colors">
                 <span className="text-sm font-medium">Mở kiểm duyệt</span>
-                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
+                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
               </div>
             </Link>
-          </div>
-        </div>
 
-        {/* Add Mod Form */}
-        <div className="border-t border-white/10 pt-8">
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold mb-2">Thêm Mod mới</h2>
-            <p className="text-slate-400">Slug sẽ được tự động tạo từ tên mod</p>
-          </div>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Single column mobile-optimized layout */}
-          <div className="space-y-6">
-            {/* Name */}
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-white mb-2">
-                Name *
-              </label>
-              <input
-                id="name"
-                type="text"
-                value={form.name}
-                onChange={(e) => handleNameChange(e.target.value)}
-                className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67] transition-colors"
-                placeholder="MIX MODS FC 26"
-                required
-              />
-              {form.name && (
-                <p className="text-xs text-slate-500 mt-1">
-                  Slug: {generateSlug(form.name)}
-                </p>
-              )}
-            </div>
-
-            {/* Author */}
-            <div>
-              <label htmlFor="author" className="block text-sm font-medium text-white mb-2">
-                Author *
-              </label>
-              <input
-                id="author"
-                type="text"
-                value={form.author}
-                onChange={(e) => handleChange('author', e.target.value)}
-                className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67] transition-colors"
-                placeholder="DungDiBinhLuan"
-                required
-              />
-            </div>
-
-            {/* Category and Version - Two columns on desktop */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="category" className="block text-sm font-medium text-white mb-2">
-                  Category *
-                </label>
-                <select
-                  id="category"
-                  value={form.category}
-                  onChange={(e) => handleChange('category', e.target.value)}
-                  className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white focus:outline-none focus:border-[#ce5a67] transition-colors"
-                >
-                  {CATEGORIES.map(cat => (
-                    <option key={cat} value={cat}>{cat}</option>
-                  ))}
-                </select>
+            {/* ── Quản lý Member (NEW) ── */}
+            <button
+              onClick={() => setMemberOpen(!memberOpen)}
+              className={`group bg-[#111111] border rounded-xl p-6 text-left transition-all duration-300 ${memberOpen ? 'border-[#ce5a67]/50 shadow-[0_8px_32px_rgba(206,90,103,0.15)]' : 'border-white/10 hover:border-[#ce5a67]/50 hover:shadow-[0_8px_32px_rgba(206,90,103,0.15)]'}`}
+            >
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-12 h-12 bg-[#ce5a67]/20 rounded-lg flex items-center justify-center group-hover:bg-[#ce5a67]/30 transition-colors">
+                  <svg className="w-6 h-6 text-[#ce5a67]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-white">Quản lý Member</h3>
+                  <p className="text-slate-400 text-sm">Thêm, sửa, xóa quyền member</p>
+                </div>
               </div>
-
-              <div>
-                <label htmlFor="version" className="block text-sm font-medium text-white mb-2">
-                  Version *
-                </label>
-                <input
-                  id="version"
-                  type="text"
-                  value={form.version}
-                  onChange={(e) => handleChange('version', e.target.value)}
-                  className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67] transition-colors"
-                  placeholder="v1.0"
-                  required
-                />
+              <div className="flex items-center text-[#ce5a67] group-hover:text-[#b44c5c] transition-colors">
+                <span className="text-sm font-medium">{memberOpen ? 'Đóng' : 'Mở'}</span>
+                <svg className={`w-4 h-4 ml-1 transition-transform ${memberOpen ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
               </div>
+            </button>
+
+            {/* ── Thêm Mod (collapsible) ── */}
+            <button
+              onClick={() => setModOpen(!modOpen)}
+              className={`group bg-[#111111] border rounded-xl p-6 text-left transition-all duration-300 ${modOpen ? 'border-[#ce5a67]/50 shadow-[0_8px_32px_rgba(206,90,103,0.15)]' : 'border-white/10 hover:border-[#ce5a67]/50 hover:shadow-[0_8px_32px_rgba(206,90,103,0.15)]'}`}
+            >
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-12 h-12 bg-[#ce5a67]/20 rounded-lg flex items-center justify-center group-hover:bg-[#ce5a67]/30 transition-colors">
+                  <svg className="w-6 h-6 text-[#ce5a67]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-white">Thêm Mod mới</h3>
+                  <p className="text-slate-400 text-sm">Tạo mod mới với đầy đủ thông tin</p>
+                </div>
+              </div>
+              <div className="flex items-center text-[#ce5a67] group-hover:text-[#b44c5c] transition-colors">
+                <span className="text-sm font-medium">{modOpen ? 'Đóng' : 'Mở form'}</span>
+                <svg className={`w-4 h-4 ml-1 transition-transform ${modOpen ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+              </div>
+            </button>
+          </div>
+        </section>
+
+        {/* ── Member Management Panel ── */}
+        {memberOpen && (
+          <section className="mb-12 border border-[#ce5a67]/20 rounded-2xl bg-[#111117] p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold">Quản lý Member &amp; Phân quyền</h2>
+              <button
+                onClick={() => { setMemberOpen(false); setEditingId(null); setMemberForm({ email: '', role: 'vip', note: '' }) }}
+                className="text-slate-400 hover:text-white text-sm"
+              >
+                ✕ Đóng
+              </button>
             </div>
 
-            {/* Updated At - Date picker */}
-            <div>
-              <label htmlFor="updatedAt" className="block text-sm font-medium text-white mb-2">
-                Updated At *
-              </label>
-              <input
-                id="updatedAt"
-                type="date"
-                value={form.updatedAt}
-                onChange={(e) => handleChange('updatedAt', e.target.value)}
-                className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white focus:outline-none focus:border-[#ce5a67] transition-colors"
-                required
-              />
-            </div>
-
-            {/* Description */}
-            <div>
-              <label htmlFor="description" className="block text-sm font-medium text-white mb-2">
-                Description
-              </label>
-              <textarea
-                id="description"
-                value={form.description}
-                onChange={(e) => handleChange('description', e.target.value)}
-                rows={3}
-                className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67] transition-colors resize-none"
-                placeholder="Mô tả ngắn..."
-              />
-            </div>
-
-            {/* Long Description */}
-            <div>
-              <label htmlFor="longDescription" className="block text-sm font-medium text-white mb-2">
-                Long Description
-              </label>
-              <textarea
-                id="longDescription"
-                value={form.longDescription}
-                onChange={(e) => handleChange('longDescription', e.target.value)}
-                rows={6}
-                className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67] transition-colors resize-none"
-                placeholder="Mô tả chi tiết..."
-              />
-            </div>
-
-            {/* Thumbnail */}
-            <div>
-              <label className="block text-sm font-medium text-white mb-2">
-                Thumbnail
-              </label>
-              <div className="space-y-4">
-                {/* File upload */}
-                <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                  <label className="px-4 py-2 bg-[#111111] border border-white/10 text-white text-sm rounded-lg hover:bg-white/10 transition-colors cursor-pointer text-center">
-                    {isUploadingThumbnail ? 'Đang upload...' : 'Chọn ảnh thumbnail'}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleThumbnailChange}
-                      disabled={isUploadingThumbnail}
-                      className="hidden"
-                    />
-                  </label>
-                  {blobUrlRef.current && (
-                    <button
-                      type="button"
-                      onClick={handleClearThumbnail}
-                      className="px-3 py-1 bg-red-500/20 text-red-400 text-sm rounded-lg hover:bg-red-500/30 transition-colors"
-                    >
-                      Xóa ảnh upload
+            {/* Add / Edit form */}
+            <form onSubmit={handleMemberSubmit} className="mb-6 p-4 rounded-xl border border-white/10 bg-[#0d0d13]">
+              <h3 className="text-sm font-bold text-slate-300 mb-3 uppercase tracking-wider">
+                {editingId ? '✏️ Sửa role' : '➕ Thêm role mới'}
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+                <div>
+                  <label className="block text-xs text-slate-400 mb-1">Email *</label>
+                  <input
+                    type="email"
+                    value={memberForm.email}
+                    onChange={e => setMemberForm(p => ({ ...p, email: e.target.value }))}
+                    disabled={!!editingId}
+                    className="w-full px-3 py-2 bg-[#111111] border border-white/10 rounded-lg text-white text-sm placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67] disabled:opacity-50"
+                    placeholder="user@gmail.com"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-slate-400 mb-1">Role *</label>
+                  <select
+                    value={memberForm.role}
+                    onChange={e => setMemberForm(p => ({ ...p, role: e.target.value }))}
+                    className="w-full px-3 py-2 bg-[#111111] border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-[#ce5a67]"
+                  >
+                    {VALID_ROLES.map(r => <option key={r} value={r}>{r}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs text-slate-400 mb-1">Ghi chú</label>
+                  <input
+                    type="text"
+                    value={memberForm.note}
+                    onChange={e => setMemberForm(p => ({ ...p, note: e.target.value }))}
+                    className="w-full px-3 py-2 bg-[#111111] border border-white/10 rounded-lg text-white text-sm placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67]"
+                    placeholder="VD: VIP đến 31/12/2026"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    type="submit"
+                    disabled={memberSubmitting}
+                    className="flex-1 px-4 py-2 bg-[#ce5a67] text-white text-sm font-semibold rounded-lg hover:bg-[#b44c5c] disabled:opacity-50 transition-colors"
+                  >
+                    {memberSubmitting ? '...' : editingId ? 'Cập nhật' : 'Thêm'}
+                  </button>
+                  {editingId && (
+                    <button type="button" onClick={handleCancelEdit} className="px-4 py-2 bg-white/5 border border-white/10 text-white text-sm rounded-lg hover:bg-white/10 transition-colors">
+                      Hủy
                     </button>
                   )}
                 </div>
+              </div>
+            </form>
 
-                {/* URL input - always show */}
+            {/* Search */}
+            <div className="mb-4">
+              <input
+                type="text"
+                placeholder="Tìm kiếm theo email hoặc role..."
+                value={memberSearch}
+                onChange={e => setMemberSearch(e.target.value)}
+                className="w-full max-w-md px-4 py-2 bg-[#0d0d13] border border-white/10 rounded-lg text-white text-sm placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67]"
+              />
+            </div>
+
+            {/* Error */}
+            {rolesError && (
+              <div className="mb-4 rounded-lg border border-red-500/50 bg-red-500/20 p-3 text-sm text-red-300">{rolesError}</div>
+            )}
+
+            {/* Roles table */}
+            <div className="overflow-x-auto rounded-xl border border-white/10">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-white/10 bg-[#0d0d13]">
+                    <th className="text-left px-4 py-3 text-xs font-bold text-slate-400 uppercase tracking-wider">Email</th>
+                    <th className="text-left px-4 py-3 text-xs font-bold text-slate-400 uppercase tracking-wider">Role</th>
+                    <th className="text-left px-4 py-3 text-xs font-bold text-slate-400 uppercase tracking-wider hidden md:table-cell">Ghi chú</th>
+                    <th className="text-left px-4 py-3 text-xs font-bold text-slate-400 uppercase tracking-wider hidden md:table-cell">Ngày tạo</th>
+                    <th className="text-right px-4 py-3 text-xs font-bold text-slate-400 uppercase tracking-wider">Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rolesLoading ? (
+                    <tr><td colSpan={5} className="px-4 py-8 text-center text-slate-500">Đang tải...</td></tr>
+                  ) : filteredRoles.length === 0 ? (
+                    <tr><td colSpan={5} className="px-4 py-8 text-center text-slate-500">Chưa có member nào được phân quyền</td></tr>
+                  ) : (
+                    filteredRoles.map(entry => (
+                      <tr key={entry.id} className="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
+                        <td className="px-4 py-3 font-mono text-xs text-slate-300">{entry.email}</td>
+                        <td className="px-4 py-3">
+                          <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border ${roleBadgeColor(entry.role)}`}>
+                            {entry.role.toUpperCase()}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-xs text-slate-400 hidden md:table-cell max-w-[200px] truncate">{entry.note || '—'}</td>
+                        <td className="px-4 py-3 text-xs text-slate-500 hidden md:table-cell">{new Date(entry.created_at).toLocaleDateString('vi-VN')}</td>
+                        <td className="px-4 py-3 text-right">
+                          <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              onClick={() => handleEditRole(entry)}
+                              className="px-2.5 py-1 text-[11px] font-semibold text-amber-400 border border-amber-500/30 rounded-lg hover:bg-amber-500/10 transition-colors"
+                            >
+                              Sửa
+                            </button>
+                            <button
+                              onClick={() => handleDeleteRole(entry.id)}
+                              className="px-2.5 py-1 text-[11px] font-semibold text-red-400 border border-red-500/30 rounded-lg hover:bg-red-500/10 transition-colors"
+                            >
+                              Xóa
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+            <p className="mt-2 text-xs text-slate-600">Hiển thị {filteredRoles.length}/{roles.length} member</p>
+          </section>
+        )}
+
+        {/* ── Add Mod Panel (collapsible) ── */}
+        {modOpen && (
+          <section className="mb-12 border border-[#ce5a67]/20 rounded-2xl bg-[#111117] p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-xl font-bold">Thêm Mod mới</h2>
+                <p className="text-sm text-slate-400 mt-1">Slug sẽ được tự động tạo từ tên mod</p>
+              </div>
+              <button onClick={() => setModOpen(false)} className="text-slate-400 hover:text-white text-sm">✕ Đóng</button>
+            </div>
+
+            <form onSubmit={handleModSubmit} className="space-y-5">
+              {/* Name */}
+              <div>
+                <label className="block text-sm font-medium text-white mb-1.5">Tên mod *</label>
                 <input
                   type="text"
-                  value={form.thumbnail}
-                  onChange={handleUrlChange}
-                  className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67] transition-colors"
-                  placeholder="/mods/thumbnail.jpg hoặc URL"
+                  value={form.name}
+                  onChange={(e) => { setForm(prev => ({ ...prev, name: e.target.value })) }}
+                  className="w-full px-4 py-2.5 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67] transition-colors"
+                  placeholder="MIX MODS FC 26"
+                  required
                 />
-
-                {/* Preview */}
-                {thumbnailPreview && (
-                  <div className="relative w-full aspect-video bg-[#111111] border border-white/10 rounded-lg overflow-hidden">
-                    <img
-                      src={thumbnailPreview}
-                      alt="Thumbnail preview"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                )}
+                {form.name && <p className="text-xs text-slate-500 mt-1">Slug: {generateSlug(form.name)}</p>}
               </div>
-            </div>
 
-            {/* Download URL */}
-            <div>
-              <label htmlFor="downloadUrl" className="block text-sm font-medium text-white mb-2">
-                Download URL
-              </label>
-              <input
-                id="downloadUrl"
-                type="url"
-                value={form.downloadUrl}
-                onChange={(e) => handleChange('downloadUrl', e.target.value)}
-                className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67] transition-colors"
-                placeholder="https://drive.google.com/..."
-              />
-            </div>
-
-            {/* Tags */}
-            <div>
-              <label htmlFor="tags" className="block text-sm font-medium text-white mb-2">
-                Tags (comma-separated)
-              </label>
-              <input
-                id="tags"
-                type="text"
-                value={form.tags}
-                onChange={(e) => handleChange('tags', e.target.value)}
-                className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67] transition-colors"
-                placeholder="Faces, Kits, Gameplay"
-              />
-            </div>
-
-            {/* Thumbnail Orientation and Featured - Two columns */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-white mb-2">
-                  Thumbnail Orientation
-                </label>
-                <div className="space-y-3">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="thumbnailOrientation"
-                      value="portrait"
-                      checked={form.thumbnailOrientation === 'portrait'}
-                      onChange={() => handleChange('thumbnailOrientation', 'portrait')}
-                      className="w-4 h-4 accent-[#ce5a67]"
-                    />
-                    <span className="text-sm">Portrait (default)</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="thumbnailOrientation"
-                      value="landscape"
-                      checked={form.thumbnailOrientation === 'landscape'}
-                      onChange={() => handleChange('thumbnailOrientation', 'landscape')}
-                      className="w-4 h-4 accent-[#ce5a67]"
-                    />
-                    <span className="text-sm">Landscape</span>
-                  </label>
+              {/* Author + Category + Version */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-white mb-1.5">Author *</label>
+                  <input type="text" value={form.author} onChange={(e) => handleChange('author', e.target.value)} className="w-full px-4 py-2.5 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67]" placeholder="DungDiBinhLuan" required />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-white mb-1.5">Category *</label>
+                  <select value={form.category} onChange={(e) => handleChange('category', e.target.value)} className="w-full px-4 py-2.5 bg-[#111111] border border-white/10 rounded-lg text-white focus:outline-none focus:border-[#ce5a67]">
+                    {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-white mb-1.5">Version *</label>
+                  <input type="text" value={form.version} onChange={(e) => handleChange('version', e.target.value)} className="w-full px-4 py-2.5 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67]" placeholder="v1.0" required />
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-white mb-2">
-                  Options
-                </label>
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={form.featured}
-                    onChange={(e) => handleChange('featured', e.target.checked)}
-                    className="w-4 h-4 accent-[#ce5a67]"
-                  />
-                  <span className="text-sm font-medium">Featured</span>
-                </label>
+              {/* Updated At + Tags */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-white mb-1.5">Updated At *</label>
+                  <input type="date" value={form.updatedAt} onChange={(e) => handleChange('updatedAt', e.target.value)} className="w-full px-4 py-2.5 bg-[#111111] border border-white/10 rounded-lg text-white focus:outline-none focus:border-[#ce5a67]" required />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-white mb-1.5">Tags (comma-separated)</label>
+                  <input type="text" value={form.tags} onChange={(e) => handleChange('tags', e.target.value)} className="w-full px-4 py-2.5 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67]" placeholder="Faces, Kits, Gameplay" />
+                </div>
               </div>
-            </div>
 
-            {/* Video ID */}
-            <div>
-              <label htmlFor="videoId" className="block text-sm font-medium text-white mb-2">
-                Video ID (optional)
-              </label>
-              <input
-                id="videoId"
-                type="text"
-                value={form.videoId}
-                onChange={(e) => handleChange('videoId', e.target.value)}
-                className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67] transition-colors"
-                placeholder="Vimeo video ID (e.g., 1176297958)"
-              />
-            </div>
-          </div>
+              {/* Description */}
+              <div>
+                <label className="block text-sm font-medium text-white mb-1.5">Description</label>
+                <textarea value={form.description} onChange={(e) => handleChange('description', e.target.value)} rows={2} className="w-full px-4 py-2.5 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67] resize-none" placeholder="Mô tả ngắn..." />
+              </div>
 
-          {/* Error */}
-          {error && (
-            <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-4">
-              <p className="text-red-400">{error}</p>
-            </div>
-          )}
+              {/* Long Description */}
+              <div>
+                <label className="block text-sm font-medium text-white mb-1.5">Long Description</label>
+                <textarea value={form.longDescription} onChange={(e) => handleChange('longDescription', e.target.value)} rows={3} className="w-full px-4 py-2.5 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67] resize-none" placeholder="Mô tả chi tiết..." />
+              </div>
 
-          {/* Submit button */}
-          <div className="flex flex-col sm:flex-row gap-4 pt-4">
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex-1 px-6 py-3 bg-[#ce5a67] text-white font-semibold rounded-lg hover:bg-[#b44c5c] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? 'Đang lưu...' : 'Lưu mod'}
-            </button>
-            <Link
-              href="/admin/mods"
-              className="px-6 py-3 bg-[#111111] border border-white/10 text-white font-semibold rounded-lg hover:bg-white/10 transition-colors text-center"
-            >
-              Xem danh sách
-            </Link>
-          </div>
-        </form>
-        </div>
+              {/* Thumbnail */}
+              <div>
+                <label className="block text-sm font-medium text-white mb-1.5">Thumbnail</label>
+                <div className="space-y-3">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <label className="px-4 py-2 bg-[#111111] border border-white/10 text-white text-sm rounded-lg hover:bg-white/10 transition-colors cursor-pointer">
+                      {isUploadingThumbnail ? 'Đang upload...' : 'Chọn ảnh'}
+                      <input type="file" accept="image/*" onChange={handleThumbnailChange} disabled={isUploadingThumbnail} className="hidden" />
+                    </label>
+                    {blobUrlRef.current && (
+                      <button type="button" onClick={() => { revokeBlobUrl(); setThumbnailPreview(null); setForm(prev => ({ ...prev, thumbnail: '' })) }} className="px-3 py-1.5 bg-red-500/20 text-red-400 text-sm rounded-lg hover:bg-red-500/30 transition-colors">Xóa ảnh upload</button>
+                    )}
+                  </div>
+                  <input type="text" value={form.thumbnail} onChange={(e) => { setForm(prev => ({ ...prev, thumbnail: e.target.value })); if (!blobUrlRef.current) setThumbnailPreview(e.target.value || null) }} className="w-full px-4 py-2.5 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67]" placeholder="/mods/thumbnail.jpg hoặc URL" />
+                  {thumbnailPreview && (
+                    <div className="relative w-full max-w-sm aspect-video bg-[#111111] border border-white/10 rounded-lg overflow-hidden">
+                      <img src={thumbnailPreview} alt="Preview" className="w-full h-full object-cover" />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Download URL */}
+              <div>
+                <label className="block text-sm font-medium text-white mb-1.5">Download URL</label>
+                <input type="url" value={form.downloadUrl} onChange={(e) => handleChange('downloadUrl', e.target.value)} className="w-full px-4 py-2.5 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67]" placeholder="https://drive.google.com/..." />
+              </div>
+
+              {/* Orientation + Featured + Video */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-white mb-1.5">Orientation</label>
+                  <div className="flex gap-4 mt-2">
+                    <label className="flex items-center gap-2 cursor-pointer"><input type="radio" name="thumbOrient" value="portrait" checked={form.thumbnailOrientation === 'portrait'} onChange={() => handleChange('thumbnailOrientation', 'portrait')} className="w-4 h-4 accent-[#ce5a67]" /><span className="text-sm">Portrait</span></label>
+                    <label className="flex items-center gap-2 cursor-pointer"><input type="radio" name="thumbOrient" value="landscape" checked={form.thumbnailOrientation === 'landscape'} onChange={() => handleChange('thumbnailOrientation', 'landscape')} className="w-4 h-4 accent-[#ce5a67]" /><span className="text-sm">Landscape</span></label>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-white mb-1.5">Options</label>
+                  <label className="flex items-center gap-2 cursor-pointer mt-2"><input type="checkbox" checked={form.featured} onChange={(e) => handleChange('featured', e.target.checked)} className="w-4 h-4 accent-[#ce5a67]" /><span className="text-sm">Featured</span></label>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-white mb-1.5">Video ID</label>
+                  <input type="text" value={form.videoId} onChange={(e) => handleChange('videoId', e.target.value)} className="w-full px-4 py-2.5 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67]" placeholder="Vimeo ID" />
+                </div>
+              </div>
+
+              {/* Error */}
+              {modError && (
+                <div className="rounded-lg border border-red-500/50 bg-red-500/20 p-3 text-sm text-red-300">{modError}</div>
+              )}
+
+              {/* Submit */}
+              <div className="flex gap-3 pt-2">
+                <button type="submit" disabled={modLoading} className="px-6 py-2.5 bg-[#ce5a67] text-white font-semibold rounded-lg hover:bg-[#b44c5c] disabled:opacity-50 transition-colors">
+                  {modLoading ? 'Đang lưu...' : 'Lưu mod'}
+                </button>
+                <button type="button" onClick={() => setModOpen(false)} className="px-6 py-2.5 bg-[#111111] border border-white/10 text-white font-semibold rounded-lg hover:bg-white/10 transition-colors">Hủy</button>
+              </div>
+            </form>
+          </section>
+        )}
       </div>
     </div>
   )

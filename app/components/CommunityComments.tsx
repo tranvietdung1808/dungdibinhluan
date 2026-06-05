@@ -2,8 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
-import type { User } from "@supabase/supabase-js";
-import { checkIsAdminEmail, isStaticAdminEmail } from "@/lib/admin";
+import { useAuth } from "./useAuth";
 
 type CommentItem = {
   id: string;
@@ -27,79 +26,16 @@ type Props = {
 };
 
 export default function CommunityComments({ scopeType, scopeId, title, emptyText }: Props) {
+  const { user, isAdmin, login } = useAuth();
+
   const [items, setItems] = useState<CommentItem[]>([]);
   const [pendingItems, setPendingItems] = useState<CommentItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [content, setContent] = useState("");
   const [replyToId, setReplyToId] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [pinPendingId, setPinPendingId] = useState<string | null>(null);
-
-  useEffect(() => {
-    const supabase = createClient();
-    let active = true;
-
-    const loadUser = async () => {
-      const { data: sessionData } = await supabase.auth.getSession();
-      if (!active) return;
-      const session = sessionData.session;
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
-      
-      if (currentUser) {
-        if (isStaticAdminEmail(currentUser.email)) {
-          setIsAdmin(true);
-        } else {
-          const token = session?.access_token;
-          if (token) {
-            const res = await fetch("/api/auth/admin-session", {
-              method: "POST",
-              headers: { Authorization: `Bearer ${token}` },
-            });
-            if (active) setIsAdmin(res.ok);
-          } else {
-            setIsAdmin(false);
-          }
-        }
-      } else {
-        setIsAdmin(false);
-      }
-    };
-
-    loadUser();
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (!active) return;
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
-      
-      if (currentUser) {
-        if (isStaticAdminEmail(currentUser.email)) {
-          setIsAdmin(true);
-        } else {
-          const token = session?.access_token;
-          if (token) {
-            const res = await fetch("/api/auth/admin-session", {
-              method: "POST",
-              headers: { Authorization: `Bearer ${token}` },
-            });
-            if (active) setIsAdmin(res.ok);
-          } else {
-            setIsAdmin(false);
-          }
-        }
-      } else {
-        setIsAdmin(false);
-      }
-    });
-
-    return () => {
-      active = false;
-      authListener.subscription.unsubscribe();
-    };
-  }, []);
 
   const loadComments = useCallback(async () => {
     setLoading(true);
@@ -122,7 +58,6 @@ export default function CommunityComments({ scopeType, scopeId, title, emptyText
   }, [loadComments]);
 
   const allItems = useMemo(() => {
-    // Merge server items + optimistic pending items (deduplicate by id)
     const serverIds = new Set(items.map((i) => i.id));
     const extra = pendingItems.filter((p) => !serverIds.has(p.id));
     return [...items, ...extra];
@@ -141,13 +76,7 @@ export default function CommunityComments({ scopeType, scopeId, title, emptyText
   }, [allItems]);
 
   const handleLogin = async () => {
-    const supabase = createClient();
-    const currentPath = `${window.location.pathname}${window.location.search}`;
-    const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(currentPath)}`;
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo },
-    });
+    await login();
   };
 
   const submit = async () => {
@@ -192,8 +121,17 @@ export default function CommunityComments({ scopeType, scopeId, title, emptyText
         scope_type: scopeType,
         scope_id: scopeId,
         parent_id: replyToId,
-        author_name: isAdmin ? "ADMIN" : (user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split("@")[0] || "Người dùng"),
-        author_avatar: isAdmin ? "/favicon.ico" : (user?.user_metadata?.avatar_url || user?.user_metadata?.picture || null),
+        author_name: isAdmin
+          ? "ADMIN"
+          : user?.user_metadata?.full_name ||
+            user?.user_metadata?.name ||
+            user?.email?.split("@")[0] ||
+            "Người dùng",
+        author_avatar: isAdmin
+          ? "/favicon.ico"
+          : user?.user_metadata?.avatar_url ||
+            user?.user_metadata?.picture ||
+            null,
         content: trimmed,
         is_admin_comment: isAdmin,
         is_pinned: false,
@@ -222,9 +160,7 @@ export default function CommunityComments({ scopeType, scopeId, title, emptyText
 
       const response = await fetch(`/api/admin/community?id=${id}`, {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       if (!response.ok) {
@@ -232,10 +168,9 @@ export default function CommunityComments({ scopeType, scopeId, title, emptyText
         setMessage(data?.error || "Không xóa được bình luận");
         return;
       }
-      // Remove from pending list too in case it was optimistic
       setPendingItems((prev) => prev.filter((p) => p.id !== id));
       await loadComments();
-    } catch (error) {
+    } catch {
       setMessage("Lỗi kết nối khi xóa");
     }
   };
@@ -337,15 +272,22 @@ export default function CommunityComments({ scopeType, scopeId, title, emptyText
             const replies = repliesByParent.get(root.id) || [];
             const isPendingRoot = root.status === "pending";
             return (
-              <article key={root.id} className={`rounded-xl border p-3 ${
-                isPendingRoot
-                  ? "border-white/5 bg-white/[0.01] opacity-60"
-                  : "border-white/10 bg-white/[0.02]"
-              }`}>
+              <article
+                key={root.id}
+                className={`rounded-xl border p-3 ${
+                  isPendingRoot
+                    ? "border-white/5 bg-white/[0.01] opacity-60"
+                    : "border-white/10 bg-white/[0.02]"
+                }`}
+              >
                 <div className="flex items-center gap-2">
                   <div className="h-7 w-7 overflow-hidden rounded-full bg-[#1e1e2b]">
                     {root.author_avatar ? (
-                      <img src={root.author_avatar} alt={root.author_name} className="h-full w-full object-cover" />
+                      <img
+                        src={root.author_avatar}
+                        alt={root.author_name}
+                        className="h-full w-full object-cover"
+                      />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center text-[11px] text-slate-400">
                         {root.author_name.slice(0, 1).toUpperCase()}
@@ -408,7 +350,10 @@ export default function CommunityComments({ scopeType, scopeId, title, emptyText
                 {replies.length > 0 && (
                   <div className="mt-3 space-y-2 border-l border-white/10 pl-3">
                     {replies.map((reply) => (
-                      <div key={reply.id} className="rounded-lg border border-white/10 bg-black/20 p-2.5">
+                      <div
+                        key={reply.id}
+                        className="rounded-lg border border-white/10 bg-black/20 p-2.5"
+                      >
                         <div className="flex items-center gap-2">
                           <p className="text-[11px] font-semibold text-white flex items-center gap-1.5">
                             {reply.author_name}

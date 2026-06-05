@@ -19,15 +19,19 @@ function AuthCallbackContent() {
         await supabase.auth.exchangeCodeForSession(code);
         const { data } = await supabase.auth.getSession();
         const token = data.session?.access_token;
+
         if (token) {
-          await fetch("/api/auth/profile-sync", {
-            method: "POST",
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          await fetch("/api/auth/admin-session", {
-            method: "POST",
-            headers: { Authorization: `Bearer ${token}` },
-          });
+          // Run profile-sync and admin-session in parallel for faster auth
+          await Promise.all([
+            fetch("/api/auth/profile-sync", {
+              method: "POST",
+              headers: { Authorization: `Bearer ${token}` },
+            }),
+            fetch("/api/auth/admin-session", {
+              method: "POST",
+              headers: { Authorization: `Bearer ${token}` },
+            }),
+          ]);
         } else {
           await fetch("/api/auth/admin-session", { method: "DELETE" });
         }

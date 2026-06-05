@@ -1,19 +1,17 @@
 import type { NextRequest } from "next/server";
 import { errorResponse, runRoute, successResponse } from "@/lib/server/api-response";
 import { supabaseAdmin } from "@/lib/supabase";
+import { extractToken, getUserFromToken } from "@/lib/server/auth";
 
 export async function POST(request: NextRequest) {
   return runRoute(async () => {
-    const authorization = request.headers.get("authorization") || "";
-    const token = authorization.startsWith("Bearer ") ? authorization.slice(7).trim() : "";
+    const token = extractToken(request);
     if (!token) {
       return errorResponse("Unauthorized", 401);
     }
 
-    const { data: authData, error: authError } = await supabaseAdmin.auth.getUser(token);
-    const user = authData.user;
-
-    if (authError || !user) {
+    const user = await getUserFromToken(token);
+    if (!user) {
       return errorResponse("Unauthorized", 401);
     }
 

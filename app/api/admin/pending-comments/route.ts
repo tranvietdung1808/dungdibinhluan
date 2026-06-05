@@ -1,20 +1,7 @@
 import type { NextRequest } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { errorResponse, runRoute, successResponse } from "@/lib/server/api-response";
-import { checkIsAdminEmail } from "@/lib/admin";
-
-async function ensureAdmin(request: NextRequest) {
-  const authorization = request.headers.get("authorization") || "";
-  const token = authorization.startsWith("Bearer ") ? authorization.slice(7).trim() : "";
-  if (!token) {
-    return null;
-  }
-  const { data, error } = await supabaseAdmin.auth.getUser(token);
-  if (error || !data.user || !(await checkIsAdminEmail(supabaseAdmin, data.user.email))) {
-    return null;
-  }
-  return data.user;
-}
+import { ensureAdmin } from "@/lib/server/auth";
 
 export async function GET(request: NextRequest) {
   return runRoute(async () => {

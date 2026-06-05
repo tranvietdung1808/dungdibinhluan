@@ -1,11 +1,10 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/utils/supabase/client";
-import type { User } from "@supabase/supabase-js";
 import CheckUyTinButton from "./CheckUyTinButton";
+import { useAuth } from "./useAuth";
 
 const navItems = [
   { label: "🔥 CHIA SẺ MODS", href: "/mods" },
@@ -14,148 +13,23 @@ const navItems = [
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [authLoading, setAuthLoading] = useState(true);
   const [authPending, setAuthPending] = useState(false);
   const router = useRouter();
-
-  const syncAdminSessionCookie = useCallback(async (supabase = createClient()) => {
-    try {
-      const { data } = await supabase.auth.getSession();
-      const token = data.session?.access_token;
-      if (!token) {
-        await fetch("/api/auth/admin-session", { method: "DELETE" });
-        return false;
-      }
-      const res = await fetch("/api/auth/admin-session", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      return res.ok;
-    } catch (error) {
-      console.error("Admin session sync error:", error);
-      return false;
-    }
-  }, []);
-
-  useEffect(() => {
-    const supabase = createClient();
-    let active = true;
-
-    const loadUser = async () => {
-      // Use getSession for immediate local data instead of getUser which makes a network request
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!active) return;
-      
-      const currentUser = session?.user ?? null;
-      console.log("[Navbar] loadUser - currentUser:", currentUser?.email);
-      setUser(currentUser);
-      
-      // Stop showing '...' so user can log out or see their profile immediately
-      setAuthLoading(false);
-      
-      // Fetch admin status in the background
-      if (currentUser && currentUser.email) {
-        // Fast UI Load: Check cache and static email first for 0ms latency
-        const cacheKey = `isAdmin_${currentUser.email}`;
-        const isStaticAdmin = currentUser.email === "dungba66@gmail.com";
-        const hasCache = localStorage.getItem(cacheKey) === "true";
-        
-        if (isStaticAdmin || hasCache) {
-          setIsAdmin(true);
-        }
-
-        // Background synchronization
-        const adminStatus = await syncAdminSessionCookie(supabase);
-        console.log("[Navbar] loadUser - adminStatus:", adminStatus);
-        if (active) {
-          setIsAdmin(adminStatus);
-          localStorage.setItem(cacheKey, String(adminStatus));
-        }
-      } else {
-        if (active) setIsAdmin(false);
-      }
-    };
-
-    loadUser();
-
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (!active) return;
-      const currentUser = session?.user ?? null;
-      console.log("[Navbar] authStateChange - currentUser:", currentUser?.email);
-      setUser(currentUser);
-      
-      // Stop showing '...' immediately on auth state change
-      setAuthLoading(false);
-      setAuthPending(false);
-      
-      // Fetch admin status in the background
-      if (currentUser && currentUser.email) {
-        const cacheKey = `isAdmin_${currentUser.email}`;
-        const isStaticAdmin = currentUser.email === "dungba66@gmail.com";
-        const hasCache = localStorage.getItem(cacheKey) === "true";
-        
-        if (isStaticAdmin || hasCache) {
-          setIsAdmin(true);
-        }
-
-        const adminStatus = await syncAdminSessionCookie(supabase);
-        console.log("[Navbar] authStateChange - adminStatus:", adminStatus);
-        if (active) {
-          setIsAdmin(adminStatus);
-          localStorage.setItem(cacheKey, String(adminStatus));
-        }
-      } else {
-        if (active) setIsAdmin(false);
-      }
-    });
-
-    return () => {
-      active = false;
-      authListener.subscription.unsubscribe();
-    };
-  }, [syncAdminSessionCookie]);
+  const { user, isAdmin, loading: authLoading, login, logout } = useAuth();
 
   const handleGoogleLogin = async () => {
-    console.log("[Navbar] handleGoogleLogin triggered");
     setAuthPending(true);
-    const supabase = createClient();
-    const currentPath = `${window.location.pathname}${window.location.search}`;
-    const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(currentPath)}`;
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo },
-    });
-
-    if (error) {
-      setAuthPending(false);
-      alert("Đăng nhập Google thất bại. Vui lòng thử lại.");
-    }
+    await login();
+    // OAuth redirect happens — pending state resets on return
   };
 
   const handleLogout = async () => {
-    console.log("Logout triggered");
-    try {
-      setAuthPending(true);
-      const supabase = createClient();
-      await supabase.auth.signOut();
-      console.log("Supabase signOut successful");
-      try {
-        await fetch("/api/auth/admin-session", { method: "DELETE" });
-      } catch (fetchError) {
-        console.warn("Failed to delete admin session cookie:", fetchError);
-      }
-      sessionStorage.removeItem("admin_authenticated");
-    } catch (e) {
-      console.error("Logout error:", e);
-    } finally {
-      setAuthPending(false);
-      router.refresh();
-      // If we're in an admin route, reloading might be necessary to clear state
-      if (window.location.pathname.startsWith('/admin')) {
-        window.location.href = '/'; 
-      }
+    setAuthPending(true);
+    await logout();
+    setAuthPending(false);
+    router.refresh();
+    if (window.location.pathname.startsWith("/admin")) {
+      window.location.href = "/";
     }
   };
 
@@ -168,15 +42,27 @@ export default function Navbar() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0a]/70 backdrop-blur-xl border-b border-white/5">
       <div className="max-w-6xl mx-auto px-4 md:px-6 h-14 md:h-16 flex items-center justify-between gap-3">
-
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 md:gap-3 flex-shrink-0 hover:opacity-80 transition-opacity cursor-pointer">
+        <Link
+          href="/"
+          className="flex items-center gap-2 md:gap-3 flex-shrink-0 hover:opacity-80 transition-opacity cursor-pointer"
+        >
           <div className="w-8 h-8 md:w-9 md:h-9 rounded-full overflow-hidden ring-1 ring-[#ce5a67]/40">
-            <Image src="/logo.png" alt="Logo" width={36} height={36} className="object-cover w-full h-full" />
+            <Image
+              src="/logo.png"
+              alt="Logo"
+              width={36}
+              height={36}
+              className="object-cover w-full h-full"
+            />
           </div>
           <div>
-            <p className="font-black text-[11px] md:text-sm tracking-widest hidden sm:block">DUNGDIBINHLUAN</p>
-            <p className="text-[8px] text-slate-500 tracking-[0.3em] hidden sm:block">FC MODDING AND CAREER MODE</p>
+            <p className="font-black text-[11px] md:text-sm tracking-widest hidden sm:block">
+              DUNGDIBINHLUAN
+            </p>
+            <p className="text-[8px] text-slate-500 tracking-[0.3em] hidden sm:block">
+              FC MODDING AND CAREER MODE
+            </p>
           </div>
         </Link>
 
@@ -195,8 +81,18 @@ export default function Navbar() {
             href="/huong-dan"
             className="px-4 py-2 text-[11px] font-bold tracking-widest text-slate-400 hover:text-white transition-colors rounded-lg hover:bg-white/5 flex items-center gap-2"
           >
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            <svg
+              className="w-3 h-3"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
             </svg>
             HƯỚNG DẪN/MẸO
           </Link>
@@ -252,14 +148,26 @@ export default function Navbar() {
             </button>
           )}
 
-          {/* Hamburger — chỉ hiện trên mobile */}
+          {/* Hamburger — mobile only */}
           <button
             onClick={() => setOpen(!open)}
             className="md:hidden flex flex-col justify-center items-center w-9 h-9 rounded-lg bg-white/5 border border-white/10 gap-1.5"
           >
-            <span className={`block w-4 h-0.5 bg-white transition-all duration-300 ${open ? "rotate-45 translate-y-2" : ""}`} />
-            <span className={`block w-4 h-0.5 bg-white transition-all duration-300 ${open ? "opacity-0" : ""}`} />
-            <span className={`block w-4 h-0.5 bg-white transition-all duration-300 ${open ? "-rotate-45 -translate-y-2" : ""}`} />
+            <span
+              className={`block w-4 h-0.5 bg-white transition-all duration-300 ${
+                open ? "rotate-45 translate-y-2" : ""
+              }`}
+            />
+            <span
+              className={`block w-4 h-0.5 bg-white transition-all duration-300 ${
+                open ? "opacity-0" : ""
+              }`}
+            />
+            <span
+              className={`block w-4 h-0.5 bg-white transition-all duration-300 ${
+                open ? "-rotate-45 -translate-y-2" : ""
+              }`}
+            />
           </button>
         </div>
       </div>
@@ -282,8 +190,18 @@ export default function Navbar() {
             onClick={() => setOpen(false)}
             className="px-4 py-3 text-[11px] font-bold tracking-widest text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-colors flex items-center gap-2"
           >
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            <svg
+              className="w-3 h-3"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
             </svg>
             HƯỚNG DẪN/MẸO
           </Link>

@@ -2,8 +2,9 @@ import type { NextRequest } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { errorResponse, parseJsonBody, runRoute, successResponse } from "@/lib/server/api-response";
 import type { Database } from "@/utils/supabase/database.types";
-import { checkIsAdminEmail } from "@/lib/admin";
 import { supabaseAdmin } from "@/lib/supabase";
+import { extractToken, getUserFromToken } from "@/lib/server/auth";
+import { checkIsAdminEmail } from "@/lib/admin";
 
 type CommunityInsert = Database["public"]["Tables"]["community_comments"]["Insert"];
 
@@ -64,16 +65,13 @@ export async function POST(request: NextRequest) {
       return errorResponse("Nội dung bình luận phải từ 2 đến 2000 ký tự", 400);
     }
 
-    const authorization = request.headers.get("authorization") || "";
-    const token = authorization.startsWith("Bearer ") ? authorization.slice(7).trim() : "";
+    const token = extractToken(request);
     if (!token) {
       return errorResponse("Bạn cần đăng nhập để bình luận", 401);
     }
 
-    const { data: authData, error: authError } = await supabaseAdmin.auth.getUser(token);
-    const user = authData.user;
-
-    if (authError || !user) {
+    const user = await getUserFromToken(token);
+    if (!user) {
       return errorResponse("Bạn cần đăng nhập để bình luận", 401);
     }
 
@@ -102,7 +100,8 @@ export async function POST(request: NextRequest) {
       content,
       is_admin_comment: isAdmin,
       is_pinned: false,
-      status: "pending",
+      // Admin comments auto-approved, regular users go to pending queue
+      status: isAdmin ? "approved" : "pending",
     };
 
     const { data, error } = await supabaseAdmin
