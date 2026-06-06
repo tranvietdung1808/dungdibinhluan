@@ -1,10 +1,10 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { Suspense, useCallback, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 
-export default function AdminLoginPage() {
+function AdminLoginContent() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const router = useRouter()
@@ -87,5 +87,17 @@ export default function AdminLoginPage() {
         </div>
       </div>
     </main>
+  )
+}
+
+export default function AdminLoginPage() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen bg-[#0a0a0a] text-white flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-[#ce5a67] border-t-transparent rounded-full animate-spin" />
+      </main>
+    }>
+      <AdminLoginContent />
+    </Suspense>
   )
 }
