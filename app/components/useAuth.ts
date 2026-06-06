@@ -138,7 +138,6 @@ export function useAuth(): UseAuthResult {
     } catch {
       // ignore
     }
-    sessionStorage.removeItem("admin_authenticated");
     // Clear admin cache
     if (user?.email) {
       localStorage.removeItem(`isAdmin_${user.email}`);

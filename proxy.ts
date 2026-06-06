@@ -4,11 +4,11 @@ import type { NextRequest } from 'next/server'
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  if (pathname.startsWith('/admin')) {
+  if (pathname.startsWith('/admin') && pathname !== '/admin') {
     const adminSession = request.cookies.get('admin_user')?.value
 
     if (adminSession !== '1') {
-      const loginUrl = new URL('/admin/login', request.url)
+      const loginUrl = new URL('/admin', request.url)
       loginUrl.searchParams.set('redirect', pathname)
       return NextResponse.redirect(loginUrl)
     }
@@ -19,6 +19,6 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/admin/((?!login).*)',
+    '/admin/:path*',
   ],
 }
