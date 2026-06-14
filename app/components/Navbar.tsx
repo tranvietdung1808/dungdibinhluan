@@ -47,7 +47,7 @@ export default function Navbar() {
           href="/"
           className="flex items-center gap-2 md:gap-3 flex-shrink-0 hover:opacity-80 transition-opacity cursor-pointer"
         >
-          <div className="w-8 h-8 md:w-9 md:h-9 rounded-full overflow-hidden ring-1 ring-[#ce5a67]/40">
+          <div className="w-8 h-8 md:w-9 md:h-9 rounded-full overflow-hidden ring-1 ring-[var(--color-primary)]/40">
             <Image
               src="/logo.png"
               alt="Logo"
@@ -111,7 +111,7 @@ export default function Navbar() {
           <CheckUyTinButton />
           <Link
             href="/games/fc26/select"
-            className="flex-shrink-0 px-4 md:px-5 py-2 md:py-2.5 bg-[#ce5a67] rounded-xl text-[10px] md:text-[11px] font-black tracking-widest text-white hover:bg-[#b44c5c] transition-colors shadow-[0_4px_20px_rgba(206,90,103,0.3)]"
+            className="flex-shrink-0 px-4 md:px-5 py-2 md:py-2.5 bg-[var(--color-primary)] rounded-xl text-[10px] md:text-[11px] font-black tracking-widest text-white hover:bg-[#b44c5c] transition-colors shadow-[0_4px_20px_rgba(206,90,103,0.3)]"
           >
             TẢI NGAY
           </Link>
@@ -124,7 +124,7 @@ export default function Navbar() {
               {isAdmin && (
                 <Link
                   href="/admin/dashboard"
-                  className="flex-shrink-0 px-3 md:px-4 py-2 rounded-xl text-[10px] md:text-[11px] font-semibold tracking-wide text-slate-200 border border-[#ce5a67]/40 bg-[#ce5a67]/15 hover:bg-[#ce5a67]/25 transition-colors"
+                  className="flex-shrink-0 px-3 md:px-4 py-2 rounded-xl text-[10px] md:text-[11px] font-semibold tracking-wide text-slate-200 border border-[var(--color-primary)]/40 bg-[var(--color-primary)]/15 hover:bg-[var(--color-primary)]/25 transition-colors"
                 >
                   Open Admin Panel
                 </Link>

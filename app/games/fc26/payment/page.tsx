@@ -6,10 +6,11 @@ import { Suspense } from "react";
 import CheckUyTinButton from "../../../components/CheckUyTinButton";
 import CopyButton from "../../../components/CopyButton";
 import PayOSButton from "../../../components/PayOSButton";
+import FlashSaleBanner from "../../../components/FlashSaleBanner";
 
-const EDITIONS: Record<string, { label: string; price: string; color: string; productId: string; ckContent: string }> = {
-  normal: { label: "STANDARD EDITION", price: "149.000₫", color: "#ce5a67", productId: "fc26-normal", ckContent: "quacuoi" },
-  mods:   { label: "FULL MODS EDITION", price: "269.000₫", color: "#a855f7", productId: "fc26-mods", ckContent: "quaque" },
+const EDITIONS: Record<string, { label: string; price: string; oldPrice: string; discount: string; color: string; productId: string; ckContent: string }> = {
+  normal: { label: "STANDARD EDITION", price: "69.000₫", oldPrice: "149.000₫", discount: "-54%", color: "#ce5a67", productId: "fc26-normal", ckContent: "quacuoi" },
+  mods:   { label: "FULL MODS EDITION", price: "199.000₫", oldPrice: "269.000₫", discount: "-26%", color: "#a855f7", productId: "fc26-mods", ckContent: "quaque" },
 };
 
 const BANK_INFO = {
@@ -39,11 +40,17 @@ function PaymentContent() {
           <CheckUyTinButton />
         </div>
 
+        <FlashSaleBanner />
+
         <div
-          className="rounded-2xl border p-5 text-center space-y-1"
+          className="rounded-2xl border p-5 text-center space-y-2"
           style={{ borderColor: `${ed.color}30`, background: `${ed.color}10` }}
         >
           <p className="text-xs text-slate-400 tracking-widest uppercase">Tổng thanh toán</p>
+          <div className="flex items-center justify-center gap-2">
+            <span className="text-sm text-slate-600 line-through">{ed.oldPrice}</span>
+            <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-green-500/20 text-green-400 border border-green-500/30">{ed.discount}</span>
+          </div>
           <p className="text-4xl font-black" style={{ color: ed.color }}>{ed.price}</p>
         </div>
 

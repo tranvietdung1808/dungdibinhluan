@@ -4,6 +4,7 @@
   --background: #080810;
   --foreground: #ededed;
   --accent: #ce5a67;
+  --color-primary: #ce5a67;
 }
 
 body {
@@ -15,6 +16,7 @@ body {
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-primary: #ce5a67;
 }
 
 /* ===== ANIMATIONS ===== */

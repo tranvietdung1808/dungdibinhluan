@@ -10,15 +10,15 @@ const game = GAMES.find(g => g.slug === "fc26")!;
 const GlowBg = () => (
   <div aria-hidden className="pointer-events-none">
     <div className="absolute inset-0 bg-[linear-gradient(rgba(206,90,103,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(206,90,103,0.04)_1px,transparent_1px)] bg-[size:44px_44px]" />
-    <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-[#ce5a67]/10 blur-[140px] rounded-full" />
-    <div className="absolute -bottom-40 -right-10 w-[350px] h-[350px] bg-[#ce5a67]/6 blur-[100px] rounded-full" />
+    <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-[var(--color-primary)]/10 blur-[140px] rounded-full" />
+    <div className="absolute -bottom-40 -right-10 w-[350px] h-[350px] bg-[var(--color-primary)]/6 blur-[100px] rounded-full" />
   </div>
 );
 
 const Avatar = ({ size = 112 }: { size?: number }) => (
   <div
     style={{ width: size, height: size }}
-    className="rounded-full overflow-hidden flex-shrink-0 ring-2 ring-[#ce5a67]/40 shadow-[0_0_30px_rgba(206,90,103,0.25)]"
+    className="rounded-full overflow-hidden flex-shrink-0 ring-2 ring-[var(--color-primary)]/40 shadow-[0_0_30px_rgba(206,90,103,0.25)]"
   >
     <Image src="/logo.png" alt="Dung Gaming" width={size} height={size} className="object-cover w-full h-full" />
   </div>
@@ -81,7 +81,7 @@ function LoginView({ onSuccess }: { onSuccess: (type: string) => void }) {
           autoComplete="off"
           onChange={e => { setCode(e.target.value.toUpperCase()); setError(""); }}
           className={`w-full bg-white/5 border rounded-2xl px-6 py-4 text-center tracking-widest text-base font-mono focus:outline-none transition-colors ${
-            error ? "border-red-500/60 focus:border-red-500" : "border-white/10 focus:border-[#ce5a67]"
+            error ? "border-red-500/60 focus:border-red-500" : "border-white/10 focus:border-[var(--color-primary)]"
           }`}
         />
         {error && <p className="text-center text-xs text-red-400 animate-pulse">{error}</p>}
@@ -89,7 +89,7 @@ function LoginView({ onSuccess }: { onSuccess: (type: string) => void }) {
       <button
         type="submit"
         disabled={loading}
-        className="w-full py-4 bg-[#ce5a67] rounded-2xl font-black tracking-[0.3em] hover:bg-[#b44c5c] transition-colors shadow-[0_8px_30px_rgba(206,90,103,0.3)] disabled:opacity-60"
+        className="w-full py-4 bg-[var(--color-primary)] rounded-2xl font-black tracking-[0.3em] hover:bg-[#b44c5c] transition-colors shadow-[0_8px_30px_rgba(206,90,103,0.3)] disabled:opacity-60"
       >
         {loading ? "ĐANG KIỂM TRA..." : "XÁC THỰC"}
       </button>
@@ -163,7 +163,7 @@ function DashboardView({ type }: { type: string }) {
 
   return (
     <div className="relative z-10 w-full max-w-xl">
-      <div className="absolute -inset-px bg-gradient-to-b from-[#ce5a67]/30 via-[#ce5a67]/8 to-transparent rounded-3xl pointer-events-none" />
+      <div className="absolute -inset-px bg-gradient-to-b from-[var(--color-primary)]/30 via-[var(--color-primary)]/8 to-transparent rounded-3xl pointer-events-none" />
       <div className="relative bg-[#111]/90 backdrop-blur-xl rounded-3xl overflow-hidden">
 
         <header className="flex items-center justify-between px-8 py-5 border-b border-white/5">
@@ -171,14 +171,14 @@ function DashboardView({ type }: { type: string }) {
             <Avatar size={40} />
             <div>
               <p className="text-sm font-black tracking-wider">{game.name}</p>
-              <p className="text-[9px] text-[#ce5a67] tracking-[0.3em] uppercase">
+              <p className="text-[9px] text-[var(--color-primary)] tracking-[0.3em] uppercase">
                 {type === "mods" ? "FULL MODS EDITION" : game.subtitle}
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#ce5a67]/30 bg-[#ce5a67]/5">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#ce5a67] animate-pulse" />
-            <span className="text-[9px] font-bold text-[#ce5a67] tracking-widest">SYSTEM ONLINE</span>
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-[var(--color-primary)]/30 bg-[var(--color-primary)]/5">
+            <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)] animate-pulse" />
+            <span className="text-[9px] font-bold text-[var(--color-primary)] tracking-widest">SYSTEM ONLINE</span>
           </div>
         </header>
 
@@ -186,11 +186,11 @@ function DashboardView({ type }: { type: string }) {
           <div className="grid grid-cols-2 gap-4">
             <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/5 space-y-2">
               <p className="text-[9px] text-slate-500 uppercase tracking-widest">Dung lượng file</p>
-              <p className="text-2xl font-black text-[#ce5a67]">{game.fileSize}</p>
+              <p className="text-2xl font-black text-[var(--color-primary)]">{game.fileSize}</p>
             </div>
             <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/5 space-y-2">
               <p className="text-[9px] text-slate-500 uppercase tracking-widest">Định dạng</p>
-              <p className="text-2xl font-black text-[#ce5a67]">{game.fileFormat}</p>
+              <p className="text-2xl font-black text-[var(--color-primary)]">{game.fileFormat}</p>
             </div>
           </div>
 
@@ -199,7 +199,7 @@ function DashboardView({ type }: { type: string }) {
             onClick={handleDownload}
             disabled={status !== "idle"}
             className={`group relative w-full py-5 rounded-2xl font-black text-lg overflow-hidden transition-all active:scale-[0.98] shadow-[0_10px_40px_rgba(206,90,103,0.25)] disabled:cursor-not-allowed ${
-              status === "done" ? "bg-green-500/80" : "bg-[#ce5a67] hover:bg-[#b44c5c]"
+              status === "done" ? "bg-green-500/80" : "bg-[var(--color-primary)] hover:bg-[#b44c5c]"
             }`}
           >
             {buttonContent[status]}
@@ -212,7 +212,7 @@ function DashboardView({ type }: { type: string }) {
           {type === "mods" && (
             <button
               onClick={handleDownloadMods}
-              className="group relative w-full py-5 rounded-2xl font-black text-lg overflow-hidden transition-all active:scale-[0.98] border border-[#ce5a67]/40 text-[#ce5a67] hover:bg-[#ce5a67]/10"
+              className="group relative w-full py-5 rounded-2xl font-black text-lg overflow-hidden transition-all active:scale-[0.98] border border-[var(--color-primary)]/40 text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10"
             >
               <span className="relative z-10 tracking-widest">🎮 TẢI FULL MODS PACK</span>
             </button>

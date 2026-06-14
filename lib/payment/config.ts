@@ -17,7 +17,7 @@ export const PRODUCTS: Record<ProductId, ProductConfig> = {
   'fc26-normal': {
     id: 'fc26-normal',
     name: 'FC26 Standard Edition',
-    price: 149000,
+    price: 69000,
     codePrefix: 'DUNG',
     returnUrl: '/games/fc26?edition=normal',
     codeEntryUrl: `${BASE}/games/fc26?edition=normal`,
@@ -25,7 +25,7 @@ export const PRODUCTS: Record<ProductId, ProductConfig> = {
   'fc26-mods': {
     id: 'fc26-mods',
     name: 'FC26 Full Mods Edition',
-    price: 269000,
+    price: 199000,
     codePrefix: 'MODS',
     returnUrl: '/games/fc26?edition=mods',
     codeEntryUrl: `${BASE}/games/fc26?edition=mods`,

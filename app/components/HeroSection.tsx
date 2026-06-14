@@ -135,7 +135,7 @@ export default function HeroSection({ latestGuides = [] }: HeroSectionProps) {
           <div className="flex flex-col xl:flex-row items-center justify-between gap-8 xl:gap-16 w-full">
             <div className="max-w-xs sm:max-w-sm md:max-w-xl space-y-4 md:space-y-6 mx-auto xl:mx-0 flex-1">
               <div className="flex items-center gap-2 md:gap-3 flex-wrap">
-                <span className="px-2.5 py-1 rounded-full text-[9px] md:text-[10px] font-black tracking-widest bg-[#ce5a67]/20 text-[#ce5a67] border border-[#ce5a67]/30">
+                <span className="px-2.5 py-1 rounded-full text-[9px] md:text-[10px] font-black tracking-widest bg-[var(--color-primary)]/20 text-[var(--color-primary)] border border-[var(--color-primary)]/30">
                   🔥 HOT
                 </span>
                 <span className="px-2.5 py-1 rounded-full text-[9px] md:text-[10px] font-black tracking-widest bg-white/5 text-slate-400 border border-white/10">
@@ -145,7 +145,7 @@ export default function HeroSection({ latestGuides = [] }: HeroSectionProps) {
 
               <div>
                 <h1 className="text-4xl sm:text-5xl md:text-7xl font-black italic tracking-tighter leading-none text-white">
-                  EA FC <span className="text-[#ce5a67]">26</span>
+                  EA FC <span className="text-[var(--color-primary)]">26</span>
                 </h1>
                 <p className="text-slate-400 text-[10px] md:text-sm tracking-[0.2em] md:tracking-[0.3em] uppercase mt-2 md:mt-3">
                   ALL IN ONE GAME SET UP
@@ -159,7 +159,7 @@ export default function HeroSection({ latestGuides = [] }: HeroSectionProps) {
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                 <Link
                   href="/games/fc26/select"
-                  className="group flex items-center justify-center gap-2 px-6 md:px-8 py-3.5 md:py-4 bg-[#ce5a67] rounded-2xl font-black tracking-widest text-sm md:text-base text-white hover:bg-[#b44c5c] transition-all shadow-[0_8px_30px_rgba(206,90,103,0.3)]"
+                  className="group flex items-center justify-center gap-2 px-6 md:px-8 py-3.5 md:py-4 bg-[var(--color-primary)] rounded-2xl font-black tracking-widest text-sm md:text-base text-white hover:bg-[#b44c5c] transition-all shadow-[0_8px_30px_rgba(206,90,103,0.3)]"
                 >
                   TẢI FC 26 NGAY
                   <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
@@ -184,10 +184,10 @@ export default function HeroSection({ latestGuides = [] }: HeroSectionProps) {
                 <div className="space-y-3 w-[280px] 2xl:w-[320px]">
                   <div className="flex items-center justify-between px-2">
                     <div className="flex items-center gap-2">
-                      <div className="w-1 h-3.5 rounded-full bg-[#ce5a67]" />
+                      <div className="w-1 h-3.5 rounded-full bg-[var(--color-primary)]" />
                       <p className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-white">BÀI VIẾT MỚI</p>
                     </div>
-                    <Link href="/huong-dan" className="group flex items-center gap-1.5 text-[9px] text-[#ce5a67] hover:text-white font-black tracking-widest uppercase transition-colors">
+                    <Link href="/huong-dan" className="group flex items-center gap-1.5 text-[9px] text-[var(--color-primary)] hover:text-white font-black tracking-widest uppercase transition-colors">
                       Xem tất cả
                       <span className="transition-transform group-hover:translate-x-1">→</span>
                     </Link>
@@ -197,9 +197,9 @@ export default function HeroSection({ latestGuides = [] }: HeroSectionProps) {
                       <Link
                         key={guide.id}
                         href={`/huong-dan/${guide.slug}`}
-                        className="group relative flex items-start gap-3 rounded-[16px] p-2.5 border border-white/5 bg-white/[0.015] backdrop-blur-md overflow-hidden hover:border-[#ce5a67]/40 hover:bg-white/[0.04] hover:-translate-y-[2px] transition-all duration-300 hover:shadow-[0_8px_25px_rgba(206,90,103,0.1)]"
+                        className="group relative flex items-start gap-3 rounded-[16px] p-2.5 border border-white/5 bg-white/[0.015] backdrop-blur-md overflow-hidden hover:border-[var(--color-primary)]/40 hover:bg-white/[0.04] hover:-translate-y-[2px] transition-all duration-300 hover:shadow-[0_8px_25px_rgba(206,90,103,0.1)]"
                       >
-                        <div className="absolute inset-y-0 left-0 w-[3px] bg-gradient-to-b from-[#ce5a67] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-[0_0_8px_#ce5a67]" />
+                        <div className="absolute inset-y-0 left-0 w-[3px] bg-gradient-to-b from-[var(--color-primary)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-[0_0_8px_var(--color-primary)]" />
                         
                         <div className="relative w-[56px] h-[72px] rounded-xl overflow-hidden bg-[#13131b] flex-shrink-0 shadow-[0_4px_15px_rgba(0,0,0,0.5)]">
                           {guide.thumbnail ? (
@@ -214,14 +214,14 @@ export default function HeroSection({ latestGuides = [] }: HeroSectionProps) {
                               loading="lazy"
                             />
                           ) : (
-                            <div className="w-full h-full bg-gradient-to-br from-[#ce5a67]/20 to-[#111]" />
+                            <div className="w-full h-full bg-gradient-to-br from-[var(--color-primary)]/20 to-[#111]" />
                           )}
                         </div>
                         
                         <div className="min-w-0 pr-1 pt-1 pb-0.5 flex flex-col justify-between h-[68px]">
-                          <p className="text-xs font-bold text-slate-200 line-clamp-2 leading-snug group-hover:text-[#ce5a67] transition-colors">{guide.title}</p>
+                          <p className="text-xs font-bold text-slate-200 line-clamp-2 leading-snug group-hover:text-[var(--color-primary)] transition-colors">{guide.title}</p>
                           <p className="text-[9px] text-slate-500 font-medium tracking-widest flex items-center gap-1.5 uppercase">
-                            <span className="w-1 h-1 rounded-full bg-[#ce5a67]/60" />
+                            <span className="w-1 h-1 rounded-full bg-[var(--color-primary)]/60" />
                             {guide.createdAt}
                           </p>
                         </div>
@@ -260,7 +260,7 @@ export default function HeroSection({ latestGuides = [] }: HeroSectionProps) {
               <div>
                 <p className="text-[10px] uppercase tracking-[0.3em] text-slate-500">FC26 MOD SHOWCASE</p>
                 <h3 className="mt-1 text-xl md:text-2xl font-black text-white leading-tight">
-                  MIX MODS FC 26 <span className="text-[#ce5a67]">2025–2026</span>
+                  MIX MODS FC 26 <span className="text-[var(--color-primary)]">2025–2026</span>
                 </h3>
                 <p className="mt-2 text-xs md:text-sm text-slate-400 leading-relaxed">
                   Siêu phẩm MIX MODS FC 26 đã chính thức ra mắt!<br /><br />
@@ -293,7 +293,7 @@ export default function HeroSection({ latestGuides = [] }: HeroSectionProps) {
               {modalSections.map((section) => (
                 <div key={section.title}>
                   <div className="flex items-center gap-2 mb-3">
-                    <div className="w-1 h-4 rounded-full bg-[#ce5a67] flex-shrink-0" />
+                    <div className="w-1 h-4 rounded-full bg-[var(--color-primary)] flex-shrink-0" />
                     <h4 className="text-xs md:text-sm font-black text-white tracking-wide uppercase">
                       {section.title}
                     </h4>
@@ -322,7 +322,7 @@ export default function HeroSection({ latestGuides = [] }: HeroSectionProps) {
               <Link
                 href="/games/fc26/select"
                 onClick={() => setOpen(false)}
-                className="flex items-center justify-center gap-2 flex-1 py-3 bg-[#ce5a67] rounded-2xl font-black tracking-widest text-sm text-white hover:bg-[#b44c5c] transition-all"
+                className="flex items-center justify-center gap-2 flex-1 py-3 bg-[var(--color-primary)] rounded-2xl font-black tracking-widest text-sm text-white hover:bg-[#b44c5c] transition-all"
               >
                 TẢI NGAY
               </Link>

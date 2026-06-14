@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import CheckUyTinButton from "../../../components/CheckUyTinButton";
+import FlashSaleBanner from "../../../components/FlashSaleBanner";
 
 export const metadata: Metadata = {
   title: "Chọn phiên bản EA FC 26",
@@ -21,8 +22,10 @@ const editions = [
     tag: "GAME GỐC",
     tagColor: "#ce5a67",
     img: "/games/fc26n.jpg",
-    price: "149.000₫",
-    href: "/games/fc26/payment?edition=normal", // 👈 đổi href
+    price: "69.000₫",
+    oldPrice: "149.000₫",
+    discount: "-54%",
+    href: "/games/fc26/payment?edition=normal",
   },
   {
     id: "mods",
@@ -33,19 +36,25 @@ const editions = [
     tag: "EXCLUSIVE",
     tagColor: "#a855f7",
     img: "/games/fc26-banner.jpg",
-    price: "269.000₫",
-    href: "/games/fc26/payment?edition=mods", // 👈 đổi href
+    price: "199.000₫",
+    oldPrice: "269.000₫",
+    discount: "-26%",
+    href: "/games/fc26/payment?edition=mods",
   },
 ];
 
 export default function SelectEditionPage() {
   return (
     <main className="min-h-screen bg-[#0a0a0a] text-white flex flex-col items-center justify-center px-4 py-16">
-      <div className="text-center space-y-2 mb-12">
+      <div className="text-center space-y-2 mb-6">
         <h1 className="text-3xl md:text-4xl font-black">
           CHỌN <span className="text-[#ce5a67]">PHIÊN BẢN</span>
         </h1>
         <p className="text-slate-500 text-xs tracking-widest uppercase">Chọn gói phù hợp với bạn</p>
+      </div>
+
+      <div className="w-full max-w-3xl mb-8">
+        <FlashSaleBanner />
       </div>
 
       <div className="mb-8">
@@ -85,7 +94,11 @@ export default function SelectEditionPage() {
               {/* Giá */}
               <div className="flex items-center justify-between border-t border-white/5 pt-3">
                 <span className="text-xs text-slate-500 uppercase tracking-widest">Giá</span>
-                <span className="text-xl font-black" style={{ color: ed.tagColor }}>{ed.price}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-slate-600 line-through">{ed.oldPrice}</span>
+                  <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-green-500/20 text-green-400 border border-green-500/30">{ed.discount}</span>
+                  <span className="text-xl font-black" style={{ color: ed.tagColor }}>{ed.price}</span>
+                </div>
               </div>
 
               <div className="w-full py-3.5 rounded-2xl font-black text-xs tracking-widest text-center text-white transition-all" style={{ background: ed.tagColor }}>
