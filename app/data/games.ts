@@ -27,7 +27,7 @@ export const GAMES: Game[] = [
     passSum: 15,
     fileSize: "50 GB",
     fileFormat: "WINRAR",
-    coverColor: "#ce5a67",
+    coverColor: "var(--color-primary)",
   },
   {
     slug: "fc25",

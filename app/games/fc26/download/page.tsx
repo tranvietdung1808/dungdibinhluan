@@ -16,7 +16,7 @@ export default function DownloadPage() {
     <main className="min-h-screen bg-[#0a0a0a] text-white flex items-center justify-center px-4">
       <div className="w-full max-w-md space-y-8 text-center">
         <div className="space-y-2">
-          <div className="w-16 h-16 mx-auto rounded-2xl bg-[#ce5a67]/10 border border-[#ce5a67]/20 flex items-center justify-center text-3xl">
+          <div className="w-16 h-16 mx-auto rounded-2xl bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 flex items-center justify-center text-3xl">
             ✅
           </div>
           <h1 className="text-2xl font-black">SẴN SÀNG TẢI!</h1>
@@ -36,7 +36,7 @@ export default function DownloadPage() {
           ) : (
             <a
               href={url!}
-              className="flex items-center justify-center gap-2 w-full py-4 bg-[#ce5a67] rounded-2xl font-black tracking-widest text-white hover:bg-[#b44c5c] transition-all shadow-[0_8px_30px_rgba(206,90,103,0.3)]"
+              className="flex items-center justify-center gap-2 w-full py-4 bg-[var(--color-primary)] rounded-2xl font-black tracking-widest text-white hover:bg-[#b44c5c] transition-all shadow-[0_8px_30px_rgba(206,90,103,0.3)]"
             >
               ⬇️ TẢI EA FC 26
             </a>

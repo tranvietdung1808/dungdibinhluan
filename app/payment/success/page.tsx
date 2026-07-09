@@ -50,7 +50,7 @@ function SuccessContent() {
       <div className="w-full max-w-md space-y-8 text-center">
         {status === "checking" && (
           <div className="space-y-4">
-            <div className="w-16 h-16 mx-auto border-4 border-[#ce5a67] border-t-transparent rounded-full animate-spin" />
+            <div className="w-16 h-16 mx-auto border-4 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin" />
             <h1 className="text-2xl font-black">ĐANG XÁC NHẬN</h1>
             <p className="text-slate-500 text-sm">Đang kiểm tra thanh toán của bạn...</p>
           </div>
@@ -72,7 +72,7 @@ function SuccessContent() {
             </div>
             <button
               onClick={() => router.push("/")}
-              className="w-full py-4 bg-[#ce5a67] rounded-2xl font-black tracking-widest text-sm text-white hover:bg-[#b44c5c] transition-all"
+              className="w-full py-4 bg-[var(--color-primary)] rounded-2xl font-black tracking-widest text-sm text-white hover:bg-[#b44c5c] transition-all"
             >
               ← VỀ TRANG CHỦ
             </button>

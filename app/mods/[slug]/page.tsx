@@ -12,7 +12,7 @@ const TAG_COLORS: Record<string, string> = {
   Kits: "#8b5cf6",
   Gameplay: "#10b981",
   "Đồ họa": "#f59e0b",
-  "Cơ chế game": "#ce5a67",
+  "Cơ chế game": "var(--color-primary)",
 };
 
 const ALL_STATIC_MODS: Mod[] = [...(FACES as Mod[]), ...MODS];
@@ -276,7 +276,7 @@ export default async function ModDetailPage({
 
             <div className="absolute top-5 left-5 flex items-center gap-2 flex-wrap">
               {mod.featured && (
-                <span className="px-3 py-1 rounded-full text-[10px] font-black bg-[#ce5a67] text-white tracking-widest">
+                <span className="px-3 py-1 rounded-full text-[10px] font-black bg-[var(--color-primary)] text-white tracking-widest">
                   ⭐ FEATURED
                 </span>
               )}
@@ -344,8 +344,8 @@ export default async function ModDetailPage({
             />
           </div>
 
-          <div className="relative overflow-hidden bg-gradient-to-br from-[#ce5a67]/20 via-[#0a0a0a] to-[#a855f7]/10 border border-[#ce5a67]/30 rounded-3xl p-6 md:p-8">
-            <div className="pointer-events-none absolute -top-10 -right-10 w-48 h-48 rounded-full bg-[#ce5a67]/20 blur-3xl" />
+          <div className="relative overflow-hidden bg-gradient-to-br from-[var(--color-primary)]/20 via-[#0a0a0a] to-[#a855f7]/10 border border-[var(--color-primary)]/30 rounded-3xl p-6 md:p-8">
+            <div className="pointer-events-none absolute -top-10 -right-10 w-48 h-48 rounded-full bg-[var(--color-primary)]/20 blur-3xl" />
             
             <div className="relative flex flex-col sm:flex-row items-center gap-6">
               <div className="flex-1 text-center sm:text-left space-y-1">
@@ -353,12 +353,12 @@ export default async function ModDetailPage({
                 <p className="text-2xl md:text-3xl font-black text-white">
                   169.000đ
                 </p>
-                <p className="text-sm text-[#ce5a67] font-bold">Hỗ trợ update miễn phí trọn đời</p>
+                <p className="text-sm text-[var(--color-primary)] font-bold">Hỗ trợ update miễn phí trọn đời</p>
                 <p className="text-slate-500 text-xs">An toàn · Hỗ trợ 1:1 · Cài đặt qua Teamviewer</p>
               </div>
               <Link
                 href="/mods/mix-mods-fc26/payment"
-                className="flex items-center gap-2 px-8 py-4 bg-[#ce5a67] rounded-2xl font-black tracking-widest text-sm text-white hover:bg-[#b44c5c] transition-all shadow-[0_12px_40px_rgba(206,90,103,0.45)] whitespace-nowrap"
+                className="flex items-center gap-2 px-8 py-4 bg-[var(--color-primary)] rounded-2xl font-black tracking-widest text-sm text-white hover:bg-[#b44c5c] transition-all shadow-[0_12px_40px_rgba(206,90,103,0.45)] whitespace-nowrap"
               >
                 💳 LIÊN HỆ MUA
               </Link>
@@ -367,7 +367,7 @@ export default async function ModDetailPage({
 
           <p className="text-xs text-slate-600 italic text-center">
             Lưu ý: Bản mod chỉ dành cho anh em đã có game. Chưa có game?{" "}
-            <Link href="/games/fc26/select" className="text-[#ce5a67] hover:underline">
+            <Link href="/games/fc26/select" className="text-[var(--color-primary)] hover:underline">
               Liên hệ admin mua ngay
             </Link>
           </p>
@@ -387,7 +387,7 @@ export default async function ModDetailPage({
                   Faces
                 </span>
                 {mod.featured && (
-                  <span className="px-3 py-1 rounded-full text-[10px] font-black bg-[#ce5a67] text-white">
+                  <span className="px-3 py-1 rounded-full text-[10px] font-black bg-[var(--color-primary)] text-white">
                     ⭐ FEATURED
                   </span>
                 )}
@@ -454,7 +454,7 @@ export default async function ModDetailPage({
                   />
                 </div>
 
-                <div className="bg-gradient-to-br from-[#ce5a67]/20 via-[#ce5a67]/5 to-transparent border border-[#ce5a67]/40 rounded-2xl p-5 md:p-6 flex flex-col sm:flex-row items-center gap-4">
+                <div className="bg-gradient-to-br from-[var(--color-primary)]/20 via-[var(--color-primary)]/5 to-transparent border border-[var(--color-primary)]/40 rounded-2xl p-5 md:p-6 flex flex-col sm:flex-row items-center gap-4">
                   <div className="flex-1 text-center sm:text-left">
                     <p className="text-[11px] text-slate-400 uppercase tracking-widest">
                       Sẵn sàng cài đặt
@@ -470,7 +470,7 @@ export default async function ModDetailPage({
                     href={mod.downloadUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 px-8 py-3.5 bg-[#ce5a67] rounded-2xl font-black tracking-widest text-xs md:text-sm text-white hover:bg-[#b44c5c] transition-all shadow-[0_12px_40px_rgba(206,90,103,0.45)] whitespace-nowrap"
+                    className="flex items-center justify-center gap-2 px-8 py-3.5 bg-[var(--color-primary)] rounded-2xl font-black tracking-widest text-xs md:text-sm text-white hover:bg-[#b44c5c] transition-all shadow-[0_12px_40px_rgba(206,90,103,0.45)] whitespace-nowrap"
                   >
                     ⬇️ TẢI XUỐNG
                   </a>
@@ -480,7 +480,7 @@ export default async function ModDetailPage({
                   <p>Lưu ý: Bản mod chỉ dành cho anh em đã có game.</p>
                   <p>
                     Chưa có game?{" "}
-                    <Link href="/games/fc26/select" className="text-[#ce5a67] hover:underline font-semibold">
+                    <Link href="/games/fc26/select" className="text-[var(--color-primary)] hover:underline font-semibold">
                       Liên hệ admin mua ngay
                     </Link>
                   </p>
@@ -508,7 +508,7 @@ export default async function ModDetailPage({
               <div>
                 <div className="flex items-center gap-2 mb-2 flex-wrap">
                   {mod.featured && (
-                    <span className="px-2.5 py-1 rounded-full text-[9px] font-black bg-[#ce5a67] text-white">
+                    <span className="px-2.5 py-1 rounded-full text-[9px] font-black bg-[var(--color-primary)] text-white">
                       ⭐ FEATURED
                     </span>
                   )}
@@ -557,7 +557,7 @@ export default async function ModDetailPage({
             />
           </div>
 
-          <div className="bg-gradient-to-br from-[#ce5a67]/10 to-transparent border border-[#ce5a67]/20 rounded-3xl p-6 md:p-8 flex flex-col sm:flex-row items-center gap-5">
+          <div className="bg-gradient-to-br from-[var(--color-primary)]/10 to-transparent border border-[var(--color-primary)]/20 rounded-3xl p-6 md:p-8 flex flex-col sm:flex-row items-center gap-5">
             <div className="flex-1 text-center sm:text-left">
               <p className="text-xs text-slate-500 uppercase tracking-widest">Sẵn sàng cài đặt</p>
               <p className="text-lg md:text-xl font-black mt-1">
@@ -571,7 +571,7 @@ export default async function ModDetailPage({
               href={mod.downloadUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 px-8 py-4 bg-[#ce5a67] rounded-2xl font-black tracking-widest text-sm text-white hover:bg-[#b44c5c] transition-all shadow-[0_8px_30px_rgba(206,90,103,0.3)] whitespace-nowrap"
+              className="flex items-center gap-2 px-8 py-4 bg-[var(--color-primary)] rounded-2xl font-black tracking-widest text-sm text-white hover:bg-[#b44c5c] transition-all shadow-[0_8px_30px_rgba(206,90,103,0.3)] whitespace-nowrap"
             >
               ⬇️ TẢI XUỐNG
             </a>
@@ -581,7 +581,7 @@ export default async function ModDetailPage({
             <p>Lưu ý: Bản mod chỉ dành cho anh em đã có game.</p>
             <p>
               Chưa có game?{" "}
-              <Link href="/games/fc26/select" className="text-[#ce5a67] hover:underline font-semibold">
+              <Link href="/games/fc26/select" className="text-[var(--color-primary)] hover:underline font-semibold">
                 Liên hệ admin mua ngay
               </Link>
             </p>
@@ -594,7 +594,7 @@ export default async function ModDetailPage({
             <div>
               <h2 className="text-xl md:text-2xl font-black text-white">Mods liên quan</h2>
             </div>
-            <Link href="/mods" className="text-[11px] uppercase tracking-widest text-[#ce5a67] hover:underline font-black">
+            <Link href="/mods" className="text-[11px] uppercase tracking-widest text-[var(--color-primary)] hover:underline font-black">
               Xem tất cả
             </Link>
           </div>
@@ -604,7 +604,7 @@ export default async function ModDetailPage({
                 <Link
                   key={relatedMod.slug}
                   href={`/mods/${relatedMod.slug}`}
-                  className="group rounded-2xl border border-white/10 bg-white/[0.02] overflow-hidden transition-colors hover:border-[#ce5a67]/50"
+                  className="group rounded-2xl border border-white/10 bg-white/[0.02] overflow-hidden transition-colors hover:border-[var(--color-primary)]/50"
                 >
                   <div className="h-36 bg-[#16161d]">
                     {relatedMod.thumbnail ? (

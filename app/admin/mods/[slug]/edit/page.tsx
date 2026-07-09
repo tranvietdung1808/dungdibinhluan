@@ -211,7 +211,7 @@ export default function EditModPage({ params }: { params: Promise<{ slug: string
   if (!mod && !error) {
     return (
       <div className="min-h-screen bg-[#0a0a0a] text-white flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-[#ce5a67] border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-8 h-8 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin"></div>
       </div>
     )
   }
@@ -264,7 +264,7 @@ export default function EditModPage({ params }: { params: Promise<{ slug: string
                     type="text"
                     value={form.name}
                     onChange={(e) => handleChange('name', e.target.value)}
-                    className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67] transition-colors"
+                    className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[var(--color-primary)] transition-colors"
                     required
                   />
                 </div>
@@ -279,7 +279,7 @@ export default function EditModPage({ params }: { params: Promise<{ slug: string
                     type="text"
                     value={form.author}
                     onChange={(e) => handleChange('author', e.target.value)}
-                    className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67] transition-colors"
+                    className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[var(--color-primary)] transition-colors"
                     required
                   />
                 </div>
@@ -293,7 +293,7 @@ export default function EditModPage({ params }: { params: Promise<{ slug: string
                     id="category"
                     value={form.category}
                     onChange={(e) => handleChange('category', e.target.value)}
-                    className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white focus:outline-none focus:border-[#ce5a67] transition-colors"
+                    className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white focus:outline-none focus:border-[var(--color-primary)] transition-colors"
                   >
                     {CATEGORIES.map(cat => (
                       <option key={cat} value={cat}>{cat}</option>
@@ -311,7 +311,7 @@ export default function EditModPage({ params }: { params: Promise<{ slug: string
                     type="text"
                     value={form.version}
                     onChange={(e) => handleChange('version', e.target.value)}
-                    className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67] transition-colors"
+                    className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[var(--color-primary)] transition-colors"
                     required
                   />
                 </div>
@@ -326,7 +326,7 @@ export default function EditModPage({ params }: { params: Promise<{ slug: string
                     type="text"
                     value={form.updatedAt}
                     onChange={(e) => handleChange('updatedAt', e.target.value)}
-                    className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67] transition-colors"
+                    className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[var(--color-primary)] transition-colors"
                     required
                   />
                 </div>
@@ -341,7 +341,7 @@ export default function EditModPage({ params }: { params: Promise<{ slug: string
                     value={form.description}
                     onChange={(e) => handleChange('description', e.target.value)}
                     rows={3}
-                    className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67] transition-colors resize-none"
+                    className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[var(--color-primary)] transition-colors resize-none"
                   />
                 </div>
 
@@ -355,7 +355,7 @@ export default function EditModPage({ params }: { params: Promise<{ slug: string
                     value={form.longDescription}
                     onChange={(e) => handleChange('longDescription', e.target.value)}
                     rows={6}
-                    className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67] transition-colors resize-none"
+                    className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[var(--color-primary)] transition-colors resize-none"
                   />
                 </div>
               </div>
@@ -408,7 +408,7 @@ export default function EditModPage({ params }: { params: Promise<{ slug: string
                           handleChange('thumbnail', e.target.value)
                           setThumbnailPreview(e.target.value || null)
                         }}
-                        className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67] transition-colors"
+                        className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[var(--color-primary)] transition-colors"
                         placeholder="/mods/thumbnail.jpg hoặc URL"
                       />
                     )}
@@ -425,7 +425,7 @@ export default function EditModPage({ params }: { params: Promise<{ slug: string
                     type="url"
                     value={form.downloadUrl}
                     onChange={(e) => handleChange('downloadUrl', e.target.value)}
-                    className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67] transition-colors"
+                    className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[var(--color-primary)] transition-colors"
                   />
                 </div>
 
@@ -439,7 +439,7 @@ export default function EditModPage({ params }: { params: Promise<{ slug: string
                     type="text"
                     value={form.tags}
                     onChange={(e) => handleChange('tags', e.target.value)}
-                    className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67] transition-colors"
+                    className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[var(--color-primary)] transition-colors"
                   />
                 </div>
 
@@ -456,7 +456,7 @@ export default function EditModPage({ params }: { params: Promise<{ slug: string
                         value="portrait"
                         checked={form.thumbnailOrientation === 'portrait'}
                         onChange={() => handleChange('thumbnailOrientation', 'portrait')}
-                        className="w-4 h-4 accent-[#ce5a67]"
+                        className="w-4 h-4 accent-[var(--color-primary)]"
                       />
                       <span className="text-sm">Portrait</span>
                     </label>
@@ -467,7 +467,7 @@ export default function EditModPage({ params }: { params: Promise<{ slug: string
                         value="landscape"
                         checked={form.thumbnailOrientation === 'landscape'}
                         onChange={() => handleChange('thumbnailOrientation', 'landscape')}
-                        className="w-4 h-4 accent-[#ce5a67]"
+                        className="w-4 h-4 accent-[var(--color-primary)]"
                       />
                       <span className="text-sm">Landscape</span>
                     </label>
@@ -481,7 +481,7 @@ export default function EditModPage({ params }: { params: Promise<{ slug: string
                       type="checkbox"
                       checked={form.featured}
                       onChange={(e) => handleChange('featured', e.target.checked)}
-                      className="w-4 h-4 accent-[#ce5a67]"
+                      className="w-4 h-4 accent-[var(--color-primary)]"
                     />
                     <span className="text-sm font-medium">Featured</span>
                   </label>
@@ -497,7 +497,7 @@ export default function EditModPage({ params }: { params: Promise<{ slug: string
                     type="text"
                     value={form.videoId}
                     onChange={(e) => handleChange('videoId', e.target.value)}
-                    className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67] transition-colors"
+                    className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[var(--color-primary)] transition-colors"
                   />
                 </div>
               </div>
@@ -515,7 +515,7 @@ export default function EditModPage({ params }: { params: Promise<{ slug: string
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 px-6 py-3 bg-[#ce5a67] text-white font-semibold rounded-lg hover:bg-[#b44c5c] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-6 py-3 bg-[var(--color-primary)] text-white font-semibold rounded-lg hover:bg-[#b44c5c] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Đang lưu...' : 'Lưu thay đổi'}
               </button>

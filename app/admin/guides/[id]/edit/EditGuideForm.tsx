@@ -153,7 +153,7 @@ export default function EditGuideForm({ guide }: { guide: Guide }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="rounded-xl border border-[#ce5a67]/35 bg-[#ce5a67]/10 px-4 py-4">
+      <div className="rounded-xl border border-[var(--color-primary)]/35 bg-[var(--color-primary)]/10 px-4 py-4">
         <h2 className="text-sm font-semibold text-white">Vận hành mục Bài viết liên quan</h2>
         <p className="mt-1 text-xs text-slate-300">
           Chọn tag thủ công để bài được xếp đúng nhóm liên quan.
@@ -166,7 +166,7 @@ export default function EditGuideForm({ guide }: { guide: Guide }) {
         <button
           type="submit"
           disabled={saving}
-          className="px-5 py-2.5 bg-[#ce5a67] text-white font-semibold rounded-lg hover:bg-[#b44c5c] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-5 py-2.5 bg-[var(--color-primary)] text-white font-semibold rounded-lg hover:bg-[#b44c5c] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {saving ? 'Đang lưu...' : 'Lưu thay đổi'}
         </button>
@@ -181,7 +181,7 @@ export default function EditGuideForm({ guide }: { guide: Guide }) {
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67] transition-colors"
+          className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[var(--color-primary)] transition-colors"
           placeholder="Nhập tiêu đề bài viết"
           required
         />
@@ -197,7 +197,7 @@ export default function EditGuideForm({ guide }: { guide: Guide }) {
           type="text"
           value={slug}
           onChange={(e) => setSlug(e.target.value)}
-          className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67] transition-colors"
+          className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[var(--color-primary)] transition-colors"
           placeholder="tieu-de-bai-viet"
           required
         />
@@ -218,7 +218,7 @@ export default function EditGuideForm({ guide }: { guide: Guide }) {
                 key={tag}
                 type="button"
                 onClick={() => toggleTag(tag)}
-                className={`rounded-full border px-3 py-1.5 text-xs transition-colors ${selected ? 'border-[#ce5a67] bg-[#ce5a67]/20 text-white' : 'border-white/20 bg-white/5 text-slate-300 hover:border-white/40'}`}
+                className={`rounded-full border px-3 py-1.5 text-xs transition-colors ${selected ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/20 text-white' : 'border-white/20 bg-white/5 text-slate-300 hover:border-white/40'}`}
               >
                 {tag}
               </button>
@@ -285,7 +285,7 @@ export default function EditGuideForm({ guide }: { guide: Guide }) {
                   setStoredThumbnailUrl(v)
                   setThumbnailPreview(v ? v : null)
                 }}
-                className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67] transition-colors"
+                className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[var(--color-primary)] transition-colors"
                 placeholder="https://example.com/image.jpg"
               />
             </div>
@@ -313,7 +313,7 @@ export default function EditGuideForm({ guide }: { guide: Guide }) {
         <button
           type="submit"
           disabled={saving}
-          className="flex-1 px-6 py-3 bg-[#ce5a67] text-white font-semibold rounded-lg hover:bg-[#b44c5c] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex-1 px-6 py-3 bg-[var(--color-primary)] text-white font-semibold rounded-lg hover:bg-[#b44c5c] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {saving ? 'Đang lưu...' : 'Lưu thay đổi'}
         </button>

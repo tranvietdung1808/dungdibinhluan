@@ -8,7 +8,7 @@ interface PayOSButtonProps {
   color?: string;
 }
 
-export default function PayOSButton({ productId, price, color = "#ce5a67" }: PayOSButtonProps) {
+export default function PayOSButton({ productId, price, color = "var(--color-primary)" }: PayOSButtonProps) {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");

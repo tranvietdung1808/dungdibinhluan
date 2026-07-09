@@ -142,7 +142,7 @@ export default function ModsPage({ initialDbMods = [] }: ModsPageProps) {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#050507] text-white flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-[#ce5a67] border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-8 h-8 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }

@@ -75,7 +75,7 @@ function AdminLoginContent() {
           type="button"
           onClick={handleGoogleLogin}
           disabled={loading}
-          className="w-full py-4 bg-[#ce5a67] rounded-2xl font-black tracking-widest text-white hover:bg-[#b44c5c] transition-colors disabled:opacity-50"
+          className="w-full py-4 bg-[var(--color-primary)] rounded-2xl font-black tracking-widest text-white hover:bg-[#b44c5c] transition-colors disabled:opacity-50"
         >
           {loading ? 'ĐANG XỬ LÝ...' : 'LOGIN WITH GOOGLE'}
         </button>
@@ -94,7 +94,7 @@ export default function AdminLoginPage() {
   return (
     <Suspense fallback={
       <main className="min-h-screen bg-[#0a0a0a] text-white flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-[#ce5a67] border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin" />
       </main>
     }>
       <AdminLoginContent />

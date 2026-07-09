@@ -70,7 +70,7 @@ export default function AdminGuidesPage() {
     return (
       <div className="min-h-screen bg-[#0a0a0a] text-white flex items-center justify-center">
         <div className="text-center">
-          <div className="w-8 h-8 border-2 border-[#ce5a67] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-8 h-8 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p>Đang tải...</p>
         </div>
       </div>
@@ -89,7 +89,7 @@ export default function AdminGuidesPage() {
             </div>
             <Link
               href="/admin/guides/new"
-              className="px-4 py-2 bg-[#ce5a67] text-white font-semibold rounded-lg hover:bg-[#b44c5c] transition-colors"
+              className="px-4 py-2 bg-[var(--color-primary)] text-white font-semibold rounded-lg hover:bg-[#b44c5c] transition-colors"
             >
               + Tạo bài viết mới
             </Link>
@@ -99,7 +99,7 @@ export default function AdminGuidesPage() {
 
       {/* Content */}
       <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="mb-6 rounded-xl border border-[#ce5a67]/35 bg-[#ce5a67]/10 px-4 py-4">
+        <div className="mb-6 rounded-xl border border-[var(--color-primary)]/35 bg-[var(--color-primary)]/10 px-4 py-4">
           <h2 className="text-sm font-semibold text-white">Hướng dẫn vận hành nội dung liên quan</h2>
           <p className="mt-1 text-xs text-slate-300">
             Khi tạo hoặc sửa bài, admin cần chọn tag: Hướng dẫn mods, Hướng dẫn Career Mode, hoặc Thông tin game.
@@ -125,7 +125,7 @@ export default function AdminGuidesPage() {
             </p>
             <Link
               href="/admin/guides/new"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-[#ce5a67] text-white font-semibold rounded-lg hover:bg-[#b44c5c] transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--color-primary)] text-white font-semibold rounded-lg hover:bg-[#b44c5c] transition-colors"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -191,7 +191,7 @@ export default function AdminGuidesPage() {
                         </a>
                         <Link
                           href={`/admin/guides/${guide.id}/edit`}
-                          className="px-3 py-1 bg-[#ce5a67]/20 text-[#ce5a67] text-sm rounded hover:bg-[#ce5a67]/30 transition-colors"
+                          className="px-3 py-1 bg-[var(--color-primary)]/20 text-[var(--color-primary)] text-sm rounded hover:bg-[var(--color-primary)]/30 transition-colors"
                         >
                           Sửa
                         </Link>

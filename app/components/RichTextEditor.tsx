@@ -101,7 +101,7 @@ export default function RichTextEditor({ content, initialContent, onChange }: Ri
           onClick={() => editor.chain().focus().toggleBold().run()}
           className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
             editor.isActive('bold') 
-              ? 'bg-[#ce5a67] text-white' 
+              ? 'bg-[var(--color-primary)] text-white' 
               : 'bg-white/10 text-white hover:bg-white/20'
           }`}
         >
@@ -112,7 +112,7 @@ export default function RichTextEditor({ content, initialContent, onChange }: Ri
           onClick={() => editor.chain().focus().toggleItalic().run()}
           className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
             editor.isActive('italic') 
-              ? 'bg-[#ce5a67] text-white' 
+              ? 'bg-[var(--color-primary)] text-white' 
               : 'bg-white/10 text-white hover:bg-white/20'
           }`}
         >
@@ -123,7 +123,7 @@ export default function RichTextEditor({ content, initialContent, onChange }: Ri
           onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
           className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
             editor.isActive('heading', { level: 1 }) 
-              ? 'bg-[#ce5a67] text-white' 
+              ? 'bg-[var(--color-primary)] text-white' 
               : 'bg-white/10 text-white hover:bg-white/20'
           }`}
         >
@@ -134,7 +134,7 @@ export default function RichTextEditor({ content, initialContent, onChange }: Ri
           onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
           className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
             editor.isActive('heading', { level: 2 }) 
-              ? 'bg-[#ce5a67] text-white' 
+              ? 'bg-[var(--color-primary)] text-white' 
               : 'bg-white/10 text-white hover:bg-white/20'
           }`}
         >
@@ -145,7 +145,7 @@ export default function RichTextEditor({ content, initialContent, onChange }: Ri
           onClick={() => editor.chain().focus().toggleBulletList().run()}
           className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
             editor.isActive('bulletList') 
-              ? 'bg-[#ce5a67] text-white' 
+              ? 'bg-[var(--color-primary)] text-white' 
               : 'bg-white/10 text-white hover:bg-white/20'
           }`}
         >
@@ -156,7 +156,7 @@ export default function RichTextEditor({ content, initialContent, onChange }: Ri
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
           className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
             editor.isActive('orderedList') 
-              ? 'bg-[#ce5a67] text-white' 
+              ? 'bg-[var(--color-primary)] text-white' 
               : 'bg-white/10 text-white hover:bg-white/20'
           }`}
         >

@@ -365,10 +365,10 @@ export default function AdminDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
             {/* Quản lý bài viết */}
-            <Link href="/admin/guides" className="group bg-[#111111] border border-white/10 rounded-xl p-6 hover:border-[#ce5a67]/50 transition-all duration-300 hover:shadow-[0_8px_32px_rgba(206,90,103,0.15)]">
+            <Link href="/admin/guides" className="group bg-[#111111] border border-white/10 rounded-xl p-6 hover:border-[var(--color-primary)]/50 transition-all duration-300 hover:shadow-[0_8px_32px_rgba(206,90,103,0.15)]">
               <div className="flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 bg-[#ce5a67]/20 rounded-lg flex items-center justify-center group-hover:bg-[#ce5a67]/30 transition-colors">
-                  <svg className="w-6 h-6 text-[#ce5a67]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-12 h-12 bg-[var(--color-primary)]/20 rounded-lg flex items-center justify-center group-hover:bg-[var(--color-primary)]/30 transition-colors">
+                  <svg className="w-6 h-6 text-[var(--color-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                   </svg>
                 </div>
@@ -377,17 +377,17 @@ export default function AdminDashboard() {
                   <p className="text-slate-400 text-sm">Tạo và sửa bài hướng dẫn</p>
                 </div>
               </div>
-              <div className="flex items-center text-[#ce5a67] group-hover:text-[#b44c5c] transition-colors">
+              <div className="flex items-center text-[var(--color-primary)] group-hover:text-[#b44c5c] transition-colors">
                 <span className="text-sm font-medium">Quản lý ngay</span>
                 <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
               </div>
             </Link>
 
             {/* Generate Code */}
-            <Link href="/admin/generate" className="group bg-[#111111] border border-white/10 rounded-xl p-6 hover:border-[#ce5a67]/50 transition-all duration-300 hover:shadow-[0_8px_32px_rgba(206,90,103,0.15)]">
+            <Link href="/admin/generate" className="group bg-[#111111] border border-white/10 rounded-xl p-6 hover:border-[var(--color-primary)]/50 transition-all duration-300 hover:shadow-[0_8px_32px_rgba(206,90,103,0.15)]">
               <div className="flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 bg-[#ce5a67]/20 rounded-lg flex items-center justify-center group-hover:bg-[#ce5a67]/30 transition-colors">
-                  <svg className="w-6 h-6 text-[#ce5a67]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-12 h-12 bg-[var(--color-primary)]/20 rounded-lg flex items-center justify-center group-hover:bg-[var(--color-primary)]/30 transition-colors">
+                  <svg className="w-6 h-6 text-[var(--color-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
                   </svg>
                 </div>
@@ -396,17 +396,17 @@ export default function AdminDashboard() {
                   <p className="text-slate-400 text-sm">Tạo code unlock</p>
                 </div>
               </div>
-              <div className="flex items-center text-[#ce5a67] group-hover:text-[#b44c5c] transition-colors">
+              <div className="flex items-center text-[var(--color-primary)] group-hover:text-[#b44c5c] transition-colors">
                 <span className="text-sm font-medium">Tạo ngay</span>
                 <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
               </div>
             </Link>
 
             {/* Quản lý Mods List */}
-            <Link href="/admin/mods" className="group bg-[#111111] border border-white/10 rounded-xl p-6 hover:border-[#ce5a67]/50 transition-all duration-300 hover:shadow-[0_8px_32px_rgba(206,90,103,0.15)]">
+            <Link href="/admin/mods" className="group bg-[#111111] border border-white/10 rounded-xl p-6 hover:border-[var(--color-primary)]/50 transition-all duration-300 hover:shadow-[0_8px_32px_rgba(206,90,103,0.15)]">
               <div className="flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 bg-[#ce5a67]/20 rounded-lg flex items-center justify-center group-hover:bg-[#ce5a67]/30 transition-colors">
-                  <svg className="w-6 h-6 text-[#ce5a67]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-12 h-12 bg-[var(--color-primary)]/20 rounded-lg flex items-center justify-center group-hover:bg-[var(--color-primary)]/30 transition-colors">
+                  <svg className="w-6 h-6 text-[var(--color-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                   </svg>
                 </div>
@@ -415,17 +415,17 @@ export default function AdminDashboard() {
                   <p className="text-slate-400 text-sm">Xem, sửa, xóa mods</p>
                 </div>
               </div>
-              <div className="flex items-center text-[#ce5a67] group-hover:text-[#b44c5c] transition-colors">
+              <div className="flex items-center text-[var(--color-primary)] group-hover:text-[#b44c5c] transition-colors">
                 <span className="text-sm font-medium">Xem danh sách</span>
                 <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
               </div>
             </Link>
 
             {/* Kiểm duyệt bình luận */}
-            <Link href="/admin/community" className="group bg-[#111111] border border-white/10 rounded-xl p-6 hover:border-[#ce5a67]/50 transition-all duration-300 hover:shadow-[0_8px_32px_rgba(206,90,103,0.15)]">
+            <Link href="/admin/community" className="group bg-[#111111] border border-white/10 rounded-xl p-6 hover:border-[var(--color-primary)]/50 transition-all duration-300 hover:shadow-[0_8px_32px_rgba(206,90,103,0.15)]">
               <div className="flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 bg-[#ce5a67]/20 rounded-lg flex items-center justify-center group-hover:bg-[#ce5a67]/30 transition-colors">
-                  <svg className="w-6 h-6 text-[#ce5a67]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-12 h-12 bg-[var(--color-primary)]/20 rounded-lg flex items-center justify-center group-hover:bg-[var(--color-primary)]/30 transition-colors">
+                  <svg className="w-6 h-6 text-[var(--color-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 4v-4z" />
                   </svg>
                 </div>
@@ -433,13 +433,13 @@ export default function AdminDashboard() {
                   <div className="flex items-center gap-2">
                     <h3 className="text-lg font-semibold text-white">Kiểm duyệt bình luận</h3>
                     {pendingCommentsCount > 0 && (
-                      <span className="px-2 py-1 text-xs font-bold text-white bg-[#ce5a67] rounded-full">{pendingCommentsCount}</span>
+                      <span className="px-2 py-1 text-xs font-bold text-white bg-[var(--color-primary)] rounded-full">{pendingCommentsCount}</span>
                     )}
                   </div>
                   <p className="text-slate-400 text-sm">Duyệt comment bài viết và chia sẻ mod</p>
                 </div>
               </div>
-              <div className="flex items-center text-[#ce5a67] group-hover:text-[#b44c5c] transition-colors">
+              <div className="flex items-center text-[var(--color-primary)] group-hover:text-[#b44c5c] transition-colors">
                 <span className="text-sm font-medium">Mở kiểm duyệt</span>
                 <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
               </div>
@@ -448,11 +448,11 @@ export default function AdminDashboard() {
             {/* ── Quản lý Member (NEW) ── */}
             <button
               onClick={() => setMemberOpen(!memberOpen)}
-              className={`group bg-[#111111] border rounded-xl p-6 text-left transition-all duration-300 ${memberOpen ? 'border-[#ce5a67]/50 shadow-[0_8px_32px_rgba(206,90,103,0.15)]' : 'border-white/10 hover:border-[#ce5a67]/50 hover:shadow-[0_8px_32px_rgba(206,90,103,0.15)]'}`}
+              className={`group bg-[#111111] border rounded-xl p-6 text-left transition-all duration-300 ${memberOpen ? 'border-[var(--color-primary)]/50 shadow-[0_8px_32px_rgba(206,90,103,0.15)]' : 'border-white/10 hover:border-[var(--color-primary)]/50 hover:shadow-[0_8px_32px_rgba(206,90,103,0.15)]'}`}
             >
               <div className="flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 bg-[#ce5a67]/20 rounded-lg flex items-center justify-center group-hover:bg-[#ce5a67]/30 transition-colors">
-                  <svg className="w-6 h-6 text-[#ce5a67]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-12 h-12 bg-[var(--color-primary)]/20 rounded-lg flex items-center justify-center group-hover:bg-[var(--color-primary)]/30 transition-colors">
+                  <svg className="w-6 h-6 text-[var(--color-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                   </svg>
                 </div>
@@ -461,7 +461,7 @@ export default function AdminDashboard() {
                   <p className="text-slate-400 text-sm">Thêm, sửa, xóa quyền member</p>
                 </div>
               </div>
-              <div className="flex items-center text-[#ce5a67] group-hover:text-[#b44c5c] transition-colors">
+              <div className="flex items-center text-[var(--color-primary)] group-hover:text-[#b44c5c] transition-colors">
                 <span className="text-sm font-medium">{memberOpen ? 'Đóng' : 'Mở'}</span>
                 <svg className={`w-4 h-4 ml-1 transition-transform ${memberOpen ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
               </div>
@@ -470,11 +470,11 @@ export default function AdminDashboard() {
             {/* ── Thêm Mod (collapsible) ── */}
             <button
               onClick={() => setModOpen(!modOpen)}
-              className={`group bg-[#111111] border rounded-xl p-6 text-left transition-all duration-300 ${modOpen ? 'border-[#ce5a67]/50 shadow-[0_8px_32px_rgba(206,90,103,0.15)]' : 'border-white/10 hover:border-[#ce5a67]/50 hover:shadow-[0_8px_32px_rgba(206,90,103,0.15)]'}`}
+              className={`group bg-[#111111] border rounded-xl p-6 text-left transition-all duration-300 ${modOpen ? 'border-[var(--color-primary)]/50 shadow-[0_8px_32px_rgba(206,90,103,0.15)]' : 'border-white/10 hover:border-[var(--color-primary)]/50 hover:shadow-[0_8px_32px_rgba(206,90,103,0.15)]'}`}
             >
               <div className="flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 bg-[#ce5a67]/20 rounded-lg flex items-center justify-center group-hover:bg-[#ce5a67]/30 transition-colors">
-                  <svg className="w-6 h-6 text-[#ce5a67]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-12 h-12 bg-[var(--color-primary)]/20 rounded-lg flex items-center justify-center group-hover:bg-[var(--color-primary)]/30 transition-colors">
+                  <svg className="w-6 h-6 text-[var(--color-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                   </svg>
                 </div>
@@ -483,7 +483,7 @@ export default function AdminDashboard() {
                   <p className="text-slate-400 text-sm">Tạo mod mới với đầy đủ thông tin</p>
                 </div>
               </div>
-              <div className="flex items-center text-[#ce5a67] group-hover:text-[#b44c5c] transition-colors">
+              <div className="flex items-center text-[var(--color-primary)] group-hover:text-[#b44c5c] transition-colors">
                 <span className="text-sm font-medium">{modOpen ? 'Đóng' : 'Mở form'}</span>
                 <svg className={`w-4 h-4 ml-1 transition-transform ${modOpen ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
               </div>
@@ -493,7 +493,7 @@ export default function AdminDashboard() {
 
         {/* ── Member Management Panel ── */}
         {memberOpen && (
-          <section className="mb-12 border border-[#ce5a67]/20 rounded-2xl bg-[#111117] p-6">
+          <section className="mb-12 border border-[var(--color-primary)]/20 rounded-2xl bg-[#111117] p-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold">Quản lý Member &amp; Phân quyền</h2>
               <div className="flex items-center gap-3">
@@ -526,7 +526,7 @@ export default function AdminDashboard() {
                     value={memberForm.email}
                     onChange={e => setMemberForm(p => ({ ...p, email: e.target.value }))}
                     disabled={!!editingId}
-                    className="w-full px-3 py-2 bg-[#111111] border border-white/10 rounded-lg text-white text-sm placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67] disabled:opacity-50"
+                    className="w-full px-3 py-2 bg-[#111111] border border-white/10 rounded-lg text-white text-sm placeholder:text-slate-500 focus:outline-none focus:border-[var(--color-primary)] disabled:opacity-50"
                     placeholder="user@gmail.com"
                   />
                 </div>
@@ -535,7 +535,7 @@ export default function AdminDashboard() {
                   <select
                     value={memberForm.role}
                     onChange={e => setMemberForm(p => ({ ...p, role: e.target.value }))}
-                    className="w-full px-3 py-2 bg-[#111111] border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-[#ce5a67]"
+                    className="w-full px-3 py-2 bg-[#111111] border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-[var(--color-primary)]"
                   >
                     {VALID_ROLES.map(r => <option key={r} value={r}>{r}</option>)}
                   </select>
@@ -546,7 +546,7 @@ export default function AdminDashboard() {
                     type="text"
                     value={memberForm.note}
                     onChange={e => setMemberForm(p => ({ ...p, note: e.target.value }))}
-                    className="w-full px-3 py-2 bg-[#111111] border border-white/10 rounded-lg text-white text-sm placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67]"
+                    className="w-full px-3 py-2 bg-[#111111] border border-white/10 rounded-lg text-white text-sm placeholder:text-slate-500 focus:outline-none focus:border-[var(--color-primary)]"
                     placeholder="VD: VIP đến 31/12/2026"
                   />
                 </div>
@@ -554,7 +554,7 @@ export default function AdminDashboard() {
                   <button
                     type="submit"
                     disabled={memberSubmitting}
-                    className="flex-1 px-4 py-2 bg-[#ce5a67] text-white text-sm font-semibold rounded-lg hover:bg-[#b44c5c] disabled:opacity-50 transition-colors"
+                    className="flex-1 px-4 py-2 bg-[var(--color-primary)] text-white text-sm font-semibold rounded-lg hover:bg-[#b44c5c] disabled:opacity-50 transition-colors"
                   >
                     {memberSubmitting ? '...' : editingId ? 'Cập nhật' : 'Thêm'}
                   </button>
@@ -574,7 +574,7 @@ export default function AdminDashboard() {
                 placeholder="Tìm kiếm theo email hoặc role..."
                 value={memberSearch}
                 onChange={e => setMemberSearch(e.target.value)}
-                className="w-full max-w-md px-4 py-2 bg-[#0d0d13] border border-white/10 rounded-lg text-white text-sm placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67]"
+                className="w-full max-w-md px-4 py-2 bg-[#0d0d13] border border-white/10 rounded-lg text-white text-sm placeholder:text-slate-500 focus:outline-none focus:border-[var(--color-primary)]"
               />
             </div>
 
@@ -647,7 +647,7 @@ export default function AdminDashboard() {
                                   setEditingId(null)
                                   setMemberForm({ email: entry.email, role: 'vip', note: '' })
                                 }}
-                                className="px-2.5 py-1 text-[11px] font-semibold text-[#ce5a67] border border-[#ce5a67]/30 rounded-lg hover:bg-[#ce5a67]/10 transition-colors"
+                                className="px-2.5 py-1 text-[11px] font-semibold text-[var(--color-primary)] border border-[var(--color-primary)]/30 rounded-lg hover:bg-[var(--color-primary)]/10 transition-colors"
                               >
                                 + Thêm role
                               </button>
@@ -667,7 +667,7 @@ export default function AdminDashboard() {
 
         {/* ── Add Mod Panel (collapsible) ── */}
         {modOpen && (
-          <section className="mb-12 border border-[#ce5a67]/20 rounded-2xl bg-[#111117] p-6">
+          <section className="mb-12 border border-[var(--color-primary)]/20 rounded-2xl bg-[#111117] p-6">
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-xl font-bold">Thêm Mod mới</h2>
@@ -684,7 +684,7 @@ export default function AdminDashboard() {
                   type="text"
                   value={form.name}
                   onChange={(e) => { setForm(prev => ({ ...prev, name: e.target.value })) }}
-                  className="w-full px-4 py-2.5 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67] transition-colors"
+                  className="w-full px-4 py-2.5 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[var(--color-primary)] transition-colors"
                   placeholder="MIX MODS FC 26"
                   required
                 />
@@ -695,17 +695,17 @@ export default function AdminDashboard() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-white mb-1.5">Author *</label>
-                  <input type="text" value={form.author} onChange={(e) => handleChange('author', e.target.value)} className="w-full px-4 py-2.5 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67]" placeholder="DungDiBinhLuan" required />
+                  <input type="text" value={form.author} onChange={(e) => handleChange('author', e.target.value)} className="w-full px-4 py-2.5 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[var(--color-primary)]" placeholder="DungDiBinhLuan" required />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-white mb-1.5">Category *</label>
-                  <select value={form.category} onChange={(e) => handleChange('category', e.target.value)} className="w-full px-4 py-2.5 bg-[#111111] border border-white/10 rounded-lg text-white focus:outline-none focus:border-[#ce5a67]">
+                  <select value={form.category} onChange={(e) => handleChange('category', e.target.value)} className="w-full px-4 py-2.5 bg-[#111111] border border-white/10 rounded-lg text-white focus:outline-none focus:border-[var(--color-primary)]">
                     {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                   </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-white mb-1.5">Version *</label>
-                  <input type="text" value={form.version} onChange={(e) => handleChange('version', e.target.value)} className="w-full px-4 py-2.5 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67]" placeholder="v1.0" required />
+                  <input type="text" value={form.version} onChange={(e) => handleChange('version', e.target.value)} className="w-full px-4 py-2.5 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[var(--color-primary)]" placeholder="v1.0" required />
                 </div>
               </div>
 
@@ -713,24 +713,24 @@ export default function AdminDashboard() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-white mb-1.5">Updated At *</label>
-                  <input type="date" value={form.updatedAt} onChange={(e) => handleChange('updatedAt', e.target.value)} className="w-full px-4 py-2.5 bg-[#111111] border border-white/10 rounded-lg text-white focus:outline-none focus:border-[#ce5a67]" required />
+                  <input type="date" value={form.updatedAt} onChange={(e) => handleChange('updatedAt', e.target.value)} className="w-full px-4 py-2.5 bg-[#111111] border border-white/10 rounded-lg text-white focus:outline-none focus:border-[var(--color-primary)]" required />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-white mb-1.5">Tags (comma-separated)</label>
-                  <input type="text" value={form.tags} onChange={(e) => handleChange('tags', e.target.value)} className="w-full px-4 py-2.5 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67]" placeholder="Faces, Kits, Gameplay" />
+                  <input type="text" value={form.tags} onChange={(e) => handleChange('tags', e.target.value)} className="w-full px-4 py-2.5 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[var(--color-primary)]" placeholder="Faces, Kits, Gameplay" />
                 </div>
               </div>
 
               {/* Description */}
               <div>
                 <label className="block text-sm font-medium text-white mb-1.5">Description</label>
-                <textarea value={form.description} onChange={(e) => handleChange('description', e.target.value)} rows={2} className="w-full px-4 py-2.5 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67] resize-none" placeholder="Mô tả ngắn..." />
+                <textarea value={form.description} onChange={(e) => handleChange('description', e.target.value)} rows={2} className="w-full px-4 py-2.5 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[var(--color-primary)] resize-none" placeholder="Mô tả ngắn..." />
               </div>
 
               {/* Long Description */}
               <div>
                 <label className="block text-sm font-medium text-white mb-1.5">Long Description</label>
-                <textarea value={form.longDescription} onChange={(e) => handleChange('longDescription', e.target.value)} rows={3} className="w-full px-4 py-2.5 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67] resize-none" placeholder="Mô tả chi tiết..." />
+                <textarea value={form.longDescription} onChange={(e) => handleChange('longDescription', e.target.value)} rows={3} className="w-full px-4 py-2.5 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[var(--color-primary)] resize-none" placeholder="Mô tả chi tiết..." />
               </div>
 
               {/* Thumbnail */}
@@ -746,7 +746,7 @@ export default function AdminDashboard() {
                       <button type="button" onClick={() => { revokeBlobUrl(); setThumbnailPreview(null); setForm(prev => ({ ...prev, thumbnail: '' })) }} className="px-3 py-1.5 bg-red-500/20 text-red-400 text-sm rounded-lg hover:bg-red-500/30 transition-colors">Xóa ảnh upload</button>
                     )}
                   </div>
-                  <input type="text" value={form.thumbnail} onChange={(e) => { setForm(prev => ({ ...prev, thumbnail: e.target.value })); if (!blobUrlRef.current) setThumbnailPreview(e.target.value || null) }} className="w-full px-4 py-2.5 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67]" placeholder="/mods/thumbnail.jpg hoặc URL" />
+                  <input type="text" value={form.thumbnail} onChange={(e) => { setForm(prev => ({ ...prev, thumbnail: e.target.value })); if (!blobUrlRef.current) setThumbnailPreview(e.target.value || null) }} className="w-full px-4 py-2.5 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[var(--color-primary)]" placeholder="/mods/thumbnail.jpg hoặc URL" />
                   {thumbnailPreview && (
                     <div className="relative w-full max-w-sm aspect-video bg-[#111111] border border-white/10 rounded-lg overflow-hidden">
                       <img src={thumbnailPreview} alt="Preview" className="w-full h-full object-cover" />
@@ -758,7 +758,7 @@ export default function AdminDashboard() {
               {/* Download URL */}
               <div>
                 <label className="block text-sm font-medium text-white mb-1.5">Download URL</label>
-                <input type="url" value={form.downloadUrl} onChange={(e) => handleChange('downloadUrl', e.target.value)} className="w-full px-4 py-2.5 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67]" placeholder="https://drive.google.com/..." />
+                <input type="url" value={form.downloadUrl} onChange={(e) => handleChange('downloadUrl', e.target.value)} className="w-full px-4 py-2.5 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[var(--color-primary)]" placeholder="https://drive.google.com/..." />
               </div>
 
               {/* Orientation + Featured + Video */}
@@ -766,17 +766,17 @@ export default function AdminDashboard() {
                 <div>
                   <label className="block text-sm font-medium text-white mb-1.5">Orientation</label>
                   <div className="flex gap-4 mt-2">
-                    <label className="flex items-center gap-2 cursor-pointer"><input type="radio" name="thumbOrient" value="portrait" checked={form.thumbnailOrientation === 'portrait'} onChange={() => handleChange('thumbnailOrientation', 'portrait')} className="w-4 h-4 accent-[#ce5a67]" /><span className="text-sm">Portrait</span></label>
-                    <label className="flex items-center gap-2 cursor-pointer"><input type="radio" name="thumbOrient" value="landscape" checked={form.thumbnailOrientation === 'landscape'} onChange={() => handleChange('thumbnailOrientation', 'landscape')} className="w-4 h-4 accent-[#ce5a67]" /><span className="text-sm">Landscape</span></label>
+                    <label className="flex items-center gap-2 cursor-pointer"><input type="radio" name="thumbOrient" value="portrait" checked={form.thumbnailOrientation === 'portrait'} onChange={() => handleChange('thumbnailOrientation', 'portrait')} className="w-4 h-4 accent-[var(--color-primary)]" /><span className="text-sm">Portrait</span></label>
+                    <label className="flex items-center gap-2 cursor-pointer"><input type="radio" name="thumbOrient" value="landscape" checked={form.thumbnailOrientation === 'landscape'} onChange={() => handleChange('thumbnailOrientation', 'landscape')} className="w-4 h-4 accent-[var(--color-primary)]" /><span className="text-sm">Landscape</span></label>
                   </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-white mb-1.5">Options</label>
-                  <label className="flex items-center gap-2 cursor-pointer mt-2"><input type="checkbox" checked={form.featured} onChange={(e) => handleChange('featured', e.target.checked)} className="w-4 h-4 accent-[#ce5a67]" /><span className="text-sm">Featured</span></label>
+                  <label className="flex items-center gap-2 cursor-pointer mt-2"><input type="checkbox" checked={form.featured} onChange={(e) => handleChange('featured', e.target.checked)} className="w-4 h-4 accent-[var(--color-primary)]" /><span className="text-sm">Featured</span></label>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-white mb-1.5">Video ID</label>
-                  <input type="text" value={form.videoId} onChange={(e) => handleChange('videoId', e.target.value)} className="w-full px-4 py-2.5 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[#ce5a67]" placeholder="Vimeo ID" />
+                  <input type="text" value={form.videoId} onChange={(e) => handleChange('videoId', e.target.value)} className="w-full px-4 py-2.5 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[var(--color-primary)]" placeholder="Vimeo ID" />
                 </div>
               </div>
 
@@ -787,7 +787,7 @@ export default function AdminDashboard() {
 
               {/* Submit */}
               <div className="flex gap-3 pt-2">
-                <button type="submit" disabled={modLoading} className="px-6 py-2.5 bg-[#ce5a67] text-white font-semibold rounded-lg hover:bg-[#b44c5c] disabled:opacity-50 transition-colors">
+                <button type="submit" disabled={modLoading} className="px-6 py-2.5 bg-[var(--color-primary)] text-white font-semibold rounded-lg hover:bg-[#b44c5c] disabled:opacity-50 transition-colors">
                   {modLoading ? 'Đang lưu...' : 'Lưu mod'}
                 </button>
                 <button type="button" onClick={() => setModOpen(false)} className="px-6 py-2.5 bg-[#111111] border border-white/10 text-white font-semibold rounded-lg hover:bg-white/10 transition-colors">Hủy</button>

@@ -31,7 +31,7 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
             onClick={() => onPageChange(p)}
             className={`w-9 h-9 rounded-xl text-xs font-black border transition-all ${
               p === currentPage
-                ? "bg-[#ce5a67] text-white border-[#ce5a67]"
+                ? "bg-[var(--color-primary)] text-white border-[var(--color-primary)]"
                 : "bg-white/5 text-slate-400 border-white/10 hover:border-white/30 hover:text-white"
             }`}
           >

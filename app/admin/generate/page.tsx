@@ -72,7 +72,7 @@ export default function GenerateCodePage() {
             </div>
             <Link
               href="/admin/guides"
-              className="px-3 py-1 bg-[#ce5a67] text-white text-sm rounded-lg hover:bg-[#b44c5c] transition-colors"
+              className="px-3 py-1 bg-[var(--color-primary)] text-white text-sm rounded-lg hover:bg-[#b44c5c] transition-colors"
             >
               Quản lý bài viết
             </Link>
@@ -91,7 +91,7 @@ export default function GenerateCodePage() {
               value={adminKey}
               onChange={(e) => setAdminKey(e.target.value)}
               placeholder="Admin key..."
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#ce5a67]"
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[var(--color-primary)]"
             />
           </div>
 
@@ -112,7 +112,7 @@ export default function GenerateCodePage() {
                 onClick={() => setCodeType('normal')}
                 className={`py-4 rounded-xl font-black text-xs tracking-widest border transition-all ${
                   codeType === 'normal'
-                    ? 'bg-[#ce5a67] border-[#ce5a67] text-white'
+                    ? 'bg-[var(--color-primary)] border-[var(--color-primary)] text-white'
                     : 'border-white/10 text-slate-400 hover:border-white/30 hover:text-white'
                 }`}
               >
@@ -161,7 +161,7 @@ export default function GenerateCodePage() {
                 <button
                   type="button"
                   onClick={copyAll}
-                  className="px-3 py-1 text-[10px] font-bold text-[#ce5a67] border border-[#ce5a67]/30 rounded-lg hover:bg-[#ce5a67]/10 transition-colors"
+                  className="px-3 py-1 text-[10px] font-bold text-[var(--color-primary)] border border-[var(--color-primary)]/30 rounded-lg hover:bg-[var(--color-primary)]/10 transition-colors"
                 >
                   COPY ALL
                 </button>
@@ -172,7 +172,7 @@ export default function GenerateCodePage() {
                     key={`${code}-${i}`}
                     className="flex items-center justify-between group hover:bg-white/[0.02] px-2 py-1 rounded"
                   >
-                    <code className="text-xs font-mono text-[#ce5a67]">{code}</code>
+                    <code className="text-xs font-mono text-[var(--color-primary)]">{code}</code>
                     <button
                       type="button"
                       onClick={() => { navigator.clipboard.writeText(code); alert('Đã copy!') }}

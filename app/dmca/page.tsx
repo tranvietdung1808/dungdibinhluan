@@ -25,7 +25,7 @@ export default function DMCAPage() {
         {/* Page title */}
         <div className="space-y-2">
           <h1 className="text-2xl md:text-4xl font-black tracking-tight">
-            🛡️ DMCA <span className="text-[#ce5a67]">& ABUSE</span>
+            🛡️ DMCA <span className="text-[var(--color-primary)]">& ABUSE</span>
           </h1>
           <p className="text-slate-500 text-sm">Báo cáo vi phạm bản quyền và lạm dụng</p>
         </div>
@@ -35,7 +35,7 @@ export default function DMCAPage() {
           {/* Section 1 */}
           <div className="bg-white/5 border border-white/5 rounded-xl p-5 md:p-6 space-y-3">
             <h2 className="text-lg md:text-xl font-black flex items-center gap-2">
-              <span className="text-[#ce5a67]">📋</span> Hướng dẫn report vi phạm bản quyền
+              <span className="text-[var(--color-primary)]">📋</span> Hướng dẫn report vi phạm bản quyền
             </h2>
             <p className="text-slate-400 text-sm md:text-base leading-relaxed">
               Nếu bạn phát hiện nội dung trên website vi phạm bản quyền hoặc sở hữu trí tuệ của bạn, 
@@ -47,9 +47,9 @@ export default function DMCAPage() {
           {/* Section 2 */}
           <div className="bg-white/5 border border-white/5 rounded-xl p-5 md:p-6 space-y-3">
             <h2 className="text-lg md:text-xl font-black flex items-center gap-2">
-              <span className="text-[#ce5a67]">📧</span> Email liên hệ
+              <span className="text-[var(--color-primary)]">📧</span> Email liên hệ
             </h2>
-            <div className="bg-[#ce5a67]/10 border border-[#ce5a67]/20 rounded-lg p-4">
+            <div className="bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 rounded-lg p-4">
               <p className="text-white font-mono text-base md:text-lg">
                 dungdibinhluan@gmail.com
               </p>
@@ -62,7 +62,7 @@ export default function DMCAPage() {
           {/* Section 3 */}
           <div className="bg-white/5 border border-white/5 rounded-xl p-5 md:p-6 space-y-3">
             <h2 className="text-lg md:text-xl font-black flex items-center gap-2">
-              <span className="text-[#ce5a67]">⏱️</span> Cam kết xử lý trong 48-72 giờ
+              <span className="text-[var(--color-primary)]">⏱️</span> Cam kết xử lý trong 48-72 giờ
             </h2>
             <p className="text-slate-400 text-sm md:text-base leading-relaxed">
               Chúng tôi cam kết phản hồi và xử lý mọi báo cáo hợp lệ trong vòng 48-72 giờ làm việc. 
@@ -73,11 +73,11 @@ export default function DMCAPage() {
           {/* Section 4 */}
           <div className="bg-white/5 border border-white/5 rounded-xl p-5 md:p-6 space-y-3">
             <h2 className="text-lg md:text-xl font-black flex items-center gap-2">
-              <span className="text-[#ce5a67]">🔄</span> Quy trình xử lý
+              <span className="text-[var(--color-primary)]">🔄</span> Quy trình xử lý
             </h2>
             <div className="space-y-3">
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-full bg-[#ce5a67]/20 flex items-center justify-center text-[#ce5a67] font-black text-sm flex-shrink-0">
+                <div className="w-8 h-8 rounded-full bg-[var(--color-primary)]/20 flex items-center justify-center text-[var(--color-primary)] font-black text-sm flex-shrink-0">
                   1
                 </div>
                 <div>
@@ -86,7 +86,7 @@ export default function DMCAPage() {
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-full bg-[#ce5a67]/20 flex items-center justify-center text-[#ce5a67] font-black text-sm flex-shrink-0">
+                <div className="w-8 h-8 rounded-full bg-[var(--color-primary)]/20 flex items-center justify-center text-[var(--color-primary)] font-black text-sm flex-shrink-0">
                   2
                 </div>
                 <div>
@@ -95,7 +95,7 @@ export default function DMCAPage() {
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-full bg-[#ce5a67]/20 flex items-center justify-center text-[#ce5a67] font-black text-sm flex-shrink-0">
+                <div className="w-8 h-8 rounded-full bg-[var(--color-primary)]/20 flex items-center justify-center text-[var(--color-primary)] font-black text-sm flex-shrink-0">
                   3
                 </div>
                 <div>
@@ -119,7 +119,7 @@ export default function DMCAPage() {
           </div>
 
           {/* Contact */}
-          <div className="bg-[#ce5a67]/10 border border-[#ce5a67]/20 rounded-xl p-5 md:p-6 space-y-3">
+          <div className="bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 rounded-xl p-5 md:p-6 space-y-3">
             <h2 className="text-lg md:text-xl font-black">📞 Liên hệ nhanh</h2>
             <p className="text-slate-400 text-sm md:text-base leading-relaxed">
               Bạn cũng có thể liên hệ qua Facebook để được hỗ trợ nhanh hơn:{" "}
@@ -127,7 +127,7 @@ export default function DMCAPage() {
                 href="https://web.facebook.com/dungbinhluan/" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="text-[#ce5a67] hover:underline font-bold"
+                className="text-[var(--color-primary)] hover:underline font-bold"
               >
                 DungDiBinhLuan
               </a>

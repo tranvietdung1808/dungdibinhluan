@@ -4,7 +4,7 @@ import CheckUyTinButton from "../../../components/CheckUyTinButton";
 import CopyButton from "../../../components/CopyButton";
 import PayOSButton from "../../../components/PayOSButton";
 
-const COLOR = "#ce5a67";
+const COLOR = "var(--color-primary)";
 
 export default function PaymentPage() {
   return (
@@ -24,9 +24,9 @@ export default function PaymentPage() {
 
       <div className="w-full max-w-md space-y-5">
 
-        <div className="bg-[#ce5a67]/10 border border-[#ce5a67]/30 rounded-2xl p-4 flex items-center justify-between">
+        <div className="bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/30 rounded-2xl p-4 flex items-center justify-between">
           <span className="text-sm text-slate-300">Tổng thanh toán</span>
-          <span className="text-2xl font-black text-[#ce5a67]">169.000đ</span>
+          <span className="text-2xl font-black text-[var(--color-primary)]">169.000đ</span>
         </div>
 
         {/* Auto Payment PayOS - nổi bật */}
@@ -107,7 +107,7 @@ export default function PaymentPage() {
               "Tải game, giải nén và nhắn tin cho admin để cài đặt",
             ].map((step, i) => (
               <li key={i} className="flex items-start gap-3 text-xs text-slate-300">
-                <span className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black bg-[#ce5a67]/20 text-[#ce5a67] border border-[#ce5a67]/40">
+                <span className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black bg-[var(--color-primary)]/20 text-[var(--color-primary)] border border-[var(--color-primary)]/40">
                   {i + 1}
                 </span>
                 {step}
@@ -120,11 +120,11 @@ export default function PaymentPage() {
           <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Lưu ý</p>
           <ul className="space-y-1">
             <li className="text-[11px] text-slate-500 flex items-start gap-1.5">
-              <span className="text-[#ce5a67] mt-0.5">•</span>
+              <span className="text-[var(--color-primary)] mt-0.5">•</span>
               Chọn "Thanh toán QR tự động" để nhận code qua email ngay lập tức.
             </li>
             <li className="text-[11px] text-slate-500 flex items-start gap-1.5">
-              <span className="text-[#ce5a67] mt-0.5">•</span>
+              <span className="text-[var(--color-primary)] mt-0.5">•</span>
               Nếu chuyển khoản thủ công, nhấn nút bên dưới để gửi bill.
             </li>
           </ul>
@@ -134,7 +134,7 @@ export default function PaymentPage() {
           href="https://web.facebook.com/dungbinhluan/"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center justify-center gap-2 w-full py-4 bg-[#ce5a67] rounded-2xl font-black tracking-widest text-sm text-white hover:bg-[#b44c5c] transition-all shadow-[0_8px_30px_rgba(206,90,103,0.3)]"
+          className="flex items-center justify-center gap-2 w-full py-4 bg-[var(--color-primary)] rounded-2xl font-black tracking-widest text-sm text-white hover:bg-[#b44c5c] transition-all shadow-[0_8px_30px_rgba(206,90,103,0.3)]"
         >
           📸 ĐÃ CHUYỂN KHOẢN - GỬI BILL
         </a>

@@ -233,7 +233,7 @@ export default function CommunityComments({ scopeType, scopeId, title, emptyText
               value={content}
               onChange={(event) => setContent(event.target.value)}
               placeholder="Nhập bình luận của bạn..."
-              className="w-full min-h-[90px] resize-y rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-sm text-white outline-none focus:border-[#ce5a67]"
+              className="w-full min-h-[90px] resize-y rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-sm text-white outline-none focus:border-[var(--color-primary)]"
             />
             <div className="mt-2 flex items-center justify-between">
               <p className="text-[11px] text-slate-500">Đăng nhập: {user.email}</p>
@@ -259,7 +259,7 @@ export default function CommunityComments({ scopeType, scopeId, title, emptyText
             </button>
           </div>
         )}
-        {message && <p className="mt-2 text-xs text-[#ce5a67]">{message}</p>}
+        {message && <p className="mt-2 text-xs text-[var(--color-primary)]">{message}</p>}
       </div>
 
       <div className="mt-5 space-y-3">
@@ -322,7 +322,7 @@ export default function CommunityComments({ scopeType, scopeId, title, emptyText
                     <button
                       type="button"
                       onClick={() => setReplyToId(root.id)}
-                      className="text-[11px] font-semibold text-[#ce5a67] hover:underline"
+                      className="text-[11px] font-semibold text-[var(--color-primary)] hover:underline"
                     >
                       Trả lời
                     </button>
@@ -340,7 +340,7 @@ export default function CommunityComments({ scopeType, scopeId, title, emptyText
                       <button
                         type="button"
                         onClick={() => deleteComment(root.id)}
-                        className="text-[11px] font-semibold text-[#ce5a67] hover:underline"
+                        className="text-[11px] font-semibold text-[var(--color-primary)] hover:underline"
                       >
                         Xóa
                       </button>
@@ -378,7 +378,7 @@ export default function CommunityComments({ scopeType, scopeId, title, emptyText
                             <button
                               type="button"
                               onClick={() => deleteComment(reply.id)}
-                              className="text-[10px] font-semibold text-[#ce5a67] hover:underline"
+                              className="text-[10px] font-semibold text-[var(--color-primary)] hover:underline"
                             >
                               Xóa
                             </button>

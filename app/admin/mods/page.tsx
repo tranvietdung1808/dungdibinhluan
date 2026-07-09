@@ -65,7 +65,7 @@ export default function AdminModsPage() {
     return (
       <div className="min-h-screen bg-[#0a0a0a] text-white flex items-center justify-center">
         <div className="text-center">
-          <div className="w-8 h-8 border-2 border-[#ce5a67] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-8 h-8 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p>Đang tải...</p>
         </div>
       </div>
@@ -84,7 +84,7 @@ export default function AdminModsPage() {
             </div>
             <Link
               href="/admin/mods/new"
-              className="px-4 py-2 bg-[#ce5a67] text-white font-semibold rounded-lg hover:bg-[#b44c5c] transition-colors"
+              className="px-4 py-2 bg-[var(--color-primary)] text-white font-semibold rounded-lg hover:bg-[#b44c5c] transition-colors"
             >
               + Thêm mod mới
             </Link>
@@ -105,7 +105,7 @@ export default function AdminModsPage() {
             <p className="text-slate-400">Chưa có mod nào.</p>
             <Link
               href="/admin/mods/new"
-              className="inline-block mt-4 px-4 py-2 bg-[#ce5a67] text-white font-semibold rounded-lg hover:bg-[#b44c5c] transition-colors"
+              className="inline-block mt-4 px-4 py-2 bg-[var(--color-primary)] text-white font-semibold rounded-lg hover:bg-[#b44c5c] transition-colors"
             >
               Thêm mod đầu tiên
             </Link>

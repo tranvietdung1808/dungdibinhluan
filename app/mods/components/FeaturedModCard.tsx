@@ -6,7 +6,7 @@ const TAG_COLORS: Record<string, string> = {
   Kits: "#8b5cf6",
   Gameplay: "#10b981",
   "Đồ họa": "#f59e0b",
-  "Cơ chế game": "#ce5a67",
+  "Cơ chế game": "var(--color-primary)",
 };
 
 interface FeaturedModCardProps {
@@ -49,7 +49,7 @@ export default function FeaturedModCard({ mod }: FeaturedModCardProps) {
           <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(8,8,16,0.75) 0%, rgba(8,8,16,0.25) 30%, transparent 58%)" }} />
 
           <div className="absolute top-4 left-4 flex items-center gap-2 flex-wrap">
-            <span className="px-3 py-1 rounded-full text-[10px] font-black tracking-widest bg-[#ce5a67] text-white">
+            <span className="px-3 py-1 rounded-full text-[10px] font-black tracking-widest bg-[var(--color-primary)] text-white">
               ⭐ FEATURED
             </span>
             <span className="px-3 py-1 rounded-full text-[10px] font-black tracking-widest bg-white/8 text-white/80 border border-white/15">
@@ -59,8 +59,8 @@ export default function FeaturedModCard({ mod }: FeaturedModCardProps) {
         </div>
 
         <div className="absolute bottom-0 left-0 right-0 p-5 md:p-7">
-          <p className="text-[10px] uppercase tracking-[0.25em] text-[#ce5a67]/80 font-bold mb-1">Bản mod nổi bật</p>
-          <h2 className="text-xl md:text-3xl font-black leading-tight text-white group-hover:text-[#ce5a67] transition-colors duration-300">
+          <p className="text-[10px] uppercase tracking-[0.25em] text-[var(--color-primary)]/80 font-bold mb-1">Bản mod nổi bật</p>
+          <h2 className="text-xl md:text-3xl font-black leading-tight text-white group-hover:text-[var(--color-primary)] transition-colors duration-300">
             {mod.name}
           </h2>
           <p className="text-slate-300 text-xs md:text-sm mt-2 max-w-2xl leading-relaxed line-clamp-2">{mod.description}</p>

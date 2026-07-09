@@ -26,7 +26,7 @@ function CancelContent() {
         <div className="space-y-3">
           <button
             onClick={() => router.back()}
-            className="w-full py-4 bg-[#ce5a67] rounded-2xl font-black tracking-widest text-sm text-white hover:bg-[#b44c5c] transition-all"
+            className="w-full py-4 bg-[var(--color-primary)] rounded-2xl font-black tracking-widest text-sm text-white hover:bg-[#b44c5c] transition-all"
           >
             ← THỬ LẠI
           </button>

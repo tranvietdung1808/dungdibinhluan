@@ -71,10 +71,10 @@ export default async function GuidesPage() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white">
-      <div className="bg-gradient-to-b from-[#ce5a67]/10 to-transparent">
+      <div className="bg-gradient-to-b from-[var(--color-primary)]/10 to-transparent">
         <div className="max-w-6xl mx-auto px-4 md:px-6 py-12">
           <div className="flex items-center gap-3 mb-4">
-            <svg className="w-6 h-6 text-[#ce5a67]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-6 h-6 text-[var(--color-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <h1 className="text-4xl font-black tracking-wider">HƯỚNG DẪN/MẸO</h1>
@@ -94,7 +94,7 @@ export default async function GuidesPage() {
               <Link
                 key={guide.id}
                 href={`/huong-dan/${guide.slug}`}
-                className="group block bg-[#111111] border border-white/5 rounded-xl overflow-hidden hover:border-[#ce5a67]/50 transition-all duration-300 hover:shadow-[0_8px_32px_rgba(206,90,103,0.15)]"
+                className="group block bg-[#111111] border border-white/5 rounded-xl overflow-hidden hover:border-[var(--color-primary)]/50 transition-all duration-300 hover:shadow-[0_8px_32px_rgba(206,90,103,0.15)]"
               >
                 {thumbSrc ? (
                   <div className="relative aspect-video w-full overflow-hidden bg-black">
@@ -109,15 +109,15 @@ export default async function GuidesPage() {
                     <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 to-transparent" />
                   </div>
                 ) : (
-                  <div className="flex aspect-video w-full items-center justify-center bg-gradient-to-br from-[#ce5a67]/20 to-[#ce5a67]/5">
-                    <svg className="w-12 h-12 text-[#ce5a67]/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="flex aspect-video w-full items-center justify-center bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/5">
+                    <svg className="w-12 h-12 text-[var(--color-primary)]/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                     </svg>
                   </div>
                 )}
 
                 <div className="p-6">
-                  <h3 className="text-xl font-bold text-white mb-3 line-clamp-2 group-hover:text-[#ce5a67] transition-colors">
+                  <h3 className="text-xl font-bold text-white mb-3 line-clamp-2 group-hover:text-[var(--color-primary)] transition-colors">
                     {guide.title}
                   </h3>
                   <p className="text-slate-400 text-sm mb-4 line-clamp-3">
@@ -135,7 +135,7 @@ export default async function GuidesPage() {
                           className="rounded-full"
                         />
                       ) : (
-                        <div className="w-5 h-5 rounded-full bg-[#ce5a67]/20" />
+                        <div className="w-5 h-5 rounded-full bg-[var(--color-primary)]/20" />
                       )}
                       <span>{guide.profiles?.[0]?.username || 'Admin'}</span>
                     </div>

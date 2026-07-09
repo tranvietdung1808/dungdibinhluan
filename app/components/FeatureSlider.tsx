@@ -82,7 +82,7 @@ export default function FeatureSlider() {
             FC26 MOD SHOWCASE
           </p>
           <h2 className="mt-2 text-2xl md:text-4xl font-black tracking-tight text-white">
-            TÍNH NĂNG <span className="text-[#ce5a67]">NỔI BẬT</span>
+            TÍNH NĂNG <span className="text-[var(--color-primary)]">NỔI BẬT</span>
           </h2>
         </div>
 
@@ -119,7 +119,7 @@ export default function FeatureSlider() {
                   </div>
                 </div>
                 <div className="flex flex-col gap-3 text-center md:text-left">
-                  <span className="inline-flex self-center md:self-start px-3 py-1 rounded-full text-[10px] font-black tracking-[0.2em] uppercase bg-[#ce5a67]/15 text-[#f08a95] border border-[#ce5a67]/25">
+                  <span className="inline-flex self-center md:self-start px-3 py-1 rounded-full text-[10px] font-black tracking-[0.2em] uppercase bg-[var(--color-primary)]/15 text-[#f08a95] border border-[var(--color-primary)]/25">
                     {slide.tag}
                   </span>
                   <h3 className="text-2xl md:text-4xl font-black text-white leading-tight tracking-tight">
@@ -193,7 +193,7 @@ export default function FeatureSlider() {
               aria-label={`Slide ${i + 1}`}
               onClick={() => { setCurrent(i); setPaused(true); }}
               className={`rounded-full transition-all duration-300 ${
-                i === current ? "w-8 h-2 bg-[#ce5a67]" : "w-2.5 h-2.5 bg-white/20 hover:bg-white/40"
+                i === current ? "w-8 h-2 bg-[var(--color-primary)]" : "w-2.5 h-2.5 bg-white/20 hover:bg-white/40"
               }`}
             />
           ))}
