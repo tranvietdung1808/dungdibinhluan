@@ -6,7 +6,7 @@ import { GAMES } from "./data/games";
 import { MODS } from "./data/mods";
 import { FACES } from "./data/faces";
 import HeroSection from "./components/HeroSection";
-import WorldCupBanner from "./components/WorldCupBanner";
+import AutumnSaleBanner from "./components/WorldCupBanner";
 import { createClient } from "@/utils/supabase/server";
 import { resolveThumbnailSrc } from "@/utils/r2";
 
@@ -310,7 +310,7 @@ export default async function HomePage() {
     <main className="min-h-screen bg-[#080810] text-white">
       <h1 className="sr-only">DungDiBinhLuan - Mod Game FC 26, FIFA, Facepack chất lượng cao</h1>
       <div className="pt-14 md:pt-16">
-        <WorldCupBanner />
+        <AutumnSaleBanner />
         <section>
           <HeroSection latestGuides={heroGuides} />
         </section>

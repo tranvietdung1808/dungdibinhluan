@@ -2,24 +2,24 @@
 
 import Link from "next/link";
 
-export default function WorldCupBanner() {
+export default function AutumnSaleBanner() {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-[#0a0608] via-[#100a0c] to-[#080810] border-b border-[#c9a84c]/15">
+    <section className="relative overflow-hidden bg-gradient-to-b from-[#12050b] via-[#0c060a] to-[#080810] border-b border-white/5">
       {/* Background decoration */}
-      <div className="absolute inset-0 bg-gradient-to-r from-[#c9a84c]/5 via-transparent to-[#c9a84c]/5" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(201,168,76,0.12)_0%,transparent_60%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(201,168,76,0.04)_0%,transparent_70%)]" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#ce5a67]/10 via-transparent to-[#f59e0b]/10" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(206,90,103,0.18)_0%,transparent_62%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_60%_30%,rgba(245,158,11,0.10)_0%,transparent_65%)]" />
       <div
         className="absolute -top-32 -left-32 w-96 h-96 rounded-full blur-[120px] opacity-10"
-        style={{ background: "#c9a84c" }}
+        style={{ background: "#ce5a67" }}
       />
       <div
         className="absolute -bottom-32 -right-32 w-96 h-96 rounded-full blur-[120px] opacity-8"
-        style={{ background: "#f0c75e" }}
+        style={{ background: "#f59e0b" }}
       />
 
-      {/* Stars */}
-      <div className="absolute inset-0 opacity-[0.12]" aria-hidden="true">
+      {/* Particles */}
+      <div className="absolute inset-x-0 top-0 h-[70%] opacity-[0.14]" aria-hidden="true">
         {STAR_DATA.map((s, i) => (
           <div
             key={i}
@@ -27,7 +27,7 @@ export default function WorldCupBanner() {
             style={{
               width: `${s.w}px`,
               height: `${s.h}px`,
-              background: "#c9a84c",
+              background: "rgba(255,255,255,0.9)",
               top: `${s.t}%`,
               left: `${s.l}%`,
               animation: `twinkle ${s.dur}s ease-in-out infinite`,
@@ -41,23 +41,25 @@ export default function WorldCupBanner() {
       <div className="relative max-w-6xl mx-auto px-4 md:px-6 py-7 md:py-10">
         <div className="text-center space-y-5 md:space-y-6">
           {/* Label */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#c9a84c]/30 bg-[#c9a84c]/10">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#c9a84c] animate-pulse" />
-            <span className="text-[9px] md:text-[10px] font-black tracking-[0.3em] uppercase text-[#c9a84c]">
-              FIFA World Cup 26™
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-white/[0.03]">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#ce5a67] animate-pulse" />
+            <span className="text-[9px] md:text-[10px] font-black tracking-[0.3em] uppercase text-white/80">
+              Autumn Sale
             </span>
           </div>
 
           {/* Headline */}
           <h2 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-black italic tracking-tighter leading-[1.15] overflow-visible">
-            <span className="text-white inline-block pb-1">WORLD CUP ĐÃ KHỞI TRANH</span>
+            <span className="inline-block pb-1 pr-2 bg-gradient-to-r from-[#ce5a67] via-[#f59e0b] to-[#ce5a67] bg-clip-text text-transparent">
+              AUTUMN SALE
+            </span>
           </h2>
 
           {/* Subheadline */}
           <p className="text-sm md:text-base text-slate-300 max-w-xl mx-auto leading-relaxed">
-            Hòa cùng không khí bóng đá đỉnh cao toàn cầu. Săn ngay{" "}
-            <strong className="text-white">EA FC 26</strong> với giá{" "}
-            <strong className="text-[#f0c75e]">SALE SẬP SÀN</strong> mùa World Cup!
+            Thu này săn ngay <strong className="text-white">EA FC 26</strong> với giá{" "}
+            <strong className="text-white">sale sập sàn</strong> — số lượng ưu đãi có hạn, chốt nhanh để
+            giữ giá tốt nhất.
           </p>
 
           {/* Price Cards */}
@@ -80,16 +82,16 @@ export default function WorldCupBanner() {
 
             <Link
               href="/games/fc26/payment?edition=mods"
-              className="group w-full sm:w-auto flex items-center gap-3 px-5 py-3 rounded-2xl border border-[#c9a84c]/30 bg-[#c9a84c]/5 hover:border-[#c9a84c]/50 hover:bg-[#c9a84c]/10 transition-all duration-300"
+              className="group w-full sm:w-auto flex items-center gap-3 px-5 py-3 rounded-2xl border border-white/10 bg-white/[0.03] hover:border-[#f59e0b]/40 hover:bg-[#f59e0b]/5 transition-all duration-300"
             >
               <div className="text-left">
                 <p className="text-[9px] text-slate-500 uppercase tracking-widest">Full Mods Edition</p>
                 <div className="flex items-baseline gap-1.5">
                   <span className="text-sm text-slate-600 line-through">269k</span>
-                  <span className="text-lg font-black text-[#f0c75e]">199.000₫</span>
+                  <span className="text-lg font-black text-[#f59e0b]">199.000₫</span>
                 </div>
               </div>
-              <svg className="w-4 h-4 text-[#c9a84c] group-hover:translate-x-1 transition-transform flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+              <svg className="w-4 h-4 text-[#f59e0b] group-hover:translate-x-1 transition-transform flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
               </svg>
             </Link>
@@ -99,7 +101,7 @@ export default function WorldCupBanner() {
           <div className="pt-1">
             <Link
               href="/games/fc26/select"
-              className="inline-flex items-center gap-2 px-8 py-3.5 rounded-2xl font-black text-sm tracking-widest uppercase text-[#06040a] bg-gradient-to-r from-[#c9a84c] via-[#f0c75e] to-[#c9a84c] hover:from-[#f0c75e] hover:via-[#f7d47a] hover:to-[#f0c75e] transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-[#c9a84c]/20"
+              className="inline-flex items-center gap-2 px-8 py-3.5 rounded-2xl font-black text-sm tracking-widest uppercase text-[#06040a] bg-gradient-to-r from-[#ce5a67] via-[#f59e0b] to-[#ce5a67] hover:from-[#fb7185] hover:via-[#fbbf24] hover:to-[#fb7185] transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-[#ce5a67]/20"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M20 12c0 1.1-.9 2-2 2v4c0 1.1-.9 2-2 2H8c-1.1 0-2-.9-2-2v-4c-1.1 0-2-.9-2-2V8c0-1.1.9-2 2-2h.17l1.23-1.23A.996.996 0 018.17 4h7.66c.46 0 .88.21 1.17.57L18.33 6H20c1.1 0 2 .9 2 2v4zm-8-6c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm0 8.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z" />
@@ -110,11 +112,6 @@ export default function WorldCupBanner() {
               </svg>
             </Link>
           </div>
-
-          {/* Hashtag */}
-          <p className="text-[10px] text-slate-500 tracking-[0.2em] uppercase">
-            #FIFAWorldCup #WeAre26 #DungDiBinhLuan
-          </p>
         </div>
       </div>
 
