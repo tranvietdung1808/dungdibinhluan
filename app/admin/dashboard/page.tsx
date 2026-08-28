@@ -7,6 +7,42 @@ import { createClient } from '@/utils/supabase/client'
 const CATEGORIES = ['All-in-One', 'Faces', 'Kits', 'Gameplay', 'Đồ họa', 'Cơ chế game'] as const
 const VALID_ROLES = ['admin', 'vip', 'moderator', 'user'] as const
 
+// ── Membership types ──
+interface MembershipPlan {
+  id: string
+  name: string
+  description: string | null
+  price: number
+  duration_days: number
+  features: string[]
+  is_active: boolean
+  sort_order: number
+}
+
+interface SubscriptionEntry {
+  id: string
+  user_id: string
+  user_email: string
+  plan_id: string
+  status: 'active' | 'expired' | 'cancelled'
+  starts_at: string
+  expires_at: string
+  granted_by: string | null
+  note: string | null
+  membership_plans: { id: string; name: string; duration_days: number } | null
+}
+
+const initialPlanForm = {
+  id: '',
+  name: '',
+  description: '',
+  price: 0,
+  duration_days: 30,
+  features: '',   // nhập dạng mỗi dòng 1 quyền lợi, split khi submit
+  is_active: false,
+  sort_order: 0,
+}
+
 interface ModForm {
   name: string
   author: string
@@ -80,6 +116,23 @@ export default function AdminDashboard() {
   const [isUploadingThumbnail, setIsUploadingThumbnail] = useState(false)
   const [modLoading, setModLoading] = useState(false)
   const [modError, setModError] = useState('')
+
+  // ── Membership management state ──
+  const [membershipOpen, setMembershipOpen] = useState(false)
+  const [plansOpen, setPlansOpen] = useState(false)
+  const [plans, setPlans] = useState<MembershipPlan[]>([])
+  const [plansLoading, setPlansLoading] = useState(false)
+  const [subscriptions, setSubscriptions] = useState<SubscriptionEntry[]>([])
+  const [subsLoading, setSubsLoading] = useState(false)
+  const [subsError, setSubsError] = useState('')
+  const [subsSearch, setSubsSearch] = useState('')
+  const [grantForm, setGrantForm] = useState({ email: '', planId: '', note: '' })
+  const [grantSubmitting, setGrantSubmitting] = useState(false)
+  const [planForm, setPlanForm] = useState(initialPlanForm)
+  const [planFormOpen, setPlanFormOpen] = useState(false)
+  const [editingPlanId, setEditingPlanId] = useState<string | null>(null)
+  const [plansError, setPlansError] = useState('')
+  const [planSubmitting, setPlanSubmitting] = useState(false)
 
   // ── Member management state ──
   const [memberOpen, setMemberOpen] = useState(false)
@@ -320,6 +373,153 @@ export default function AdminDashboard() {
     setMemberForm({ email: '', role: 'vip', note: '' })
   }
 
+  // ── Membership: fetch plans ──
+  const fetchPlans = useCallback(async () => {
+    setPlansLoading(true)
+    setPlansError('')
+    const headers = await getAuthHeaders()
+    if (!headers) { setPlansLoading(false); return }
+    try {
+      const res = await fetch('/api/admin/plans', { headers })
+      if (res.ok) {
+        const d = await res.json()
+        setPlans(d.plans || [])
+      } else {
+        setPlansError('Không tải được danh sách gói')
+      }
+    } catch { setPlansError('Lỗi kết nối') }
+    finally { setPlansLoading(false) }
+  }, [getAuthHeaders])
+
+  // ── Membership: fetch subscriptions ──
+  const fetchSubscriptions = useCallback(async () => {
+    setSubsLoading(true)
+    setSubsError('')
+    const headers = await getAuthHeaders()
+    if (!headers) { setSubsLoading(false); return }
+    try {
+      const res = await fetch('/api/admin/memberships', { headers })
+      if (res.ok) {
+        const d = await res.json()
+        setSubscriptions(d.subscriptions || [])
+      } else {
+        setSubsError('Không tải được danh sách subscription')
+      }
+    } catch { setSubsError('Lỗi kết nối') }
+    finally { setSubsLoading(false) }
+  }, [getAuthHeaders])
+
+  useEffect(() => {
+    if (membershipOpen) { void fetchSubscriptions(); void fetchPlans() }
+  }, [membershipOpen, fetchSubscriptions, fetchPlans])
+
+  useEffect(() => {
+    if (plansOpen && plans.length === 0) void fetchPlans()
+  }, [plansOpen, plans.length, fetchPlans])
+
+  // Grant membership thủ công
+  const handleGrantMembership = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!grantForm.email || !grantForm.planId) { setSubsError('Cần nhập email và chọn gói'); return }
+    setGrantSubmitting(true)
+    setSubsError('')
+    const headers = await getAuthHeaders()
+    if (!headers) { setGrantSubmitting(false); return }
+    try {
+      const res = await fetch('/api/admin/memberships', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...headers },
+        body: JSON.stringify(grantForm),
+      })
+      const d = await res.json().catch(() => ({}))
+      if (res.ok) {
+        setToast(`Đã grant membership cho ${grantForm.email}!`)
+        setGrantForm({ email: '', planId: '', note: '' })
+        await fetchSubscriptions()
+      } else {
+        setSubsError(d.error || 'Grant thất bại')
+      }
+    } catch { setSubsError('Lỗi kết nối') }
+    finally { setGrantSubmitting(false) }
+  }
+
+  // Thu hồi membership
+  const handleRevokeSub = async (sub: SubscriptionEntry) => {
+    if (!window.confirm(`Thu hồi membership của ${sub.user_email}?`)) return
+    const headers = await getAuthHeaders()
+    if (!headers) return
+    const res = await fetch(`/api/admin/memberships/${sub.id}`, { method: 'DELETE', headers })
+    if (res.ok) { setToast('Đã thu hồi!'); await fetchSubscriptions() }
+    else { const d = await res.json().catch(() => ({})); setSubsError(d.error || 'Thất bại') }
+  }
+
+  // Tạo / sửa plan
+  const handlePlanSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!planForm.id || !planForm.name) { setPlansError('Cần nhập ID và tên gói'); return }
+    setPlanSubmitting(true)
+    setPlansError('')
+    const headers = await getAuthHeaders()
+    if (!headers) { setPlanSubmitting(false); return }
+
+    const features = planForm.features
+      .split('\n')
+      .map((f) => f.trim())
+      .filter((f) => f.length > 0)
+
+    try {
+      if (editingPlanId) {
+        const res = await fetch(`/api/admin/plans?id=${encodeURIComponent(editingPlanId)}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', ...headers },
+          body: JSON.stringify({ ...planForm, features }),
+        })
+        const d = await res.json().catch(() => ({}))
+        if (!res.ok) { setPlansError(d.error || 'Cập nhật thất bại'); return }
+        setToast('Đã cập nhật gói!')
+      } else {
+        const res = await fetch('/api/admin/plans', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...headers },
+          body: JSON.stringify({ ...planForm, features }),
+        })
+        const d = await res.json().catch(() => ({}))
+        if (!res.ok) { setPlansError(d.error || 'Tạo thất bại'); return }
+        setToast('Đã tạo gói mới!')
+      }
+      setPlanForm(initialPlanForm)
+      setEditingPlanId(null)
+      setPlanFormOpen(false)
+      await fetchPlans()
+    } catch { setPlansError('Lỗi kết nối') }
+    finally { setPlanSubmitting(false) }
+  }
+
+  const handleEditPlan = (plan: MembershipPlan) => {
+    setEditingPlanId(plan.id)
+    setPlanForm({
+      id: plan.id,
+      name: plan.name,
+      description: plan.description ?? '',
+      price: plan.price,
+      duration_days: plan.duration_days,
+      features: plan.features.join('\n'),
+      is_active: plan.is_active,
+      sort_order: plan.sort_order,
+    })
+    setPlanFormOpen(true)
+  }
+
+  const handleDeletePlan = async (planId: string) => {
+    if (!window.confirm(`Xóa gói "${planId}"?`)) return
+    const headers = await getAuthHeaders()
+    if (!headers) return
+    const res = await fetch(`/api/admin/plans?id=${encodeURIComponent(planId)}`, { method: 'DELETE', headers })
+    const d = await res.json().catch(() => ({}))
+    if (res.ok) { setToast('Đã xóa gói!'); await fetchPlans() }
+    else { setPlansError(d.error || 'Xóa thất bại') }
+  }
+
   const filteredRoles = memberSearch
     ? roles.filter(r => {
         const search = memberSearch.toLowerCase()
@@ -464,6 +664,28 @@ export default function AdminDashboard() {
               <div className="flex items-center text-[var(--color-primary)] group-hover:text-[#b44c5c] transition-colors">
                 <span className="text-sm font-medium">{memberOpen ? 'Đóng' : 'Mở'}</span>
                 <svg className={`w-4 h-4 ml-1 transition-transform ${memberOpen ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+              </div>
+            </button>
+
+            {/* ── Membership (VIP) ── */}
+            <button
+              onClick={() => setMembershipOpen(!membershipOpen)}
+              className={`group bg-[#111111] border rounded-xl p-6 text-left transition-all duration-300 ${membershipOpen ? 'border-amber-500/50 shadow-[0_8px_32px_rgba(245,158,11,0.15)]' : 'border-white/10 hover:border-amber-500/50 hover:shadow-[0_8px_32px_rgba(245,158,11,0.15)]'}`}
+            >
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-12 h-12 bg-amber-500/20 rounded-lg flex items-center justify-center group-hover:bg-amber-500/30 transition-colors">
+                  <svg className="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-white">Membership VIP</h3>
+                  <p className="text-slate-400 text-sm">Quản lý gói & grant VIP cho user</p>
+                </div>
+              </div>
+              <div className="flex items-center text-amber-400 group-hover:text-amber-300 transition-colors">
+                <span className="text-sm font-medium">{membershipOpen ? 'Đóng' : 'Mở'}</span>
+                <svg className={`w-4 h-4 ml-1 transition-transform ${membershipOpen ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
               </div>
             </button>
 
@@ -662,6 +884,297 @@ export default function AdminDashboard() {
               </table>
             </div>
             <p className="mt-2 text-xs text-slate-600">Hiển thị {filteredRoles.length}/{roles.length} member</p>
+          </section>
+        )}
+
+        {/* ── Membership VIP Panel ── */}
+        {membershipOpen && (
+          <section className="mb-12 border border-amber-500/20 rounded-2xl bg-[#111117] p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-amber-400">Membership VIP</h2>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setPlansOpen(!plansOpen)}
+                  className="px-3 py-1.5 text-xs font-semibold text-amber-300 border border-amber-500/30 rounded-lg hover:bg-amber-500/10 transition-colors"
+                >
+                  {plansOpen ? 'Ẩn quản lý gói' : 'Quản lý gói membership'}
+                </button>
+                <button onClick={() => setMembershipOpen(false)} className="text-slate-400 hover:text-white text-sm">✕ Đóng</button>
+              </div>
+            </div>
+
+            {/* ── Quản lý gói (plans) ── */}
+            {plansOpen && (
+              <div className="mb-8 p-4 rounded-xl border border-amber-500/20 bg-[#0d0d13]">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-sm font-bold text-amber-300 uppercase tracking-wider">Quản lý gói membership</h3>
+                  <button
+                    onClick={() => { setEditingPlanId(null); setPlanForm(initialPlanForm); setPlanFormOpen(!planFormOpen) }}
+                    className="px-3 py-1.5 text-xs font-semibold text-white bg-amber-500/80 rounded-lg hover:bg-amber-500 transition-colors"
+                  >
+                    {planFormOpen ? 'Hủy' : '+ Tạo gói mới'}
+                  </button>
+                </div>
+
+                {/* Form tạo/sửa plan */}
+                {planFormOpen && (
+                  <form onSubmit={handlePlanSubmit} className="mb-5 p-4 rounded-lg border border-white/10 bg-[#111117]">
+                    <h4 className="text-xs font-bold text-slate-300 mb-3">{editingPlanId ? '✏️ Sửa gói' : '➕ Tạo gói mới'}</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                      <div>
+                        <label className="block text-xs text-slate-400 mb-1">ID gói * (vd: vip-1month)</label>
+                        <input
+                          type="text"
+                          value={planForm.id}
+                          onChange={e => setPlanForm(p => ({ ...p, id: e.target.value }))}
+                          disabled={!!editingPlanId}
+                          className="w-full px-3 py-2 bg-[#111111] border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-amber-500 disabled:opacity-50"
+                          placeholder="vip-1month"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-slate-400 mb-1">Tên gói * (vd: VIP 1 Tháng)</label>
+                        <input
+                          type="text"
+                          value={planForm.name}
+                          onChange={e => setPlanForm(p => ({ ...p, name: e.target.value }))}
+                          className="w-full px-3 py-2 bg-[#111111] border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-amber-500"
+                          placeholder="VIP 1 Tháng"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-slate-400 mb-1">Giá (VND)</label>
+                        <input
+                          type="number"
+                          min={0}
+                          value={planForm.price}
+                          onChange={e => setPlanForm(p => ({ ...p, price: Number(e.target.value) }))}
+                          className="w-full px-3 py-2 bg-[#111111] border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-amber-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-slate-400 mb-1">Thời hạn (ngày)</label>
+                        <input
+                          type="number"
+                          min={1}
+                          value={planForm.duration_days}
+                          onChange={e => setPlanForm(p => ({ ...p, duration_days: Number(e.target.value) }))}
+                          className="w-full px-3 py-2 bg-[#111111] border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-amber-500"
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <label className="block text-xs text-slate-400 mb-1">Mô tả</label>
+                        <input
+                          type="text"
+                          value={planForm.description}
+                          onChange={e => setPlanForm(p => ({ ...p, description: e.target.value }))}
+                          className="w-full px-3 py-2 bg-[#111111] border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-amber-500"
+                          placeholder="Mô tả ngắn về gói"
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <label className="block text-xs text-slate-400 mb-1">Quyền lợi (mỗi dòng 1 quyền lợi)</label>
+                        <textarea
+                          value={planForm.features}
+                          onChange={e => setPlanForm(p => ({ ...p, features: e.target.value }))}
+                          rows={3}
+                          className="w-full px-3 py-2 bg-[#111111] border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-amber-500 resize-none"
+                          placeholder={'Tải mods VIP không giới hạn\nXem bài viết độc quyền'}
+                        />
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input type="checkbox" checked={planForm.is_active} onChange={e => setPlanForm(p => ({ ...p, is_active: e.target.checked }))} className="w-4 h-4 accent-amber-500" />
+                          <span className="text-sm text-slate-300">Đang mở bán</span>
+                        </label>
+                      </div>
+                      <div>
+                        <label className="block text-xs text-slate-400 mb-1">Thứ tự hiển thị</label>
+                        <input
+                          type="number"
+                          value={planForm.sort_order}
+                          onChange={e => setPlanForm(p => ({ ...p, sort_order: Number(e.target.value) }))}
+                          className="w-full px-3 py-2 bg-[#111111] border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-amber-500"
+                        />
+                      </div>
+                    </div>
+                    {plansError && <div className="mb-3 text-xs text-red-400">{plansError}</div>}
+                    <button type="submit" disabled={planSubmitting} className="px-4 py-2 bg-amber-500 text-white text-sm font-semibold rounded-lg hover:bg-amber-400 disabled:opacity-50 transition-colors">
+                      {planSubmitting ? '...' : editingPlanId ? 'Cập nhật gói' : 'Tạo gói'}
+                    </button>
+                  </form>
+                )}
+
+                {/* Danh sách plans */}
+                {plansLoading ? (
+                  <p className="text-sm text-slate-500">Đang tải gói...</p>
+                ) : plans.length === 0 ? (
+                  <p className="text-sm text-slate-500">Chưa có gói nào. Tạo gói mới ở trên.</p>
+                ) : (
+                  <div className="overflow-x-auto rounded-xl border border-white/10">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-white/10 bg-[#0d0d13]">
+                          <th className="text-left px-3 py-2 text-xs font-bold text-slate-400 uppercase">Gói</th>
+                          <th className="text-left px-3 py-2 text-xs font-bold text-slate-400 uppercase">Giá</th>
+                          <th className="text-left px-3 py-2 text-xs font-bold text-slate-400 uppercase">Thời hạn</th>
+                          <th className="text-left px-3 py-2 text-xs font-bold text-slate-400 uppercase">Quyền lợi</th>
+                          <th className="text-left px-3 py-2 text-xs font-bold text-slate-400 uppercase">Trạng thái</th>
+                          <th className="text-right px-3 py-2 text-xs font-bold text-slate-400 uppercase">Thao tác</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {plans.map(plan => (
+                          <tr key={plan.id} className="border-b border-white/5 hover:bg-white/[0.02]">
+                            <td className="px-3 py-2">
+                              <div className="font-mono text-xs text-slate-300">{plan.id}</div>
+                              <div className="text-sm text-white">{plan.name}</div>
+                            </td>
+                            <td className="px-3 py-2 text-xs text-slate-300">{plan.price.toLocaleString('vi-VN')}đ</td>
+                            <td className="px-3 py-2 text-xs text-slate-300">{plan.duration_days} ngày</td>
+                            <td className="px-3 py-2">
+                              <div className="flex flex-wrap gap-1 max-w-[220px]">
+                                {plan.features.map(f => (
+                                  <span key={f} className="px-1.5 py-0.5 text-[10px] bg-amber-500/10 text-amber-300 border border-amber-500/20 rounded-full">{f}</span>
+                                ))}
+                              </div>
+                            </td>
+                            <td className="px-3 py-2">
+                              {plan.is_active ? (
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-500/20 text-green-400 border border-green-500/30">ACTIVE</span>
+                              ) : (
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-500/20 text-slate-400 border border-slate-500/30">ẨN</span>
+                              )}
+                            </td>
+                            <td className="px-3 py-2 text-right">
+                              <div className="flex items-center justify-end gap-1.5">
+                                <button onClick={() => handleEditPlan(plan)} className="px-2.5 py-1 text-[11px] font-semibold text-amber-400 border border-amber-500/30 rounded-lg hover:bg-amber-500/10 transition-colors">Sửa</button>
+                                <button onClick={() => handleDeletePlan(plan.id)} className="px-2.5 py-1 text-[11px] font-semibold text-red-400 border border-red-500/30 rounded-lg hover:bg-red-500/10 transition-colors">Xóa</button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ── Grant membership ── */}
+            <form onSubmit={handleGrantMembership} className="mb-6 p-4 rounded-xl border border-white/10 bg-[#0d0d13]">
+              <h3 className="text-sm font-bold text-slate-300 mb-3 uppercase tracking-wider">➕ Grant membership cho user</h3>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+                <div>
+                  <label className="block text-xs text-slate-400 mb-1">Email *</label>
+                  <input
+                    type="email"
+                    value={grantForm.email}
+                    onChange={e => setGrantForm(p => ({ ...p, email: e.target.value }))}
+                    className="w-full px-3 py-2 bg-[#111111] border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-amber-500"
+                    placeholder="user@gmail.com"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-slate-400 mb-1">Gói *</label>
+                  <select
+                    value={grantForm.planId}
+                    onChange={e => setGrantForm(p => ({ ...p, planId: e.target.value }))}
+                    className="w-full px-3 py-2 bg-[#111111] border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-amber-500"
+                  >
+                    <option value="">Chọn gói...</option>
+                    {plans.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs text-slate-400 mb-1">Ghi chú</label>
+                  <input
+                    type="text"
+                    value={grantForm.note}
+                    onChange={e => setGrantForm(p => ({ ...p, note: e.target.value }))}
+                    className="w-full px-3 py-2 bg-[#111111] border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-amber-500"
+                    placeholder="VD: Tặng 1 tháng"
+                  />
+                </div>
+                <button type="submit" disabled={grantSubmitting} className="px-4 py-2 bg-amber-500 text-white text-sm font-semibold rounded-lg hover:bg-amber-400 disabled:opacity-50 transition-colors">
+                  {grantSubmitting ? '...' : 'Grant'}
+                </button>
+              </div>
+            </form>
+
+            {/* ── Search subscriptions ── */}
+            <div className="mb-4">
+              <input
+                type="text"
+                placeholder="Tìm theo email hoặc gói..."
+                value={subsSearch}
+                onChange={e => setSubsSearch(e.target.value)}
+                className="w-full max-w-md px-4 py-2 bg-[#0d0d13] border border-white/10 rounded-lg text-white text-sm placeholder:text-slate-500 focus:outline-none focus:border-amber-500"
+              />
+            </div>
+
+            {subsError && <div className="mb-4 rounded-lg border border-red-500/50 bg-red-500/20 p-3 text-sm text-red-300">{subsError}</div>}
+
+            {/* ── Subscriptions table ── */}
+            <div className="overflow-x-auto rounded-xl border border-white/10">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-white/10 bg-[#0d0d13]">
+                    <th className="text-left px-4 py-3 text-xs font-bold text-slate-400 uppercase">Email</th>
+                    <th className="text-left px-4 py-3 text-xs font-bold text-slate-400 uppercase">Gói</th>
+                    <th className="text-left px-4 py-3 text-xs font-bold text-slate-400 uppercase">Trạng thái</th>
+                    <th className="text-left px-4 py-3 text-xs font-bold text-slate-400 uppercase hidden md:table-cell">Hết hạn</th>
+                    <th className="text-left px-4 py-3 text-xs font-bold text-slate-400 uppercase hidden md:table-cell">Ghi chú</th>
+                    <th className="text-right px-4 py-3 text-xs font-bold text-slate-400 uppercase">Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {subsLoading ? (
+                    <tr><td colSpan={6} className="px-4 py-8 text-center text-slate-500">Đang tải...</td></tr>
+                  ) : subscriptions.filter(s =>
+                      !subsSearch ||
+                      s.user_email.toLowerCase().includes(subsSearch.toLowerCase()) ||
+                      s.membership_plans?.name.toLowerCase().includes(subsSearch.toLowerCase())
+                    ).length === 0 ? (
+                    <tr><td colSpan={6} className="px-4 py-8 text-center text-slate-500">Chưa có subscription nào</td></tr>
+                  ) : (
+                    subscriptions.filter(s =>
+                      !subsSearch ||
+                      s.user_email.toLowerCase().includes(subsSearch.toLowerCase()) ||
+                      s.membership_plans?.name.toLowerCase().includes(subsSearch.toLowerCase())
+                    ).map(sub => (
+                      <tr key={sub.id} className="border-b border-white/5 hover:bg-white/[0.02]">
+                        <td className="px-4 py-3 font-mono text-xs text-slate-300">{sub.user_email}</td>
+                        <td className="px-4 py-3 text-xs text-amber-300">{sub.membership_plans?.name ?? sub.plan_id}</td>
+                        <td className="px-4 py-3">
+                          {sub.status === 'active' ? (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-500/20 text-green-400 border border-green-500/30">ACTIVE</span>
+                          ) : sub.status === 'expired' ? (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-500/20 text-slate-400 border border-slate-500/30">EXPIRED</span>
+                          ) : (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-500/20 text-red-400 border border-red-500/30">CANCELLED</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-xs text-slate-400 hidden md:table-cell">
+                          {new Date(sub.expires_at).toLocaleDateString('vi-VN')}
+                        </td>
+                        <td className="px-4 py-3 text-xs text-slate-400 hidden md:table-cell max-w-[150px] truncate">{sub.note || '—'}</td>
+                        <td className="px-4 py-3 text-right">
+                          {sub.status === 'active' && (
+                            <button
+                              onClick={() => handleRevokeSub(sub)}
+                              className="px-2.5 py-1 text-[11px] font-semibold text-red-400 border border-red-500/30 rounded-lg hover:bg-red-500/10 transition-colors"
+                            >
+                              Thu hồi
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </section>
         )}
 
