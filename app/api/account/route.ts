@@ -68,6 +68,15 @@ export async function GET(request: Request) {
       } | null,
     }));
 
+    // Gói membership active (hiển thị công khai trên trang account)
+    const { data: activePlans } = await supabaseAdmin
+      .from("membership_plans")
+      .select("id, name, description, price, duration_days, features, is_active, sort_order")
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true });
+
+    const provider = user.app_metadata?.provider ?? user.identities?.[0]?.provider ?? null;
+
     if ((modAccess ?? []).length > 0) {
       // Dọn bản ghi > 60 ngày (sau khi đã lấy dữ liệu hiển thị)
       const cutoff = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString();
@@ -87,6 +96,9 @@ export async function GET(request: Request) {
         full_name: user.user_metadata?.full_name ?? profile?.username ?? null,
         avatar_url:
           profile?.avatar_url ?? user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? null,
+        created_at: user.created_at ?? user.user_metadata?.created_at ?? null,
+        last_sign_in_at: user.last_sign_in_at ?? null,
+        provider,
       },
       roles: (roles ?? []).map((r) => r.role as string),
       subscription: activeSub
@@ -95,6 +107,7 @@ export async function GET(request: Request) {
             plan_name: activeSub.plan?.name ?? "Membership",
             expires_at: activeSub.expires_at,
             starts_at: activeSub.starts_at,
+            plan_price: activeSub.plan?.price ?? 0,
           }
         : null,
       subscriptions: (subscriptions ?? []).map((s) => ({
@@ -107,6 +120,16 @@ export async function GET(request: Request) {
         plan_price: s.membership_plans?.price ?? 0,
       })),
       mods_unlocked: modsUnlocked,
+      plans: (activePlans ?? []).map((p) => ({
+        id: p.id,
+        name: p.name,
+        description: p.description,
+        price: p.price,
+        duration_days: p.duration_days,
+        features: p.features ?? [],
+        is_active: p.is_active,
+        sort_order: p.sort_order,
+      })),
       synced_at: new Date().toISOString(),
     });
   });

@@ -5,18 +5,118 @@
   --foreground: #ededed;
   --accent: #ce5a67;
   --color-primary: #ce5a67;
+
+  /* ===== Premium Dark Gaming SaaS — Surface tokens =====
+     Không dùng nền đen phẳng: 3 lớp surface rõ ràng
+     0: page background · 1: normal card · 2: raised / hover */
+  --color-surface-0: #0c0e13;
+  --color-surface-1: #151922;
+  --color-surface-2: #1d2330;
+  --color-line: rgba(255, 255, 255, 0.08);
+
+  /* Coral/pink = primary accent (CTA & VIP) */
+  --color-coral: #f06078;
+  --color-coral-strong: #e14a68;
+
+  /* Purple = accent phụ (profile & mod library) */
+  --color-violet: #8f7bf7;
+
+  /* Trạng thái */
+  --color-ok: #3ddc97;
+  --color-warn: #f4b860;
+  --color-danger: #f45d6a;
 }
 
 body {
   font-family: var(--font-be-vietnam), sans-serif !important;
   background: var(--background);
   color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-primary: #ce5a67;
+  --color-surface-0: #0c0e13;
+  --color-surface-1: #151922;
+  --color-surface-2: #1d2330;
+  --color-line: rgba(255, 255, 255, 0.08);
+  --color-coral: #f06078;
+  --color-coral-strong: #e14a68;
+  --color-violet: #8f7bf7;
+  --color-ok: #3ddc97;
+  --color-warn: #f4b860;
+  --color-danger: #f45d6a;
+}
+
+/* ===== Focus visibility (keyboard) ===== */
+:where(a, button, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-coral);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* ===== Reduced motion ===== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ===== Surface helpers (3 lớp) — @utility để dùng được với variants =====
+   0: page background · card: normal card · raised: hover/nổi bật */
+@utility surface-0 {
+  background: var(--color-surface-0);
+  border: 1px solid var(--color-line);
+}
+
+@utility surface-card {
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-line);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 10px 30px -18px rgba(0, 0, 0, 0.7);
+}
+
+@utility surface-raised {
+  background: var(--color-surface-2);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 16px 40px -20px rgba(0, 0, 0, 0.8);
+}
+
+/* Text hierarchy trên dark surface (dùng được với hover:*/group-hover:) */
+@utility text-title {
+  color: #f4f5f7;
+}
+@utility text-body {
+  color: #b6bcc9;
+}
+@utility text-text-body {
+  color: #b6bcc9;
+}
+@utility text-muted {
+  color: #7c8494;
+}
+
+/* Scrollbar tối giản */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 /* ===== ANIMATIONS ===== */
