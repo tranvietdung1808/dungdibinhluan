@@ -158,6 +158,28 @@ ${rawContent.substring(0, 3000)}`;
 }
 
 /**
+ * Dịch tiêu đề bằng DeepSeek (fallback khi Google Translate bị 429/lỗi)
+ */
+async function translateTitleViaAI(title) {
+  if (!openaiClient || !title) return null;
+  try {
+    const response = await openaiClient.chat.completions.create({
+      model: 'deepseek-chat',
+      messages: [{
+        role: 'user',
+        content: `Dịch tiêu đề bài viết sau sang tiếng Anh (giữ nguyên tên riêng, số phiên bản, thẻ tag mod). Chỉ trả về bản dịch, không thêm giải thích hay dấu ngoặc kép:\n\n${title}`
+      }],
+      temperature: 0.3,
+    });
+    const t = response.choices[0]?.message?.content?.trim() || '';
+    return t || null;
+  } catch (err) {
+    console.error(`  ⚠️  AI Title translate error: ${err.message}`);
+    return null;
+  }
+}
+
+/**
  * Lấy link tải modsfire
  */
 function extractDownloadLink($) {
@@ -278,6 +300,11 @@ async function main() {
     let finalTitle = post.title;
     if (hasCyrillic(post.title)) {
       finalTitle = await translateFallback(post.title, 'en');
+      if (!finalTitle || hasCyrillic(finalTitle)) {
+        // Google Translate lỗi/rate-limit (429) -> dùng DeepSeek
+        const aiTitle = await translateTitleViaAI(post.title);
+        if (aiTitle) finalTitle = aiTitle;
+      }
     }
     console.log(`  📝 Title : ${finalTitle}`);
 
