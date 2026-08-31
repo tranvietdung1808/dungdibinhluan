@@ -40,14 +40,14 @@ export default function Navbar() {
     "Tài khoản";
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0a]/70 backdrop-blur-xl border-b border-white/5">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-[var(--color-surface-0)]/70 backdrop-blur-xl border-b border-line">
       <div className="max-w-6xl mx-auto px-4 md:px-6 h-14 md:h-16 flex items-center justify-between gap-3">
         {/* Logo */}
         <Link
           href="/"
           className="flex items-center gap-2 md:gap-3 flex-shrink-0 hover:opacity-80 transition-opacity cursor-pointer"
         >
-          <div className="w-8 h-8 md:w-9 md:h-9 rounded-full overflow-hidden ring-1 ring-[var(--color-primary)]/40">
+          <div className="w-8 h-8 md:w-9 md:h-9 rounded-full overflow-hidden ring-1 ring-coral/40">
             <Image
               src="/logo.png"
               alt="Logo"
@@ -60,7 +60,7 @@ export default function Navbar() {
             <p className="font-black text-[11px] md:text-sm tracking-widest hidden sm:block">
               DUNGDIBINHLUAN
             </p>
-            <p className="text-[8px] text-slate-500 tracking-[0.3em] hidden sm:block">
+            <p className="text-[8px] text-muted tracking-[0.3em] hidden sm:block">
               FC MODDING AND CAREER MODE
             </p>
           </div>
@@ -72,14 +72,14 @@ export default function Navbar() {
             <Link
               key={item.label}
               href={item.href}
-              className="px-4 py-2 text-[11px] font-bold tracking-widest text-slate-400 hover:text-white transition-colors rounded-lg hover:bg-white/5"
+              className="px-4 py-2 text-[11px] font-bold tracking-widest text-muted hover:text-white transition-colors rounded-lg hover:bg-surface-2"
             >
               {item.label}
             </Link>
           ))}
           <Link
             href="/huong-dan"
-            className="px-4 py-2 text-[11px] font-bold tracking-widest text-slate-400 hover:text-white transition-colors rounded-lg hover:bg-white/5 flex items-center gap-2"
+            className="px-4 py-2 text-[11px] font-bold tracking-widest text-muted hover:text-white transition-colors rounded-lg hover:bg-surface-2 flex items-center gap-2"
           >
             <svg
               className="w-3 h-3"
@@ -100,7 +100,7 @@ export default function Navbar() {
             href="https://web.facebook.com/dungbinhluan/"
             target="_blank"
             rel="noopener noreferrer"
-            className="px-4 py-2 text-[11px] font-bold tracking-widest text-slate-400 hover:text-white transition-colors rounded-lg hover:bg-white/5"
+            className="px-4 py-2 text-[11px] font-bold tracking-widest text-muted hover:text-white transition-colors rounded-lg hover:bg-surface-2"
           >
             GROUP FACEBOOK
           </a>
@@ -111,12 +111,12 @@ export default function Navbar() {
           <CheckUyTinButton />
           <Link
             href="/games/fc26/select"
-            className="flex-shrink-0 px-4 md:px-5 py-2 md:py-2.5 bg-[var(--color-primary)] rounded-xl text-[10px] md:text-[11px] font-black tracking-widest text-white hover:bg-[#b44c5c] transition-colors shadow-[0_4px_20px_rgba(206,90,103,0.3)]"
+            className="flex-shrink-0 px-4 md:px-5 py-2 md:py-2.5 bg-coral rounded-xl text-[10px] md:text-[11px] font-black tracking-widest text-white hover:bg-coral-strong transition-colors shadow-[0_4px_20px_rgba(240,96,120,0.3)]"
           >
             TẢI NGAY
           </Link>
           {authLoading ? (
-            <div className="px-3 py-2 rounded-xl border border-white/10 bg-white/5 text-[10px] text-slate-400 font-bold tracking-wide">
+            <div className="px-3 py-2 rounded-xl border border-line bg-surface-1 text-[10px] text-muted font-bold tracking-wide">
               ...
             </div>
           ) : user ? (
@@ -124,7 +124,7 @@ export default function Navbar() {
               {isAdmin && (
                 <Link
                   href="/admin/dashboard"
-                  className="flex-shrink-0 px-3 md:px-4 py-2 rounded-xl text-[10px] md:text-[11px] font-semibold tracking-wide text-slate-200 border border-[var(--color-primary)]/40 bg-[var(--color-primary)]/15 hover:bg-[var(--color-primary)]/25 transition-colors"
+                  className="flex-shrink-0 px-3 md:px-4 py-2 rounded-xl text-[10px] md:text-[11px] font-semibold tracking-wide text-body border border-coral/40 bg-coral/15 hover:bg-coral/25 transition-colors"
                 >
                   Open Admin Panel
                 </Link>
@@ -132,9 +132,9 @@ export default function Navbar() {
               <Link
                 href="/account"
                 title="Quản lý tài khoản"
-                className="flex-shrink-0 flex items-center gap-2 px-3 md:px-4 py-2 rounded-xl text-[10px] md:text-[11px] font-black tracking-wide text-white border border-[var(--color-primary)]/40 bg-[var(--color-primary)]/15 hover:bg-[var(--color-primary)]/25 transition-colors"
+                className="flex-shrink-0 flex items-center gap-2 px-3 md:px-4 py-2 rounded-xl text-[10px] md:text-[11px] font-black tracking-wide text-white border border-coral/40 bg-coral/15 hover:bg-coral/25 transition-colors"
               >
-                <span className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-[10px] overflow-hidden">
+                <span className="w-6 h-6 rounded-full bg-surface-2 flex items-center justify-center text-[10px] overflow-hidden">
                   {user?.user_metadata?.picture ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={user.user_metadata.picture as string} alt="" className="w-full h-full object-cover" />
@@ -149,7 +149,7 @@ export default function Navbar() {
                 disabled={authPending}
                 title="Đăng xuất"
                 aria-label="Đăng xuất"
-                className="flex-shrink-0 w-10 h-10 rounded-xl text-sm font-black text-slate-300 border border-white/15 bg-white/5 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-60"
+                className="flex-shrink-0 w-10 h-10 rounded-xl text-sm font-black text-body border border-line bg-surface-1 hover:text-white hover:bg-surface-2 transition-colors disabled:opacity-60"
               >
                 {authPending ? "..." : "⏻"}
               </button>
@@ -158,7 +158,7 @@ export default function Navbar() {
             <button
               onClick={handleGoogleLogin}
               disabled={authPending}
-              className="flex-shrink-0 px-3 md:px-4 py-2 rounded-xl text-[10px] md:text-[11px] font-semibold tracking-wide text-slate-200 border border-white/20 bg-white/5 hover:bg-white/10 transition-colors disabled:opacity-60"
+              className="flex-shrink-0 px-3 md:px-4 py-2 rounded-xl text-[10px] md:text-[11px] font-semibold tracking-wide text-body border border-line bg-surface-1 hover:bg-surface-2 transition-colors disabled:opacity-60"
             >
               {authPending ? "..." : "Login with Google"}
             </button>
@@ -167,7 +167,7 @@ export default function Navbar() {
           {/* Hamburger — mobile only */}
           <button
             onClick={() => setOpen(!open)}
-            className="md:hidden flex flex-col justify-center items-center w-9 h-9 rounded-lg bg-white/5 border border-white/10 gap-1.5"
+            className="md:hidden flex flex-col justify-center items-center w-9 h-9 rounded-lg bg-surface-1 border border-line gap-1.5"
           >
             <span
               className={`block w-4 h-0.5 bg-white transition-all duration-300 ${
@@ -190,12 +190,12 @@ export default function Navbar() {
 
       {/* Mobile menu dropdown */}
       {open && (
-        <div className="md:hidden border-t border-white/5 bg-[#0a0a0a]/95 backdrop-blur-xl px-4 py-3 flex flex-col gap-1">
+        <div className="md:hidden border-t border-line bg-[var(--color-surface-0)]/95 backdrop-blur-xl px-4 py-3 flex flex-col gap-1">
           {user && (
             <Link
               href="/account"
               onClick={() => setOpen(false)}
-              className="px-4 py-3 text-[11px] font-bold tracking-widest text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-colors"
+              className="px-4 py-3 text-[11px] font-bold tracking-widest text-muted hover:text-white hover:bg-surface-2 rounded-xl transition-colors"
             >
               👤 TÀI KHOẢN CỦA TÔI
             </Link>
@@ -205,7 +205,7 @@ export default function Navbar() {
               key={item.label}
               href={item.href}
               onClick={() => setOpen(false)}
-              className="px-4 py-3 text-[11px] font-bold tracking-widest text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-colors"
+              className="px-4 py-3 text-[11px] font-bold tracking-widest text-muted hover:text-white hover:bg-surface-2 rounded-xl transition-colors"
             >
               {item.label}
             </Link>
@@ -213,7 +213,7 @@ export default function Navbar() {
           <Link
             href="/huong-dan"
             onClick={() => setOpen(false)}
-            className="px-4 py-3 text-[11px] font-bold tracking-widest text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-colors flex items-center gap-2"
+            className="px-4 py-3 text-[11px] font-bold tracking-widest text-muted hover:text-white hover:bg-surface-2 rounded-xl transition-colors flex items-center gap-2"
           >
             <svg
               className="w-3 h-3"
@@ -235,7 +235,7 @@ export default function Navbar() {
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => setOpen(false)}
-            className="px-4 py-3 text-[11px] font-bold tracking-widest text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-colors"
+            className="px-4 py-3 text-[11px] font-bold tracking-widest text-muted hover:text-white hover:bg-surface-2 rounded-xl transition-colors"
           >
             GROUP FACEBOOK
           </a>
