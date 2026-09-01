@@ -13,6 +13,12 @@
   --color-surface-1: #151922;
   --color-surface-2: #1d2330;
   --color-line: rgba(255, 255, 255, 0.08);
+  --color-line-strong: rgba(255, 255, 255, 0.14);
+  --accent-edge-width: 3px;
+
+  /* Shadow lan tỏa rất nhẹ — tạo chiều sâu mà không chỉ dựa vào border */
+  --shadow-ambient: 0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 20px 50px -30px rgba(0, 0, 0, 0.6);
 
   /* Coral/pink = primary accent (CTA & VIP) */
   --color-coral: #f06078;
@@ -42,6 +48,7 @@ body {
   --color-surface-1: #151922;
   --color-surface-2: #1d2330;
   --color-line: rgba(255, 255, 255, 0.08);
+  --color-line-strong: rgba(255, 255, 255, 0.14);
   --color-coral: #f06078;
   --color-coral-strong: #e14a68;
   --color-violet: #8f7bf7;
@@ -79,7 +86,7 @@ body {
 @utility surface-card {
   background: var(--color-surface-1);
   border: 1px solid var(--color-line);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 10px 30px -18px rgba(0, 0, 0, 0.7);
+  box-shadow: var(--shadow-ambient);
 }
 
 @utility surface-raised {
