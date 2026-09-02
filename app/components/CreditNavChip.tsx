@@ -1,9 +1,9 @@
 "use client";
 
-// ─── Credit Chip trên Navbar ───
-// Hiển thị số dư credit thật (fetch từ /api/credit/balance) + nút "+" nạp thêm.
-// - Số dư < 10 sẽ nhấp nháy và chuyển đỏ để thu hút chú ý.
-// - Số dư được cache ngắn trong sessionStorage (60s) để tránh refetch mỗi lần điều hướng.
+// ─── Credit Chip đơn giản kiểu ví (giống image reference) ───
+// 1 thẻ duy nhất: gradient vàng, icon coins xếp lớp, số dư, mũi tên xuống ở cuối
+// Bấm cả chip → điều hướng đến /credit để nạp thêm
+// Số dư cache 60s để tránh refetch mỗi lần navigate
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -32,22 +32,24 @@ function writeCachedBalance(balance: number) {
   }
 }
 
-/** Icon đồng xu SVG inline 18x18 */
-function CoinIcon() {
+/** Icon coins xếp lớp (stacked) giống hình ref */
+function StackedCoinsIcon() {
   return (
     <svg
-      width="16"
-      height="16"
+      width="20"
+      height="20"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="2"
+      strokeWidth="1.8"
       strokeLinecap="round"
       strokeLinejoin="round"
+      aria-hidden="true"
     >
-      <circle cx="12" cy="12" r="10" />
-      <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" />
-      <path d="M12 18V6" />
+      <ellipse cx="12" cy="6" rx="9" ry="2.5" fill="currentColor" fillOpacity="0.25" />
+      <path d="M3 6v5c0 1.385 4.03 2.5 9 2.5s9-1.115 9-2.5V6" />
+      <path d="M3 11v5c0 1.385 4.03 2.5 9 2.5s9-1.115 9-2.5v-5" />
+      <path d="M3 16v5c0 1.385 4.03 2.5 9 2.5s9-1.115 9-2.5v-5" />
     </svg>
   );
 }
@@ -78,7 +80,7 @@ export default function CreditNavChip() {
         writeCachedBalance(d.balance);
       }
     } catch {
-      // bỏ qua — giữ số dư hiện có nếu fetch lỗi
+      // bỏ qua
     }
   }, []);
 
@@ -87,30 +89,40 @@ export default function CreditNavChip() {
   }, [fetchBalance]);
 
   const isLow = balance !== null && balance < 10;
-  const openTopUp = () => router.push("/credit");
+  const display = balance ?? "…";
 
   return (
-    <div className="flex items-center gap-1">
-      <button
-        onClick={openTopUp}
-        title={isLow ? "Số dư sắp hết, nạp ngay!" : "Xem và nạp credit"}
-        className={`rounded-full px-3 py-1.5 text-sm font-semibold transition-all shadow-md flex items-center gap-1.5 cursor-pointer ${
-          isLow
-            ? "animate-pulse bg-gradient-to-r from-red-500 to-orange-600 text-white shadow-red-500/20"
-            : "bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 shadow-orange-500/20"
-        }`}
+    <button
+      type="button"
+      onClick={() => router.push("/credit")}
+      title={isLow ? "Số dư sắp hết — nạp thêm" : "Số dư credit — bấm để nạp thêm"}
+      aria-label="Số dư credit"
+      className={`group inline-flex items-center gap-2 rounded-xl px-3.5 py-1.5 md:px-4 md:py-2 border transition-all shadow-sm ${
+        isLow
+          ? "bg-gradient-to-br from-red-500 to-orange-500 border-orange-400 text-white animate-pulse"
+          : "bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 border-amber-500 hover:from-amber-500 hover:to-amber-700 text-white shadow-amber-500/30"
+      }`}
+    >
+      <span className="shrink-0 text-white/95 -ml-0.5">
+        <StackedCoinsIcon />
+      </span>
+      <span className="text-sm md:text-base font-black tabular-nums tracking-tight text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.25)]">
+        {display}
+      </span>
+      <svg
+        width="14"
+        height="14"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="shrink-0 text-white/80 group-hover:text-white transition-colors -mr-0.5"
+        aria-hidden="true"
       >
-        <CoinIcon />
-        <span className="tabular-nums">⭐ {balance ?? "…"}</span>
-      </button>
-      <button
-        onClick={openTopUp}
-        aria-label="Nạp thêm credit"
-        title="Nạp thêm credit"
-        className="w-7 h-7 rounded-full bg-amber-500 text-white font-black text-base leading-none flex items-center justify-center hover:bg-amber-600 transition-colors shadow-md shadow-amber-500/30 cursor-pointer"
-      >
-        +
-      </button>
-    </div>
+        <polyline points="6 9 12 15 18 9" />
+      </svg>
+    </button>
   );
 }
