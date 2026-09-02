@@ -20,6 +20,9 @@ export type ModPayload = {
   thumbnail_orientation?: string
   featured?: boolean
   video_id?: string | null
+  /** Cấu hình mở khóa credit (không nằm trong cột mods, xử lý riêng) */
+  credit_enabled?: boolean
+  credit_cost?: number | null
 }
 
 export const REQUIRED_CREATE_MOD_FIELDS: Array<keyof ModPayload> = [

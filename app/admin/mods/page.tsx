@@ -13,16 +13,49 @@ interface Mod {
   updated_at: string
   featured: boolean
   created_at: string
+  credit_enabled?: boolean
+  credit_cost?: number | null
 }
 
 export default function AdminModsPage() {
   const [mods, setMods] = useState<Mod[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [savingId, setSavingId] = useState<string | null>(null)
 
   useEffect(() => {
     fetchMods()
   }, [])
+
+  const handleToggleCredit = async (mod: Mod) => {
+    const enabled = !mod.credit_enabled
+    const creditCost = enabled ? (mod.credit_cost ?? 5) : 0
+    setSavingId(mod.id)
+    try {
+      const response = await fetch('/api/admin/mods/credit-config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug: mod.slug, enabled, creditCost }),
+      })
+      if (response.ok) {
+        const data = await response.json()
+        setMods(prev =>
+          prev.map(m =>
+            m.id === mod.id
+              ? { ...m, credit_enabled: data.credit_enabled, credit_cost: data.credit_cost }
+              : m
+          )
+        )
+      } else {
+        const err = await response.json().catch(() => ({}))
+        alert(err.error || 'Cập nhật thất bại')
+      }
+    } catch (err) {
+      alert('Có lỗi xảy ra khi cập nhật')
+    } finally {
+      setSavingId(null)
+    }
+  }
 
   const handleDelete = async (slug: string, name: string) => {
     if (!confirm(`Bạn có chắc muốn xóa mod "${name}" không?`)) {
@@ -122,6 +155,7 @@ export default function AdminModsPage() {
                   <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">Version</th>
                   <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">Updated</th>
                   <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">Featured</th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">Mở khóa credit</th>
                   <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">Actions</th>
                 </tr>
               </thead>
@@ -144,6 +178,35 @@ export default function AdminModsPage() {
                       ) : (
                         <span className="text-slate-600">-</span>
                       )}
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="flex items-center gap-2">
+                        {/* Switch bật/tắt yêu cầu mở khóa credit */}
+                        <button
+                          type="button"
+                          disabled={savingId === mod.id}
+                          onClick={() => handleToggleCredit(mod)}
+                          role="switch"
+                          aria-checked={mod.credit_enabled}
+                          title={mod.credit_enabled ? 'Tắt yêu cầu mở khóa credit' : 'Bật yêu cầu mở khóa credit'}
+                          className={`relative w-10 h-6 rounded-full transition-colors disabled:opacity-50 disabled:cursor-wait ${
+                            mod.credit_enabled ? 'bg-amber-500' : 'bg-slate-600'
+                          }`}
+                        >
+                          <span
+                            className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${
+                              mod.credit_enabled ? 'translate-x-[18px]' : 'translate-x-0.5'
+                            }`}
+                          />
+                        </button>
+                        {mod.credit_enabled ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-400 text-xs font-bold">
+                            🔒 {mod.credit_cost ?? 5} credit
+                          </span>
+                        ) : (
+                          <span className="text-slate-600 text-xs">Tắt</span>
+                        )}
+                      </div>
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-2">

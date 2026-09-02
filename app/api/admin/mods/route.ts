@@ -8,6 +8,7 @@ import {
   REQUIRED_CREATE_MOD_FIELDS,
   type ModPayload,
 } from '@/lib/server/mods'
+import { getCreditPricesMap } from '@/lib/server/credit'
 import { errorResponse, parseJsonBody, runRoute, successResponse } from '@/lib/server/api-response'
 
 export async function GET() {
@@ -17,7 +18,15 @@ export async function GET() {
       return errorResponse('Failed to fetch mods', 500)
     }
 
-    return successResponse(data)
+    // Gắn trạng thái "mở khóa bằng credit" cho từng mod
+    const prices = await getCreditPricesMap()
+    const mods = (data ?? []).map((m) => ({
+      ...m,
+      credit_enabled: prices[m.id as string] != null,
+      credit_cost: prices[m.id as string] ?? null,
+    }))
+
+    return successResponse(mods)
   })
 }
 

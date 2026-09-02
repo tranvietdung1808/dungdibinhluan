@@ -26,6 +26,24 @@ interface Mod {
   featured: boolean;
   video_id: string | null;
   created_at: string;
+  /** Số credit cần mở khóa (có giá trị = mod yêu cầu mở khóa credit) */
+  credit_cost?: number | null;
+}
+
+// Card hiển thị: dữ liệu static + DB, có creditCost
+interface CardMod {
+  slug: string;
+  name: string;
+  description: string;
+  thumbnail: string;
+  category: string;
+  version: string;
+  updatedAt: string;
+  author: string;
+  thumbnailOrientation?: string;
+  tags: string[];
+  featured?: boolean;
+  creditCost?: number;
 }
 
 const parseDate = (str: string) => {
@@ -78,7 +96,7 @@ export default function ModsPage({ initialDbMods = [] }: ModsPageProps) {
   };
 
   // Convert DB mods to static format
-  const convertedDbMods = useMemo(() => {
+  const convertedDbMods = useMemo<CardMod[]>(() => {
     return dbMods.map(mod => ({
       slug: mod.slug,
       name: mod.name,
@@ -94,17 +112,32 @@ export default function ModsPage({ initialDbMods = [] }: ModsPageProps) {
       thumbnailOrientation: mod.thumbnail_orientation as 'portrait' | 'landscape',
       featured: mod.featured,
       videoId: mod.video_id || undefined,
+      creditCost: mod.credit_cost ?? undefined,
     }));
   }, [dbMods]);
 
+  // Bản đồ slug → credit cost từ DB (để gắn khóa cho cả static trùng slug)
+  const creditMap = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const m of dbMods) {
+      if (typeof m.credit_cost === 'number' && m.credit_cost > 0) map.set(m.slug, m.credit_cost);
+    }
+    return map;
+  }, [dbMods]);
+
   // Combine static and database mods
-  const ALL_MODS = useMemo(() => {
-    return [...ALL_STATIC_MODS, ...convertedDbMods].sort((a, b) => {
-      const dateDiff = parseDate(b.updatedAt) - parseDate(a.updatedAt);
-      if (dateDiff !== 0) return dateDiff;
-      return 0;
-    });
-  }, [convertedDbMods]);
+  const ALL_MODS = useMemo<CardMod[]>(() => {
+    return [...ALL_STATIC_MODS, ...convertedDbMods]
+      .map((m) => ({
+        ...m,
+        creditCost: (m as CardMod).creditCost ?? creditMap.get(m.slug),
+      }))
+      .sort((a, b) => {
+        const dateDiff = parseDate(b.updatedAt) - parseDate(a.updatedAt);
+        if (dateDiff !== 0) return dateDiff;
+        return 0;
+      });
+  }, [convertedDbMods, creditMap]);
 
   const filtered = useMemo(() => {
     return activeTag === "Tất cả"

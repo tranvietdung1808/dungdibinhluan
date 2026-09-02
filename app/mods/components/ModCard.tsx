@@ -21,6 +21,8 @@ interface ModCardProps {
     author: string;
     thumbnailOrientation?: string;
     tags: string[];
+    /** Số credit cần để mở khóa (có giá trị = mod yêu cầu mở khóa credit) */
+    creditCost?: number;
   };
 }
 
@@ -84,11 +86,17 @@ export default function ModCard({ mod }: ModCardProps) {
             {mod.category}
           </span>
 
-          {/* Giá credit mở khóa mod */}
-          <span className="absolute bottom-2 right-2 z-20 inline-flex items-center gap-1 rounded-full bg-black/70 px-2.5 py-1 text-xs font-semibold text-amber-400 backdrop-blur-sm">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>
-            5
-          </span>
+          {/* Mod yêu cầu credit → ổ khóa + giá */}
+          {typeof mod.creditCost === "number" && mod.creditCost > 0 && (
+            <span
+              className="absolute bottom-2 right-2 z-20 inline-flex items-center gap-1 rounded-full bg-black/75 px-2.5 py-1 text-xs font-black text-amber-400 ring-1 ring-amber-400/50 backdrop-blur-md shadow-lg"
+              title={`Yêu cầu mở khóa bằng ${mod.creditCost} credit`}
+            >
+              <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <svg className="w-3 h-3 text-amber-300/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>
+              <span className="tabular-nums">{mod.creditCost}</span>
+            </span>
+          )}
         </div>
 
         {/* Khung nội dung Information */}

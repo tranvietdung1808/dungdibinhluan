@@ -9,6 +9,7 @@ import {
   type ModPayload,
   updateMod,
 } from '@/lib/server/mods'
+import { clearModCreditConfig, getModCreditConfigBySlug, setModCreditConfig } from '@/lib/server/credit'
 import { errorResponse, parseJsonBody, runRoute, successResponse } from '@/lib/server/api-response'
 
 export async function GET(
@@ -22,7 +23,13 @@ export async function GET(
       return errorResponse('Mod not found', 404)
     }
 
-    return successResponse(data)
+    // Gắn cấu hình mở khóa credit
+    const config = await getModCreditConfigBySlug(slug)
+    return successResponse({
+      ...data,
+      credit_enabled: config.enabled,
+      credit_cost: config.creditCost,
+    })
   })
 }
 
@@ -59,6 +66,20 @@ export async function PUT(
     }
     if (!data) {
       return errorResponse(`Mod "${slug}" not found`, 404)
+    }
+
+    // Lưu cấu hình "mở khóa bằng credit" nếu được gửi lên
+    if (typeof body.credit_enabled === 'boolean') {
+      try {
+        const modId = data.id as string
+        if (body.credit_enabled) {
+          await setModCreditConfig(modId, body.credit_cost ?? 5)
+        } else {
+          await clearModCreditConfig(modId)
+        }
+      } catch (e) {
+        return errorResponse(e instanceof Error ? e.message : 'Không lưu được cấu hình credit', 500)
+      }
     }
 
     return successResponse({ success: true, data })

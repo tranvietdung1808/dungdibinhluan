@@ -107,6 +107,78 @@ export async function getModCreditCost(modId: string): Promise<number> {
   return (data?.credit_cost as number) ?? DEFAULT_MOD_CREDIT_COST
 }
 
+// =====================================================
+// Cấu hình "mở khóa bằng credit" cho mod (theo slug)
+// enabled = có dòng trong mod_unlock_prices
+// =====================================================
+export interface ModCreditConfig {
+  modId: string | null
+  enabled: boolean
+  creditCost: number | null
+}
+
+// Lấy config credit theo slug (join mods -> mod_unlock_prices)
+export async function getModCreditConfigBySlug(slug: string): Promise<ModCreditConfig> {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('mods')
+      .select('id, mod_unlock_prices(credit_cost)')
+      .eq('slug', slug)
+      .maybeSingle()
+
+    if (error || !data) return { modId: null, enabled: false, creditCost: null }
+
+    // postgREST embed "mods -> mod_unlock_prices" có thể trả object hoặc array
+    const row = data as {
+      id: string
+      mod_unlock_prices?: { credit_cost: number } | { credit_cost: number }[] | null
+    }
+    const price = Array.isArray(row.mod_unlock_prices)
+      ? row.mod_unlock_prices[0]
+      : row.mod_unlock_prices
+    return {
+      modId: row.id,
+      enabled: price != null,
+      creditCost: price?.credit_cost ?? null,
+    }
+  } catch {
+    return { modId: null, enabled: false, creditCost: null }
+  }
+}
+
+// Bật yêu cầu mở khóa credit với mức giá cụ thể
+export async function setModCreditConfig(modId: string, creditCost: number): Promise<void> {
+  const cost = Number.isFinite(creditCost) ? Math.max(1, Math.floor(creditCost)) : DEFAULT_MOD_CREDIT_COST
+  const { error } = await supabaseAdmin
+    .from('mod_unlock_prices')
+    .upsert({ mod_id: modId, credit_cost: cost }, { onConflict: 'mod_id' })
+
+  if (error) throw new Error('Không lưu được cấu hình credit: ' + error.message)
+}
+
+// Tắt yêu cầu mở khóa credit
+export async function clearModCreditConfig(modId: string): Promise<void> {
+  const { error } = await supabaseAdmin
+    .from('mod_unlock_prices')
+    .delete()
+    .eq('mod_id', modId)
+
+  if (error) throw new Error('Không xóa được cấu hình credit: ' + error.message)
+}
+
+// Bản đồ mod_id -> credit_cost (dùng cho list mods)
+export async function getCreditPricesMap(): Promise<Record<string, number>> {
+  const { data } = await supabaseAdmin
+    .from('mod_unlock_prices')
+    .select('mod_id, credit_cost')
+
+  const map: Record<string, number> = {}
+  for (const row of data ?? []) {
+    map[row.mod_id as string] = row.credit_cost as number
+  }
+  return map
+}
+
 // Cộng credit vào ví user (topup) — ATOMIC qua RPC Postgres
 // Nếu reference trùng (ví dụ webhook retry cùng orderCode) → unique violation
 // (23505) → coi như đã xử lý, không cộng đúp.

@@ -86,6 +86,18 @@ export default function CreditNavChip() {
 
   useEffect(() => {
     void fetchBalance();
+
+    // Refresh khi balance thay đổi (mở khóa mod / nạp credit)
+    const onBalanceChanged = () => {
+      try {
+        sessionStorage.removeItem(CACHE_KEY);
+      } catch {
+        // bỏ qua
+      }
+      void fetchBalance();
+    };
+    window.addEventListener("credit-balance-changed", onBalanceChanged);
+    return () => window.removeEventListener("credit-balance-changed", onBalanceChanged);
   }, [fetchBalance]);
 
   const isLow = balance !== null && balance < 10;
