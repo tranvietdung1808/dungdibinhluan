@@ -20,40 +20,55 @@ export async function GET(request: Request) {
     const userId = user.id;
     const email = user.email?.toLowerCase() ?? "";
 
-    // Profile
-    const { data: profile } = await supabaseAdmin
-      .from("profiles")
-      .select("*")
-      .eq("id", userId)
-      .maybeSingle();
-
-    // Roles
-    const { data: roles } = await supabaseAdmin
-      .from("user_roles")
-      .select("role, note, created_at")
-      .eq("email", email)
-      .order("created_at", { ascending: false });
-
-    // Subscription active (hiển thị thẻ hạn dùng/credit)
-    const activeSub = await getActiveSubscription(userId);
-
-    // Lịch sử subscription
-    const { data: subscriptions } = await supabaseAdmin
-      .from("subscriptions")
-      .select("*, membership_plans(id, name, description, price, duration_days, features)")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false })
-      .limit(50);
-
-    // Mod đã mở trong 60 ngày gần nhất
+    // ── Chạy song song tất cả query để loại bỏ độ trễ N+1 tuần tự ──
     const since = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString();
-    const { data: modAccess } = await supabaseAdmin
-      .from("mod_access")
-      .select("*, mods(id, slug, name, thumbnail, category, tags)")
-      .eq("user_id", userId)
-      .gte("created_at", since)
-      .order("created_at", { ascending: false })
-      .limit(100);
+
+    const [
+      profileRes,
+      rolesRes,
+      activeSub,
+      subscriptionsRes,
+      modAccessRes,
+      activePlansRes,
+    ] = await Promise.all([
+      // Profile
+      supabaseAdmin.from("profiles").select("*").eq("id", userId).maybeSingle(),
+      // Roles
+      supabaseAdmin
+        .from("user_roles")
+        .select("role, note, created_at")
+        .eq("email", email)
+        .order("created_at", { ascending: false }),
+      // Subscription active (hiển thị thẻ hạn dùng/credit)
+      getActiveSubscription(userId),
+      // Lịch sử subscription
+      supabaseAdmin
+        .from("subscriptions")
+        .select("*, membership_plans(id, name, description, price, duration_days, features)")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(50),
+      // Mod đã mở trong 60 ngày gần nhất
+      supabaseAdmin
+        .from("mod_access")
+        .select("*, mods(id, slug, name, thumbnail, category, tags)")
+        .eq("user_id", userId)
+        .gte("created_at", since)
+        .order("created_at", { ascending: false })
+        .limit(100),
+      // Gói membership active (hiển thị công khai trên trang account)
+      supabaseAdmin
+        .from("membership_plans")
+        .select("id, name, description, price, duration_days, features, is_active, sort_order")
+        .eq("is_active", true)
+        .order("sort_order", { ascending: true }),
+    ]);
+
+    const profile = profileRes.data;
+    const roles = rolesRes.data;
+    const subscriptions = subscriptionsRes.data;
+    const modAccess = modAccessRes.data;
+    const activePlans = activePlansRes.data;
 
     const modsUnlocked = (modAccess ?? []).map((row) => ({
       id: row.id,
@@ -67,13 +82,6 @@ export async function GET(request: Request) {
         tags: string[];
       } | null,
     }));
-
-    // Gói membership active (hiển thị công khai trên trang account)
-    const { data: activePlans } = await supabaseAdmin
-      .from("membership_plans")
-      .select("id, name, description, price, duration_days, features, is_active, sort_order")
-      .eq("is_active", true)
-      .order("sort_order", { ascending: true });
 
     const provider = user.app_metadata?.provider ?? user.identities?.[0]?.provider ?? null;
 

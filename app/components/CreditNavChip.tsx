@@ -1,21 +1,43 @@
 "use client";
 
-// ─── Credit Chip hiển thị số dư credit trên Navbar ───
-// Khi balance < 10, chip sẽ nhấp nháy (animate-pulse) và chuyển sang màu đỏ để thu hút sự chú ý.
+// ─── Credit Chip trên Navbar ───
+// Hiển thị số dư credit thật (fetch từ /api/credit/balance) + nút "+" nạp thêm.
+// - Số dư < 10 sẽ nhấp nháy và chuyển đỏ để thu hút chú ý.
+// - Số dư được cache ngắn trong sessionStorage (60s) để tránh refetch mỗi lần điều hướng.
 
-interface CreditNavChipProps {
-  /** Số dư credit hiện tại của user */
-  balance: number;
-  /** Callback khi click vào chip (mở modal nạp credit) */
-  onClick: () => void;
+import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/utils/supabase/client";
+
+const CACHE_KEY = "credit_balance_cache";
+const CACHE_TTL_MS = 60_000;
+
+function readCachedBalance(): number | null {
+  try {
+    const raw = sessionStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { balance: number; ts: number };
+    if (Date.now() - parsed.ts > CACHE_TTL_MS) return null;
+    return parsed.balance;
+  } catch {
+    return null;
+  }
+}
+
+function writeCachedBalance(balance: number) {
+  try {
+    sessionStorage.setItem(CACHE_KEY, JSON.stringify({ balance, ts: Date.now() }));
+  } catch {
+    // bỏ qua (private mode / quota)
+  }
 }
 
 /** Icon đồng xu SVG inline 18x18 */
 function CoinIcon() {
   return (
     <svg
-      width="18"
-      height="18"
+      width="16"
+      height="16"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -30,21 +52,65 @@ function CoinIcon() {
   );
 }
 
-export default function CreditNavChip({ balance, onClick }: CreditNavChipProps) {
-  const isLow = balance < 10;
+export default function CreditNavChip() {
+  const router = useRouter();
+  const [balance, setBalance] = useState<number | null>(null);
+
+  const fetchBalance = useCallback(async () => {
+    const cached = readCachedBalance();
+    if (cached !== null) {
+      setBalance(cached);
+      return;
+    }
+    try {
+      const supabase = createClient();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session?.access_token) return;
+      const res = await fetch("/api/credit/balance", {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (!res.ok) return;
+      const d = await res.json();
+      if (typeof d.balance === "number") {
+        setBalance(d.balance);
+        writeCachedBalance(d.balance);
+      }
+    } catch {
+      // bỏ qua — giữ số dư hiện có nếu fetch lỗi
+    }
+  }, []);
+
+  useEffect(() => {
+    void fetchBalance();
+  }, [fetchBalance]);
+
+  const isLow = balance !== null && balance < 10;
+  const openTopUp = () => router.push("/credit");
 
   return (
-    <button
-      onClick={onClick}
-      className={`rounded-full px-3 py-1.5 text-sm font-semibold transition-all shadow-md flex items-center gap-1.5 cursor-pointer ${
-        isLow
-          ? "animate-pulse bg-gradient-to-r from-red-500 to-orange-600 text-white shadow-red-500/20"
-          : "bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 shadow-orange-500/20"
-      }`}
-      title={isLow ? "Số dư sắp hết, nạp ngay!" : `Số dư: ${balance} credit`}
-    >
-      <CoinIcon />
-      <span>⭐ {balance}</span>
-    </button>
+    <div className="flex items-center gap-1">
+      <button
+        onClick={openTopUp}
+        title={isLow ? "Số dư sắp hết, nạp ngay!" : "Xem và nạp credit"}
+        className={`rounded-full px-3 py-1.5 text-sm font-semibold transition-all shadow-md flex items-center gap-1.5 cursor-pointer ${
+          isLow
+            ? "animate-pulse bg-gradient-to-r from-red-500 to-orange-600 text-white shadow-red-500/20"
+            : "bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 shadow-orange-500/20"
+        }`}
+      >
+        <CoinIcon />
+        <span className="tabular-nums">⭐ {balance ?? "…"}</span>
+      </button>
+      <button
+        onClick={openTopUp}
+        aria-label="Nạp thêm credit"
+        title="Nạp thêm credit"
+        className="w-7 h-7 rounded-full bg-amber-500 text-white font-black text-base leading-none flex items-center justify-center hover:bg-amber-600 transition-colors shadow-md shadow-amber-500/30 cursor-pointer"
+      >
+        +
+      </button>
+    </div>
   );
 }

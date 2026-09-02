@@ -21,32 +21,36 @@ export async function GET(request: Request) {
 
     const userId = user.id;
 
-    // Ví credit
-    const wallet = await getCreditWallet(userId);
+    // ── Chạy song song tất cả query để loại bỏ độ trễ N+1 tuần tự ──
+    const [wallet, lastTopupRes, topupCountRes, unlockCountRes] = await Promise.all([
+      // Ví credit
+      getCreditWallet(userId),
+      // Lần nạp gần nhất
+      supabaseAdmin
+        .from("credit_topup_orders")
+        .select("amount_vnd, credit_total, created_at")
+        .eq("user_id", userId)
+        .eq("status", "paid")
+        .order("created_at", { ascending: false })
+        .limit(1),
+      // Thống kê số lần nạp
+      supabaseAdmin
+        .from("credit_transactions")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", userId)
+        .eq("type", "topup"),
+      // Thống kê số lần mở khóa
+      supabaseAdmin
+        .from("credit_transactions")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", userId)
+        .eq("type", "spend"),
+    ]);
+
     const { balance, totalEarned, totalSpent } = wallet;
-
-    // Lần nạp gần nhất
-    const { data: lastTopup } = await supabaseAdmin
-      .from("credit_topup_orders")
-      .select("amount_vnd, credit_total, created_at")
-      .eq("user_id", userId)
-      .eq("status", "paid")
-      .order("created_at", { ascending: false })
-      .limit(1);
-
-    // Thống kê số lần nạp
-    const { count: topupCount } = await supabaseAdmin
-      .from("credit_transactions")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", userId)
-      .eq("type", "topup");
-
-    // Thống kê số lần mở khóa
-    const { count: unlockCount } = await supabaseAdmin
-      .from("credit_transactions")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", userId)
-      .eq("type", "spend");
+    const lastTopup = lastTopupRes.data;
+    const topupCount = topupCountRes.count;
+    const unlockCount = unlockCountRes.count;
 
     // Dữ liệu riêng của user → không được cache công khai (chống CDN leak)
     return NextResponse.json(
