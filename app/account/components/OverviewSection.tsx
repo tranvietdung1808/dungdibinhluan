@@ -6,7 +6,7 @@
 // =====================================================
 
 import type { SectionKey, SubscriptionInfo, UnlockedMod } from "../types";
-import { Card, CardHeader, Icon, StatCard } from "./ui";
+import { Card, CardHeader, Icon, StatCard, type IconName } from "./ui";
 import { MembershipHero } from "./MembershipSection";
 import { formatDate, daysLeft } from "./states";
 
@@ -85,18 +85,36 @@ export function OverviewSection({
       {/* Quick links */}
       <Card>
         <CardHeader
+          icon="sparkles"
+          iconTone="violet"
           title="Truy cập nhanh"
           subtitle="Điều hướng các khu vực chính"
         />
         <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-          <QuickLink label="Khám phá mods" desc="Xem & tải các mod mới nhất" href="/mods" />
+          <QuickLink
+            label="Khám phá mods"
+            desc="Xem & tải các mod mới nhất"
+            icon="search"
+            href="/mods"
+          />
           <QuickLink
             label="Gói VIP / Membership"
             desc="Chọn gói, kích hoạt mã"
+            icon="crown"
             onClick={() => onNavigate("membership")}
           />
-          <QuickLink label="Hướng dẫn cài đặt" desc="Bài viết hướng dẫn chi tiết" href="/huong-dan" />
-          <QuickLink label="Game FC 26" desc="Hướng dẫn tải & cài game" href="/games/fc26" />
+          <QuickLink
+            label="Hướng dẫn cài đặt"
+            desc="Bài viết hướng dẫn chi tiết"
+            icon="book"
+            href="/huong-dan"
+          />
+          <QuickLink
+            label="Game FC 26"
+            desc="Hướng dẫn tải & cài game"
+            icon="gamepad"
+            href="/games/fc26"
+          />
         </div>
       </Card>
     </div>
@@ -112,11 +130,13 @@ function daysLeftText(activeSub: SubscriptionInfo | null, now: number) {
 function QuickLink({
   label,
   desc,
+  icon,
   href,
   onClick,
 }: {
   label: string;
   desc: string;
+  icon: IconName;
   href?: string;
   onClick?: () => void;
 }) {
@@ -124,11 +144,17 @@ function QuickLink({
     "flex items-center gap-3.5 p-3.5 rounded-xl surface-0 border border-line text-left hover:surface-raised transition-colors duration-150 group";
   const content = (
     <>
-      <Icon name="chevron-right" className="w-5 h-5 text-muted group-hover:text-coral transition-colors shrink-0" />
-      <span className="min-w-0">
+      <span className="w-10 h-10 shrink-0 rounded-xl bg-surface-2 border border-line flex items-center justify-center text-text-body group-hover:text-coral group-hover:border-coral/30 transition-colors duration-150">
+        <Icon name={icon} className="w-5 h-5" />
+      </span>
+      <span className="min-w-0 flex-1">
         <span className="block font-bold text-sm text-title">{label}</span>
         <span className="block text-[11px] text-muted truncate">{desc}</span>
       </span>
+      <Icon
+        name="arrow-right"
+        className="w-4 h-4 text-muted/50 shrink-0 transition-all duration-150 group-hover:text-coral group-hover:translate-x-0.5"
+      />
     </>
   );
   if (onClick) {

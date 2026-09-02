@@ -4,6 +4,7 @@
 
 export type SectionKey =
   | "overview"
+  | "credit"
   | "profile"
   | "orders"
   | "unlocked"

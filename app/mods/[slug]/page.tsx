@@ -476,6 +476,32 @@ export default async function ModDetailPage({
                   </a>
                 </div>
 
+                {/* Mở khóa bằng Credit */}
+                <div className="mt-3 flex items-center gap-2">
+                  <span className="text-sm text-gray-400">
+                    hoặc mở khóa bằng ⭐ 5 credit
+                  </span>
+                  <button
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 px-3 py-1.5 text-sm font-semibold text-white hover:from-amber-600 hover:to-orange-600 transition-all"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>
+                    Mở khóa
+                  </button>
+                </div>
+
+                {/* Thông tin credit (placeholder) */}
+                <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 mt-2">
+                  <h3 className="text-sm font-bold text-white mb-1">Mở khóa mod bằng Credit</h3>
+                  <p className="text-gray-400 text-xs mb-3">
+                    Cần ⭐ 5 credit để mở khóa mod này. Bạn có thể nạp credit hoặc dùng số dư hiện có.
+                  </p>
+                  <div className="flex gap-3">
+                    <span className="flex-1 rounded-lg bg-gray-800 px-4 py-2.5 text-xs text-gray-300 text-center">
+                      Tính năng sẽ sớm ra mắt!
+                    </span>
+                  </div>
+                </div>
+
                 <div className="text-[11px] text-slate-600 italic text-center sm:text-left space-y-1">
                   <p>Lưu ý: Bản mod chỉ dành cho anh em đã có game.</p>
                   <p>
@@ -575,6 +601,32 @@ export default async function ModDetailPage({
             >
               ⬇️ TẢI XUỐNG
             </a>
+          </div>
+
+          {/* Mở khóa bằng Credit */}
+          <div className="mt-3 flex items-center gap-2">
+            <span className="text-sm text-gray-400">
+              hoặc mở khóa bằng ⭐ 5 credit
+            </span>
+            <button
+              className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 px-3 py-1.5 text-sm font-semibold text-white hover:from-amber-600 hover:to-orange-600 transition-all"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>
+              Mở khóa
+            </button>
+          </div>
+
+          {/* Thông tin credit (placeholder) */}
+          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 mt-2">
+            <h3 className="text-sm font-bold text-white mb-1">Mở khóa mod bằng Credit</h3>
+            <p className="text-gray-400 text-xs mb-3">
+              Cần ⭐ 5 credit để mở khóa mod này. Bạn có thể nạp credit hoặc dùng số dư hiện có.
+            </p>
+            <div className="flex gap-3">
+              <span className="flex-1 rounded-lg bg-gray-800 px-4 py-2.5 text-xs text-gray-300 text-center">
+                Tính năng sẽ sớm ra mắt!
+              </span>
+            </div>
           </div>
 
           <div className="text-xs text-slate-600 italic text-center space-y-1">

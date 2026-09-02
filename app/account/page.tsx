@@ -18,6 +18,7 @@ import { OrdersSection } from "./components/OrdersSection";
 import { ModLibrarySection } from "./components/ModLibrarySection";
 import { MembershipSection } from "./components/MembershipSection";
 import { SecuritySection } from "./components/SecuritySection";
+import { CreditSection } from "./components/CreditSection";
 import { Button, Card, Icon } from "./components/ui";
 import type { AccountData, SectionKey } from "./types";
 
@@ -162,6 +163,7 @@ export default function AccountPage() {
           onUpgrade={() => router.push(UPGRADE_URL)}
         />
       )}
+      {section === "credit" && <CreditSection />}
       {section === "profile" && (
         <ProfileSection
           displayName={displayName}
@@ -216,6 +218,8 @@ export default function AccountPage() {
           avatarUrl={avatarUrl}
           isVip={isVip}
           isAdmin={isAdmin}
+          memberSince={current?.created_at}
+          lastSignIn={current?.last_sign_in_at}
           vipDaysLeft={
             isVip && activeSub
               ? Math.max(0, Math.ceil((new Date(activeSub.expires_at).getTime() - now) / (24 * 60 * 60 * 1000)))

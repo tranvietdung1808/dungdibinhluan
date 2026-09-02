@@ -16,14 +16,31 @@ export interface DashTab {
   icon: IconName;
 }
 
-export const ACCOUNT_TABS: DashTab[] = [
-  { key: "overview", label: "Tổng quan", icon: "sparkles" },
-  { key: "profile", label: "Hồ sơ", icon: "user" },
-  { key: "orders", label: "Đơn hàng", icon: "bag" },
-  { key: "unlocked", label: "Mod đã mở", icon: "unlock" },
-  { key: "membership", label: "VIP / Membership", icon: "crown" },
-  { key: "security", label: "Bảo mật", icon: "lock" },
+// Nhóm tab theo chức năng cho sidebar desktop
+const ACCOUNT_GROUPS: { label: string; tabs: DashTab[] }[] = [
+  {
+    label: "Tài khoản",
+    tabs: [
+      { key: "overview", label: "Tổng quan", icon: "sparkles" },
+      { key: "profile", label: "Hồ sơ", icon: "user" },
+      { key: "security", label: "Bảo mật", icon: "lock" },
+    ],
+  },
+  {
+    label: "Giao dịch",
+    tabs: [
+      { key: "credit", label: "Ví Credit", icon: "coins" },
+      { key: "orders", label: "Đơn hàng", icon: "bag" },
+      { key: "membership", label: "VIP / Membership", icon: "crown" },
+    ],
+  },
+  {
+    label: "Thư viện",
+    tabs: [{ key: "unlocked", label: "Mod đã mở", icon: "unlock" }],
+  },
 ];
+
+export const ACCOUNT_TABS: DashTab[] = ACCOUNT_GROUPS.flatMap((g) => g.tabs);
 
 export function DashboardLayout({
   active,
@@ -69,37 +86,54 @@ function Sidebar({
   return (
     <nav
       aria-label="Menu tài khoản"
-      className="rounded-2xl surface-card p-2 flex flex-col gap-1"
+      className="rounded-2xl surface-card p-3 flex flex-col gap-4"
     >
-      {ACCOUNT_TABS.map((tab) => {
-        const isActive = tab.key === active;
-        return (
-          <button
-            key={tab.key}
-            type="button"
-            onClick={() => onNavigate(tab.key)}
-            aria-current={isActive ? "page" : undefined}
-            className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-colors duration-150 text-left ${
-              isActive
-                ? "bg-surface-2 text-title border border-line"
-                : "text-body hover:text-title hover:bg-surface-2/60"
-            }`}
-          >
-            <span className={isActive ? "text-coral" : "text-muted"}>
-              <Icon name={tab.icon} className="w-[18px] h-[18px]" />
-            </span>
-            {tab.label}
-          </button>
-        );
-      })}
+      {ACCOUNT_GROUPS.map((group) => (
+        <div key={group.label}>
+          <p className="px-3 pb-1.5 text-[11px] font-black uppercase tracking-widest text-muted/70">
+            {group.label}
+          </p>
+          <div className="flex flex-col gap-0.5">
+            {group.tabs.map((tab) => {
+              const isActive = tab.key === active;
+              return (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => onNavigate(tab.key)}
+                  aria-current={isActive ? "page" : undefined}
+                  className={`relative flex items-center gap-3 pl-3 pr-3.5 py-2.5 rounded-xl text-sm font-semibold transition-colors duration-150 text-left ${
+                    isActive
+                      ? "bg-surface-2 text-title border border-line"
+                      : "text-body hover:text-title hover:bg-surface-2/60 border border-transparent"
+                  }`}
+                >
+                  {isActive && (
+                    <span
+                      aria-hidden="true"
+                      className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-l-md bg-coral"
+                    />
+                  )}
+                  <span className={isActive ? "text-coral" : "text-muted"}>
+                    <Icon name={tab.icon} className="w-[18px] h-[18px]" />
+                  </span>
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ))}
 
-      <div className="mt-3 pt-3 border-t border-line flex items-center gap-3 px-3.5 py-2.5">
-        <span className="text-muted">
-          <Icon name="shield" className="w-[18px] h-[18px]" />
-        </span>
-        <span className="text-[11px] text-muted leading-snug">
-          Tài khoản được đồng bộ an toàn từ Supabase
-        </span>
+      <div className="pt-3 border-t border-line">
+        <div className="flex items-center gap-3 px-3 py-2">
+          <span className="text-muted">
+            <Icon name="shield" className="w-[18px] h-[18px]" />
+          </span>
+          <span className="text-[11px] text-muted leading-snug">
+            Tài khoản được đồng bộ an toàn từ Supabase
+          </span>
+        </div>
       </div>
     </nav>
   );

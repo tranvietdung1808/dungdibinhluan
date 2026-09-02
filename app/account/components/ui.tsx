@@ -19,6 +19,7 @@ export type IconName =
   | "star"
   | "check"
   | "chevron-right"
+  | "arrow-right"
   | "mail"
   | "crown"
   | "lock"
@@ -27,7 +28,11 @@ export type IconName =
   | "key"
   | "refresh"
   | "sparkles"
-  | "logout";
+  | "logout"
+  | "book"
+  | "gamepad"
+  | "download"
+  | "coins";
 
 const ICON_PATHS: Record<IconName, React.ReactNode> = {
   shield: <path strokeLinecap="round" strokeLinejoin="round" d="M12 2L3 7v5c0 5.6 3.8 10.7 9 12 5.2-1.3 9-6.4 9-12V7l-9-5z" />,
@@ -59,6 +64,7 @@ const ICON_PATHS: Record<IconName, React.ReactNode> = {
   star: <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26" />,
   check: <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />,
   "chevron-right": <path strokeLinecap="round" strokeLinejoin="round" d="M9 18l6-6-6-6" />,
+  "arrow-right": <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14" />,
   mail: (
     <>
       <path strokeLinecap="round" strokeLinejoin="round" d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
@@ -105,6 +111,35 @@ const ICON_PATHS: Record<IconName, React.ReactNode> = {
       <path strokeLinecap="round" strokeLinejoin="round" d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
       <polyline points="16 17 21 12 16 7" />
       <line x1="21" y1="12" x2="9" y2="12" />
+    </>
+  ),
+  book: (
+    <>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4 19.5A2.5 2.5 0 016.5 17H20" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" />
+    </>
+  ),
+  gamepad: (
+    <>
+      <line x1="6" y1="11" x2="10" y2="11" />
+      <line x1="8" y1="9" x2="8" y2="13" />
+      <line x1="15" y1="12" x2="15.01" y2="12" />
+      <line x1="18" y1="10" x2="18.01" y2="10" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M17.32 5H6.68a4 4 0 00-3.98 3.6c-.03.36-.06.72-.06 1.08V18a2 2 0 002 2h.32a2 2 0 001.7-.95L8 17h8l1.34 2.05a2 2 0 001.7.95h.32a2 2 0 002-2V9.68c0-.36-.03-.72-.06-1.08A4 4 0 0017.32 5z" />
+    </>
+  ),
+  download: (
+    <>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+      <polyline points="7 10 12 15 17 10" />
+      <line x1="12" y1="15" x2="12" y2="3" />
+    </>
+  ),
+  coins: (
+    <>
+      <circle cx="12" cy="12" r="10" />
+      <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" />
+      <path d="M12 18V6" />
     </>
   ),
 };
@@ -158,17 +193,28 @@ export function CardHeader({
   subtitle,
   action,
   icon,
+  iconTone = "neutral",
 }: {
   title: string;
   subtitle?: string;
   action?: React.ReactNode;
   icon?: IconName;
+  iconTone?: "neutral" | "coral" | "violet" | "ok" | "warn";
 }) {
+  const toneMap: Record<NonNullable<typeof iconTone>, string> = {
+    neutral: "bg-surface-2 text-text-body",
+    coral: "bg-coral/15 text-coral",
+    violet: "bg-violet/15 text-violet",
+    ok: "bg-ok/15 text-ok",
+    warn: "bg-warn/15 text-warn",
+  };
   return (
     <div className="flex items-start justify-between gap-4 px-5 py-4 sm:px-6 sm:py-5 border-b border-line">
-      <div className="flex items-start gap-3 min-w-0">
+      <div className="flex items-center gap-3 min-w-0">
         {icon && (
-          <span className="mt-0.5 text-muted shrink-0">
+          <span
+            className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${toneMap[iconTone]}`}
+          >
             <Icon name={icon} className="w-5 h-5" />
           </span>
         )}
@@ -344,17 +390,20 @@ export function StatCard({
   onClick?: () => void;
 }) {
   const accentMap: Record<NonNullable<typeof accent>, string> = {
-    neutral: "text-text-body",
-    coral: "text-coral",
-    violet: "text-violet",
-    ok: "text-ok",
+    neutral: "bg-surface-2 text-text-body",
+    coral: "bg-coral/15 text-coral",
+    violet: "bg-violet/15 text-violet",
+    ok: "bg-ok/15 text-ok",
   };
+  const clickable = Boolean(href || onClick);
   const content = (
     <>
-      <span className={`shrink-0 ${accentMap[accent]}`}>
+      <span
+        className={`w-10 h-10 shrink-0 rounded-xl flex items-center justify-center ${accentMap[accent]}`}
+      >
         <Icon name={icon} className="w-5 h-5" />
       </span>
-      <span className="min-w-0">
+      <span className="min-w-0 flex-1">
         <span className="block text-xl font-black text-title tracking-tight leading-tight truncate">
           {value}
         </span>
@@ -363,20 +412,26 @@ export function StatCard({
         </span>
         {hint && <span className="block text-[11px] text-muted/80 mt-1">{hint}</span>}
       </span>
+      {clickable && (
+        <Icon
+          name="chevron-right"
+          className="w-4 h-4 text-muted/50 shrink-0 transition-colors duration-150 group-hover:text-coral"
+        />
+      )}
     </>
   );
   const cls =
-    "w-full text-left flex items-center gap-3.5 p-4 sm:p-5 rounded-2xl surface-card transition-colors duration-150 hover:surface-raised";
+    "w-full text-left flex items-center gap-3.5 p-4 sm:p-5 rounded-2xl surface-card transition-colors duration-150 group";
   if (href) {
     return (
-      <a href={href} className={cls}>
+      <a href={href} className={`${cls} hover:surface-raised`}>
         {content}
       </a>
     );
   }
   if (onClick) {
     return (
-      <button type="button" onClick={onClick} className={cls}>
+      <button type="button" onClick={onClick} className={`${cls} hover:surface-raised`}>
         {content}
       </button>
     );

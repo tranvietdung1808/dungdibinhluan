@@ -81,6 +81,7 @@ export function ProfileSection({
       <Card>
         <CardHeader
           icon="user"
+          iconTone="violet"
           title="Thông tin cá nhân"
           subtitle="Tên hiển thị và thông tin tài khoản được đồng bộ từ Google"
         />
@@ -122,7 +123,7 @@ export function ProfileSection({
             <div className="flex items-center gap-2 w-full bg-surface-0 border border-line rounded-xl px-4 py-2.5">
               <Icon name="mail" className="w-4 h-4 text-muted shrink-0" />
               <span className="text-sm text-body select-all min-w-0 truncate">{email}</span>
-              <span className="ml-auto text-[10px] text-muted bg-surface-2 px-2 py-0.5 rounded-md shrink-0">
+              <span className="ml-auto text-[11px] text-muted bg-surface-2 px-2 py-0.5 rounded-md shrink-0">
                 Google
               </span>
             </div>
@@ -167,6 +168,7 @@ export function ProfileSection({
       <Card>
         <CardHeader
           icon="shield"
+          iconTone="violet"
           title="Tài khoản liên kết"
           subtitle="Phương thức đăng nhập đang dùng"
         />
@@ -198,7 +200,7 @@ export function ProfileSection({
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-xl surface-0 border border-line px-4 py-3">
-      <p className="text-[10px] uppercase tracking-wider text-muted font-bold">{label}</p>
+      <p className="text-[11px] uppercase tracking-wider text-muted font-bold">{label}</p>
       <p className="text-sm text-body mt-0.5">{value}</p>
     </div>
   );

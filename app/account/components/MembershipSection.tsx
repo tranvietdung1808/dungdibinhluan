@@ -75,11 +75,26 @@ export function MembershipHero({
 
           {/* Thanh thời hạn */}
           <div className="mt-5">
-            <div className="h-1.5 rounded-full bg-surface-1 overflow-hidden" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label="Thời gian còn lại của gói">
-              <div className="h-full bg-coral/80 rounded-full" style={{ width: `${pct}%` }} />
+            <div
+              className="h-2 rounded-full bg-surface-1 overflow-hidden relative"
+              role="progressbar"
+              aria-valuenow={pct}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label="Thời gian còn lại của gói"
+            >
+              <div
+                className="h-full bg-coral/80 rounded-full relative overflow-hidden"
+                style={{ width: `${pct}%` }}
+              >
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/25 to-transparent animate-progress-sheen"
+                />
+              </div>
             </div>
             <p className="text-[11px] text-muted mt-2">
-              Bắt đầu {formatDate(expiresAt)} · Gói này không tự gia hạn định kỳ
+              Hết hạn {formatDate(expiresAt)} · Gói này không tự gia hạn định kỳ
             </p>
           </div>
         </div>
@@ -156,6 +171,7 @@ export function MembershipSection({
       <Card>
         <CardHeader
           icon="crown"
+          iconTone="coral"
           title="Gói membership"
           subtitle={
             visiblePlans.length === 0
@@ -203,6 +219,7 @@ export function MembershipSection({
       <Card>
         <CardHeader
           icon="key"
+          iconTone="warn"
           title="Kích hoạt mã code"
           subtitle="Nhập mã mua hàng để kích hoạt / gia hạn membership"
         />

@@ -98,6 +98,14 @@ function orderStatus(s: SubscriptionHistory, now: number) {
   return { label: s.status, tone: "neutral" as BadgeTone };
 }
 
+function statusChipTone(tone: BadgeTone) {
+  return tone === "ok"
+    ? "bg-ok/15 text-ok"
+    : tone === "neutral"
+      ? "bg-surface-2 text-text-body"
+      : "bg-white/6 text-muted";
+}
+
 function OrderRow({
   s,
   now,
@@ -112,7 +120,9 @@ function OrderRow({
     <tr className="border-b border-line last:border-0 hover:bg-surface-2/40 transition-colors">
       <td className="px-5 py-4">
         <div className="flex items-center gap-3">
-          <span className="w-9 h-9 rounded-xl bg-surface-2 text-text-body flex items-center justify-center shrink-0">
+          <span
+            className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${statusChipTone(st.tone)}`}
+          >
             <Icon name="bag" className="w-4 h-4" />
           </span>
           <div className="min-w-0">
@@ -164,7 +174,9 @@ function MobileOrderCard({
     >
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
-          <span className="w-9 h-9 rounded-xl bg-surface-2 text-text-body flex items-center justify-center shrink-0">
+          <span
+            className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${statusChipTone(st.tone)}`}
+          >
             <Icon name="bag" className="w-4 h-4" />
           </span>
           <div className="min-w-0">

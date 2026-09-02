@@ -1,10 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Redis } from "@upstash/redis";
+import { PayOS, type Webhook } from "@payos/node";
 import { createCode } from "@/lib/server/gen-code";
 import { sendCodeEmail } from "@/lib/server/email";
 import { getProduct } from "@/lib/payment/config";
 
 const kv = Redis.fromEnv();
+
+let payos: PayOS | null = null;
+function getPayOS(): PayOS {
+  if (!payos) {
+    payos = new PayOS({
+      clientId: process.env.PAYOS_CLIENT_ID!,
+      apiKey: process.env.PAYOS_API_KEY!,
+      checksumKey: process.env.PAYOS_CHECKSUM_KEY!,
+    });
+  }
+  return payos;
+}
 
 export async function OPTIONS() {
   return new NextResponse(null, {
@@ -32,6 +45,14 @@ export async function POST(req: NextRequest) {
 
   if (body.webhookUrl) {
     return NextResponse.json({ success: true });
+  }
+
+  // Xác minh chữ ký PayOS TRƯỚC khi xử lý — không tin body chưa verify
+  try {
+    await getPayOS().webhooks.verify(body as unknown as Webhook);
+  } catch {
+    console.error("Payment webhook: signature verification failed");
+    return NextResponse.json({ success: false, error: "Invalid signature" }, { status: 401 });
   }
 
   const data = body.data as Record<string, unknown> | undefined;
