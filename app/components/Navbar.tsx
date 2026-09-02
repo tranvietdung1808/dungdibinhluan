@@ -2,7 +2,6 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import CheckUyTinButton from "./CheckUyTinButton";
 import CreditNavChip from "./CreditNavChip";
 import { useAuth } from "./useAuth";
@@ -15,23 +14,12 @@ const navItems = [
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [authPending, setAuthPending] = useState(false);
-  const router = useRouter();
-  const { user, isAdmin, loading: authLoading, login, logout } = useAuth();
+  const { user, isAdmin, loading: authLoading, login } = useAuth();
 
   const handleGoogleLogin = async () => {
     setAuthPending(true);
     await login();
     // OAuth redirect happens — pending state resets on return
-  };
-
-  const handleLogout = async () => {
-    setAuthPending(true);
-    await logout();
-    setAuthPending(false);
-    router.refresh();
-    if (window.location.pathname.startsWith("/admin")) {
-      window.location.href = "/";
-    }
   };
 
   const displayName =
@@ -111,12 +99,6 @@ export default function Navbar() {
         <div className="flex items-center gap-2">
           <CheckUyTinButton />
           {user && <CreditNavChip />}
-          <Link
-            href="/games/fc26/select"
-            className="flex-shrink-0 px-4 md:px-5 py-2 md:py-2.5 bg-coral rounded-xl text-[10px] md:text-[11px] font-black tracking-widest text-white hover:bg-coral-strong transition-colors shadow-[0_4px_20px_rgba(240,96,120,0.3)]"
-          >
-            TẢI NGAY
-          </Link>
           {authLoading ? (
             <div className="px-3 py-2 rounded-xl border border-line bg-surface-1 text-[10px] text-muted font-bold tracking-wide">
               ...
@@ -146,15 +128,6 @@ export default function Navbar() {
                 </span>
                 <span className="hidden sm:inline">TÀI KHOẢN</span>
               </Link>
-              <button
-                onClick={handleLogout}
-                disabled={authPending}
-                title="Đăng xuất"
-                aria-label="Đăng xuất"
-                className="flex-shrink-0 w-10 h-10 rounded-xl text-sm font-black text-body border border-line bg-surface-1 hover:text-white hover:bg-surface-2 transition-colors disabled:opacity-60"
-              >
-                {authPending ? "..." : "⏻"}
-              </button>
             </>
           ) : (
             <button

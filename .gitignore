@@ -37,6 +37,10 @@ yarn-error.log*
 # vercel
 .vercel
 
+# IDE tooling (không phải source)
+/.trae/
+/.impeccable/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
