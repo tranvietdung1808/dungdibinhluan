@@ -36,7 +36,12 @@ export async function isRateLimited(
 }
 
 export function clientIp(request: Request): string {
+  // Ưu tiên IP thật do Vercel ghi đè (chống giả mạo x-forwarded-for)
+  const vercelIp = request.headers.get("x-vercel-forwarded-for");
+  if (vercelIp) return vercelIp.trim();
+  const realIp = request.headers.get("x-real-ip");
+  if (realIp) return realIp.trim();
   const fwd = request.headers.get("x-forwarded-for");
   if (fwd) return fwd.split(",")[0].trim();
-  return request.headers.get("x-real-ip") ?? "unknown";
+  return "unknown";
 }

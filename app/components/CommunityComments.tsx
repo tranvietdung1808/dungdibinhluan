@@ -36,6 +36,8 @@ export default function CommunityComments({ scopeType, scopeId, title, emptyText
   const [replyToId, setReplyToId] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [pinPendingId, setPinPendingId] = useState<string | null>(null);
+  // Honeypot chống spam: field ẩn, người thật không bao giờ điền
+  const [website, setWebsite] = useState("");
 
   const loadComments = useCallback(async () => {
     setLoading(true);
@@ -106,6 +108,7 @@ export default function CommunityComments({ scopeType, scopeId, title, emptyText
           scopeId,
           content: trimmed,
           parentId: replyToId,
+          website,
         }),
       });
 
@@ -229,6 +232,16 @@ export default function CommunityComments({ scopeType, scopeId, title, emptyText
                 </button>
               </div>
             )}
+            <input
+              type="text"
+              name="website"
+              value={website}
+              onChange={(event) => setWebsite(event.target.value)}
+              tabIndex={-1}
+              autoComplete="off"
+              aria-hidden="true"
+              className="absolute -left-[9999px] h-0 w-0 opacity-0"
+            />
             <textarea
               value={content}
               onChange={(event) => setContent(event.target.value)}

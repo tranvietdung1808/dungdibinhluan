@@ -1,8 +1,14 @@
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { NextResponse } from 'next/server';
+import { clientIp, isRateLimited } from "@/lib/server/rate-limit";
 
-export async function GET() {
+export async function GET(request: Request) {
+    // Chống bot tạo presigned URL hàng loạt: tối đa 60 lần / phút / IP
+    if (await isRateLimited(`rl:download-tool:${clientIp(request)}`, 60, 60)) {
+        return NextResponse.json({ error: "Quá nhiều yêu cầu tải, thử lại sau" }, { status: 429 });
+    }
+
     const s3Client = new S3Client({
         region: "auto",
         endpoint: process.env.R2_ENDPOINT,
