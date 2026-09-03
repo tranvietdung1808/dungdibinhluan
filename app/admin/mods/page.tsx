@@ -22,14 +22,14 @@ export default function AdminModsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [savingId, setSavingId] = useState<string | null>(null)
+  const [costDrafts, setCostDrafts] = useState<Record<string, string>>({})
 
   useEffect(() => {
     fetchMods()
   }, [])
 
-  const handleToggleCredit = async (mod: Mod) => {
-    const enabled = !mod.credit_enabled
-    const creditCost = enabled ? (mod.credit_cost ?? 5) : 0
+  // Lưu cấu hình credit (bật/tắt hoặc đổi số credit)
+  const persistCredit = async (mod: Mod, enabled: boolean, creditCost: number) => {
     setSavingId(mod.id)
     try {
       const response = await fetch('/api/admin/mods/credit-config', {
@@ -46,6 +46,7 @@ export default function AdminModsPage() {
               : m
           )
         )
+        setCostDrafts(prev => ({ ...prev, [mod.id]: String(data.credit_cost ?? 5) }))
       } else {
         const err = await response.json().catch(() => ({}))
         alert(err.error || 'Cập nhật thất bại')
@@ -55,6 +56,22 @@ export default function AdminModsPage() {
     } finally {
       setSavingId(null)
     }
+  }
+
+  const handleToggleCredit = async (mod: Mod) => {
+    const enabled = !mod.credit_enabled
+    await persistCredit(mod, enabled, enabled ? (mod.credit_cost ?? 5) : 0)
+  }
+
+  // Lưu khi đổi số credit ở ô nhập nhanh (Enter hoặc blur)
+  const handleSaveCost = async (mod: Mod) => {
+    const raw = costDrafts[mod.id] ?? String(mod.credit_cost ?? 5)
+    const value = Number(raw)
+    if (!Number.isFinite(value) || value < 1) {
+      setCostDrafts(prev => ({ ...prev, [mod.id]: String(mod.credit_cost ?? 5) }))
+      return
+    }
+    await persistCredit(mod, true, Math.floor(value))
   }
 
   const handleDelete = async (slug: string, name: string) => {
@@ -200,9 +217,25 @@ export default function AdminModsPage() {
                           />
                         </button>
                         {mod.credit_enabled ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-400 text-xs font-bold">
-                            🔒 {mod.credit_cost ?? 5} credit
-                          </span>
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="number"
+                              min={1}
+                              max={100000}
+                              value={costDrafts[mod.id] ?? String(mod.credit_cost ?? 5)}
+                              onChange={(e) =>
+                                setCostDrafts(prev => ({ ...prev, [mod.id]: e.target.value }))
+                              }
+                              onBlur={() => handleSaveCost(mod)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') (e.target as HTMLInputElement).blur()
+                              }}
+                              disabled={savingId === mod.id}
+                              className="w-16 px-1.5 py-0.5 rounded-md bg-black/40 border border-amber-500/40 text-amber-400 text-xs font-bold text-center focus:outline-none focus:border-amber-400 disabled:opacity-50"
+                              title="Số credit cần mở khóa — nhập rồi Enter"
+                            />
+                            <span className="text-[11px] text-amber-400/80">credit</span>
+                          </div>
                         ) : (
                           <span className="text-slate-600 text-xs">Tắt</span>
                         )}

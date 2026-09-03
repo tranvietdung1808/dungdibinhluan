@@ -1,4 +1,4 @@
-import { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import {
   createMod,
   getModSlugBySlug,
@@ -26,7 +26,10 @@ export async function GET() {
       credit_cost: prices[m.id as string] ?? null,
     }))
 
-    return successResponse(mods)
+    // Không cache — luôn lấy trạng thái credit mới nhất cho admin
+    return NextResponse.json(mods, {
+      headers: { 'Cache-Control': 'no-store' },
+    })
   })
 }
 

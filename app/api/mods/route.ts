@@ -1,6 +1,7 @@
+import { NextResponse } from 'next/server'
 import { listModsPublic } from '@/lib/server/mods'
 import { getCreditPricesMap } from '@/lib/server/credit'
-import { errorResponse, runRoute, successResponse } from '@/lib/server/api-response'
+import { errorResponse, runRoute } from '@/lib/server/api-response'
 
 export async function GET() {
   return runRoute(async () => {
@@ -23,6 +24,9 @@ export async function GET() {
       }
     })
 
-    return successResponse(mods)
+    // Cache ngắn (60s) để khi admin bật/tắt credit, card mods phản ánh nhanh
+    return NextResponse.json(mods, {
+      headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300' },
+    })
   })
 }
