@@ -23,6 +23,8 @@ interface Mod {
   featured: boolean
   video_id: string | null
   created_at: string
+  credit_enabled?: boolean
+  credit_cost?: number | null
 }
 
 interface ModForm {
@@ -39,6 +41,8 @@ interface ModForm {
   thumbnailOrientation: 'portrait' | 'landscape'
   featured: boolean
   videoId: string
+  creditEnabled: boolean
+  creditCost: string
 }
 
 export default function EditModPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -57,6 +61,8 @@ export default function EditModPage({ params }: { params: Promise<{ slug: string
     thumbnailOrientation: 'portrait',
     featured: false,
     videoId: '',
+    creditEnabled: false,
+    creditCost: '5',
   })
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null)
   const [isUploadingThumbnail, setIsUploadingThumbnail] = useState(false)
@@ -91,6 +97,8 @@ export default function EditModPage({ params }: { params: Promise<{ slug: string
           thumbnailOrientation: (data.thumbnail_orientation as 'portrait' | 'landscape') || 'portrait',
           featured: data.featured || false,
           videoId: data.video_id || '',
+          creditEnabled: data.credit_enabled === true,
+          creditCost: String(data.credit_cost ?? 5),
         })
         setThumbnailPreview(data.thumbnail)
       } else {
@@ -179,6 +187,8 @@ export default function EditModPage({ params }: { params: Promise<{ slug: string
           thumbnail_orientation: form.thumbnailOrientation,
           featured: form.featured,
           video_id: form.videoId || null,
+          credit_enabled: form.creditEnabled,
+          credit_cost: form.creditCost ? Number(form.creditCost) : null,
         }),
       })
 
@@ -485,6 +495,50 @@ export default function EditModPage({ params }: { params: Promise<{ slug: string
                     />
                     <span className="text-sm font-medium">Featured</span>
                   </label>
+                </div>
+
+                {/* Mở khóa bằng credit */}
+                <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-bold text-amber-400">🔒 Mở khóa bằng Credit</p>
+                      <p className="text-xs text-slate-500 mt-0.5">User phải trả credit mới vào được trang mod này</p>
+                    </div>
+                    {/* Switch */}
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={form.creditEnabled}
+                      onClick={() => handleChange('creditEnabled', !form.creditEnabled)}
+                      className={`relative w-11 h-6 rounded-full transition-colors ${
+                        form.creditEnabled ? 'bg-amber-500' : 'bg-slate-700'
+                      }`}
+                    >
+                      <span
+                        className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${
+                          form.creditEnabled ? 'translate-x-[22px]' : 'translate-x-0.5'
+                        }`}
+                      />
+                    </button>
+                  </div>
+
+                  {form.creditEnabled && (
+                    <div>
+                      <label htmlFor="creditCost" className="block text-xs font-medium text-slate-300 mb-1.5">
+                        Số credit cần mở khóa
+                      </label>
+                      <input
+                        id="creditCost"
+                        type="number"
+                        min={1}
+                        max={100000}
+                        value={form.creditCost}
+                        onChange={(e) => handleChange('creditCost', e.target.value)}
+                        className="w-full px-4 py-2.5 bg-[#111111] border border-amber-500/30 rounded-lg text-white focus:outline-none focus:border-amber-400 transition-colors"
+                        placeholder="5"
+                      />
+                    </div>
+                  )}
                 </div>
 
                 {/* Video ID */}
