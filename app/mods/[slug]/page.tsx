@@ -7,6 +7,7 @@ import { notFound } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabase";
 import { getModCreditConfigBySlug } from "@/lib/server/credit";
 import ModUnlockWall from "../components/ModUnlockWall";
+import MixModsDetail from "../components/MixModsDetail";
 import { extractTopicTerms, overlapScore, parseFlexibleDate, stripHtml } from "@/lib/related-content";
 
 const TAG_COLORS: Record<string, string> = {
@@ -288,120 +289,22 @@ export default async function ModDetailPage({
       </div>
 
       {isMixMods ? (
-        <div className="max-w-4xl mx-auto px-4 md:px-6 py-8 md:py-12 space-y-8">
-          <div className="relative rounded-3xl overflow-hidden border border-white/10 h-64 md:h-[420px]">
-            {thumbnailSrc ? (
-              <Image
-                src={thumbnailSrc}
-                alt={mod.name}
-                fill
-                className="object-cover opacity-50"
-                priority
-              />
-            ) : (
-              <div className="absolute inset-0 bg-gradient-to-br from-[#1a1a1f] to-[#0a0a0a]" />
-            )}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/40 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a]/60 via-transparent to-transparent" />
-
-            <div className="absolute top-5 left-5 flex items-center gap-2 flex-wrap">
-              {mod.featured && (
-                <span className="px-3 py-1 rounded-full text-[10px] font-black bg-[var(--color-primary)] text-white tracking-widest">
-                  ⭐ FEATURED
-                </span>
-              )}
-              <span className="px-3 py-1 rounded-full text-[10px] font-black bg-white/10 text-white border border-white/20 tracking-widest">
-                {mod.category}
-              </span>
-            </div>
-
-            <div className="absolute bottom-5 left-5 right-5">
-              <h1 className="text-2xl md:text-4xl font-black leading-tight drop-shadow-lg">
-                {mod.name}
-              </h1>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 flex-wrap text-xs border-b border-white/5 pb-5">
-            <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-slate-300">
-              👤 <span className="font-bold">{mod.author}</span>
-            </span>
-            <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-slate-300">
-              🔄 Cập nhật: <span className="font-bold">{displayUpdatedAt}</span>
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2 flex-wrap">
-            {mod.tags.map((tag) => (
-              <span
-                key={tag}
-                className="px-3 py-1.5 rounded-full text-[11px] font-black"
-                style={{
-                  background: `${TAG_COLORS[tag]}20`,
-                  color: TAG_COLORS[tag],
-                  border: `1px solid ${TAG_COLORS[tag]}30`,
-                }}
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-
-          {mod.videoId && (
-            <div className="space-y-3">
-              <h2 className="text-xs font-black tracking-widest uppercase text-slate-400">
-                🎬 Video ngắn về gameplay
-              </h2>
-              <div
-                className="relative w-full rounded-2xl overflow-hidden border border-white/10 shadow-[0_8px_40px_rgba(0,0,0,0.5)]"
-                style={{ paddingBottom: "56.25%" }}
-              >
-                <iframe
-                  src={`https://player.vimeo.com/video/${mod.videoId}?autoplay=1&muted=1&loop=1&title=0&byline=0&portrait=0`}
-                  className="absolute inset-0 w-full h-full"
-                  allow="autoplay; fullscreen; picture-in-picture"
-                  allowFullScreen
-                />
-              </div>
-            </div>
-          )}
-
-          <div className="bg-[#111] rounded-2xl border border-white/5 p-5 md:p-7 space-y-3">
-            <h2 className="text-sm font-black tracking-widest uppercase text-slate-400">Mô tả</h2>
-            <div 
-              className="text-slate-300 text-sm md:text-base leading-relaxed whitespace-pre-line overflow-hidden"
-              dangerouslySetInnerHTML={{ __html: mod.longDescription || "" }}
-            />
-          </div>
-
-          <div className="relative overflow-hidden bg-gradient-to-br from-[var(--color-primary)]/20 via-[#0a0a0a] to-[#a855f7]/10 border border-[var(--color-primary)]/30 rounded-3xl p-6 md:p-8">
-            <div className="pointer-events-none absolute -top-10 -right-10 w-48 h-48 rounded-full bg-[var(--color-primary)]/20 blur-3xl" />
-            
-            <div className="relative flex flex-col sm:flex-row items-center gap-6">
-              <div className="flex-1 text-center sm:text-left space-y-1">
-                <p className="text-xs text-slate-400 uppercase tracking-widest">Sẵn sàng cài đặt</p>
-                <p className="text-2xl md:text-3xl font-black text-white">
-                  169.000đ
-                </p>
-                <p className="text-sm text-[var(--color-primary)] font-bold">Hỗ trợ update miễn phí trọn đời</p>
-                <p className="text-slate-500 text-xs">An toàn · Hỗ trợ 1:1 · Cài đặt qua Teamviewer</p>
-              </div>
-              <Link
-                href="/mods/mix-mods-fc26/payment"
-                className="flex items-center gap-2 px-8 py-4 bg-[var(--color-primary)] rounded-2xl font-black tracking-widest text-sm text-white hover:bg-[#b44c5c] transition-all shadow-[0_12px_40px_rgba(206,90,103,0.45)] whitespace-nowrap"
-              >
-                💳 LIÊN HỆ MUA
-              </Link>
-            </div>
-          </div>
-
-          <p className="text-xs text-slate-600 italic text-center">
-            Lưu ý: Bản mod chỉ dành cho anh em đã có game. Chưa có game?{" "}
-            <Link href="/games/fc26/select" className="text-[var(--color-primary)] hover:underline">
-              Liên hệ admin mua ngay
-            </Link>
-          </p>
-        </div>
+        <MixModsDetail
+          mod={{
+            slug: mod.slug,
+            name: mod.name,
+            author: mod.author,
+            category: mod.category,
+            version: mod.version,
+            updatedAt: displayUpdatedAt,
+            description: mod.description || "",
+            longDescription: mod.longDescription || "",
+            thumbnail: thumbnailSrc,
+            tags: mod.tags ?? [],
+            featured: mod.featured,
+            videoId: mod.videoId,
+          }}
+        />
       ) : isPortrait ? (
         <div className="relative">
           <div className="pointer-events-none absolute inset-0 opacity-60">
@@ -618,7 +521,7 @@ export default async function ModDetailPage({
           </div>
         </div>
       )}
-      <section className="mx-auto max-w-6xl px-4 md:px-6 pb-14">
+      <section id="mods-related" className="mx-auto max-w-6xl px-4 md:px-6 pb-14">
         <div className="rounded-3xl border border-white/10 bg-[#0f0f14] p-5 md:p-6">
           <div className="flex items-end justify-between gap-3">
             <div>

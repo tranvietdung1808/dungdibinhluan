@@ -132,12 +132,20 @@ export default function AdminModsPage() {
               <h1 className="text-2xl font-bold">Quản lý Mods</h1>
               <p className="text-slate-400 mt-1">Tổng cộng: {mods.length} mods</p>
             </div>
-            <Link
-              href="/admin/mods/new"
-              className="px-4 py-2 bg-[var(--color-primary)] text-white font-semibold rounded-lg hover:bg-[#b44c5c] transition-colors"
-            >
-              + Thêm mod mới
-            </Link>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Link
+                href="/admin/mods/mix-mods-fc26/showcase"
+                className="px-4 py-2 bg-violet-600 text-white font-semibold rounded-lg hover:bg-violet-500 transition-colors text-center"
+              >
+                🖼️ Showcase MIX MODS
+              </Link>
+              <Link
+                href="/admin/mods/new"
+                className="px-4 py-2 bg-[var(--color-primary)] text-white font-semibold rounded-lg hover:bg-[#b44c5c] transition-colors"
+              >
+                + Thêm mod mới
+              </Link>
+            </div>
           </div>
         </div>
       </div>
