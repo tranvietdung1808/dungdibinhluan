@@ -3,34 +3,14 @@
 // ─── Credit Chip đơn giản kiểu ví (giống image reference) ───
 // 1 thẻ duy nhất: gradient vàng, icon coins xếp lớp, số dư, mũi tên xuống ở cuối
 // Bấm cả chip → điều hướng đến /credit để nạp thêm
-// Số dư cache 60s để tránh refetch mỗi lần navigate
+// Số dư đọc nhanh (cache 60s + Supabase REST trực tiếp) để chip hiện ngay.
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/utils/supabase/client";
-
-const CACHE_KEY = "credit_balance_cache";
-const CACHE_TTL_MS = 60_000;
-
-function readCachedBalance(): number | null {
-  try {
-    const raw = sessionStorage.getItem(CACHE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as { balance: number; ts: number };
-    if (Date.now() - parsed.ts > CACHE_TTL_MS) return null;
-    return parsed.balance;
-  } catch {
-    return null;
-  }
-}
-
-function writeCachedBalance(balance: number) {
-  try {
-    sessionStorage.setItem(CACHE_KEY, JSON.stringify({ balance, ts: Date.now() }));
-  } catch {
-    // bỏ qua (private mode / quota)
-  }
-}
+import {
+  clearCachedCreditBalance,
+  fetchCreditBalance,
+} from "@/utils/credit-balance";
 
 /** Icon coins xếp lớp (stacked) giống hình ref */
 function StackedCoinsIcon() {
@@ -59,29 +39,8 @@ export default function CreditNavChip() {
   const [balance, setBalance] = useState<number | null>(null);
 
   const fetchBalance = useCallback(async () => {
-    const cached = readCachedBalance();
-    if (cached !== null) {
-      setBalance(cached);
-      return;
-    }
-    try {
-      const supabase = createClient();
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (!session?.access_token) return;
-      const res = await fetch("/api/credit/balance", {
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      });
-      if (!res.ok) return;
-      const d = await res.json();
-      if (typeof d.balance === "number") {
-        setBalance(d.balance);
-        writeCachedBalance(d.balance);
-      }
-    } catch {
-      // bỏ qua
-    }
+    const b = await fetchCreditBalance();
+    if (b !== null) setBalance(b);
   }, []);
 
   useEffect(() => {
@@ -89,11 +48,7 @@ export default function CreditNavChip() {
 
     // Refresh khi balance thay đổi (mở khóa mod / nạp credit)
     const onBalanceChanged = () => {
-      try {
-        sessionStorage.removeItem(CACHE_KEY);
-      } catch {
-        // bỏ qua
-      }
+      clearCachedCreditBalance();
       void fetchBalance();
     };
     window.addEventListener("credit-balance-changed", onBalanceChanged);

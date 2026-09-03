@@ -13,6 +13,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "@/app/components/useAuth";
 import { createClient } from "@/utils/supabase/client";
+import { fetchCreditBalance } from "@/utils/credit-balance";
 
 interface ModUnlockWallProps {
   slug: string;
@@ -82,21 +83,10 @@ export default function ModUnlockWall({
   const [errorMsg, setErrorMsg] = useState("");
   const [needLogin, setNeedLogin] = useState(false);
 
-  // Lấy số dư credit hiện tại (hiển thị cho user)
+  // Lấy số dư credit hiện tại (hiển thị cho user) — đọc nhanh, cache 60s
   const fetchBalance = useCallback(async () => {
-    try {
-      const supabase = createClient();
-      const { data: s } = await supabase.auth.getSession();
-      if (!s.session?.access_token) return;
-      const res = await fetch("/api/credit/balance", {
-        headers: { Authorization: `Bearer ${s.session.access_token}` },
-      });
-      if (!res.ok) return;
-      const d = await res.json();
-      if (typeof d.balance === "number") setBalance(d.balance);
-    } catch {
-      // bỏ qua
-    }
+    const b = await fetchCreditBalance();
+    if (b !== null) setBalance(b);
   }, []);
 
   // Tải nội dung đầy đủ sau khi đã có quyền
