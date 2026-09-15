@@ -7,8 +7,10 @@ import CreditNavChip from "./CreditNavChip";
 import { useAuth } from "./useAuth";
 
 const navItems = [
-  { label: "🔥 CHIA SẺ MODS", href: "/mods" },
-  { label: "GAME KHÁC", href: "#games" },
+  { label: "FC 27 ↗", href: "/#dat-truoc" },
+  { label: "FC 26", href: "/#fc26" },
+  { label: "MODS", href: "/mods" },
+  { label: "GAME KHÁC", href: "/#games" },
 ];
 
 export default function Navbar() {
@@ -30,13 +32,13 @@ export default function Navbar() {
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-[var(--color-surface-0)]/70 backdrop-blur-xl border-b border-line">
-      <div className="max-w-6xl mx-auto px-4 md:px-6 h-14 md:h-16 flex items-center justify-between gap-3">
+      <div className="max-w-[1280px] mx-auto px-4 md:px-6 h-14 md:h-16 flex items-center justify-between gap-3">
         {/* Logo */}
         <Link
           href="/"
           className="flex items-center gap-2 md:gap-3 flex-shrink-0 hover:opacity-80 transition-opacity cursor-pointer"
         >
-          <div className="w-8 h-8 md:w-9 md:h-9 rounded-full overflow-hidden ring-1 ring-coral/40">
+          <div className="w-8 h-8 md:w-9 md:h-9 rounded-full overflow-hidden ring-1 ring-accent/40">
             <Image
               src="/logo.png"
               alt="Logo"
@@ -56,19 +58,19 @@ export default function Navbar() {
         </Link>
 
         {/* Desktop menu */}
-        <div className="hidden md:flex items-center gap-1">
+        <div className="hidden xl:flex items-center gap-1">
           {navItems.map((item) => (
             <Link
               key={item.label}
               href={item.href}
-              className="px-4 py-2 text-[11px] font-bold tracking-widest text-muted hover:text-white transition-colors rounded-lg hover:bg-surface-2"
+              className="px-3 py-2 text-[10px] font-bold tracking-widest text-muted hover:text-white transition-colors rounded-lg hover:bg-surface-2"
             >
               {item.label}
             </Link>
           ))}
           <Link
             href="/huong-dan"
-            className="px-4 py-2 text-[11px] font-bold tracking-widest text-muted hover:text-white transition-colors rounded-lg hover:bg-surface-2 flex items-center gap-2"
+            className="px-3 py-2 text-[10px] font-bold tracking-widest text-muted hover:text-white transition-colors rounded-lg hover:bg-surface-2 flex items-center gap-2"
           >
             <svg
               className="w-3 h-3"
@@ -89,7 +91,7 @@ export default function Navbar() {
             href="https://web.facebook.com/dungbinhluan/"
             target="_blank"
             rel="noopener noreferrer"
-            className="px-4 py-2 text-[11px] font-bold tracking-widest text-muted hover:text-white transition-colors rounded-lg hover:bg-surface-2"
+            className="px-3 py-2 text-[10px] font-bold tracking-widest text-muted hover:text-white transition-colors rounded-lg hover:bg-surface-2"
           >
             GROUP FACEBOOK
           </a>
@@ -108,20 +110,24 @@ export default function Navbar() {
               {isAdmin && (
                 <Link
                   href="/admin/dashboard"
-                  className="flex-shrink-0 px-3 md:px-4 py-2 rounded-xl text-[10px] md:text-[11px] font-semibold tracking-wide text-body border border-coral/40 bg-coral/15 hover:bg-coral/25 transition-colors"
+                  className="hidden sm:block flex-shrink-0 px-3 md:px-4 py-2 rounded-xl text-[10px] md:text-[11px] font-semibold tracking-wide text-body border border-accent/40 bg-accent/15 hover:bg-accent/25 transition-colors"
                 >
-                  Open Admin Panel
+                  Quản trị
                 </Link>
               )}
               <Link
                 href="/account"
                 title="Quản lý tài khoản"
-                className="flex-shrink-0 flex items-center gap-2 px-3 md:px-4 py-2 rounded-xl text-[10px] md:text-[11px] font-black tracking-wide text-white border border-coral/40 bg-coral/15 hover:bg-coral/25 transition-colors"
+                className="flex-shrink-0 flex items-center gap-2 px-3 md:px-4 py-2 rounded-xl text-[10px] md:text-[11px] font-black tracking-wide text-white border border-accent/40 bg-accent/15 hover:bg-accent/25 transition-colors"
               >
                 <span className="w-6 h-6 rounded-full bg-surface-2 flex items-center justify-center text-[10px] overflow-hidden">
                   {user?.user_metadata?.picture ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={user.user_metadata.picture as string} alt="" className="w-full h-full object-cover" />
+                    <img
+                      src={user.user_metadata.picture as string}
+                      alt=""
+                      className="w-full h-full object-cover"
+                    />
                   ) : (
                     displayName.charAt(0).toUpperCase()
                   )}
@@ -135,14 +141,17 @@ export default function Navbar() {
               disabled={authPending}
               className="flex-shrink-0 px-3 md:px-4 py-2 rounded-xl text-[10px] md:text-[11px] font-semibold tracking-wide text-body border border-line bg-surface-1 hover:bg-surface-2 transition-colors disabled:opacity-60"
             >
-              {authPending ? "..." : "Login with Google"}
+              {authPending ? "..." : "Đăng nhập"}
             </button>
           )}
 
           {/* Hamburger — mobile only */}
           <button
+            aria-label={open ? "Đóng menu" : "Mở menu"}
+            aria-expanded={open}
+            aria-controls="mobile-navigation"
             onClick={() => setOpen(!open)}
-            className="md:hidden flex flex-col justify-center items-center w-9 h-9 rounded-lg bg-surface-1 border border-line gap-1.5"
+            className="xl:hidden flex flex-col justify-center items-center w-9 h-9 rounded-lg bg-surface-1 border border-line gap-1.5"
           >
             <span
               className={`block w-4 h-0.5 bg-white transition-all duration-300 ${
@@ -165,7 +174,10 @@ export default function Navbar() {
 
       {/* Mobile menu dropdown */}
       {open && (
-        <div className="md:hidden border-t border-line bg-[var(--color-surface-0)]/95 backdrop-blur-xl px-4 py-3 flex flex-col gap-1">
+        <div
+          id="mobile-navigation"
+          className="xl:hidden border-t border-line bg-[var(--color-surface-0)]/95 backdrop-blur-xl px-4 py-3 flex flex-col gap-1"
+        >
           {user && (
             <Link
               href="/account"

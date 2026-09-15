@@ -1,179 +1,104 @@
-# Ngôn Ngữ Thiết Kế — DungDiBinhLuan (FC 26 Mod)
+# DungDiBinhLuan — Design language / FC 27
 
-> Tài liệu phục vụ họp team: tổng hợp design language hiện tại của **account dashboard (đã migrate)** và **admin (chưa migrate)**, kèm điểm mâu thuẫn cần tinh chỉnh.
-> Trạng thái: 2026-08-31 · Codebase: `app/globals.css`, `app/account/**`, `app/admin/**`, `app/components/Navbar.tsx`
+Cập nhật: 15/09/2026. Áp dụng cho trang chủ mới và định hướng đồng bộ các trang tiếp theo.
+Nguồn sự thật về màu: app/globals.css. Quy tắc triển khai trang chủ: app/home.module.css.
 
----
+## 1. Tinh thần thiết kế
 
-## 1. Concept Tổng Quan
+**Đêm trước mùa giải mới.** Một trang game có chất biên tập: ảnh cầu thủ đủ lớn, tiêu đề mạnh, nền gần đen, coral trầm dẫn mắt đến hành động. Khoảng trống giúp ảnh và giá có sức nặng. Ưu tiên sự rõ ràng và cảm xúc bóng đá.
 
-**Creative North Star: "The VIP Arcade Booth"**
+Mục tiêu trang chủ: khách hiểu ngay FC 27 đang nhận đặt trước, giá 180.000đ, chơi khi game ra mắt; khách FC 26 vẫn tìm được game và mods hiện tại.
 
-Website như một gian booth premium trong khu game arcade sau giờ tối: nền tối tự nhiên, nhưng mọi bề mặt tương tác đều **solid, phân lớp, ấm — không bao giờ đen phẳng**. Chiều sâu được tạo bằng **3 lớp surface** (page → card → raised/hover) thay vì border/glow trang trí.
+## 2. Bảng màu chuẩn
 
-- **Coral `#f06078` = làn VIP**: chỉ xuất hiện ở khoảnh khắc chuyển đổi/giá trị — nút mua, nâng cấp, vương miện membership, badge VIP, focus ring. Giống "dây rào VIP".
-- **Violet `#8f7bf7` = làn sở hữu**: dành cho profile, mod library, unlock — nội dung "bạn đang sở hữu / có thể mở khóa".
-- **Nguyên tắc 2 làn**: coral và violet **không bao giờ chung một interaction surface**. Trả tiền = coral, sở hữu = violet.
+| Primitive / semantic | Giá trị | Vai trò |
+| --- | --- | --- |
+| --brand-canvas / --color-surface-0 | #090a0f | Nền trang gần đen, giống tinh thần ảnh tham chiếu |
+| --brand-card / --color-surface-1 | #14131b | Card, thanh chuyển mùa, vùng bài viết |
+| --brand-raised / --color-surface-2 | #201c26 | Nút phụ, hover, vùng nổi |
+| --brand-coral / --color-accent / --color-coral / --color-primary | #cf5c69 | CTA, giá, nhấn FC 27 |
+| --brand-coral-hover / --color-accent-strong | #dd7480 | Hover CTA |
+| --color-on-accent | #100c10 | Chữ tối trên coral, tăng độ tương phản |
+| --color-title | #f4f5f7 | Tiêu đề |
+| --color-body | #b6bcc9 | Nội dung |
+| --color-muted | #9499a8 | Metadata, chú thích |
+| --color-line | rgba(255,255,255,.08) | Viền thường |
+| --color-line-strong | rgba(255,255,255,.14) | Viền rõ hơn |
+| --color-campaign-amber | #f5a623 | Cam điểm nhấn cho chiến dịch, dùng tiết chế |
+| --color-violet | #8f7bf7 | Chức năng thư viện/tài khoản khi cần |
+| --color-ok | #3ddc97 | Thành công/uy tín |
+| --color-warn | #f4b860 | Cảnh báo |
+| --color-danger | #f45d6a | Lỗi/xóa |
 
-**Tính cách:** Tần số cao, dày, tự tin. Typography nặng (900/700) + tracking chặt; micro-label uppercase tracking rộng. Motion tiết chế (150ms color transition). Mọi trạng thái (loading/error/empty) là một khoảnh khắc được thiết kế với copy + hành động tiếp theo.
+Màu được chọn gần với ảnh người dùng cung cấp; không khẳng định là giá trị gốc tuyệt đối vì ảnh chụp có lớp phủ/độ sáng khác nhau. Nền trước lần sửa này đang là #0f0708, surfaces #140a0d/#1d1015/#2a161d, accent #f06078. Những thay đổi đó đã tồn tại trên đĩa và chưa commit.
 
----
+### Quy tắc màu
 
-## 2. Design Tokens (globals.css)
+- Primitive chỉ khai báo một lần ở :root; semantic aliases và Tailwind cùng tham chiếu primitive.
+- Nền tối chiếm phần lớn trang. Coral dành cho điểm cần quyết định và nhận diện chiến dịch.
+- Cam là tùy chọn cho campaign nhỏ; không biến cả trang thành cam hoặc nâu.
+- Không dùng xanh neon để trang trí mods ở trang chủ. Xanh thành công vẫn có nghĩa riêng trong nút uy tín.
+- Không dùng giá trị màu cứng trong component mới khi đã có token tương ứng.
+- Homepage dùng chữ tối trên nút coral. Component cũ dùng chữ trắng cần được kiểm tra contrast khi migrate; thay token toàn cục không đồng nghĩa mọi trang đã được thiết kế lại.
 
-| Token | Giá trị | Dùng cho |
-|---|---|---|
-| `--color-surface-0` | `#0c0e13` | Nền page, nền input |
-| `--color-surface-1` | `#151922` | Card thường (resting) |
-| `--color-surface-2` | `#1d2330` | Raised / hover, sidebar active, skeleton |
-| `--color-line` | `rgba(255,255,255,0.08)` | Hairline border (raised: 0.12) |
-| `--color-title` | `#f4f5f7` | Tiêu đề, giá trị lớn |
-| `--color-body` | `#b6bcc9` | Text mặc định / đọc |
-| `--color-muted` | `#7c8494` | Label, hint, metadata, timestamp |
-| `--color-coral` | `#f06078` | **Primary accent — CTA & VIP** |
-| `--color-coral-strong` | `#e14a68` | Hover của coral |
-| `--color-violet` | `#8f7bf7` | **Secondary accent — profile & mod** |
-| `--color-ok` | `#3ddc97` | Thành công, active plan |
-| `--color-warn` | `#f4b860` | Cảnh báo, pending |
-| `--color-danger` | `#f45d6a` | Hủy diệt, lỗi, danger zone |
+## 3. Chữ và nhịp điệu
 
-### Surface helpers (`@utility` — dùng kèm `hover:`/`group-hover:`)
+Font duy nhất: Be Vietnam Pro, hỗ trợ tiếng Việt; giữ loader hiện tại.
 
-```
-surface-0      → nền page (surface-0 + border line)
-surface-card   → card thường (surface-1 + border line + shadow nhẹ)
-surface-raised → raised/hover (surface-2 + border white/12 + shadow sâu)
-text-title / text-body / text-muted
-```
+| Cấp | Desktop | Mobile | Weight / line height |
+| --- | --- | --- | --- |
+| Tên EA FC 27 | 90–116px | 76px | 900 / 1; italic |
+| Thông điệp hero | 46px | 32px | 900 / 1.22 |
+| Tiêu đề section | 26–38px | 26px | 900 / 1.25 |
+| Tiêu đề card | 19–23px | 17–23px | 700 / 1.4 |
+| Nội dung | 13–15px | 13px | 400 / 1.7–1.9 |
+| CTA | 11px | 10–11px | 900 |
+| Eyebrow/metadata | 9–10px | 8–10px | 700 |
 
-### Typography
+Chữ nhỏ chỉ dành cho thông tin phụ; giá, phiên bản, trạng thái, nút đặt phải luôn đọc được. Tiêu đề tracking -0.04em; tên game -0.07em. Uppercase giới hạn cho nhãn ngắn. Không viết toàn bộ đoạn văn bằng chữ hoa.
 
-- **Display** (Be Vietnam Pro, 900, clamp 1.5–2rem, lh 1.1, tracking -0.02em): giá trị hero — số membership, stat lớn
-- **Headline** (700, 1.5rem, lh 1.2): tiêu đề section ("Gói membership")
-- **Title** (700, 1.125rem, lh 1.25): tiêu đề card, tên plan
-- **Body** (400, 0.875rem, lh 1.625, ~65ch): mô tả, list item
-- **Label** (900, 0.6875rem, lh 1.2, tracking 0.06em, UPPERCASE): micro-label metadata
+## 4. Bố cục
 
----
+- Container trang chủ 1200px, lề desktop 32px, mobile 20px.
+- Grid chính: khu đặt trước 60/40; bài viết và FAQ 38/62; mods 4 → 2 → 1 cột.
+- Section cách nhau khoảng 64px desktop / 42px mobile.
+- Hero mở đầu bằng một ảnh chủ đạo và một CTA. Không carousel tự chạy.
+- FC 26 có ảnh và nút chọn phiên bản riêng; mức nhấn thấp hơn FC 27.
+- Navbar giữ logo, đăng nhập, ví, quản trị và uy tín; điều hướng FC 27, FC 26, Mods, game, hướng dẫn. Menu chuyển dạng thu gọn dưới 1280px để tránh chen chúc.
+- Fixed navbar được bù khoảng trống bởi root layout; không cộng padding lần nữa ở trang chủ.
 
-## 3. Button System (account/ui.tsx — CHUẨN MỚI)
+## 5. Components và trạng thái
 
-**Base:** `rounded-xl font-bold transition-colors duration-150 disabled:opacity-40`
+### CTA
 
-| Variant | Class | Dùng cho |
-|---|---|---|
-| `primary` | `bg-coral text-white hover:bg-coral-strong` + coral glow shadow | CTA chính, submit, nâng cấp |
-| `secondary` | `bg-surface-2 text-title border-line hover:bg-surface-1 hover:border-white/20` | Hành động phụ |
-| `ghost` | `text-body hover:text-title hover:bg-surface-2` | Link-action, icon |
-| `danger` | `bg-danger/10 text-danger border-danger/25 hover:bg-danger/20` | Xóa, thu hồi |
-| `violet` | `bg-violet/15 text-violet border-violet/25 hover:bg-violet/25` | Mod / unlock |
+Primary: coral, chữ tối, radius 10px, cao tối thiểu 52px, bóng nhẹ. Hover sáng hơn và dịch lên 2px. Secondary: raised surface, viền mảnh, chữ sáng. Link thường có mũi tên, hover sáng lên.
 
-**Size:** `sm` px-3 py-1.5 text-xs · `md` px-4 py-2.5 text-sm · `lg` px-6 py-3 text-sm
+Hero CTA cuộn đến #dat-truoc. CTA xác nhận mở Facebook với nhãn rõ “Liên hệ đặt trước”. Không mô phỏng thanh toán thành công.
 
-### Badge
+### Card và hình ảnh
 
-`rounded-lg text-[11px] font-black uppercase tracking-wide border` + fill tone 12% / border tone 25%.
-Tones: `coral | violet | ok | warn | danger | neutral` (neutral: white/6 fill, body text, white/12 border).
+Radius 12–16px; viền 1px; tối đa một lớp card. Ảnh giữ tỷ lệ, object-fit cover; không kéo méo hoặc che mặt cầu thủ bằng text chính trên desktop. Hero có gradient bảo vệ độ đọc. Giá nằm trong HTML, không chèn vào ảnh.
 
-### Input
+### FAQ
 
-`bg-surface-0 border-line rounded-xl px-4 py-2.5 text-title placeholder:text-muted` — focus: `border-coral + ring-coral/20`. Lỗi: `border-danger/50 + ring-danger/25` + message `role="alert"`.
+Dùng details/summary native: mở bằng chuột hoặc Enter/Space, nội dung vẫn hoạt động khi không có JavaScript. Icon cộng xoay khi mở, không thay nhãn câu hỏi.
 
-### Shadow Vocabulary
+### Nội dung động
 
-- Card: `0 10px 30px -18px rgba(0,0,0,0.7)`
-- Raised: `0 16px 40px -20px rgba(0,0,0,0.8)`
-- **Coral glow duy nhất**: `0 8px 24px -12px rgba(240,96,120,0.55)` — chỉ CTA primary + VIP crown tile
+Mods lấy từ database và dữ liệu có sẵn, bỏ trùng theo slug, ưu tiên dữ liệu database. Bài viết dùng nguồn hiện tại. Khi không có bài viết, hiển thị lời dẫn và link đến chuyên mục. Không dựng số lượt mua, review hay đồng hồ đếm ngược giả.
 
-### Radius
+### Accessibility và motion
 
-- `rounded-xl` (12px): buttons, inputs, nav items
-- `rounded-2xl` (16px): cards, membership hero
-- `rounded-lg` (6px): badges, focus outline
+Một h1; section có h2 và aria-labelledby; nút menu có nhãn và aria-expanded. Focus ring coral 2px; mọi ý nghĩa trạng thái có chữ đi kèm. Anchor có scroll-margin để tránh navbar che tiêu đề. Motion 150–250ms, tôn trọng prefers-reduced-motion.
 
----
+## 6. Giọng văn
 
-## 4. Navbar (public — ĐÃ MIGRATE)
+Thân thiện, trực tiếp, mang tinh thần bóng đá. Dùng “anh em” vừa phải. Ưu tiên các câu ngắn: “Mùa giải mới. Đam mê tiếp nối.”, “Chơi ngay khi game ra mắt.”, “Sân cỏ vẫn đang chờ bạn.”
 
-- Fixed top: `bg-surface-0/70 backdrop-blur-xl border-line`, h-14/md:h-16
-- Logo tròn `ring-coral/40`, brand + tagline `text-muted tracking-[0.3em]`
-- Nav links: `text-muted hover:text-white hover:bg-surface-2 rounded-lg`
-- CTA "TẢI NGAY": **coral filled + glow**
-- Auth (account/admin): `border-coral/40 bg-coral/15 hover:bg-coral/25`
-- Logout: `border-line bg-surface-1`
-- Mobile: hamburger `bg-surface-1 border-line` → dropdown `bg-surface-0/95`
+Không tự thêm ngày phát hành, quyền lợi Ultimate, chơi online, quà tặng hay hỗ trợ mod FC 27 khi chưa xác nhận. Ảnh có tên edition chỉ là minh họa; FAQ làm rõ cần xác nhận gói.
 
----
+## 7. Phạm vi migration
 
-## 5. Account Dashboard (ĐÃ MIGRATE — chuẩn mới)
+Đã áp dụng: homepage, menu, global primitives, ảnh FC 27, SEO riêng trang chủ. Các chỉnh sửa người dùng ở account/admin/payment được giữ lại. Không coi tài liệu này là bằng chứng các màn hình đó đã được kiểm thử hoặc migrate toàn bộ.
 
-**Layout:** sidebar desktop sticky 240px (dưới lg → tab rail ngang scroll), 6 tabs: overview, profile, orders, library, membership, security. `role=tablist` + arrow-key.
-
-- **Focal point:** MembershipHero — active VIP (raised + coral/25 border + crown tile + time-bar) ; non-VIP (coral CTA "Nâng cấp lên VIP" → payment)
-- **StatCard:** icon accent (coral=vip / violet=mod / ok=active) + `text-xl font-black` value + uppercase label
-- **Orders:** desktop table / mobile compact cards + OrderDetailModal (drawer, ESC, auto-focus)
-- **Mod library:** grid, accent violet
-- **Empty state:** mọi list = 0 đều có copy + CTA
-- **Loading:** Skeleton `animate-pulse bg-surface-2/80` · Error: ErrorState + retry
-
----
-
-## 6. Admin (CHƯA MIGRATE — hệ cũ) + Mapping
-
-| Hạng mục | Admin hiện tại | Account mới (chuẩn) |
-|---|---|---|
-| Page bg | `bg-[#0a0a0a]` | `surface-0` `#0c0e13` |
-| Card | `bg-[#111111]` flat + `border-white/10` | `surface-card` (3 lớp + shadow) |
-| Accent chính | `--color-primary` `#ce5a67` | **coral `#f06078`** |
-| VIP | **amber** (`amber-500`) | **coral** (VIP = coral theo semantics) |
-| Buttons | inline thủ công lặp lại | `Button` component 5 variants |
-| Text | `slate-400/500` | `text-muted / text-body / text-title` |
-| Badge role | `red/amber/blue/slate` (role-based) | tone-based: `coral/violet/ok/warn/danger` |
-| Loading | spinner thủ công | Skeleton |
-| Toast | `green-500/90` | (chưa có chuẩn — cần quyết định) |
-
-**Điểm mâu thuẫn cần team quyết định:**
-
-1. **Accent admin**: giữ màu riêng cho admin (ví dụ: admin = một màu quản trị) hay thống nhất coral toàn site?
-2. **VIP màu**: account dùng coral cho VIP, admin đang dùng amber — chọn 1 (đề xuất: coral).
-3. **Badge role admin** (`admin/vip/moderator/user`): giữ màu theo role (red/amber/blue) hay map sang tone system (`coral/violet/ok/neutral`)?
-4. **Toast/confirm**: account không có toast chuẩn; admin dùng `confirm()` + toast xanh — có đưa vào design system chung?
-5. **Pane collapsible admin** (Quản lý Member, Membership VIP, Thêm Mod): giữ kiểu `bg-[#111117] border accent/20` hay đổi sang `surface-card + accent-border/25`?
-
----
-
-## 7. Luật Bất Biến (Do / Don't)
-
-### Do
-- ✅ Phân lớp chiều sâu bằng 3 surface (0 → card → raised), không lồng card trong card
-- ✅ Coral chỉ cho conversion/value (mua, nâng cấp, VIP); violet chỉ cho ownership (profile, mods, unlocks)
-- ✅ Mọi list rỗng / stat = 0 đều có copy giải thích + CTA
-- ✅ Micro-label metadata: uppercase font-black 11px tracking 0.06em
-- ✅ Focus-visible coral 2px / offset 2px trên mọi element tương tác
-- ✅ Hairline border 8% white (12% raised) — structure, không trang trí
-- ✅ Tôn trọng reduced motion (animation co về ~0.01ms, chức năng giữ nguyên)
-
-### Don't
-- ❌ Nền đen phẳng / text xám thuần — luôn pha vào nền navy tối
-- ❌ Glow ngoài CTA coral, crown tile, khoảnh khắc VIP
-- ❌ Glassmorphism trên account surfaces
-- ❌ Gradient/animation nền chồng chéo — hệ thống là layered-lift, không phải liquid
-- ❌ Trộn coral + violet trên một element
-- ❌ Tràn ngang dưới 320px — scroll ngang chỉ ở tab strip mobile
-- ❌ Easing bounce/elastic — chỉ 150ms color shift
-
----
-
-## 8. Trạng thái chuyển đổi (Migration Status)
-
-| Khu vực | Trạng thái |
-|---|---|
-| `app/account/**` (overview, profile, orders, library, membership, security) | ✅ Migrated đầy đủ |
-| `app/components/Navbar.tsx` | ✅ Migrated |
-| `app/mods/mix-mods-fc26/payment/page.tsx` | ✅ Migrated |
-| `app/admin/**` (dashboard, mods, guides, community, generate, scraper) | ⏳ Chưa migrate |
-| `app/page.tsx` (home), `app/mods/*`, `app/huong-dan/*` | ⏳ Chưa migrate (chờ quyết định) |
-
----
-
-*File này sinh từ codebase thực tế — tham chiếu: `app/globals.css`, `app/account/components/ui.tsx`, `app/account/components/DashboardLayout.tsx`, `app/components/Navbar.tsx`, `app/admin/dashboard/page.tsx`, `DESIGN.md`.*
+Blueprint cụ thể: FC27-HOMEPAGE-BLUEPRINT.md.

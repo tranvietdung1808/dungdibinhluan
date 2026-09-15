@@ -1,17 +1,31 @@
 @import "tailwindcss";
 :root {
+  /* Brand primitives: shared by CSS and Tailwind. Reference: supplied homepage image. */
+  --brand-coral: #cf5c69;
+  --brand-coral-hover: #dd7480;
+  --brand-canvas: #090a0f;
+  --brand-card: #14131b;
+  --brand-raised: #201c26;
+  --color-title: #f4f5f7;
+  --color-body: #b6bcc9;
+  --color-muted: #9499a8;
+  --color-campaign-amber: #f5a623;
   --font-sans: var(--font-be-vietnam);
-  --background: #080810;
+  --background: var(--brand-canvas);
   --foreground: #ededed;
-  --accent: #ce5a67;
-  --color-primary: #ce5a67;
+  --accent: var(--brand-coral);
+  --color-primary: var(--brand-coral);
+  --color-accent: var(--brand-coral);
+  --color-accent-strong: var(--brand-coral-hover);
+  --color-on-accent: #100c10;
 
   /* ===== Premium Dark Gaming SaaS — Surface tokens =====
      Không dùng nền đen phẳng: 3 lớp surface rõ ràng
-     0: page background · 1: normal card · 2: raised / hover */
-  --color-surface-0: #0c0e13;
-  --color-surface-1: #151922;
-  --color-surface-2: #1d2330;
+     0: page background · 1: normal card · 2: raised / hover
+     Nền gần đen theo ảnh tham chiếu; coral dành cho điểm nhấn */
+  --color-surface-0: var(--brand-canvas);
+  --color-surface-1: var(--brand-card);
+  --color-surface-2: var(--brand-raised);
   --color-line: rgba(255, 255, 255, 0.08);
   --color-line-strong: rgba(255, 255, 255, 0.14);
   --accent-edge-width: 3px;
@@ -21,8 +35,8 @@
     0 20px 50px -30px rgba(0, 0, 0, 0.6);
 
   /* Coral/pink = primary accent (CTA & VIP) */
-  --color-coral: #f06078;
-  --color-coral-strong: #e14a68;
+  --color-coral: var(--brand-coral);
+  --color-coral-strong: var(--brand-coral-hover);
 
   /* Purple = accent phụ (profile & mod library) */
   --color-violet: #8f7bf7;
@@ -43,14 +57,17 @@ body {
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-primary: #ce5a67;
-  --color-surface-0: #0c0e13;
-  --color-surface-1: #151922;
-  --color-surface-2: #1d2330;
+  --color-primary: var(--brand-coral);
+  --color-accent: var(--brand-coral);
+  --color-accent-strong: var(--brand-coral-hover);
+  --color-on-accent: #100c10;
+  --color-surface-0: var(--brand-canvas);
+  --color-surface-1: var(--brand-card);
+  --color-surface-2: var(--brand-raised);
   --color-line: rgba(255, 255, 255, 0.08);
   --color-line-strong: rgba(255, 255, 255, 0.14);
-  --color-coral: #f06078;
-  --color-coral-strong: #e14a68;
+  --color-coral: var(--brand-coral);
+  --color-coral-strong: var(--brand-coral-hover);
   --color-violet: #8f7bf7;
   --color-ok: #3ddc97;
   --color-warn: #f4b860;
@@ -97,16 +114,16 @@ body {
 
 /* Text hierarchy trên dark surface (dùng được với hover:/group-hover:) */
 @utility text-title {
-  color: #f4f5f7;
+  color: var(--color-title);
 }
 @utility text-body {
-  color: #b6bcc9;
+  color: var(--color-body);
 }
 @utility text-text-body {
-  color: #b6bcc9;
+  color: var(--color-body);
 }
 @utility text-muted {
-  color: #7c8494;
+  color: var(--color-muted);
 }
 
 /* Scrollbar tối giản */
@@ -128,8 +145,8 @@ body {
 
 /* ===== Browser surface theming ===== */
 ::selection {
-  background: rgba(240, 96, 120, 0.32);
-  color: #f4f5f7;
+  background: color-mix(in srgb, var(--color-accent) 32%, transparent);
+  color: var(--color-title);
 }
 
 @media (prefers-color-scheme: dark) {

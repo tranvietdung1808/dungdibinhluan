@@ -1,25 +1,41 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import dynamic from "next/dynamic";
 import { GAMES } from "./data/games";
 import { MODS } from "./data/mods";
 import { FACES } from "./data/faces";
-import HeroSection from "./components/HeroSection";
-import AutumnSaleBanner from "./components/WorldCupBanner";
 import { createClient } from "@/utils/supabase/server";
 import { resolveThumbnailSrc } from "@/utils/r2";
+import s from "./home.module.css";
 
+const PREORDER_PRICE = 180000;
+const price = new Intl.NumberFormat("vi-VN").format(PREORDER_PRICE) + "đ";
+const contactUrl = "https://web.facebook.com/dungbinhluan/";
 export const metadata: Metadata = {
-  alternates: {
-    canonical: "https://dungdibinhluan.com",
+  title: "Đặt trước EA FC 27 — 180.000đ | FC 26 & Mods",
+  description:
+    "Đặt trước FC 27 giá 180.000đ tại DungDiBinhLuan. Chơi ngay khi game ra mắt. Khám phá FC 26, mods và hướng dẫn Career Mode.",
+  alternates: { canonical: "https://dungdibinhluan.com" },
+  openGraph: {
+    title: "EA FC 27 — Sẵn sàng cho mùa giải mới",
+    description: "Đặt trước 180.000đ. Chơi ngay khi game ra mắt.",
+    images: [
+      {
+        url: "/games/fc27/fc27-city.webp",
+        width: 1240,
+        height: 698,
+        alt: "EA FC 27",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Đặt trước EA FC 27 — 180.000đ",
+    description: "Chơi ngay khi game ra mắt.",
+    images: ["/games/fc27/fc27-city.webp"],
   },
 };
-
-export const revalidate = 86400;
-
-const FeatureSlider = dynamic(() => import("./components/FeatureSlider"));
-
+export const revalidate = 3600;
 type HomeGuide = {
   id: string;
   title: string;
@@ -27,7 +43,6 @@ type HomeGuide = {
   created_at: string;
   thumbnail_url: string | null;
 };
-
 type HomeDbMod = {
   id: string;
   slug: string;
@@ -36,7 +51,6 @@ type HomeDbMod = {
   thumbnail: string | null;
   tags: string[];
 };
-
 type HomeModCard = {
   slug: string;
   name: string;
@@ -44,239 +58,52 @@ type HomeModCard = {
   thumbnail: string;
   tag: string;
 };
-
-// ========== QUICK FEATURES ==========
-const features = [
-  { icon: "🛒", title: "MUA HÀNG DỄ DÀNG", desc: "Nhanh chóng, thuận tiện. Với nhiều mẫu mã cho anh em lựa chọn." },
-  { icon: "💬", title: "HỖ TRỢ NHANH CHÓNG", desc: "Đội ngũ admin luôn sẵn sàng xử lí những vấn đề anh em gặp phải." },
-  { icon: "🛡️", title: "BẢO HÀNH TRỌN ĐỜI", desc: "Cam kết bảo hành trọn đời với những sản phẩm đã mua." },
-  { icon: "⚙️", title: "DỄ DÀNG CÀI ĐẶT", desc: "Hỗ trợ cài đặt 1:1 qua Teamviewer bất cứ lúc nào." },
+const parseDate = (value: string) => {
+  if (value.includes("/")) {
+    const [d, m, y] = value.split("/").map(Number);
+    return new Date(y, m - 1, d).getTime() || 0;
+  }
+  return new Date(value).getTime() || 0;
+};
+const sortModsByUpdated = (a: HomeModCard, b: HomeModCard) =>
+  parseDate(b.updatedAt) - parseDate(a.updatedAt);
+const Arrow = () => <span aria-hidden="true">↗</span>;
+const faqs = [
+  [
+    "Đặt trước FC 27 giá bao nhiêu?",
+    "Giá đặt trước là 180.000đ. Nhấn “Liên hệ đặt trước” để trao đổi với DungDiBinhLuan trên Facebook và xác nhận thông tin gói trước khi thanh toán.",
+  ],
+  [
+    "Khi nào mình được chơi FC 27?",
+    "Chơi ngay khi game ra mắt. Thời điểm mở chơi và hướng dẫn nhận game sẽ được xác nhận trực tiếp qua kênh hỗ trợ khi đặt trước.",
+  ],
+  [
+    "Gói đặt trước bao gồm phiên bản nào?",
+    "Liên hệ để xác nhận phiên bản, hình thức kích hoạt, chế độ chơi và cấu hình phù hợp trước khi đặt. Hình ảnh trên trang dùng để minh họa, không đại diện cho quyền lợi của gói.",
+  ],
+  [
+    "FC 26 và các bản mod có còn không?",
+    "Có. FC 26 vẫn có khu chọn phiên bản riêng, cùng thư viện mods và hướng dẫn hiện tại. Bạn có thể tiếp tục chơi FC 26 trong lúc chờ FC 27.",
+  ],
+  [
+    "Mods FC 26 có dùng được cho FC 27 không?",
+    "Các mods hiện có được ghi theo phiên bản hỗ trợ trên từng trang chi tiết. Chỉ sử dụng cho FC 27 khi bản mod đã được xác nhận tương thích.",
+  ],
 ];
 
-const Features = () => (
-  <section className="bg-[#080810] border-y border-white/5 py-10 md:py-14">
-    <div className="max-w-6xl mx-auto px-4 md:px-6 grid grid-cols-2 md:grid-cols-4 gap-5 md:gap-8">
-      {features.map((f) => (
-        <div key={f.title} className="text-center space-y-2 md:space-y-3">
-          <div className="w-11 h-11 md:w-14 md:h-14 mx-auto rounded-xl md:rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center text-xl md:text-2xl">
-            {f.icon}
-          </div>
-          <p className="text-[9px] md:text-[10px] font-black tracking-widest text-white uppercase">{f.title}</p>
-          <p className="text-[10px] md:text-xs text-slate-500 leading-relaxed">{f.desc}</p>
-        </div>
-      ))}
-    </div>
-  </section>
-);
-
-const parseDate = (str: string) => {
-  if (!str) return 0;
-  if (str.includes("/")) {
-    const [day, month, year] = str.split("/").map(Number);
-    return new Date(year, month - 1, day).getTime();
-  }
-  const t = new Date(str).getTime();
-  return Number.isNaN(t) ? 0 : t;
-};
-
-const sortModsByUpdated = (a: HomeModCard, b: HomeModCard) => {
-  const diff = parseDate(b.updatedAt) - parseDate(a.updatedAt);
-  return Number.isNaN(diff) ? 0 : diff;
-};
-
-const LatestModsSection = ({ mods }: { mods: HomeModCard[] }) => {
-  if (mods.length === 0) return null;
-
-  return (
-    <section className="max-w-6xl mx-auto px-4 md:px-6 mt-6 lg:mt-8 relative z-20" aria-labelledby="latest-mods-heading">
-      <div className="rounded-3xl border border-white/10 bg-[#0d0d14]/95 backdrop-blur-xl p-4 md:p-6">
-        <div className="flex items-center justify-between mb-5">
-          <div>
-            <p className="text-[10px] uppercase tracking-[0.3em] text-slate-500">CHIA SẺ MODS MIỄN PHÍ</p>
-            <h2 id="latest-mods-heading" className="text-xl md:text-2xl font-black mt-1">MOD MỚI CẬP NHẬT</h2>
-          </div>
-          <Link href="/mods" className="text-[10px] md:text-xs text-[#ce5a67] font-black tracking-widest hover:underline uppercase">
-            Xem tất cả
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
-          {mods.slice(0, 8).map((mod) => (
-            <article key={mod.slug}>
-              <Link
-                href={`/mods/${mod.slug}`}
-                className="group rounded-2xl border border-white/10 bg-white/[0.02] overflow-hidden hover:border-[#ce5a67]/45 transition-colors block"
-              >
-                <div className="relative h-28 md:h-32 bg-[#111]">
-                  {mod.thumbnail ? (
-                    <Image
-                      src={mod.thumbnail}
-                      alt={`Thumbnail mod ${mod.name}`}
-                      fill
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 25vw"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-[#1a1a1f] to-[#0a0a0a]" />
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-                  <span className="absolute top-2 left-2 px-2 py-1 rounded-full text-[9px] font-black tracking-widest bg-[#ce5a67]/20 text-[#ce5a67] border border-[#ce5a67]/30">
-                    {mod.tag}
-                  </span>
-                </div>
-                <div className="p-2.5 md:p-3">
-                  <h3 className="text-xs md:text-sm font-bold line-clamp-2 leading-snug group-hover:text-[#ce5a67] transition-colors">{mod.name}</h3>
-                  <p className="mt-1.5 md:mt-2 text-[9px] md:text-[10px] text-slate-500">Cập nhật: {mod.updatedAt}</p>
-                </div>
-              </Link>
-            </article>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-};
-
-const MobileLatestGuidesSection = ({
-  guides,
-}: {
-  guides: Array<{ id: string; slug: string; title: string; createdAt: string; thumbnail?: string }>;
-}) => {
-  if (guides.length === 0) return null;
-
-  return (
-    <section className="xl:hidden max-w-6xl mx-auto px-4 md:px-6 mt-4">
-      <div className="rounded-2xl border border-white/10 bg-[#0d0d14]/90 p-4">
-        <div className="flex items-center justify-between mb-3">
-          <p className="text-[10px] uppercase tracking-[0.28em] text-slate-300">BÀI VIẾT MỚI</p>
-          <Link href="/huong-dan" className="text-[10px] text-[#ce5a67] font-black tracking-widest hover:underline uppercase">
-            Xem tất cả
-          </Link>
-        </div>
-
-        <div className="flex gap-3 overflow-x-auto pb-1 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-          {guides.map((guide) => (
-            <Link
-              key={guide.id}
-              href={`/huong-dan/${guide.slug}`}
-              className="snap-start min-w-[200px] max-w-[200px] md:min-w-[210px] md:max-w-[210px] rounded-xl border border-white/10 bg-white/[0.03] overflow-hidden"
-            >
-              <div className="relative h-32 md:h-36 bg-[#13131b]">
-                {guide.thumbnail ? (
-                  <Image
-                    src={guide.thumbnail}
-                    alt={guide.title}
-                    fill
-                    className="w-full h-full object-cover"
-                    sizes="(max-width: 768px) 240px, 210px"
-                    quality={95}
-                    unoptimized={guide.thumbnail.startsWith("/api/media/")}
-                    loading="lazy"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-b from-[#ce5a67]/25 to-transparent" />
-                )}
-              </div>
-              <div className="p-3">
-                <p className="text-xs text-white line-clamp-2 leading-snug">{guide.title}</p>
-                <p className="mt-2 text-[10px] text-slate-500">{guide.createdAt}</p>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-};
-
-// ========== GAME GRID ==========
-const GameGrid = () => {
-  const others = GAMES.filter((g) => !g.spotlight);
-
-  return (
-    <section id="games" className="max-w-6xl mx-auto px-4 md:px-6 py-10 md:py-16 space-y-6 md:space-y-8" aria-labelledby="games-heading">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 id="games-heading" className="text-xl md:text-2xl font-black tracking-tight">CÁC GAME KHÁC</h2>
-          <p className="text-[10px] text-slate-500 tracking-widest uppercase mt-1">Liên hệ để mua</p>
-        </div>
-        <a
-          href="https://web.facebook.com/dungbinhluan/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-[10px] text-[#ce5a67] font-bold tracking-widest hover:underline uppercase"
-        >
-          Xem tất cả →
-        </a>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
-        {others.map((game) => (
-          <article
-            key={game.slug}
-            className="group relative overflow-hidden rounded-2xl border transition-all hover:scale-[1.01] duration-300"
-            style={{
-              borderColor: `${game.coverColor}20`,
-              background: `radial-gradient(ellipse at top right, ${game.coverColor}10, transparent 60%), #111`,
-            }}
-          >
-            <div className="relative h-36 md:h-44 overflow-hidden">
-              <Image
-                src={game.thumbnail ?? `/games/${game.slug}-thumb.jpg`}
-                alt={`Thumbnail game ${game.name}`}
-                fill
-                className="object-cover opacity-60 group-hover:opacity-80 group-hover:scale-105 transition-all duration-500"
-                sizes="(max-width: 640px) 100vw, 50vw"
-                loading="lazy"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#111] via-transparent to-transparent" />
-              <span
-                className="absolute top-3 left-3 md:top-4 md:left-4 px-2.5 py-1 rounded-full text-[9px] font-black tracking-widest"
-                style={{
-                  background: `${game.coverColor}20`,
-                  color: game.coverColor,
-                  border: `1px solid ${game.coverColor}30`,
-                }}
-              >
-                {game.tag}
-              </span>
-            </div>
-
-            <div className="p-4 md:p-5 space-y-3 md:space-y-4">
-              <div>
-                <h3 className="text-base md:text-lg font-black">{game.name}</h3>
-                <p className="text-[9px] uppercase tracking-widest mt-0.5" style={{ color: game.coverColor }}>
-                  {game.subtitle}
-                </p>
-                <p className="text-slate-500 text-xs mt-1">{game.description}</p>
-              </div>
-              <a
-                href={game.fbUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 py-2.5 md:py-3 rounded-xl text-xs font-black tracking-widest border transition-all hover:opacity-80"
-                style={{ borderColor: `${game.coverColor}40`, color: game.coverColor }}
-              >
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                </svg>
-                LIÊN HỆ MUA
-              </a>
-            </div>
-          </article>
-        ))}
-      </div>
-    </section>
-  );
-};
-
-// ========== PAGE ==========
 export default async function HomePage() {
   const supabase = createClient();
   const [guidesRes, dbModsRes] = await Promise.all([
-    supabase.from("guides").select("id,title,slug,created_at,thumbnail_url").order("created_at", { ascending: false }).limit(6),
-    supabase.from("mods").select("id,slug,name,updated_at,thumbnail,tags").order("created_at", { ascending: false }).limit(8),
+    supabase
+      .from("guides")
+      .select("id,title,slug,created_at,thumbnail_url")
+      .order("created_at", { ascending: false })
+      .limit(6),
+    supabase
+      .from("mods")
+      .select("id,slug,name,updated_at,thumbnail,tags")
+      .order("created_at", { ascending: false })
+      .limit(8),
   ]);
 
   const latestGuides: HomeGuide[] = guidesRes.data || [];
@@ -296,66 +123,455 @@ export default async function HomePage() {
     tag: mod.tags?.[0] || "MOD",
   }));
 
-  const dbMods: HomeModCard[] = ((dbModsRes.data || []) as HomeDbMod[]).map((mod) => ({
-    slug: mod.slug,
-    name: mod.name,
-    updatedAt: mod.updated_at,
-    thumbnail: resolveThumbnailSrc(mod.thumbnail) || "",
-    tag: mod.tags?.[0] || "MOD",
-  }));
+  const dbMods: HomeModCard[] = ((dbModsRes.data || []) as HomeDbMod[]).map(
+    (mod) => ({
+      slug: mod.slug,
+      name: mod.name,
+      updatedAt: mod.updated_at,
+      thumbnail: resolveThumbnailSrc(mod.thumbnail) || "",
+      tag: mod.tags?.[0] || "MOD",
+    }),
+  );
 
-  const latestMods = [...dbMods, ...staticMods].sort(sortModsByUpdated);
+  const latestMods = [
+    ...new Map(
+      [...staticMods, ...dbMods].map((mod) => [mod.slug, mod]),
+    ).values(),
+  ].sort(sortModsByUpdated);
 
   return (
-    <main className="min-h-screen bg-[#080810] text-white">
-      <h1 className="sr-only">DungDiBinhLuan - Mod Game FC 26, FIFA, Facepack chất lượng cao</h1>
-      <div className="pt-14 md:pt-16">
-        <AutumnSaleBanner />
-        <section>
-          <HeroSection latestGuides={heroGuides} />
-        </section>
-        <section className="max-w-6xl mx-auto px-4 md:px-6 mt-8 relative z-20">
-          <div className="rounded-2xl border border-[#ce5a67]/30 bg-[#ce5a67]/5 backdrop-blur-xl p-4 md:p-5 flex items-start gap-3">
-            <span className="text-lg mt-0.5">🛡️</span>
-            <div>
-              <p className="text-xs md:text-sm text-slate-200 leading-relaxed">
-                <strong className="text-[#ce5a67]">Lưu ý:</strong> Website cung cấp <strong>key bản quyền offline chính hãng</strong> — <em>không phải crack</em>. 
-                EA FC 26 sử dụng công nghệ <strong>Denuvo Anti-Tamper</strong> chống crack, do đó <u>không thể bẻ khóa</u>. 
-                Toàn bộ key được kích hoạt hợp lệ, chơi offline ổn định.
-              </p>
-            </div>
-          </div>
-        </section>
-        <section>
-          <MobileLatestGuidesSection guides={heroGuides} />
-        </section>
-        <section>
-          <LatestModsSection mods={latestMods} />
-        </section>
-        <section id="tinh-nang" className="-mt-10 relative z-10">
-          <FeatureSlider />
-        </section>
-        <section>
-          <Features />
-        </section>
-        <section id="games">
-          <GameGrid />
-        </section>
+    <main className={s.home} id="home">
+      <a href="#dat-truoc" className={s.skip}>
+        Đến phần đặt trước FC 27
+      </a>
+      <div className={s.announcement}>
+        <span className={s.dot} /> MÙA GIẢI MỚI ĐANG ĐẾN{" "}
+        <span className={s.announcementDivider}>/</span>{" "}
+        <a href="#dat-truoc">
+          Đặt trước FC 27 · {price} <Arrow />
+        </a>
       </div>
-      <footer className="border-t border-white/5 px-4 md:px-6 py-5 md:py-6 text-center space-y-3">
-        <div className="flex items-center justify-center gap-4 md:gap-6 text-[10px] md:text-xs">
-          <Link href="/dmca" className="text-slate-500 hover:text-white transition-colors uppercase tracking-widest">
-            DMCA & Abuse
+      <section className={s.hero} aria-labelledby="hero-title">
+        <div className={s.heroArt}>
+          <Image
+            src="/games/fc27/fc27-portrait.webp"
+            alt="Ảnh minh họa EA FC 27 với cầu thủ trong trang phục Real Madrid"
+            fill
+            priority
+            sizes="(max-width: 700px) 100vw, 58vw"
+            className={s.portrait}
+          />
+        </div>
+        <div className={s.heroShade} />
+        <div className={s.container}>
+          <div className={s.heroTop}>
+            <span>DUNGDIBINHLUAN / NEXT SEASON</span>
+            <span>FC 27 — ĐẶT TRƯỚC</span>
+          </div>
+          <div className={s.heroContent}>
+            <p className={s.eyebrow}>
+              <span className={s.dot} /> SẴN SÀNG CHO NGÀY RA MẮT
+            </p>
+            <h1 id="hero-title" className={s.heroTitle}>
+              EA FC <span>27</span>
+              <small>
+                Mùa giải mới.
+                <br />
+                Đam mê tiếp nối.
+              </small>
+            </h1>
+            <p className={s.heroDescription}>
+              Chơi ngay khi game ra mắt.
+              <br />
+              Đặt trước hôm nay, sẵn sàng bước vào sân.
+            </p>
+            <div className={s.heroOffer}>
+              <div>
+                <span className={s.overline}>GIÁ ĐẶT TRƯỚC</span>
+                <strong>{price}</strong>
+              </div>
+              <a href="#dat-truoc" className={s.primary}>
+                ĐẶT TRƯỚC FC 27 <Arrow />
+              </a>
+            </div>
+            <Link href="/games/fc26/select" className={s.quietLink}>
+              Muốn chơi ngay? Khám phá FC 26 <span aria-hidden="true">→</span>
+            </Link>
+          </div>
+          <div className={s.heroBottom}>
+            <span>01 / MÙA GIẢI TIẾP THEO</span>
+            <a href="#dat-truoc">
+              KHÁM PHÁ FC 27 <span aria-hidden="true">↓</span>
+            </a>
+            <span className={s.artNote}>HÌNH ẢNH MINH HỌA</span>
+          </div>
+        </div>
+      </section>
+      <div className={s.seasonRail}>
+        <div className={s.container}>
+          <a href="#dat-truoc">
+            <span className={s.dot} />
+            <b>FC 27</b>
+            <span>Đang nhận đặt trước</span>
+            <Arrow />
+          </a>
+          <a href="#fc26">
+            <b>FC 26</b>
+            <span>Sẵn sàng để chơi</span>
+            <Arrow />
+          </a>
+          <Link href="/mods">
+            <b>MODS & CAREER MODE</b>
+            <span>Tiếp tục đam mê</span>
+            <Arrow />
           </Link>
         </div>
-        <p className="text-[9px] md:text-[10px] text-slate-400 max-w-xl mx-auto leading-relaxed">
-          ⚠️ Website cung cấp <strong>key bản quyền offline chính hãng</strong> — không phải crack. 
-          EA FC 26 được bảo vệ bởi <strong>Denuvo</strong>, không thể bẻ khóa. 
-          Chúng tôi <em>không</em> phân phối phần mềm lậu.
-        </p>
-        <p className="text-[9px] text-slate-600 uppercase tracking-widest">
-          © 2026 DUNGDIBINHLUAN — Key Bản Quyền Offline Chính Hãng
-        </p>
+      </div>
+      <section
+        id="dat-truoc"
+        className={s.section}
+        aria-labelledby="preorder-title"
+      >
+        <div className={s.sectionHeader}>
+          <div>
+            <p className={s.eyebrow}>01 / KHỞI ĐỘNG MÙA GIẢI MỚI</p>
+            <h2 id="preorder-title">Sẵn sàng. Ngay từ hôm nay.</h2>
+          </div>
+          <span className={s.status}>ĐANG NHẬN ĐẶT TRƯỚC</span>
+        </div>
+        <div className={s.preorderGrid}>
+          <div className={s.cityCard}>
+            <div className={s.cityImage}>
+              <Image
+                src="/games/fc27/fc27-city.webp"
+                alt="Ảnh minh họa FC 27 trên nền thành phố và sân bóng"
+                fill
+                sizes="(max-width: 800px) 100vw, 60vw"
+              />
+            </div>
+            <div className={s.cityCaption}>
+              <div>
+                <span className={s.overline}>EA SPORTS FC 27</span>
+                <h3>Một mùa giải để mong chờ.</h3>
+              </div>
+              <span aria-hidden="true">↗</span>
+            </div>
+          </div>
+          <div className={s.orderCard}>
+            <p className={s.eyebrow}>DÀNH CHO ANH EM SẴN SÀNG</p>
+            <h3>Đặt trước FC 27</h3>
+            <p className={s.orderPrice}>{price}</p>
+            <p className={s.orderPromise}>Chơi ngay khi game ra mắt.</p>
+            <ul className={s.benefits}>
+              <li>
+                <span>01</span> Xác nhận gói phù hợp trước khi đặt
+              </li>
+              <li>
+                <span>02</span> Nhận thông tin mở chơi qua hỗ trợ
+              </li>
+              <li>
+                <span>03</span> Hướng dẫn nhận game khi ra mắt
+              </li>
+            </ul>
+            <a
+              className={s.primary}
+              href={contactUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              LIÊN HỆ ĐẶT TRƯỚC <Arrow />
+            </a>
+            <p className={s.fineprint}>
+              Mở Facebook của DungDiBinhLuan để xác nhận đơn và thông tin gói.
+            </p>
+          </div>
+        </div>
+        <div className={s.steps}>
+          <div>
+            <span>01</span>
+            <h3>Chọn mùa giải mới</h3>
+            <p>FC 27 với giá đặt trước {price}.</p>
+          </div>
+          <div>
+            <span>02</span>
+            <h3>Kết nối với Page</h3>
+            <p>Nhắn Page để xác nhận phiên bản và cách nhận game.</p>
+          </div>
+          <div>
+            <span>03</span>
+            <h3>Sẵn sàng vào sân</h3>
+            <p>Chơi ngay khi game ra mắt.</p>
+          </div>
+        </div>
+      </section>
+      <section id="fc26" className={s.section} aria-labelledby="fc26-title">
+        <div className={s.sectionHeader}>
+          <div>
+            <p className={s.eyebrow}>02 / TRONG LÚC CHỜ FC 27</p>
+            <h2 id="fc26-title">Sân cỏ vẫn đang chờ bạn.</h2>
+          </div>
+          <Link href="/games/fc26" className={s.textLink}>
+            Chi tiết FC 26 <Arrow />
+          </Link>
+        </div>
+        <div className={s.fc26Card}>
+          <Image
+            src="/games/fc26-banner.jpg"
+            alt="EA FC 26"
+            fill
+            sizes="(max-width: 800px) 100vw, 1200px"
+          />
+          <div className={s.fc26Shade} />
+          <div className={s.fc26Content}>
+            <span className={s.status}>ĐANG CÓ SẴN</span>
+            <h3>
+              EA FC <span>26</span>
+            </h3>
+            <p>
+              Tiếp tục hành trình Career Mode.
+              <br />
+              Khám phá game, bộ mods và hướng dẫn cài đặt.
+            </p>
+            <div className={s.actions}>
+              <Link href="/games/fc26/select" className={s.secondary}>
+                CHỌN PHIÊN BẢN FC 26 <Arrow />
+              </Link>
+              <Link href="/mods" className={s.textLink}>
+                Khám phá mods →
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section className={s.section} aria-labelledby="mods-title">
+        <div className={s.sectionHeader}>
+          <div>
+            <p className={s.eyebrow}>03 / THÊM CHẤT RIÊNG CHO GAME</p>
+            <h2 id="mods-title">Mods mới. Cảm hứng mới.</h2>
+            <p className={s.sectionDescription}>
+              Thư viện hiện tại · Xem phiên bản tương thích trong từng bản mod.
+            </p>
+          </div>
+          <Link href="/mods" className={s.textLink}>
+            Tất cả mods <Arrow />
+          </Link>
+        </div>
+        <div className={s.modGrid}>
+          {latestMods.slice(0, 4).map((mod) => (
+            <Link
+              key={mod.slug}
+              href={"/mods/" + mod.slug}
+              className={s.modCard}
+            >
+              <div className={s.modImage}>
+                {mod.thumbnail ? (
+                  <Image
+                    src={mod.thumbnail}
+                    alt={mod.name}
+                    fill
+                    sizes="(max-width: 600px) 100vw, (max-width: 1000px) 50vw, 25vw"
+                    unoptimized={mod.thumbnail.startsWith("/api/media/")}
+                  />
+                ) : (
+                  <span className={s.placeholder}>MOD / FC</span>
+                )}
+                <span className={s.modTag}>{mod.tag}</span>
+              </div>
+              <div className={s.modInfo}>
+                <h3>{mod.name}</h3>
+                <span>
+                  KHÁM PHÁ BẢN MOD <Arrow />
+                </span>
+              </div>
+            </Link>
+          ))}
+        </div>
+        {latestMods.length === 0 && (
+          <p className={s.empty}>
+            Các bản mod đang được cập nhật.{" "}
+            <Link href="/mods">Mở thư viện mods →</Link>
+          </p>
+        )}
+      </section>
+      <section className={s.editorialSection} aria-labelledby="guides-title">
+        <div className={s.editorialGrid}>
+          <div className={s.editorialIntro}>
+            <p className={s.eyebrow}>04 / NGOÀI ĐƯỜNG BIÊN</p>
+            <h2 id="guides-title">
+              Hiểu game hơn.
+              <br />
+              Chơi chất hơn.
+            </h2>
+            <p>
+              Góc chia sẻ chiến thuật, cài đặt và những điều thú vị trong Career
+              Mode.
+            </p>
+            <Link href="/huong-dan" className={s.textLink}>
+              Đọc tất cả bài viết <Arrow />
+            </Link>
+            <div className={s.editorialArt}>
+              <Image
+                src="/games/fc27/fc27-cover.webp"
+                alt="Ảnh minh họa mùa giải FC 27"
+                width={1600}
+                height={900}
+                sizes="(max-width: 800px) 100vw, 400px"
+              />
+            </div>
+          </div>
+          <div className={s.guideList}>
+            {heroGuides.slice(0, 4).map((guide, index) => (
+              <Link
+                key={guide.id}
+                href={"/huong-dan/" + guide.slug}
+                className={s.guide}
+              >
+                <span className={s.guideNumber}>0{index + 1}</span>
+                <div>
+                  <span className={s.overline}>{guide.createdAt}</span>
+                  <h3>{guide.title}</h3>
+                </div>
+                {guide.thumbnail && (
+                  <div className={s.guideImage}>
+                    <Image
+                      src={guide.thumbnail}
+                      alt=""
+                      fill
+                      sizes="88px"
+                      unoptimized={guide.thumbnail.startsWith("/api/media/")}
+                    />
+                  </div>
+                )}
+                <Arrow />
+              </Link>
+            ))}
+            {heroGuides.length === 0 && (
+              <div className={s.empty}>
+                <h3>Bắt đầu từ một hướng dẫn hay.</h3>
+                <p>
+                  Khám phá cách cài đặt và chơi game trong chuyên mục hướng dẫn.
+                </p>
+                <Link href="/huong-dan" className={s.textLink}>
+                  Mở chuyên mục →
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+      <section id="games" className={s.section} aria-labelledby="games-title">
+        <div className={s.sectionHeader}>
+          <div>
+            <p className={s.eyebrow}>05 / ĐỔI GIÓ MỘT CHÚT</p>
+            <h2 id="games-title">Ngoài sân cỏ.</h2>
+          </div>
+        </div>
+        <div className={s.otherGames}>
+          {GAMES.filter((game) => !game.spotlight).map((game) => (
+            <a
+              key={game.slug}
+              href={game.fbUrl || contactUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={s.otherGame}
+            >
+              <div className={s.otherImage}>
+                <Image
+                  src={game.thumbnail || "/games/" + game.slug + "-thumb.jpg"}
+                  alt={game.name}
+                  fill
+                  sizes="(max-width: 600px) 100vw, 50vw"
+                />
+              </div>
+              <div>
+                <span className={s.overline}>KHÁM PHÁ THÊM</span>
+                <h3>{game.name}</h3>
+                <p>{game.description}</p>
+                <span className={s.textLink}>
+                  Liên hệ mua <Arrow />
+                </span>
+              </div>
+            </a>
+          ))}
+        </div>
+      </section>
+      <section className={s.section} aria-labelledby="faq-title">
+        <div className={s.faqGrid}>
+          <div>
+            <p className={s.eyebrow}>TRƯỚC KHI VÀO SÂN</p>
+            <h2 id="faq-title">
+              Bạn hỏi.
+              <br />
+              Dũng trả lời.
+            </h2>
+            <p className={s.sectionDescription}>
+              Những điều cần biết về đặt trước FC 27.
+            </p>
+            <Image
+              className={s.faqLogo}
+              src="/games/fc27/fc27-logo.webp"
+              alt="EA Sports FC 27"
+              width={250}
+              height={125}
+            />
+          </div>
+          <div className={s.faqList}>
+            {faqs.map(([question, answer]) => (
+              <details key={question}>
+                <summary>
+                  {question}
+                  <span aria-hidden="true">+</span>
+                </summary>
+                <p>{answer}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+      <section className={s.finalCall}>
+        <div className={s.container}>
+          <div>
+            <p className={s.eyebrow}>HẸN BẠN Ở MÙA GIẢI MỚI</p>
+            <h2>
+              Trận đấu mới.
+              <br />
+              <span>Bắt đầu từ đây.</span>
+            </h2>
+          </div>
+          <div className={s.finalOffer}>
+            <p>
+              Đặt trước FC 27 <strong>{price}</strong>
+            </p>
+            <a
+              href={contactUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={s.primary}
+            >
+              LIÊN HỆ ĐẶT TRƯỚC <Arrow />
+            </a>
+            <span>Chơi ngay khi game ra mắt.</span>
+          </div>
+        </div>
+      </section>
+      <footer className={s.footer}>
+        <div className={s.container}>
+          <div>
+            <Link href="/" className={s.footerBrand}>
+              DUNGDIBINHLUAN
+            </Link>
+            <p>FC MODDING & CAREER MODE</p>
+          </div>
+          <div className={s.footerLinks}>
+            <Link href="/mods">Mods</Link>
+            <Link href="/huong-dan">Hướng dẫn</Link>
+            <a href={contactUrl} target="_blank" rel="noopener noreferrer">
+              Liên hệ
+            </a>
+            <Link href="/dmca">DMCA & Abuse</Link>
+          </div>
+          <span>© 2026 DungDiBinhLuan</span>
+        </div>
       </footer>
     </main>
   );
