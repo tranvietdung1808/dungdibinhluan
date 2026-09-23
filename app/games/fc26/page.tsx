@@ -1,342 +1,261 @@
 "use client";
-import { useState } from "react";
-import Image from "next/image";
+
+// =====================================================
+// /games/fc26 — nhập mã truy cập → khu tải theo quyền (§12.4)
+// - Heading "Nhập mã truy cập FC 26"; input có label, paste, trim.
+// - KHÔNG xóa mã khi lỗi; tách lỗi: không hợp lệ/hết hạn,
+//   rate limit (429), lỗi server, mất kết nối.
+// - Sau verify: heading theo edition server trả (type), danh sách
+//   file theo quyền (modsOnly chỉ hiện cho bản Full Mods).
+// - Hướng dẫn cài + hỗ trợ nằm SAU vùng tải.
+// =====================================================
+
+import { Suspense, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { GAMES } from "../../data/games";
+import { PRODUCTS, type ProductConfig } from "@/lib/payment/config";
+import { SUPPORT_URL } from "@/lib/payment/order-status";
+import { Badge, Button, Card, Field, InlineNotice, inputClass } from "../../components/ui";
+import { DownloadFileCard } from "../components/DownloadFileCard";
 
-const game = GAMES.find(g => g.slug === "fc26")!;
+const game = GAMES.find((g) => g.slug === "fc26")!;
 
-const GlowBg = () => (
-  <div aria-hidden className="pointer-events-none">
-    <div className="absolute inset-0 bg-[linear-gradient(rgba(206,90,103,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(206,90,103,0.04)_1px,transparent_1px)] bg-[size:44px_44px]" />
-    <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-[var(--color-primary)]/10 blur-[140px] rounded-full" />
-    <div className="absolute -bottom-40 -right-10 w-[350px] h-[350px] bg-[var(--color-primary)]/6 blur-[100px] rounded-full" />
-  </div>
-);
+type CodeType = "normal" | "mods";
 
-const Avatar = ({ size = 112 }: { size?: number }) => (
-  <div
-    style={{ width: size, height: size }}
-    className="rounded-full overflow-hidden flex-shrink-0 ring-2 ring-[var(--color-primary)]/40 shadow-[0_0_30px_rgba(206,90,103,0.25)]"
-  >
-    <Image src="/logo.png" alt="Dung Gaming" width={size} height={size} className="object-cover w-full h-full" />
-  </div>
-);
+function productForType(type: string): ProductConfig {
+  return type === "mods" ? PRODUCTS["fc26-mods"] : PRODUCTS["fc26-normal"];
+}
 
-const Spinner = () => (
-  <span className="inline-block w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-);
-
-const LoadingDots = () => (
-  <span className="inline-flex items-center gap-1">
-    {[0, 1, 2].map(i => (
-      <span key={i} style={{ animationDelay: `${i * 0.15}s` }} className="w-2 h-2 bg-white rounded-full animate-bounce" />
-    ))}
-  </span>
-);
-
-// ========== LOGIN VIEW ==========
-function LoginView({ onSuccess }: { onSuccess: (type: string) => void }) {
+// ========== CODE ENTRY VIEW ==========
+function CodeEntryView({
+  expectedEdition,
+  onSuccess,
+}: {
+  expectedEdition: string | null;
+  onSuccess: (type: CodeType) => void;
+}) {
   const [code, setCode] = useState("");
-  const [error, setError] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const prefixHint = expectedEdition === "mods" ? "MODS-XXXX-XXXX" : "DUNG-XXXX-XXXX";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const trimmed = code.trim();
+    if (!trimmed) {
+      setError("Vui lòng nhập mã truy cập");
+      return;
+    }
+
     setLoading(true);
-    setError("");
+    setError(null);
     try {
       const res = await fetch("/api/verify-code", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code }),
+        body: JSON.stringify({ code: trimmed }),
       });
-      const data = await res.json();
-      if (data.valid) {
-        onSuccess(data.type ?? "normal"); // ← truyền type lên
-      } else {
-        setError(data.message || "Mã không hợp lệ!");
-        setCode("");
+      const data = (await res.json().catch(() => null)) as
+        | { valid?: boolean; type?: string; message?: string }
+        | null;
+
+      if (res.status === 429) {
+        // Rate limit — server có message riêng
+        setError(
+          data?.message ??
+            "Bạn thử mã quá nhiều lần — vui lòng thử lại sau ít phút."
+        );
+        return;
       }
+      if (!res.ok) {
+        setError("Chưa kiểm tra được mã — thử lại sau ít phút.");
+        return;
+      }
+      if (data?.valid) {
+        onSuccess(data.type === "mods" ? "mods" : "normal");
+        return;
+      }
+      // Mã sai hoặc đã hết hạn (mã có hiệu lực 24h sau khi cấp)
+      setError(
+        data?.message ??
+          "Mã không đúng hoặc đã hết hạn. Mã chỉ có hiệu lực 24 giờ sau khi cấp — nếu đã quá hạn, liên hệ hỗ trợ."
+      );
     } catch {
-      setError("Lỗi kết nối server!");
+      setError("Mất kết nối — kiểm tra mạng rồi thử lại. Mã của bạn vẫn được giữ nguyên.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="relative z-10 w-full max-w-sm flex flex-col items-center gap-6">
-      <Avatar />
-      <div className="text-center">
-        <h1 className="text-xl font-black tracking-widest uppercase">{game.name}</h1>
-        <p className="text-[10px] text-slate-500 tracking-[0.35em] uppercase mt-1">{game.subtitle}</p>
-      </div>
-      <div className="w-full space-y-2">
-        <input
-          type="text"
-          placeholder="DUNG-XXXX-XXXX hoặc MODS-XXXX-XXXX"
-          value={code}
-          autoComplete="off"
-          onChange={e => { setCode(e.target.value.toUpperCase()); setError(""); }}
-          className={`w-full bg-white/5 border rounded-2xl px-6 py-4 text-center tracking-widest text-base font-mono focus:outline-none transition-colors ${
-            error ? "border-red-500/60 focus:border-red-500" : "border-white/10 focus:border-[var(--color-primary)]"
-          }`}
-        />
-        {error && <p className="text-center text-xs text-red-400 animate-pulse">{error}</p>}
-      </div>
-      <button
-        type="submit"
-        disabled={loading}
-        className="w-full py-4 bg-[var(--color-primary)] rounded-2xl font-black tracking-[0.3em] hover:bg-[#b44c5c] transition-colors shadow-[0_8px_30px_rgba(206,90,103,0.3)] disabled:opacity-60"
-      >
-        {loading ? "ĐANG KIỂM TRA..." : "XÁC THỰC"}
-      </button>
-      <Link href="/" className="text-[10px] text-slate-600 hover:text-slate-400 transition-colors tracking-widest uppercase">
-        ← Quay lại trang chủ
-      </Link>
-    </form>
+    <Card className="w-full max-w-md">
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="space-y-1.5 text-center">
+          <h1 className="text-h2 text-[var(--color-title)]">Nhập mã truy cập FC 26</h1>
+          <p className="text-sm text-[var(--color-muted)]">
+            Nhập mã được gửi qua email sau khi thanh toán để mở khu tải.
+          </p>
+        </div>
+
+        <Field
+          label="Mã truy cập"
+          hint={`Định dạng: ${prefixHint} — có thể dán trực tiếp`}
+          error={error}
+          required
+        >
+          {({ id, describedBy }) => (
+            <input
+              id={id}
+              type="text"
+              value={code}
+              autoComplete="off"
+              spellCheck={false}
+              aria-describedby={describedBy}
+              aria-invalid={error ? true : undefined}
+              onChange={(e) => {
+                setCode(e.target.value.toUpperCase());
+                if (error) setError(null);
+              }}
+              placeholder={prefixHint}
+              className={`${inputClass} text-center font-mono tracking-widest`}
+            />
+          )}
+        </Field>
+
+        <Button type="submit" loading={loading} size="lg" fullWidth>
+          Xác thực
+        </Button>
+
+        <div className="flex flex-col items-center gap-2 border-t border-[var(--color-line)] pt-4">
+          <Link
+            href="/games/fc26/select"
+            className="text-sm font-semibold text-[var(--color-accent-strong)] underline-offset-4 hover:underline"
+          >
+            Chưa có mã? Chọn phiên bản →
+          </Link>
+          <a
+            href={SUPPORT_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-meta text-[var(--color-muted)] transition-colors hover:text-[var(--color-body)]"
+          >
+            Cần hỗ trợ? Fanpage DungDiBinhLuan ↗
+          </a>
+        </div>
+      </form>
+    </Card>
   );
 }
 
-// ========== DASHBOARD VIEW ==========
-function DashboardView({ type }: { type: string }) {
-  const [status, setStatus] = useState<"idle" | "loading" | "done">("idle");
-  const [toolStatus, setToolStatus] = useState<"idle" | "loading" | "done">("idle");
-
-  const handleDownload = async () => {
-    setStatus("loading");
-    try {
-      const { url } = await fetch("/api/download").then(r => r.json());
-      if (url) {
-        setStatus("done");
-        setTimeout(() => { window.location.href = url; }, 600);
-      }
-    } catch {
-      alert("Lỗi kết nối máy chủ R2!");
-      setStatus("idle");
-    }
-  };
-
-  const handleDownloadMods = async () => {
-    try {
-      const { url } = await fetch("/api/download-mods").then(r => r.json());
-      if (url) window.location.href = url;
-    } catch {
-      alert("Lỗi kết nối máy chủ R2!");
-    }
-  };
-
-  const handleDownloadTool = async () => {
-    setToolStatus("loading");
-    try {
-      const { url } = await fetch("/api/download-tool").then(r => r.json());
-      if (url) {
-        setToolStatus("done");
-        setTimeout(() => { window.location.href = url; }, 600);
-      }
-    } catch {
-      alert("Lỗi kết nối máy chủ R2!");
-      setToolStatus("idle");
-    }
-  };
-
-  const buttonContent = {
-    idle: <span className="relative z-10 tracking-widest">BẮT ĐẦU TẢI XUỐNG</span>,
-    loading: (
-      <span className="relative z-10 flex items-center justify-center gap-3">
-        <Spinner />
-        <span className="tracking-widest">ĐANG KHỞI TẠO</span>
-        <LoadingDots />
-      </span>
-    ),
-    done: (
-      <span className="relative z-10 flex items-center justify-center gap-2 tracking-widest">
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-        </svg>
-        ĐANG MỞ LINK...
-      </span>
-    ),
-  };
+// ========== DOWNLOAD VIEW ==========
+function DownloadView({ type }: { type: CodeType }) {
+  const product = productForType(type);
+  const files = (game.files ?? []).filter((f) => type === "mods" || !f.modsOnly);
 
   return (
-    <div className="relative z-10 w-full max-w-xl">
-      <div className="absolute -inset-px bg-gradient-to-b from-[var(--color-primary)]/30 via-[var(--color-primary)]/8 to-transparent rounded-3xl pointer-events-none" />
-      <div className="relative bg-[#111]/90 backdrop-blur-xl rounded-3xl overflow-hidden">
-
-        <header className="flex items-center justify-between px-8 py-5 border-b border-white/5">
-          <div className="flex items-center gap-3">
-            <Avatar size={40} />
-            <div>
-              <p className="text-sm font-black tracking-wider">{game.name}</p>
-              <p className="text-[9px] text-[var(--color-primary)] tracking-[0.3em] uppercase">
-                {type === "mods" ? "FULL MODS EDITION" : game.subtitle}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-[var(--color-primary)]/30 bg-[var(--color-primary)]/5">
-            <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)] animate-pulse" />
-            <span className="text-[9px] font-bold text-[var(--color-primary)] tracking-widest">SYSTEM ONLINE</span>
-          </div>
-        </header>
-
-        <div className="px-8 py-8 space-y-6">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/5 space-y-2">
-              <p className="text-[9px] text-slate-500 uppercase tracking-widest">Dung lượng file</p>
-              <p className="text-2xl font-black text-[var(--color-primary)]">{game.fileSize}</p>
-            </div>
-            <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/5 space-y-2">
-              <p className="text-[9px] text-slate-500 uppercase tracking-widest">Định dạng</p>
-              <p className="text-2xl font-black text-[var(--color-primary)]">{game.fileFormat}</p>
-            </div>
-          </div>
-
-          {/* Nút tải game — luôn hiện */}
-          <button
-            onClick={handleDownload}
-            disabled={status !== "idle"}
-            className={`group relative w-full py-5 rounded-2xl font-black text-lg overflow-hidden transition-all active:scale-[0.98] shadow-[0_10px_40px_rgba(206,90,103,0.25)] disabled:cursor-not-allowed ${
-              status === "done" ? "bg-green-500/80" : "bg-[var(--color-primary)] hover:bg-[#b44c5c]"
-            }`}
-          >
-            {buttonContent[status]}
-            {status === "idle" && (
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-            )}
-          </button>
-
-          {/* Nút tải mods — chỉ hiện nếu type === "mods" */}
-          {type === "mods" && (
-            <button
-              onClick={handleDownloadMods}
-              className="group relative w-full py-5 rounded-2xl font-black text-lg overflow-hidden transition-all active:scale-[0.98] border border-[var(--color-primary)]/40 text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10"
-            >
-              <span className="relative z-10 tracking-widest">🎮 TẢI FULL MODS PACK</span>
-            </button>
-          )}
-
-          {/* ========== TOOL CÀI ĐẶT ========== */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="h-px flex-1 bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent" />
-              <span className="text-[9px] text-cyan-400/70 tracking-[0.4em] uppercase font-bold flex-shrink-0">Công cụ cài đặt</span>
-              <div className="h-px flex-1 bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent" />
-            </div>
-
-            <div className="p-5 rounded-2xl bg-cyan-500/[0.04] border border-cyan-500/15 space-y-4">
-              <div className="flex items-start gap-3">
-                <span className="text-cyan-400 text-lg mt-0.5 flex-shrink-0">🛠️</span>
-                <div className="space-y-1.5">
-                  <p className="text-sm font-bold text-cyan-300 tracking-wide">ClientTool DungDiBinhLuan</p>
-                  <p className="text-xs text-slate-400 leading-relaxed">
-                    Công cụ hỗ trợ cài đặt tự động, giải nén và setup game chỉ với vài cú click. Tải về và làm theo video hướng dẫn bên dưới.
-                  </p>
-                </div>
-              </div>
-
-              {/* Nút tải tool */}
-              <button
-                onClick={handleDownloadTool}
-                disabled={toolStatus !== "idle"}
-                className={`group relative w-full py-4 rounded-xl font-bold text-sm overflow-hidden transition-all active:scale-[0.98] disabled:cursor-not-allowed ${
-                  toolStatus === "done"
-                    ? "bg-emerald-500/80 shadow-[0_8px_30px_rgba(16,185,129,0.2)]"
-                    : "bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/30 shadow-[0_4px_20px_rgba(6,182,212,0.1)]"
-                }`}
-              >
-                <span className="relative z-10 flex items-center justify-center gap-2">
-                  {toolStatus === "loading" ? (
-                    <>
-                      <Spinner />
-                      <span className="tracking-widest">ĐANG KHỞI TẠO</span>
-                      <LoadingDots />
-                    </>
-                  ) : toolStatus === "done" ? (
-                    <>
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="tracking-widest">ĐANG MỞ LINK...</span>
-                    </>
-                  ) : (
-                    <>
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                      </svg>
-                      <span className="tracking-widest">TẢI TOOL CÀI ĐẶT</span>
-                    </>
-                  )}
-                </span>
-                {toolStatus === "idle" && (
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-400/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-                )}
-              </button>
-
-              {/* Nút xem video hướng dẫn */}
-              <button
-                onClick={() => window.open("https://www.youtube.com/watch?v=wOuYBJcY0k0", "_blank")}
-                className="w-full py-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-300 text-xs font-bold tracking-widest hover:bg-red-500/20 transition-colors flex items-center justify-center gap-2"
-              >
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                </svg>
-                📺 XEM VIDEO HƯỚNG DẪN CÀI ĐẶT
-              </button>
-
-              <p className="text-[10px] text-slate-500 text-center leading-relaxed pt-1 border-t border-white/5">
-                ⚡ Nếu gặp lỗi trong quá trình cài đặt, vui lòng nhắn tin qua{' '}
-                <span className="text-cyan-400 font-semibold">Fanpage</span> hoặc{' '}
-                <span className="text-cyan-400 font-semibold">Zalo</span> để được hỗ trợ ngay.
-              </p>
-            </div>
-          </div>
-
-          <div className="p-5 rounded-2xl bg-amber-500/[0.06] border border-amber-500/20 space-y-3">
-            <div className="flex items-start gap-3">
-              <span className="text-amber-400 text-base mt-0.5 flex-shrink-0">⚠️</span>
-              <div className="space-y-2">
-                <p className="text-xs text-amber-200/80 leading-relaxed">
-                  <span className="font-bold text-amber-400">LƯU Ý QUAN TRỌNG KHI TẢI GAME (FILE NẶNG {game.fileSize}):</span>
-                  <br />
-                  Do dung lượng file game rất lớn, nếu bạn tải trực tiếp bằng trình duyệt mặc định (Chrome, Edge, Cốc Cốc...) khi mạng yếu hoặc chập chờn sẽ rất dễ bị nghẽn, lỗi hoặc ngắt kết nối giữa chừng.
-                </p>
-                <p className="text-xs text-amber-200/80 leading-relaxed">
-                  <span className="font-bold text-amber-400">Khuyến nghị:</span> Để quá trình tải không bị lỗi và đạt tốc độ tối đa, bạn nên sử dụng các phần mềm hỗ trợ download chuyên dụng như <span className="text-white font-semibold">IDM (Internet Download Manager)</span> hoặc <span className="text-white font-semibold">Neat Download Manager</span>.
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={() => window.open("https://www.youtube.com/results?search_query=c%C3%A1ch+s%E1%BB%AD+d%E1%BB%A5ng+IDM", "_blank")}
-              className="w-full py-3 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-bold tracking-widest hover:bg-amber-500/25 transition-colors"
-            >
-              📺 XEM HƯỚNG DẪN SỬ DỤNG IDM
-            </button>
-          </div>
-
-          <footer className="pt-4 border-t border-white/5 flex justify-between items-center text-[9px] text-slate-600 uppercase tracking-widest">
-            <span>Powered by Google Antivirus</span>
-            <Link href="/" className="hover:text-slate-400 transition-colors">← Trang chủ</Link>
-          </footer>
+    <div className="w-full max-w-2xl space-y-6">
+      <header className="space-y-2 text-center">
+        <div className="flex justify-center">
+          <Badge tone="success">Đã xác thực mã</Badge>
         </div>
+        <h1 className="text-h2 text-[var(--color-title)]">{product.name}</h1>
+        <p className="text-sm text-[var(--color-muted)]">
+          {type === "mods"
+            ? "Quyền tải: bộ cài game + Full Mods Pack + công cụ cài đặt."
+            : "Quyền tải: bộ cài game + công cụ cài đặt."}
+        </p>
+      </header>
+
+      {/* ===== Vùng tải — mỗi file một trạng thái độc lập ===== */}
+      <section aria-label="Danh sách file tải" className="space-y-4">
+        {files.map((file) => (
+          <DownloadFileCard key={file.id} file={file} />
+        ))}
+      </section>
+
+      {/* ===== Hướng dẫn + hỗ trợ — SAU vùng tải ===== */}
+      <section aria-label="Hướng dẫn cài đặt" className="space-y-4">
+        <InlineNotice tone="warning" title={`Lưu ý khi tải file lớn (${game.fileSize})`}>
+          <p>
+            File game nặng — tải trực tiếp bằng trình duyệt khi mạng chập chờn
+            dễ bị ngắt giữa chừng. Khuyến nghị dùng{" "}
+            <strong>IDM (Internet Download Manager)</strong> hoặc{" "}
+            <strong>Neat Download Manager</strong>.
+          </p>
+        </InlineNotice>
+
+        <Card>
+          <h2 className="text-h3 text-[var(--color-title)]">Hướng dẫn cài đặt</h2>
+          <ul className="mt-3 space-y-2 text-sm text-[var(--color-body)]">
+            <li className="flex gap-2">
+              <span aria-hidden="true" className="text-[var(--color-accent-strong)]">1.</span>
+              Tải file cài đặt (và Full Mods Pack nếu có) bằng link vừa tạo.
+            </li>
+            <li className="flex gap-2">
+              <span aria-hidden="true" className="text-[var(--color-accent-strong)]">2.</span>
+              Tải ClientTool rồi làm theo{" "}
+              <a
+                href="https://www.youtube.com/watch?v=wOuYBJcY0k0"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-[var(--color-accent-strong)] underline-offset-4 hover:underline"
+              >
+                video hướng dẫn cài đặt ↗
+              </a>
+              .
+            </li>
+            <li className="flex gap-2">
+              <span aria-hidden="true" className="text-[var(--color-accent-strong)]">3.</span>
+              Gặp lỗi khi cài? Nhắn{" "}
+              <a
+                href={SUPPORT_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-[var(--color-accent-strong)] underline-offset-4 hover:underline"
+              >
+                fanpage hỗ trợ ↗
+              </a>{" "}
+              kèm mô tả lỗi.
+            </li>
+          </ul>
+        </Card>
+      </section>
+
+      <div className="text-center">
+        <Link
+          href="/"
+          className="text-meta text-[var(--color-muted)] transition-colors hover:text-[var(--color-body)]"
+        >
+          ← Về trang chủ
+        </Link>
       </div>
     </div>
   );
 }
 
 // ========== PAGE ==========
-export default function FC26Page() {
-  const [codeType, setCodeType] = useState<string | null>(null);
+function FC26Content() {
+  const params = useSearchParams();
+  const expectedEdition = params.get("edition");
+  const [codeType, setCodeType] = useState<CodeType | null>(null);
 
   return (
-    <main className="relative flex items-center justify-center min-h-screen bg-[#0a0a0a] text-white p-4 overflow-hidden font-sans">
-      <GlowBg />
-      {codeType !== null
-        ? <DashboardView type={codeType} />
-        : <LoginView onSuccess={(type) => setCodeType(type)} />
-      }
+    <main className="flex min-h-screen items-center justify-center bg-[var(--color-surface-0)] px-4 py-10 text-[var(--color-body)] md:py-14">
+      {codeType !== null ? (
+        <DownloadView type={codeType} />
+      ) : (
+        <CodeEntryView expectedEdition={expectedEdition} onSuccess={setCodeType} />
+      )}
     </main>
+  );
+}
+
+export default function FC26Page() {
+  return (
+    <Suspense>
+      <FC26Content />
+    </Suspense>
   );
 }

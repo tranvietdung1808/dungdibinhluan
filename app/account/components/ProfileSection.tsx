@@ -5,7 +5,7 @@
 // Violet = accent phụ (profile)
 // =====================================================
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Badge, Button, Card, CardHeader, Icon, Input, useFeedback } from "./ui";
 import { formatDateTime } from "./states";
 
@@ -18,7 +18,6 @@ export function ProfileSection({
   memberSince,
   lastSignIn,
   onSaved,
-  onError,
 }: {
   displayName: string;
   email: string;
@@ -26,11 +25,19 @@ export function ProfileSection({
   memberSince?: string | null;
   lastSignIn?: string | null;
   onSaved: () => void;
-  onError: (msg: string) => void;
 }) {
   const [name, setName] = useState(displayName);
   const [saving, setSaving] = useState(false);
   const fb = useFeedback();
+
+  // Tên gốc thay đổi (sau khi lưu thành công / đổi tài khoản) → đồng bộ field
+  useEffect(() => {
+    setName(displayName);
+  }, [displayName]);
+
+  // §14.4: dirty state — chỉ cho lưu khi có thay đổi; Hủy khôi phục tên gốc
+  const dirty = name.trim() !== displayName.trim();
+  const tooShort = name.trim().length < API_TOKEN_MIN;
 
   const save = async () => {
     const trimmed = name.trim();
@@ -60,16 +67,14 @@ export function ProfileSection({
       });
       if (!res.ok) {
         const d = await res.json().catch(() => ({}));
-        const msg = "Lỗi: " + (d.error || "không xác định");
-        fb.report(msg, "error");
-        onError(msg);
+        // §14.4: lỗi lưu ở field/form — KHÔNG đẩy cả trang sang ErrorState
+        fb.report(d.error || "Chưa lưu được tên hiển thị", "error");
         return;
       }
       fb.report("Đã lưu tên hiển thị mới", "ok");
       onSaved();
     } catch {
-      const msg = "Lỗi kết nối, vui lòng thử lại";
-      fb.report(msg, "error");
+      fb.report("Lỗi kết nối, vui lòng thử lại", "error");
     } finally {
       setSaving(false);
     }
@@ -108,11 +113,20 @@ export function ProfileSection({
           <Input
             label="Tên hiển thị"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => {
+              setName(e.target.value);
+              if (fb.msg) fb.clear();
+            }}
             placeholder="Nhập tên hiển thị..."
             maxLength={64}
             hint="Từ 2 đến 64 ký tự, hiển thị trên toàn trang."
-            error={name.length > 0 && name.trim().length < API_TOKEN_MIN ? "Tên quá ngắn" : undefined}
+            error={
+              name.length > 0 && tooShort
+                ? "Tên quá ngắn"
+                : fb.kind === "error" && fb.msg
+                  ? fb.msg
+                  : undefined
+            }
           />
 
           {/* Email (readonly) */}
@@ -137,9 +151,9 @@ export function ProfileSection({
             </div>
           )}
 
-          {/* Save */}
-          <div className="flex items-center gap-4 pt-1">
-            <Button onClick={save} disabled={saving || name.trim().length < API_TOKEN_MIN}>
+          {/* Save / Cancel — nút Hủy khôi phục giá trị gốc, chỉ hiện khi dirty */}
+          <div className="flex flex-wrap items-center gap-3 pt-1">
+            <Button onClick={save} disabled={saving || !dirty || tooShort}>
               {saving ? (
                 <>
                   <svg className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" viewBox="0 0 24 24" aria-hidden="true" />
@@ -152,11 +166,20 @@ export function ProfileSection({
                 </>
               )}
             </Button>
-            {fb.msg && (
-              <span
-                className={`text-xs font-semibold ${fb.kind === "ok" ? "text-ok" : "text-danger"}`}
-                role="status"
+            {dirty && (
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setName(displayName);
+                  fb.clear();
+                }}
+                disabled={saving}
               >
+                Hủy
+              </Button>
+            )}
+            {fb.msg && fb.kind === "ok" && (
+              <span className="text-xs font-semibold text-ok" role="status">
                 {fb.msg}
               </span>
             )}

@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
       return errorResponse("Forbidden", 403);
     }
 
-    const { data, error, count } = await supabaseAdmin
+    const { error, count } = await supabaseAdmin
       .from("community_comments")
       .select("id", { count: "exact", head: true })
       .eq("status", "pending");

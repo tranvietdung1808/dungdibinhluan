@@ -2,47 +2,68 @@
 
 // =====================================================
 // Membership — VIP card/hero là focal point của trang
-// - MembershipHero: thẻ nổi bật cho gói đang active
-// - MembershipSection: plans từ API + kích hoạt mã code
+// - MembershipHero: trạng thái gói hiện tại (đang dùng / được cấp / chưa có)
+// - MembershipSection: plans từ API + CTA liên hệ (A05: chưa có checkout
+//   membership → mọi CTA mở fanpage hỗ trợ, không link sang checkout Mix Mods)
 // Coral = primary accent (VIP)
 // =====================================================
 
-import { useEffect, useState } from "react";
-import type { MembershipPlan } from "../types";
+import type { MembershipPlan, SubscriptionInfo } from "../types";
+import { SUPPORT_URL } from "../types";
 import {
   Badge,
-  Button,
+  ButtonLink,
   Card,
   CardHeader,
   Icon,
-  Input,
-  useFeedback,
 } from "./ui";
-import { EmptyState, ErrorState, VND, daysLeft, formatDate } from "./states";
+import {
+  EmptyState,
+  InlineError,
+  VND,
+  daysLeft,
+  formatDate,
+  subProgressPct,
+} from "./states";
+
+type HeroCta = { href: string; label: string };
 
 // ─── Hero (focal point): trạng thái VIP hiện tại ───
+// Ba trạng thái riêng biệt (§14.3):
+//   1) Subscription đang hoạt động → hạn dùng + thanh thời gian thật
+//   2) VIP do role, không subscription → "Được cấp quyền" (không hiển thị
+//      đồng thời VIP + "Chưa có VIP")
+//   3) Chưa có gói → upsell dẫn tới danh sách gói / kênh liên hệ
 export function MembershipHero({
   hasVip,
+  hasVipRole = false,
   planName,
+  startsAt,
   expiresAt,
   now,
-  onUpgrade,
+  cta,
 }: {
   hasVip: boolean;
+  hasVipRole?: boolean;
   planName?: string;
+  startsAt?: string;
   expiresAt?: string;
   now: number;
-  onUpgrade: () => void;
+  // CTA cho trạng thái "chưa có gói" — mỗi section truyền đích phù hợp
+  cta: HeroCta;
 }) {
-  if (hasVip && planName && expiresAt) {
+  const expired = expiresAt ? new Date(expiresAt).getTime() <= now : false;
+
+  // ── 1) Subscription còn hạn ──
+  if (hasVip && planName && expiresAt && !expired) {
     const left = daysLeft(expiresAt, now);
-    const pct = left <= 0 ? 0 : left >= 90 ? 100 : Math.round((left / 90) * 100);
+    const pct = subProgressPct(startsAt, expiresAt, now);
     return (
-      <section aria-label="Membership hiện tại" className="rounded-2xl surface-raised overflow-hidden border border-coral/25">
+      <section aria-label="Membership hiện tại" className="rounded-2xl surface-raised overflow-hidden border border-accent/25">
         <div className="p-5 sm:p-7">
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-5">
             <div className="flex items-start gap-4 min-w-0">
-              <span className="shrink-0 w-12 h-12 rounded-xl bg-coral/15 text-coral flex items-center justify-center">
+              <span className="shrink-0 w-12 h-12 rounded-xl bg-accent/15 text-accent flex items-center justify-center">
                 <Icon name="crown" filled className="w-6 h-6" />
               </span>
               <div className="min-w-0">
@@ -50,128 +71,205 @@ export function MembershipHero({
                   <h2 className="text-xl sm:text-2xl font-black text-title tracking-tight">
                     {planName}
                   </h2>
-                  <Badge tone="coral">
+                  <Badge tone="ok">
                     <Icon name="check" className="w-3 h-3" />
-                    Active
+                    Đang hoạt động
                   </Badge>
                 </div>
                 <p className="text-sm text-body mt-1.5 leading-relaxed max-w-xl">
-                  Quyền lợi VIP đang được kích hoạt. Hết hạn{" "}
+                  Quyền lợi của gói đang được áp dụng cho tài khoản. Hết hạn{" "}
                   <span className="font-bold text-title">{formatDate(expiresAt)}</span>
                   {" "}
-                  <span className="text-muted">({left === 0 ? "hôm nay" : `${left} ngày`})</span>.
+                  <span className="text-muted">({left === 0 ? "hôm nay" : `còn ${left} ngày`})</span>.
                 </p>
               </div>
             </div>
             <div className="shrink-0 sm:text-right flex sm:flex-col items-center gap-2 sm:items-end">
-              <p className="text-3xl font-black text-coral tracking-tight tabular-nums">
+              <p className="text-3xl font-black text-accent tracking-tight tabular-nums">
                 {left} <span className="text-sm font-bold text-muted">ngày</span>
               </p>
-              <Button variant="ghost" size="sm" onClick={onUpgrade}>
-                Gia hạn
-              </Button>
+              <ButtonLink variant="ghost" size="sm" href={SUPPORT_URL}>
+                Liên hệ gia hạn
+              </ButtonLink>
             </div>
           </div>
 
-          {/* Thanh thời hạn */}
-          <div className="mt-5">
-            <div
-              className="h-2 rounded-full bg-surface-1 overflow-hidden relative"
-              role="progressbar"
-              aria-valuenow={pct}
-              aria-valuemin={0}
-              aria-valuemax={100}
-              aria-label="Thời gian còn lại của gói"
-            >
+          {/* Thanh thời hạn — tỷ lệ từ starts_at/expires_at thật (§14.3) */}
+          {pct !== null && (
+            <div className="mt-5">
               <div
-                className="h-full bg-coral/80 rounded-full relative overflow-hidden"
-                style={{ width: `${pct}%` }}
+                className="h-2 rounded-full bg-surface-1 overflow-hidden relative"
+                role="progressbar"
+                aria-valuenow={pct}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-label="Thời gian còn lại của gói"
               >
-                <span
-                  aria-hidden="true"
-                  className="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/25 to-transparent animate-progress-sheen"
-                />
+                <div
+                  className="h-full bg-accent/80 rounded-full relative overflow-hidden"
+                  style={{ width: `${pct}%` }}
+                >
+                  <span
+                    aria-hidden="true"
+                    className="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/25 to-transparent animate-progress-sheen"
+                  />
+                </div>
               </div>
             </div>
-            <p className="text-[11px] text-muted mt-2">
-              Hết hạn {formatDate(expiresAt)} · Gói này không tự gia hạn định kỳ
-            </p>
+          )}
+          <p className="text-[11px] text-muted mt-2">
+            {startsAt ? `Hiệu lực ${formatDate(startsAt)} → ` : ""}Hết hạn{" "}
+            {formatDate(expiresAt)} · Gói này không tự gia hạn định kỳ
+          </p>
+        </div>
+      </section>
+    );
+  }
+
+  // ── 2) VIP do role, không có subscription đang chạy ──
+  if (hasVip) {
+    return (
+      <section aria-label="Membership hiện tại" className="rounded-2xl surface-raised overflow-hidden border border-accent/25">
+        <div className="p-5 sm:p-7">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-5">
+            <div className="flex items-start gap-4 min-w-0">
+              <span className="shrink-0 w-12 h-12 rounded-xl bg-accent/15 text-accent flex items-center justify-center">
+                <Icon name="crown" filled className="w-6 h-6" />
+              </span>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h2 className="text-xl sm:text-2xl font-black text-title tracking-tight">
+                    Tài khoản VIP
+                  </h2>
+                  <Badge tone="ok">
+                    <Icon name="check" className="w-3 h-3" />
+                    Được cấp quyền
+                  </Badge>
+                </div>
+                <p className="text-sm text-body mt-1.5 leading-relaxed max-w-xl">
+                  Quyền VIP đang được cấp trực tiếp cho tài khoản này
+                  {hasVipRole ? " qua hạng thành viên" : ""}, không gắn với một
+                  gói có thời hạn.
+                </p>
+              </div>
+            </div>
+            <ButtonLink
+              variant="ghost"
+              size="sm"
+              href={SUPPORT_URL}
+              className="shrink-0 self-start sm:self-auto"
+            >
+              Liên hệ hỗ trợ
+            </ButtonLink>
           </div>
         </div>
       </section>
     );
   }
 
-  // Chưa có gói → CTA focal
+  // ── 3) Từng có gói nhưng đã hết hạn (hiếm: subscription quá hạn) ──
+  if (planName && expiresAt && expired) {
+    return (
+      <section aria-label="Membership đã hết hạn" className="rounded-2xl surface-raised overflow-hidden border border-line">
+        <div className="p-5 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+          <div className="flex items-start gap-4 min-w-0">
+            <span className="shrink-0 w-12 h-12 rounded-xl bg-surface-2 text-muted flex items-center justify-center">
+              <Icon name="crown" className="w-6 h-6" />
+            </span>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className="text-xl sm:text-2xl font-black text-title tracking-tight">
+                  {planName}
+                </h2>
+                <Badge tone="neutral">Đã hết hạn</Badge>
+              </div>
+              <p className="text-sm text-body mt-1.5 leading-relaxed max-w-xl">
+                Gói của bạn đã hết hạn vào {formatDate(expiresAt)}. Liên hệ fanpage
+                để gia hạn hoặc đổi sang gói phù hợp.
+              </p>
+            </div>
+          </div>
+          <ButtonLink variant="primary" size="lg" href={SUPPORT_URL} className="shrink-0 w-full sm:w-auto">
+            Liên hệ gia hạn
+            <Icon name="chevron-right" className="w-4 h-4" />
+          </ButtonLink>
+        </div>
+      </section>
+    );
+  }
+
+  // ── 4) Chưa có gói → CTA về danh sách gói / kênh liên hệ ──
   return (
-    <section aria-label="Nâng cấp VIP" className="rounded-2xl surface-raised overflow-hidden border border-coral/30">
+    <section aria-label="Gói membership" className="rounded-2xl surface-raised overflow-hidden border border-accent/30">
       <div className="p-5 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-5">
         <div className="flex items-start gap-4 min-w-0">
-          <span className="shrink-0 w-12 h-12 rounded-xl bg-coral text-white flex items-center justify-center shadow-[0_10px_30px_-10px_rgba(240,96,120,0.6)]">
+          <span className="shrink-0 w-12 h-12 rounded-xl bg-accent text-white flex items-center justify-center shadow-[0_10px_30px_-10px_rgba(110,242,160,0.6)]">
             <Icon name="crown" filled className="w-6 h-6" />
           </span>
           <div className="min-w-0">
             <h2 className="text-xl sm:text-2xl font-black text-title tracking-tight">
-              Nâng cấp lên <span className="text-coral">VIP</span>
+              Chưa có gói membership
             </h2>
             <p className="text-sm text-body mt-1.5 leading-relaxed max-w-xl">
-              Mở toàn bộ mod chất lượng cao, tải không giới hạn, nhận hỗ trợ ưu tiên
-              và quyền lợi độc quyền.
+              Xem quyền lợi từng gói bên dưới. Chưa có thanh toán trực tuyến cho
+              membership — liên hệ fanpage để được tư vấn và kích hoạt.
             </p>
           </div>
         </div>
-        <Button variant="primary" size="lg" className="shrink-0 w-full sm:w-auto" onClick={onUpgrade}>
+        <ButtonLink
+          variant="primary"
+          size="lg"
+          href={cta.href}
+          className="shrink-0 w-full sm:w-auto"
+        >
           <Icon name="crown" className="w-4 h-4" />
-          Chọn gói VIP
+          {cta.label}
           <Icon name="chevron-right" className="w-4 h-4" />
-        </Button>
+        </ButtonLink>
       </div>
     </section>
   );
 }
 
-// ─── Section chính: plans + kích hoạt code ───
+// ─── Section chính: hero + danh sách gói ───
 export function MembershipSection({
   plans,
   fetchPlans,
   plansLoading,
   plansError,
   hasVip,
+  hasVipRole,
   activeSub,
   now,
-  onUpgrade,
 }: {
   plans: MembershipPlan[];
   fetchPlans: () => void;
   plansLoading: boolean;
   plansError: string;
   hasVip: boolean;
-  activeSub: { plan_name: string; expires_at: string } | null;
+  hasVipRole?: boolean;
+  activeSub: SubscriptionInfo | null;
   now: number;
-  onUpgrade: () => void;
 }) {
-  const activate = useFeedback();
-  const [code, setCode] = useState("");
-
-  // Plans hidden nếu đã có VIP hết hạn? Ngược lại vẫn hiện để gia hạn nếu cần.
-  const upgradable = hasVip ? "Gia hạn / đổi gói" : "Chọn gói";
   const visiblePlans = plans.filter((p) => p.is_active);
 
   return (
     <div className="space-y-6">
       <MembershipHero
         hasVip={hasVip}
+        hasVipRole={hasVipRole}
         planName={activeSub?.plan_name}
+        startsAt={activeSub?.starts_at}
         expiresAt={activeSub?.expires_at}
         now={now}
-        onUpgrade={onUpgrade}
+        cta={{ href: SUPPORT_URL, label: "Liên hệ tư vấn gói" }}
       />
 
       {/* Danh sách gói */}
       <Card>
         <CardHeader
           icon="crown"
-          iconTone="coral"
+          iconTone="accent"
           title="Gói membership"
           subtitle={
             visiblePlans.length === 0
@@ -179,7 +277,7 @@ export function MembershipSection({
               : `${visiblePlans.length} gói · đơn vị VND`
           }
         />
-        <div className="p-5 sm:p-6">
+        <div className="p-5 sm:p-6 space-y-4">
           {plansLoading ? (
             <div className="grid sm:grid-cols-2 gap-4" aria-busy="true">
               {Array.from({ length: 2 }).map((_, i) => (
@@ -187,14 +285,14 @@ export function MembershipSection({
               ))}
             </div>
           ) : plansError ? (
-            <ErrorState message={plansError} onRetry={fetchPlans} />
+            <InlineError message={plansError} onRetry={fetchPlans} />
           ) : visiblePlans.length === 0 ? (
             <EmptyState
               icon="crown"
               title="Chưa có gói VIP nào"
-              description="Danh sách gói membership chưa được bật. Quay lại sau khi cửa hàng cập nhật, hoặc liên hệ hỗ trợ."
+              description="Danh sách gói membership chưa được bật. Quay lại sau khi cửa hàng cập nhật, hoặc liên hệ fanpage để được tư vấn."
               ctaLabel="Liên hệ hỗ trợ"
-              ctaHref="/lien-he"
+              ctaHref={SUPPORT_URL}
             />
           ) : (
             <div className="grid sm:grid-cols-2 gap-4">
@@ -205,63 +303,22 @@ export function MembershipSection({
                     key={p.id}
                     plan={p}
                     isCurrent={Boolean(isCurrent)}
-                    actionLabel={upgradable}
-                    onChoose={onUpgrade}
                   />
                 );
               })}
             </div>
           )}
-        </div>
-      </Card>
-
-      {/* Kích hoạt mã code */}
-      <Card>
-        <CardHeader
-          icon="key"
-          iconTone="warn"
-          title="Kích hoạt mã code"
-          subtitle="Nhập mã mua hàng để kích hoạt / gia hạn membership"
-        />
-        <div className="p-5 sm:p-6 space-y-4">
-          <form
-            className="flex flex-col sm:flex-row gap-3"
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (code.trim().length < 4) {
-                activate.report("Mã code quá ngắn", "error");
-                return;
-              }
-              // TODO: nối API /api/payment/redeem khi có
-              activate.report("Tính năng kích hoạt mã sẽ sớm hoạt động trên trang mua hàng.", "error");
-            }}
-          >
-            <div className="flex-1">
-              <Input
-                placeholder="VD: DUNG-XXXX-XXXX"
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                prefixIcon="key"
-                autoComplete="off"
-                aria-label="Mã kích hoạt"
-              />
-            </div>
-            <Button type="submit" variant="secondary" size="md" className="sm:w-auto w-full">
-              Kích hoạt
-            </Button>
-          </form>
-          {activate.msg && (
-            <p
-              className={`text-sm font-medium ${
-                activate.kind === "ok" ? "text-ok" : "text-danger"
-              }`}
-              role="status"
-            >
-              {activate.msg}
-            </p>
-          )}
           <p className="text-[11px] text-muted leading-relaxed">
-            Mã code được phát hành sau khi thanh toán thành công tại trang mua gói. Nếu bạn đã có mã mà không kích hoạt được, hãy liên hệ hỗ trợ.
+            Đã thanh toán hoặc cần gia hạn gói? Liên hệ{" "}
+            <a
+              href={SUPPORT_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-accent hover:text-accent-strong underline underline-offset-2"
+            >
+              fanpage DungDiBinhLuan
+            </a>{" "}
+            để được kích hoạt cho tài khoản của bạn.
           </p>
         </div>
       </Card>
@@ -272,19 +329,15 @@ export function MembershipSection({
 function PlanCard({
   plan,
   isCurrent,
-  actionLabel,
-  onChoose,
 }: {
   plan: MembershipPlan;
   isCurrent: boolean;
-  actionLabel: string;
-  onChoose: () => void;
 }) {
   return (
     <Card
       as="article"
       className={`p-5 flex flex-col ${
-        isCurrent ? "border border-coral/25 surface-raised" : ""
+        isCurrent ? "border border-accent/25 surface-raised" : ""
       }`}
     >
       <div className="flex items-start justify-between gap-3">
@@ -295,7 +348,7 @@ function PlanCard({
           )}
         </div>
         {isCurrent && (
-          <Badge tone="coral">
+          <Badge tone="accent">
             <Icon name="check" className="w-3 h-3" />
             Đang dùng
           </Badge>
@@ -303,7 +356,7 @@ function PlanCard({
       </div>
 
       <p className="mt-4">
-        <span className="text-2xl font-black text-coral tracking-tight">{VND(plan.price)}</span>
+        <span className="text-2xl font-black text-accent tracking-tight">{VND(plan.price)}</span>
         <span className="text-xs text-muted"> / {plan.duration_days} ngày</span>
       </p>
 
@@ -320,13 +373,15 @@ function PlanCard({
         </ul>
       )}
 
-      <Button
+      {/* A05/T17: chưa có checkout membership → CTA mở fanpage hỗ trợ,
+          không chuyển nhầm sang checkout sản phẩm khác */}
+      <ButtonLink
         variant={isCurrent ? "secondary" : "primary"}
         className="mt-5 w-full"
-        onClick={onChoose}
+        href={SUPPORT_URL}
       >
-        {actionLabel}
-      </Button>
+        {isCurrent ? "Liên hệ gia hạn" : "Liên hệ về gói này"}
+      </ButtonLink>
     </Card>
   );
 }

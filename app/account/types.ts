@@ -11,6 +11,27 @@ export type SectionKey =
   | "membership"
   | "security";
 
+// Whitelist 7 section hiện có — dùng để đọc/ghi `?section=` trên URL (A07)
+export const SECTION_KEYS: readonly SectionKey[] = [
+  "overview",
+  "credit",
+  "profile",
+  "orders",
+  "unlocked",
+  "membership",
+  "security",
+];
+
+export const DEFAULT_SECTION: SectionKey = "overview";
+
+export function isSectionKey(value: string | null | undefined): value is SectionKey {
+  return value != null && (SECTION_KEYS as readonly string[]).includes(value);
+}
+
+// Kênh hỗ trợ đang hoạt động — dùng cho CTA liên hệ membership (A05, B14)
+// và mọi điểm "liên hệ" trong khu vực tài khoản (chưa có route /lien-he).
+export const SUPPORT_URL = "https://web.facebook.com/dungbinhluan/";
+
 export interface AccountUser {
   id: string;
   email: string;

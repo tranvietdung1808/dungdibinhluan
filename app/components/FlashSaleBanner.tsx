@@ -1,13 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-// 7 ngay ke tu hom nay
-const END_DATE = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+// =====================================================
+// FlashSaleBanner (§4.3)
+// Chỉ hiển thị countdown khi có thời điểm kết thúc THẬT:
+//   - prop `endsAt` (ISO date string), hoặc
+//   - env NEXT_PUBLIC_SALE_ENDS_AT.
+// Không có / đã qua / sai định dạng → render null (không banner giả).
+// =====================================================
 
-function getTimeLeft() {
-  const diff = END_DATE.getTime() - Date.now();
-  if (diff <= 0) return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+type TimeLeft = { days: number; hours: number; minutes: number; seconds: number };
+
+function parseEndsAt(value?: string | null): number | null {
+  if (!value) return null;
+  const t = new Date(value).getTime();
+  return Number.isFinite(t) ? t : null;
+}
+
+function getTimeLeft(target: number): TimeLeft {
+  const diff = Math.max(0, target - Date.now());
   return {
     days: Math.floor(diff / (1000 * 60 * 60 * 24)),
     hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
@@ -16,33 +28,61 @@ function getTimeLeft() {
   };
 }
 
-export default function FlashSaleBanner() {
-  const [time, setTime] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+export default function FlashSaleBanner({
+  endsAt,
+  label = "Ưu đãi đang diễn ra",
+}: {
+  /** ISO date string, ví dụ "2026-10-01T23:59:59+07:00" */
+  endsAt?: string;
+  label?: string;
+}) {
+  const target = useMemo(
+    () => parseEndsAt(endsAt ?? process.env.NEXT_PUBLIC_SALE_ENDS_AT),
+    [endsAt],
+  );
+  const [time, setTime] = useState<TimeLeft | null>(null);
 
   useEffect(() => {
-    const timeout = setTimeout(() => setTime(getTimeLeft()), 0);
-    const interval = setInterval(() => setTime(getTimeLeft()), 1000);
+    if (!target) return;
+    // setTime chỉ chạy trong callback (rAF/interval), không sync trong effect body
+    const tick = () => setTime(getTimeLeft(target));
+    const raf = requestAnimationFrame(tick);
+    const interval = setInterval(tick, 1000);
     return () => {
-      clearTimeout(timeout);
+      cancelAnimationFrame(raf);
       clearInterval(interval);
     };
-  }, []);
+  }, [target]);
+
+  // Không có deadline thật, chưa mount (tránh hydration mismatch) hoặc đã hết → không render
+  if (!target || !time) return null;
+  const expired =
+    time.days === 0 && time.hours === 0 && time.minutes === 0 && time.seconds === 0;
+  if (expired) return null;
 
   const pad = (n: number) => String(n).padStart(2, "0");
+  const endLabel = new Date(target).toLocaleString("vi-VN", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
 
   return (
-    <div className="text-center py-3 px-4 rounded-2xl bg-gradient-to-r from-[#ce5a67]/15 via-[#080810]/40 to-[#f59e0b]/15 border border-white/10">
-      <p className="text-[11px] font-black text-white tracking-widest uppercase mb-2">
-        🍂 AUTUMN SALE — GIÁ SỐC 7 NGÀY 🍂
+    <div className="rounded-2xl border border-[var(--color-line)] bg-gradient-to-r from-[var(--color-accent-subtle)] via-[var(--color-surface-0)]/40 to-[var(--color-credit-subtle)] px-4 py-3 text-center">
+      <p className="mb-2 text-xs font-bold uppercase tracking-widest text-[var(--color-title)]">
+        {label} — kết thúc {endLabel}
       </p>
-      <div className="flex items-center justify-center gap-2">
-        <TimeBlock value={pad(time.days)} label="NGÀY" />
-        <span className="text-white/30 font-black">:</span>
-        <TimeBlock value={pad(time.hours)} label="GIỜ" />
-        <span className="text-white/30 font-black">:</span>
-        <TimeBlock value={pad(time.minutes)} label="PHÚT" />
-        <span className="text-white/30 font-black">:</span>
-        <TimeBlock value={pad(time.seconds)} label="GIÂY" />
+      <div
+        role="timer"
+        aria-label={`Ưu đãi kết thúc lúc ${endLabel}`}
+        className="flex items-center justify-center gap-2"
+      >
+        <TimeBlock value={pad(time.days)} label="ngày" />
+        <span className="font-black text-white/30" aria-hidden="true">:</span>
+        <TimeBlock value={pad(time.hours)} label="giờ" />
+        <span className="font-black text-white/30" aria-hidden="true">:</span>
+        <TimeBlock value={pad(time.minutes)} label="phút" />
+        <span className="font-black text-white/30" aria-hidden="true">:</span>
+        <TimeBlock value={pad(time.seconds)} label="giây" />
       </div>
     </div>
   );
@@ -50,11 +90,16 @@ export default function FlashSaleBanner() {
 
 function TimeBlock({ value, label }: { value: string; label: string }) {
   return (
-    <div className="flex flex-col items-center">
-      <span className="text-xl md:text-2xl font-black text-white bg-white/[0.04] border border-white/10 rounded-lg px-2 py-0.5 min-w-[2.5rem] text-center tabular-nums">
+    <span className="flex flex-col items-center">
+      <span
+        className="min-w-[2.5rem] rounded-lg border border-white/10 bg-white/[0.04] px-2 py-0.5 text-center text-xl font-black tabular-nums text-white md:text-2xl"
+        aria-hidden="true"
+      >
         {value}
       </span>
-      <span className="text-[8px] text-white/60 tracking-widest mt-0.5">{label}</span>
-    </div>
+      <span className="mt-0.5 text-xs uppercase tracking-widest text-white/60">
+        {label}
+      </span>
+    </span>
   );
 }

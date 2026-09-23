@@ -26,7 +26,7 @@ export async function GET(request: Request) {
 
         const url = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
         return NextResponse.json({ url });
-    } catch (error) {
+    } catch {
         return NextResponse.json({ error: "Lỗi tạo link" }, { status: 500 });
     }
 }

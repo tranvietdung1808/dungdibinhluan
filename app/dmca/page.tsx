@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { Breadcrumb, Card, Container, InlineNotice } from "@/app/components/ui";
+import CopyButton from "@/app/components/CopyButton";
 
 export const metadata: Metadata = {
   title: "DMCA & Abuse | DungDiBinhLuan",
@@ -9,132 +10,143 @@ export const metadata: Metadata = {
   },
 };
 
+const CONTACT_EMAIL = "dungdibinhluan@gmail.com";
+const FACEBOOK_URL = "https://web.facebook.com/dungbinhluan/";
+
+const steps = [
+  {
+    title: "Nhận báo cáo",
+    description: "Tiếp nhận email báo cáo từ người dùng",
+  },
+  {
+    title: "Xem xét",
+    description: "Đánh giá tính hợp lệ và bằng chứng đi kèm",
+  },
+  {
+    title: "Gỡ nếu vi phạm",
+    description: "Xóa nội dung vi phạm và thông báo kết quả xử lý",
+  },
+];
+
 export default function DMCAPage() {
   return (
-    <main className="min-h-screen bg-[#0a0a0a] text-white">
-      {/* Header breadcrumb */}
-      <div className="border-b border-white/5 px-4 md:px-6 py-4 flex items-center gap-3">
-        <Link href="/" className="text-slate-500 hover:text-white transition-colors text-sm">
-          ← Trang chủ
-        </Link>
-        <span className="text-slate-700">/</span>
-        <span className="text-sm font-bold tracking-widest uppercase text-white">DMCA & Abuse</span>
-      </div>
+    <main className="min-h-screen">
+      <Container className="py-8 md:py-12">
+        <Breadcrumb
+          items={[
+            { label: "Trang chủ", href: "/" },
+            { label: "DMCA & Abuse" },
+          ]}
+        />
 
-      <div className="max-w-4xl mx-auto px-4 md:px-6 py-10 md:py-16 space-y-8">
-        {/* Page title */}
-        <div className="space-y-2">
-          <h1 className="text-2xl md:text-4xl font-black tracking-tight">
-            🛡️ DMCA <span className="text-[var(--color-primary)]">& ABUSE</span>
+        <header className="mt-8 max-w-2xl">
+          <h1 className="text-h1 text-[var(--color-title)]">
+            DMCA &amp; báo cáo lạm dụng
           </h1>
-          <p className="text-slate-500 text-sm">Báo cáo vi phạm bản quyền và lạm dụng</p>
-        </div>
+          <p className="mt-3 text-[15px] leading-relaxed text-[var(--color-muted)]">
+            Kênh tiếp nhận báo cáo vi phạm bản quyền và lạm dụng trên DungDiBinhLuan.
+          </p>
+        </header>
 
-        {/* Content */}
-        <div className="space-y-6">
-          {/* Section 1 */}
-          <div className="bg-white/5 border border-white/5 rounded-xl p-5 md:p-6 space-y-3">
-            <h2 className="text-lg md:text-xl font-black flex items-center gap-2">
-              <span className="text-[var(--color-primary)]">📋</span> Hướng dẫn report vi phạm bản quyền
+        <div className="mt-10 max-w-3xl space-y-6">
+          <Card>
+            <h2 className="text-h3 text-[var(--color-title)]">
+              Báo cáo vi phạm bản quyền
             </h2>
-            <p className="text-slate-400 text-sm md:text-base leading-relaxed">
-              Nếu bạn phát hiện nội dung trên website vi phạm bản quyền hoặc sở hữu trí tuệ của bạn, 
-              vui lòng gửi email báo cáo chi tiết đến địa chỉ liên hệ bên dưới. Chúng tôi cam kết 
-              xem xét và xử lý nghiêm túc mọi báo cáo hợp lệ.
+            <p className="mt-3 leading-relaxed text-[var(--color-body)]">
+              Nếu bạn phát hiện nội dung trên website vi phạm bản quyền hoặc sở hữu
+              trí tuệ của bạn, vui lòng gửi email báo cáo chi tiết đến địa chỉ liên
+              hệ bên dưới. Chúng tôi cam kết xem xét và xử lý nghiêm túc mọi báo cáo
+              hợp lệ.
             </p>
-          </div>
+          </Card>
 
-          {/* Section 2 */}
-          <div className="bg-white/5 border border-white/5 rounded-xl p-5 md:p-6 space-y-3">
-            <h2 className="text-lg md:text-xl font-black flex items-center gap-2">
-              <span className="text-[var(--color-primary)]">📧</span> Email liên hệ
-            </h2>
-            <div className="bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 rounded-lg p-4">
-              <p className="text-white font-mono text-base md:text-lg">
-                dungdibinhluan@gmail.com
-              </p>
+          <Card>
+            <h2 className="text-h3 text-[var(--color-title)]">Email tiếp nhận</h2>
+            <div className="mt-4 flex flex-wrap items-center gap-3 rounded-xl border border-[var(--color-accent-border)] bg-[var(--color-accent-subtle)] px-4 py-3">
+              <a
+                href={`mailto:${CONTACT_EMAIL}`}
+                className="break-all font-mono text-base font-semibold text-[var(--color-accent-strong)] hover:underline md:text-lg"
+              >
+                {CONTACT_EMAIL}
+              </a>
+              <span className="ml-auto">
+                <CopyButton text={CONTACT_EMAIL} />
+              </span>
             </div>
-            <p className="text-slate-400 text-sm md:text-base leading-relaxed">
-              Vui lòng gửi email với tiêu đề rõ ràng, ví dụ: <span className="text-white font-mono">[DMCA Report] - Tên nội dung vi phạm</span>
+            <p className="mt-3 text-sm leading-relaxed text-[var(--color-muted)]">
+              Vui lòng gửi email với tiêu đề rõ ràng, ví dụ:{" "}
+              <span className="font-mono text-[var(--color-body)]">
+                [DMCA Report] - Tên nội dung vi phạm
+              </span>
             </p>
-          </div>
-
-          {/* Section 3 */}
-          <div className="bg-white/5 border border-white/5 rounded-xl p-5 md:p-6 space-y-3">
-            <h2 className="text-lg md:text-xl font-black flex items-center gap-2">
-              <span className="text-[var(--color-primary)]">⏱️</span> Cam kết xử lý trong 48-72 giờ
-            </h2>
-            <p className="text-slate-400 text-sm md:text-base leading-relaxed">
-              Chúng tôi cam kết phản hồi và xử lý mọi báo cáo hợp lệ trong vòng 48-72 giờ làm việc. 
-              Bạn sẽ nhận được email xác nhận khi chúng tôi bắt đầu xem xét báo cáo của bạn.
-            </p>
-          </div>
-
-          {/* Section 4 */}
-          <div className="bg-white/5 border border-white/5 rounded-xl p-5 md:p-6 space-y-3">
-            <h2 className="text-lg md:text-xl font-black flex items-center gap-2">
-              <span className="text-[var(--color-primary)]">🔄</span> Quy trình xử lý
-            </h2>
-            <div className="space-y-3">
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-full bg-[var(--color-primary)]/20 flex items-center justify-center text-[var(--color-primary)] font-black text-sm flex-shrink-0">
-                  1
-                </div>
-                <div>
-                  <p className="text-white font-bold text-sm">Nhận report</p>
-                  <p className="text-slate-500 text-xs">Tiếp nhận email báo cáo từ người dùng</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-full bg-[var(--color-primary)]/20 flex items-center justify-center text-[var(--color-primary)] font-black text-sm flex-shrink-0">
-                  2
-                </div>
-                <div>
-                  <p className="text-white font-bold text-sm">Xem xét</p>
-                  <p className="text-slate-500 text-xs">Đánh giá tính hợp lệ và bằng chứng</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-full bg-[var(--color-primary)]/20 flex items-center justify-center text-[var(--color-primary)] font-black text-sm flex-shrink-0">
-                  3
-                </div>
-                <div>
-                  <p className="text-white font-bold text-sm">Gỡ nếu vi phạm</p>
-                  <p className="text-slate-500 text-xs">Xóa nội dung vi phạm và thông báo kết quả</p>
-                </div>
-              </div>
+            <div className="mt-4">
+              <a
+                href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("[DMCA Report] - ")}`}
+                className="inline-flex h-9 items-center justify-center gap-2 rounded-[10px] border border-[var(--color-line-strong)] bg-[var(--color-surface-2)] px-3 text-sm font-semibold text-[var(--color-title)] transition-colors hover:border-[var(--color-accent-border)]"
+              >
+                Soạn email báo cáo
+              </a>
             </div>
-          </div>
+          </Card>
 
-          {/* Section 5 */}
-          <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-5 md:p-6 space-y-3">
-            <h2 className="text-lg md:text-xl font-black flex items-center gap-2 text-red-400">
-              ⚠️ Nghiêm cấm lạm dụng hệ thống report
-            </h2>
-            <p className="text-slate-400 text-sm md:text-base leading-relaxed">
-              Chúng tôi nghiêm cấm việc lạm dụng hệ thống report để báo cáo sai sự thật, quấy rối 
-              hoặc gây phiền toái cho người khác. Mọi hành vi lạm dụng sẽ bị xử lý và có thể dẫn 
-              đến việc chặn truy cập vĩnh viễn.
+          <Card>
+            <h2 className="text-h3 text-[var(--color-title)]">Thời gian xử lý</h2>
+            <p className="mt-3 leading-relaxed text-[var(--color-body)]">
+              Chúng tôi cam kết phản hồi và xử lý mọi báo cáo hợp lệ trong vòng
+              48-72 giờ làm việc. Bạn sẽ nhận được email xác nhận khi chúng tôi bắt
+              đầu xem xét báo cáo của bạn.
             </p>
-          </div>
+          </Card>
 
-          {/* Contact */}
-          <div className="bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 rounded-xl p-5 md:p-6 space-y-3">
-            <h2 className="text-lg md:text-xl font-black">📞 Liên hệ nhanh</h2>
-            <p className="text-slate-400 text-sm md:text-base leading-relaxed">
+          <Card>
+            <h2 className="text-h3 text-[var(--color-title)]">Quy trình xử lý</h2>
+            <ol className="mt-4 space-y-4">
+              {steps.map((step, index) => (
+                <li key={step.title} className="flex items-start gap-3.5">
+                  <span
+                    aria-hidden="true"
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--color-accent-subtle)] text-sm font-bold text-[var(--color-accent-strong)]"
+                  >
+                    {index + 1}
+                  </span>
+                  <div className="min-w-0 pt-0.5">
+                    <p className="font-semibold text-[var(--color-title)]">
+                      {step.title}
+                    </p>
+                    <p className="mt-0.5 text-sm text-[var(--color-muted)]">
+                      {step.description}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </Card>
+
+          <InlineNotice tone="danger" title="Nghiêm cấm lạm dụng hệ thống báo cáo">
+            <p className="leading-relaxed">
+              Chúng tôi nghiêm cấm việc lạm dụng hệ thống báo cáo để khai sai sự
+              thật, quấy rối hoặc gây phiền toái cho người khác. Mọi hành vi lạm
+              dụng sẽ bị xử lý và có thể dẫn đến việc chặn truy cập vĩnh viễn.
+            </p>
+          </InlineNotice>
+
+          <Card>
+            <h2 className="text-h3 text-[var(--color-title)]">Liên hệ nhanh</h2>
+            <p className="mt-3 leading-relaxed text-[var(--color-body)]">
               Bạn cũng có thể liên hệ qua Facebook để được hỗ trợ nhanh hơn:{" "}
-              <a 
-                href="https://web.facebook.com/dungbinhluan/" 
-                target="_blank" 
+              <a
+                href={FACEBOOK_URL}
+                target="_blank"
                 rel="noopener noreferrer"
-                className="text-[var(--color-primary)] hover:underline font-bold"
+                className="font-semibold text-[var(--color-accent-strong)] hover:underline"
               >
                 DungDiBinhLuan
               </a>
             </p>
-          </div>
+          </Card>
         </div>
-      </div>
+      </Container>
     </main>
   );
 }

@@ -2,7 +2,10 @@
 
 import { Suspense, useCallback, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import Link from 'next/link'
 import { createClient } from '@/utils/supabase/client'
+import { Button } from '@/app/components/ui/Button'
+import { InlineNotice } from '@/app/components/ui/states'
 
 function AdminLoginContent() {
   const [error, setError] = useState('')
@@ -10,6 +13,7 @@ function AdminLoginContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirect = searchParams.get('redirect') || '/admin/dashboard'
+  const forbidden = searchParams.get('error') === 'forbidden'
 
   const syncAndRedirectIfAdmin = useCallback(async () => {
     const supabase = createClient()
@@ -26,8 +30,8 @@ function AdminLoginContent() {
   }, [redirect, router])
 
   useEffect(() => {
-    void syncAndRedirectIfAdmin()
-  }, [syncAndRedirectIfAdmin])
+    if (!forbidden) void syncAndRedirectIfAdmin()
+  }, [syncAndRedirectIfAdmin, forbidden])
 
   const handleGoogleLogin = async () => {
     setLoading(true)
@@ -54,36 +58,43 @@ function AdminLoginContent() {
   }
 
   return (
-    <main className="min-h-screen bg-[#0a0a0a] text-white flex items-center justify-center p-6">
-      <div className="bg-[#111111] border border-white/10 rounded-xl p-8 w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-xl font-black tracking-widest text-white">ADMIN PANEL</h1>
-          <p className="text-[10px] text-slate-500 tracking-widest uppercase mt-1">DUNGDIBINHLUAN</p>
+    <main className="flex min-h-screen items-center justify-center bg-[var(--color-surface-0)] p-6">
+      <div className="w-full max-w-md rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface-1)] p-8">
+        <div className="mb-8 text-center">
+          <h1 className="text-xl font-black tracking-widest text-[var(--color-title)]">
+            QUẢN TRỊ
+          </h1>
+          <p className="mt-1 text-xs font-medium uppercase tracking-widest text-[var(--color-muted)]">
+            DungDiBinhLuan
+          </p>
         </div>
 
+        {forbidden && (
+          <InlineNotice tone="danger" className="mb-4">
+            Tài khoản này không có quyền quản trị. Hãy đăng nhập bằng email admin.
+          </InlineNotice>
+        )}
         {error && (
-          <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-3 text-center mb-4">
-            <p className="text-red-400 text-sm">{error}</p>
-          </div>
+          <InlineNotice tone="danger" className="mb-4">
+            {error}
+          </InlineNotice>
         )}
 
-        <p className="text-sm text-slate-400 text-center mb-6">
+        <p className="mb-6 text-center text-sm text-[var(--color-muted)]">
           Đăng nhập bằng Google với email admin để truy cập trang quản trị
         </p>
 
-        <button
-          type="button"
-          onClick={handleGoogleLogin}
-          disabled={loading}
-          className="w-full py-4 bg-[var(--color-primary)] rounded-2xl font-black tracking-widest text-white hover:bg-[#b44c5c] transition-colors disabled:opacity-50"
-        >
-          {loading ? 'ĐANG XỬ LÝ...' : 'LOGIN WITH GOOGLE'}
-        </button>
+        <Button type="button" onClick={handleGoogleLogin} loading={loading} fullWidth size="lg">
+          {loading ? 'Đang xử lý…' : 'Đăng nhập bằng Google'}
+        </Button>
 
         <div className="mt-6 text-center">
-          <a href="/" className="text-[10px] text-slate-600 hover:text-slate-400 transition-colors">
+          <Link
+            href="/"
+            className="text-sm text-[var(--color-muted)] transition-colors hover:text-[var(--color-title)]"
+          >
             ← Về trang chủ
-          </a>
+          </Link>
         </div>
       </div>
     </main>
@@ -92,11 +103,13 @@ function AdminLoginContent() {
 
 export default function AdminLoginPage() {
   return (
-    <Suspense fallback={
-      <main className="min-h-screen bg-[#0a0a0a] text-white flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin" />
-      </main>
-    }>
+    <Suspense
+      fallback={
+        <main className="flex min-h-screen items-center justify-center bg-[var(--color-surface-0)]">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--color-accent)] border-t-transparent" />
+        </main>
+      }
+    >
       <AdminLoginContent />
     </Suspense>
   )

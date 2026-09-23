@@ -2,10 +2,15 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { GAMES } from "./data/games";
-import { MODS } from "./data/mods";
+import { MODS, type Mod } from "./data/mods";
 import { FACES } from "./data/faces";
 import { createClient } from "@/utils/supabase/server";
+import { listModsPublic } from "@/lib/server/mods";
+import { getCreditPricesMap } from "@/lib/server/credit";
+import { buildCatalog, type DbModRecord } from "@/lib/catalog";
 import { resolveThumbnailSrc } from "@/utils/r2";
+import ModCard from "./mods/components/ModCard";
+import { InlineNotice } from "./components/ui";
 import s from "./home.module.css";
 
 const PREORDER_PRICE = 180000;
@@ -43,30 +48,6 @@ type HomeGuide = {
   created_at: string;
   thumbnail_url: string | null;
 };
-type HomeDbMod = {
-  id: string;
-  slug: string;
-  name: string;
-  updated_at: string;
-  thumbnail: string | null;
-  tags: string[];
-};
-type HomeModCard = {
-  slug: string;
-  name: string;
-  updatedAt: string;
-  thumbnail: string;
-  tag: string;
-};
-const parseDate = (value: string) => {
-  if (value.includes("/")) {
-    const [d, m, y] = value.split("/").map(Number);
-    return new Date(y, m - 1, d).getTime() || 0;
-  }
-  return new Date(value).getTime() || 0;
-};
-const sortModsByUpdated = (a: HomeModCard, b: HomeModCard) =>
-  parseDate(b.updatedAt) - parseDate(a.updatedAt);
 const Arrow = () => <span aria-hidden="true">↗</span>;
 const faqs = [
   [
@@ -93,21 +74,19 @@ const faqs = [
 
 export default async function HomePage() {
   const supabase = createClient();
-  const [guidesRes, dbModsRes] = await Promise.all([
+  const [guidesRes, dbModsRes, prices] = await Promise.all([
     supabase
       .from("guides")
       .select("id,title,slug,created_at,thumbnail_url")
       .order("created_at", { ascending: false })
       .limit(6),
-    supabase
-      .from("mods")
-      .select("id,slug,name,updated_at,thumbnail,tags")
-      .order("created_at", { ascending: false })
-      .limit(8),
+    listModsPublic(),
+    getCreditPricesMap(),
   ]);
 
+  const guidesFailed = Boolean(guidesRes.error);
   const latestGuides: HomeGuide[] = guidesRes.data || [];
-  const heroGuides = latestGuides.slice(0, 6).map((guide) => ({
+  const guides = latestGuides.slice(0, 6).map((guide) => ({
     id: guide.id,
     slug: guide.slug,
     title: guide.title,
@@ -115,42 +94,52 @@ export default async function HomePage() {
     thumbnail: resolveThumbnailSrc(guide.thumbnail_url) || "",
   }));
 
-  const staticMods: HomeModCard[] = [...MODS, ...FACES].map((mod) => ({
-    slug: mod.slug,
-    name: mod.name,
-    updatedAt: mod.updatedAt,
-    thumbnail: mod.thumbnail || "",
-    tag: mod.tags?.[0] || "MOD",
-  }));
+  // Cùng pipeline với /mods (lib/catalog): gắn credit_cost, che download_url
+  // của mod khóa credit, merge static+DB, dedupe theo slug, resolve offer.
+  const modsPartialError = Boolean(dbModsRes.error);
+  const dbMods: DbModRecord[] = (dbModsRes.data ?? []).map((m) => {
+    const cost = prices[m.id as string];
+    const isLocked = cost != null;
+    return {
+      id: m.id as string,
+      slug: m.slug as string,
+      name: m.name as string,
+      author: m.author as string,
+      category: m.category as string,
+      version: m.version as string,
+      updated_at: m.updated_at as string,
+      description: (m.description as string | null) ?? null,
+      long_description: null,
+      thumbnail: (m.thumbnail as string | null) ?? null,
+      download_url: isLocked ? null : ((m.download_url as string | null) ?? null),
+      tags: (m.tags as string[] | null) ?? [],
+      thumbnail_orientation: (m.thumbnail_orientation as string) ?? "portrait",
+      featured: Boolean(m.featured),
+      video_id: (m.video_id as string | null) ?? null,
+      created_at: m.created_at as string,
+      credit_cost: cost ?? null,
+    };
+  });
 
-  const dbMods: HomeModCard[] = ((dbModsRes.data || []) as HomeDbMod[]).map(
-    (mod) => ({
-      slug: mod.slug,
-      name: mod.name,
-      updatedAt: mod.updated_at,
-      thumbnail: resolveThumbnailSrc(mod.thumbnail) || "",
-      tag: mod.tags?.[0] || "MOD",
-    }),
-  );
-
-  const latestMods = [
-    ...new Map(
-      [...staticMods, ...dbMods].map((mod) => [mod.slug, mod]),
-    ).values(),
-  ].sort(sortModsByUpdated);
+  const catalog = buildCatalog([...MODS, ...(FACES as Mod[])], dbMods);
+  const modCards = [...catalog]
+    .sort((a, b) => b.updatedAtTs - a.updatedAtTs)
+    .slice(0, 4);
 
   return (
     <main className={s.home} id="home">
-      <a href="#dat-truoc" className={s.skip}>
-        Đến phần đặt trước FC 27
-      </a>
+      {/* 1. Announcement — chỉ hiển thị khi chiến dịch đang hoạt động */}
       <div className={s.announcement}>
-        <span className={s.dot} /> MÙA GIẢI MỚI ĐANG ĐẾN{" "}
-        <span className={s.announcementDivider}>/</span>{" "}
+        <span className={s.dot} aria-hidden="true" /> MÙA GIẢI MỚI ĐANG ĐẾN{" "}
+        <span className={s.announcementDivider} aria-hidden="true">
+          /
+        </span>{" "}
         <a href="#dat-truoc">
           Đặt trước FC 27 · {price} <Arrow />
         </a>
       </div>
+
+      {/* 2. Hero FC 27 */}
       <section className={s.hero} aria-labelledby="hero-title">
         <div className={s.heroArt}>
           <Image
@@ -158,11 +147,11 @@ export default async function HomePage() {
             alt="Ảnh minh họa EA FC 27 với cầu thủ trong trang phục Real Madrid"
             fill
             priority
-            sizes="(max-width: 700px) 100vw, 58vw"
+            sizes="(max-width: 600px) 100vw, (max-width: 1000px) 65vw, 58vw"
             className={s.portrait}
           />
         </div>
-        <div className={s.heroShade} />
+        <div className={s.heroShade} aria-hidden="true" />
         <div className={s.container}>
           <div className={s.heroTop}>
             <span>DUNGDIBINHLUAN / NEXT SEASON</span>
@@ -170,7 +159,8 @@ export default async function HomePage() {
           </div>
           <div className={s.heroContent}>
             <p className={s.eyebrow}>
-              <span className={s.dot} /> SẴN SÀNG CHO NGÀY RA MẮT
+              <span className={s.dot} aria-hidden="true" /> SẴN SÀNG CHO NGÀY RA
+              MẮT
             </p>
             <h1 id="hero-title" className={s.heroTitle}>
               EA FC <span>27</span>
@@ -203,30 +193,33 @@ export default async function HomePage() {
             <a href="#dat-truoc">
               KHÁM PHÁ FC 27 <span aria-hidden="true">↓</span>
             </a>
-            <span className={s.artNote}>HÌNH ẢNH MINH HỌA</span>
+            <span>HÌNH ẢNH MINH HỌA</span>
           </div>
         </div>
       </section>
+
+      {/* 3. Lối tắt FC 26 / Kho mod / Hướng dẫn */}
       <div className={s.seasonRail}>
         <div className={s.container}>
-          <a href="#dat-truoc">
-            <span className={s.dot} />
-            <b>FC 27</b>
-            <span>Đang nhận đặt trước</span>
-            <Arrow />
-          </a>
-          <a href="#fc26">
+          <Link href="/games/fc26/select">
             <b>FC 26</b>
-            <span>Sẵn sàng để chơi</span>
+            <span>Chọn phiên bản & chơi ngay</span>
             <Arrow />
-          </a>
+          </Link>
           <Link href="/mods">
-            <b>MODS & CAREER MODE</b>
-            <span>Tiếp tục đam mê</span>
+            <b>KHO MOD</b>
+            <span>Faces, kits, gameplay</span>
+            <Arrow />
+          </Link>
+          <Link href="/huong-dan">
+            <b>HƯỚNG DẪN</b>
+            <span>Cài đặt & mẹo Career Mode</span>
             <Arrow />
           </Link>
         </div>
       </div>
+
+      {/* 4. Khối đặt trước */}
       <section
         id="dat-truoc"
         className={s.section}
@@ -246,7 +239,7 @@ export default async function HomePage() {
                 src="/games/fc27/fc27-city.webp"
                 alt="Ảnh minh họa FC 27 trên nền thành phố và sân bóng"
                 fill
-                sizes="(max-width: 800px) 100vw, 60vw"
+                sizes="(max-width: 800px) 100vw, (max-width: 1100px) 55vw, 720px"
               />
             </div>
             <div className={s.cityCaption}>
@@ -279,10 +272,11 @@ export default async function HomePage() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              LIÊN HỆ ĐẶT TRƯỚC <Arrow />
+              LIÊN HỆ ĐẶT TRƯỚC QUA FACEBOOK <Arrow />
             </a>
             <p className={s.fineprint}>
-              Mở Facebook của DungDiBinhLuan để xác nhận đơn và thông tin gói.
+              Mở fanpage Facebook của DungDiBinhLuan để xác nhận gói và đặt
+              trước.
             </p>
           </div>
         </div>
@@ -294,8 +288,8 @@ export default async function HomePage() {
           </div>
           <div>
             <span>02</span>
-            <h3>Kết nối với Page</h3>
-            <p>Nhắn Page để xác nhận phiên bản và cách nhận game.</p>
+            <h3>Kết nối với fanpage</h3>
+            <p>Nhắn fanpage để xác nhận phiên bản và cách nhận game.</p>
           </div>
           <div>
             <span>03</span>
@@ -304,13 +298,15 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* 5. FC 26 */}
       <section id="fc26" className={s.section} aria-labelledby="fc26-title">
         <div className={s.sectionHeader}>
           <div>
             <p className={s.eyebrow}>02 / TRONG LÚC CHỜ FC 27</p>
             <h2 id="fc26-title">Sân cỏ vẫn đang chờ bạn.</h2>
           </div>
-          <Link href="/games/fc26" className={s.textLink}>
+          <Link href="/games/fc26/select" className={s.textLink}>
             Chi tiết FC 26 <Arrow />
           </Link>
         </div>
@@ -319,9 +315,9 @@ export default async function HomePage() {
             src="/games/fc26-banner.jpg"
             alt="EA FC 26"
             fill
-            sizes="(max-width: 800px) 100vw, 1200px"
+            sizes="(max-width: 1264px) calc(100vw - 64px), 1200px"
           />
-          <div className={s.fc26Shade} />
+          <div className={s.fc26Shade} aria-hidden="true" />
           <div className={s.fc26Content}>
             <span className={s.status}>ĐANG CÓ SẴN</span>
             <h3>
@@ -336,6 +332,9 @@ export default async function HomePage() {
               <Link href="/games/fc26/select" className={s.secondary}>
                 CHỌN PHIÊN BẢN FC 26 <Arrow />
               </Link>
+              <Link href="/games/fc26" className={s.textLink}>
+                Đã có code? Nhập code →
+              </Link>
               <Link href="/mods" className={s.textLink}>
                 Khám phá mods →
               </Link>
@@ -343,6 +342,8 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* 6. Mods mới — cùng card family với catalog */}
       <section className={s.section} aria-labelledby="mods-title">
         <div className={s.sectionHeader}>
           <div>
@@ -356,43 +357,36 @@ export default async function HomePage() {
             Tất cả mods <Arrow />
           </Link>
         </div>
-        <div className={s.modGrid}>
-          {latestMods.slice(0, 4).map((mod) => (
-            <Link
-              key={mod.slug}
-              href={"/mods/" + mod.slug}
-              className={s.modCard}
-            >
-              <div className={s.modImage}>
-                {mod.thumbnail ? (
-                  <Image
-                    src={mod.thumbnail}
-                    alt={mod.name}
-                    fill
-                    sizes="(max-width: 600px) 100vw, (max-width: 1000px) 50vw, 25vw"
-                    unoptimized={mod.thumbnail.startsWith("/api/media/")}
-                  />
-                ) : (
-                  <span className={s.placeholder}>MOD / FC</span>
-                )}
-                <span className={s.modTag}>{mod.tag}</span>
-              </div>
-              <div className={s.modInfo}>
-                <h3>{mod.name}</h3>
-                <span>
-                  KHÁM PHÁ BẢN MOD <Arrow />
-                </span>
-              </div>
+        {modsPartialError && (
+          <InlineNotice
+            tone="warning"
+            title="Một số mod mới chưa tải được"
+            className={s.notice}
+          >
+            Danh sách bên dưới có thể chưa đầy đủ — kho mod đầy đủ luôn mở tại{" "}
+            <Link href="/mods" className={s.noticeLink}>
+              /mods
             </Link>
-          ))}
-        </div>
-        {latestMods.length === 0 && (
-          <p className={s.empty}>
-            Các bản mod đang được cập nhật.{" "}
-            <Link href="/mods">Mở thư viện mods →</Link>
-          </p>
+            .
+          </InlineNotice>
+        )}
+        {modCards.length > 0 ? (
+          <div className={s.modGrid}>
+            {modCards.map((mod) => (
+              <ModCard key={mod.slug} mod={mod} />
+            ))}
+          </div>
+        ) : (
+          !modsPartialError && (
+            <p className={s.empty}>
+              Các bản mod đang được cập nhật.{" "}
+              <Link href="/mods">Mở thư viện mods →</Link>
+            </p>
+          )
         )}
       </section>
+
+      {/* 7. Hướng dẫn nổi bật */}
       <section className={s.editorialSection} aria-labelledby="guides-title">
         <div className={s.editorialGrid}>
           <div className={s.editorialIntro}>
@@ -412,53 +406,86 @@ export default async function HomePage() {
             <div className={s.editorialArt}>
               <Image
                 src="/games/fc27/fc27-cover.webp"
-                alt="Ảnh minh họa mùa giải FC 27"
+                alt=""
                 width={1600}
                 height={900}
-                sizes="(max-width: 800px) 100vw, 400px"
+                sizes="320px"
               />
             </div>
           </div>
           <div className={s.guideList}>
-            {heroGuides.slice(0, 4).map((guide, index) => (
-              <Link
-                key={guide.id}
-                href={"/huong-dan/" + guide.slug}
-                className={s.guide}
+            {guidesFailed ? (
+              <InlineNotice
+                tone="warning"
+                title="Chưa tải được bài hướng dẫn"
               >
-                <span className={s.guideNumber}>0{index + 1}</span>
-                <div>
-                  <span className={s.overline}>{guide.createdAt}</span>
-                  <h3>{guide.title}</h3>
-                </div>
-                {guide.thumbnail && (
-                  <div className={s.guideImage}>
-                    <Image
-                      src={guide.thumbnail}
-                      alt=""
-                      fill
-                      sizes="88px"
-                      unoptimized={guide.thumbnail.startsWith("/api/media/")}
-                    />
+                Các khối khác trên trang vẫn hoạt động.{" "}
+                <Link href="/huong-dan" className={s.noticeLink}>
+                  Mở chuyên mục hướng dẫn →
+                </Link>
+              </InlineNotice>
+            ) : (
+              <>
+                {guides.slice(0, 4).map((guide, index) => (
+                  <Link
+                    key={guide.id}
+                    href={"/huong-dan/" + guide.slug}
+                    className={s.guide}
+                  >
+                    <span className={s.guideNumber}>0{index + 1}</span>
+                    <div>
+                      <span className={s.overline}>{guide.createdAt}</span>
+                      <h3>{guide.title}</h3>
+                    </div>
+                    {guide.thumbnail ? (
+                      <div className={s.guideImage}>
+                        <Image
+                          src={guide.thumbnail}
+                          alt=""
+                          fill
+                          sizes="80px"
+                          unoptimized={guide.thumbnail.startsWith("/api/media/")}
+                        />
+                      </div>
+                    ) : (
+                      <div className={s.guideThumbFallback} aria-hidden="true">
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.6"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                          <polyline points="14 2 14 8 20 8" />
+                          <line x1="16" y1="13" x2="8" y2="13" />
+                          <line x1="16" y1="17" x2="8" y2="17" />
+                        </svg>
+                      </div>
+                    )}
+                    <Arrow />
+                  </Link>
+                ))}
+                {guides.length === 0 && (
+                  <div className={s.empty}>
+                    <h3>Bắt đầu từ một hướng dẫn hay.</h3>
+                    <p>
+                      Khám phá cách cài đặt và chơi game trong chuyên mục hướng
+                      dẫn.
+                    </p>
+                    <Link href="/huong-dan" className={s.textLink}>
+                      Mở chuyên mục →
+                    </Link>
                   </div>
                 )}
-                <Arrow />
-              </Link>
-            ))}
-            {heroGuides.length === 0 && (
-              <div className={s.empty}>
-                <h3>Bắt đầu từ một hướng dẫn hay.</h3>
-                <p>
-                  Khám phá cách cài đặt và chơi game trong chuyên mục hướng dẫn.
-                </p>
-                <Link href="/huong-dan" className={s.textLink}>
-                  Mở chuyên mục →
-                </Link>
-              </div>
+              </>
             )}
           </div>
         </div>
       </section>
+
+      {/* 8. Game khác */}
       <section id="games" className={s.section} aria-labelledby="games-title">
         <div className={s.sectionHeader}>
           <div>
@@ -480,7 +507,7 @@ export default async function HomePage() {
                   src={game.thumbnail || "/games/" + game.slug + "-thumb.jpg"}
                   alt={game.name}
                   fill
-                  sizes="(max-width: 600px) 100vw, 50vw"
+                  sizes="(max-width: 600px) 95px, (max-width: 800px) 180px, 160px"
                 />
               </div>
               <div>
@@ -495,6 +522,8 @@ export default async function HomePage() {
           ))}
         </div>
       </section>
+
+      {/* 9. FAQ */}
       <section className={s.section} aria-labelledby="faq-title">
         <div className={s.faqGrid}>
           <div>
@@ -528,51 +557,6 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
-      <section className={s.finalCall}>
-        <div className={s.container}>
-          <div>
-            <p className={s.eyebrow}>HẸN BẠN Ở MÙA GIẢI MỚI</p>
-            <h2>
-              Trận đấu mới.
-              <br />
-              <span>Bắt đầu từ đây.</span>
-            </h2>
-          </div>
-          <div className={s.finalOffer}>
-            <p>
-              Đặt trước FC 27 <strong>{price}</strong>
-            </p>
-            <a
-              href={contactUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={s.primary}
-            >
-              LIÊN HỆ ĐẶT TRƯỚC <Arrow />
-            </a>
-            <span>Chơi ngay khi game ra mắt.</span>
-          </div>
-        </div>
-      </section>
-      <footer className={s.footer}>
-        <div className={s.container}>
-          <div>
-            <Link href="/" className={s.footerBrand}>
-              DUNGDIBINHLUAN
-            </Link>
-            <p>FC MODDING & CAREER MODE</p>
-          </div>
-          <div className={s.footerLinks}>
-            <Link href="/mods">Mods</Link>
-            <Link href="/huong-dan">Hướng dẫn</Link>
-            <a href={contactUrl} target="_blank" rel="noopener noreferrer">
-              Liên hệ
-            </a>
-            <Link href="/dmca">DMCA & Abuse</Link>
-          </div>
-          <span>© 2026 DungDiBinhLuan</span>
-        </div>
-      </footer>
     </main>
   );
 }

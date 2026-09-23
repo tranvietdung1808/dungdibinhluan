@@ -93,6 +93,19 @@ export function stripHtml(input: string) {
   return input.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim()
 }
 
+/**
+ * B11 — excerpt thật cho card bài viết: strip HTML rồi cắt theo ranh giới từ.
+ * Nguồn dữ liệu guides chưa có cột excerpt → derive từ content phía server.
+ */
+export function buildExcerpt(input: string, maxLen = 170) {
+  const text = stripHtml(input)
+  if (text.length <= maxLen) return text
+  const cut = text.slice(0, maxLen)
+  const lastSpace = cut.lastIndexOf(" ")
+  const boundary = lastSpace > maxLen * 0.5 ? lastSpace : maxLen
+  return `${cut.slice(0, boundary).trimEnd()}…`
+}
+
 export function inferGuideTagsFromText(title: string, content: string) {
   const normalized = normalizeText(`${title} ${stripHtml(content)}`)
   const tags = GUIDE_FIXED_TAGS.filter((tag) =>

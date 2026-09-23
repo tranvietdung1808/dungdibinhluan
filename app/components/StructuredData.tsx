@@ -5,7 +5,7 @@ export default function StructuredData() {
     name: "DungDiBinhLuan",
     alternateName: "DungDiBinhLuan Mod Hub",
     url: "https://dungdibinhluan.com",
-    description: "Trang chia sẻ mod miễn phí cho cộng đồng EA FC 26 Việt Nam",
+    description: "Kho mod FC 26 và hướng dẫn Career Mode cho cộng đồng Việt Nam",
     inLanguage: "vi-VN",
     potentialAction: {
       "@type": "SearchAction",

@@ -2,16 +2,20 @@
 
 // =====================================================
 // Trang quản lý tài khoản (Account Dashboard)
-// Premium Dark Gaming SaaS · coral primary / violet phụ
+// Premium Dark Gaming SaaS · accent primary / violet phụ
+// Section đọc/ghi qua ?section= trên URL (A07):
+//   - vào thẳng /account?section=credit mở đúng ví (T11)
+//   - đổi tab → router.replace(..., { scroll: false })
+//   - Back/Forward khôi phục section vì state derive từ URL
 // =====================================================
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/app/components/useAuth";
 import { createClient } from "@/utils/supabase/client";
 import { DashboardLayout } from "./components/DashboardLayout";
 import { PageHeader } from "./components/PageHeader";
-import { ErrorState, PageSkeleton } from "./components/states";
+import { ErrorState, PageSkeleton, daysLeft } from "./components/states";
 import { OverviewSection } from "./components/OverviewSection";
 import { ProfileSection } from "./components/ProfileSection";
 import { OrdersSection } from "./components/OrdersSection";
@@ -20,20 +24,34 @@ import { MembershipSection } from "./components/MembershipSection";
 import { SecuritySection } from "./components/SecuritySection";
 import { CreditSection } from "./components/CreditSection";
 import { Button, Card, Icon } from "./components/ui";
-import type { AccountData, SectionKey } from "./types";
+import {
+  DEFAULT_SECTION,
+  isSectionKey,
+  type AccountData,
+  type SectionKey,
+} from "./types";
 
-const UPGRADE_URL = "/mods/mix-mods-fc26/payment";
-
-export default function AccountPage() {
+function AccountPageClient() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, isAdmin, loading: authLoading, login, logout } = useAuth();
-  const [section, setSection] = useState<SectionKey>("overview");
   const [data, setData] = useState<AccountData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [plansLoading, setPlansLoading] = useState(false);
   const [plansError, setPlansError] = useState("");
-  const firstLoad = useRef(true);
+  const plansRequested = useRef(false);
+
+  // ── A07: section là state derive từ URL (single source of truth) ──
+  const rawSection = searchParams.get("section");
+  const section: SectionKey = isSectionKey(rawSection) ? rawSection : DEFAULT_SECTION;
+
+  // Param không hợp lệ → dọn URL về mặc định (không để URL "bogus" sót lại)
+  useEffect(() => {
+    if (rawSection != null && !isSectionKey(rawSection)) {
+      router.replace("/account", { scroll: false });
+    }
+  }, [rawSection, router]);
 
   const fetchAccount = useCallback(async () => {
     const supabase = createClient();
@@ -63,42 +81,71 @@ export default function AccountPage() {
     }
   }, [router]);
 
+  // Luôn fetch thật khi được gọi (retry hoạt động đúng — T19).
+  // Việc chỉ tự gọi 1 lần được kiểm soát qua ensurePlans/plansRequested.
   const fetchPlans = useCallback(async () => {
-    if (!firstLoad.current) return;
-    firstLoad.current = false;
     setPlansLoading(true);
     setPlansError("");
     try {
-      // Ưu tiên plans trong /api/account; fallback /api/admin/plans (admin-only)
-      // nếu account API chưa trả (tránh "data cũ chưa có"). Security: endpoint này
-      // không lộ data nhạy cảm; nếu user không phải admin sẽ bị 403 → giữ plans hiện có.
       const res = await fetch("/api/account/plans");
       if (!res.ok) throw new Error("Không tải được danh sách gói");
       const d = await res.json();
-      const plans = d.plans ?? [];
+      const plans = d.plans ?? d.data?.plans ?? [];
       setData((prev) => (prev ? { ...prev, plans } : prev));
     } catch {
-      setPlansError("Không tải được danh sách gói membership");
+      setPlansError("Chưa tải được danh sách gói membership");
     } finally {
       setPlansLoading(false);
     }
   }, []);
 
+  // Tự nạp plans tối đa 1 lần mỗi phiên xem (user đổi → reset ở effect dưới)
+  const ensurePlans = useCallback(() => {
+    if (plansRequested.current) return;
+    plansRequested.current = true;
+    void fetchPlans();
+  }, [fetchPlans]);
+
+  // T12: user đổi (logout A → login B cùng tab) → xoá dữ liệu cũ, nạp lại
+  const userId = user?.id ?? null;
   useEffect(() => {
-    if (!authLoading) void fetchAccount();
-  }, [authLoading, fetchAccount]);
+    if (authLoading) return;
+    setData(null);
+    setError("");
+    setPlansError("");
+    plansRequested.current = false;
+    setLoading(true);
+    void fetchAccount();
+  }, [authLoading, userId, fetchAccount]);
+
+  // Vào section membership (kể cả vào thẳng bằng URL) → đảm bảo có plans
+  useEffect(() => {
+    if (section === "membership") ensurePlans();
+  }, [section, ensurePlans]);
+
+  const navigate = useCallback(
+    (s: SectionKey) => {
+      if (!isSectionKey(s)) return;
+      const params = new URLSearchParams(searchParams.toString());
+      if (s === DEFAULT_SECTION) params.delete("section");
+      else params.set("section", s);
+      const qs = params.toString();
+      router.replace(qs ? `/account?${qs}` : "/account", { scroll: false });
+    },
+    [router, searchParams]
+  );
 
   const refetchAll = useCallback(() => {
-    firstLoad.current = true;
-    fetchPlans();
+    plansRequested.current = false;
+    if (section === "membership") ensurePlans();
     void fetchAccount();
-  }, [fetchAccount, fetchPlans]);
+  }, [fetchAccount, ensurePlans, section]);
 
   if (authLoading) {
     return (
       <div className="min-h-screen bg-surface-0 flex items-center justify-center">
         <div
-          className="w-8 h-8 border-2 border-coral border-t-transparent rounded-full animate-spin"
+          className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin"
           role="status"
           aria-label="Đang tải"
         />
@@ -110,12 +157,12 @@ export default function AccountPage() {
     return (
       <div className="min-h-screen bg-surface-0 flex items-center justify-center px-4">
         <Card className="p-8 sm:p-10 text-center max-w-md w-full">
-          <div className="mx-auto w-16 h-16 rounded-2xl bg-surface-2 border border-line flex items-center justify-center text-muted">
+          <div className="mx-auto w-16 h-16 rounded-lg bg-surface-2 border border-line flex items-center justify-center text-muted">
             <Icon name="user" className="w-8 h-8" />
           </div>
           <h1 className="mt-5 text-2xl font-black text-title">Bạn chưa đăng nhập</h1>
           <p className="mt-2 text-sm text-body leading-relaxed">
-            Đăng nhập bằng Google để quản lý tài khoản, đơn hàng, mod đã mở và membership VIP.
+            Đăng nhập bằng Google để quản lý tài khoản, ví credit, mod đã mở và membership.
           </p>
           <Button variant="primary" size="lg" className="mt-6 w-full" onClick={login}>
             <Icon name="user" className="w-4 h-4" />
@@ -139,28 +186,29 @@ export default function AccountPage() {
     user?.user_metadata?.picture ||
     null;
   const now = Date.now();
-  const isVip =
-    data?.roles?.includes("vip") ||
-    (data?.subscription != null &&
-      new Date(data.subscription.expires_at).getTime() > now);
+  // §14.3: VIP do role (admin cấp, không có subscription) là trạng thái RIÊNG,
+  // tách khỏi VIP do subscription để UI không hiển thị mâu thuẫn.
+  const hasVipRole = Boolean(data?.roles?.includes("vip"));
   const activeSub = data?.subscription ?? null;
+  const subActive =
+    activeSub != null && new Date(activeSub.expires_at).getTime() > now;
+  const isVip = hasVipRole || subActive;
 
   const content = loading ? (
     <PageSkeleton />
   ) : error ? (
-    <ErrorState message={error} onRetry={fetchAccount} />
+    <ErrorState message={error} onRetry={refetchAll} />
   ) : (
     <>
       {section === "overview" && (
         <OverviewSection
-          displayName={displayName}
           isVip={isVip}
+          hasVipRole={hasVipRole}
           activeSub={activeSub}
           now={now}
-          orderCount={data?.subscriptions?.length ?? 0}
+          subscriptionCount={data?.subscriptions?.length ?? 0}
           unlockedItems={data?.mods_unlocked ?? []}
-          onNavigate={setSection}
-          onUpgrade={() => router.push(UPGRADE_URL)}
+          onNavigate={navigate}
         />
       )}
       {section === "credit" && <CreditSection />}
@@ -172,7 +220,6 @@ export default function AccountPage() {
           memberSince={current?.created_at}
           lastSignIn={current?.last_sign_in_at}
           onSaved={fetchAccount}
-          onError={(msg) => setError(msg)}
         />
       )}
       {section === "orders" && (
@@ -188,9 +235,9 @@ export default function AccountPage() {
           plansLoading={plansLoading}
           plansError={plansError}
           hasVip={isVip}
+          hasVipRole={hasVipRole}
           activeSub={activeSub}
           now={now}
-          onUpgrade={() => router.push(UPGRADE_URL)}
         />
       )}
       {section === "security" && (
@@ -207,10 +254,7 @@ export default function AccountPage() {
   return (
     <DashboardLayout
       active={section}
-      onNavigate={(s) => {
-        setSection(s);
-        if (s === "membership") fetchPlans();
-      }}
+      onNavigate={navigate}
       header={
         <PageHeader
           displayName={displayName}
@@ -221,22 +265,40 @@ export default function AccountPage() {
           memberSince={current?.created_at}
           lastSignIn={current?.last_sign_in_at}
           vipDaysLeft={
-            isVip && activeSub
-              ? Math.max(0, Math.ceil((new Date(activeSub.expires_at).getTime() - now) / (24 * 60 * 60 * 1000)))
-              : undefined
+            isVip && activeSub ? daysLeft(activeSub.expires_at, now) : undefined
           }
         />
       }
     >
       {content}
-      {!loading && !error && data && (
-        <p className="mt-8 text-[11px] text-muted/70 text-center" aria-hidden="true">
-          Đồng bộ lần cuối:{" "}
-          {data.synced_at
-            ? new Date(data.synced_at).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })
-            : "—"}
+      {!loading && !error && data?.synced_at && (
+        <p className="mt-8 text-[11px] text-muted/70 text-center">
+          Lần cập nhật gần nhất:{" "}
+          {new Date(data.synced_at).toLocaleTimeString("vi-VN", {
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
         </p>
       )}
     </DashboardLayout>
+  );
+}
+
+// useSearchParams cần Suspense boundary khi prerender (Next.js App Router)
+export default function AccountPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-surface-0 flex items-center justify-center">
+          <div
+            className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin"
+            role="status"
+            aria-label="Đang tải"
+          />
+        </div>
+      }
+    >
+      <AccountPageClient />
+    </Suspense>
   );
 }

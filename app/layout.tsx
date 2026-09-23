@@ -4,7 +4,8 @@ import { Be_Vietnam_Pro } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import { Suspense } from "react";
 import "./globals.css";
-import Navbar from "./components/Navbar";
+import Navbar, { MainContent } from "./components/Navbar";
+import Footer from "./components/Footer";
 import StructuredData from "./components/StructuredData";
 import TopProgressBar from "./components/TopProgressBar";
 import MessengerButton from "./components/MessengerButton";
@@ -110,13 +111,19 @@ export default function RootLayout({
         <StructuredData />
       </head>
       <body className={`${beVietnamPro.variable} antialiased font-sans`}>
+        {/* Skip link — hiện khi focus bằng bàn phím */}
+        <a
+          href="#main-content"
+          className="fixed left-4 top-3 z-[var(--layer-toast)] -translate-y-[300%] rounded-xl bg-[var(--color-accent)] px-4 py-3 text-sm font-bold text-[var(--color-on-accent)] shadow-lg transition-transform duration-150 focus:translate-y-0"
+        >
+          Bỏ qua tới nội dung
+        </a>
         <Suspense fallback={null}>
           <TopProgressBar />
         </Suspense>
         <Navbar />
-        <div className="pt-14 md:pt-16">
-          {children}
-        </div>
+        <MainContent>{children}</MainContent>
+        <Footer />
         <MessengerButton />
         <Analytics />
       </body>

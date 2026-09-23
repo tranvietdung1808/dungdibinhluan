@@ -1,13 +1,12 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
+import { use, useEffect, useState } from 'react'
+import { AdminPage } from '../../../components/AdminPage'
+import { ModForm, modToFormState, type ModFormState } from '../../../components/mods/ModForm'
+import { adminFetchJson, adminErrorMessage, isAdminAuthError } from '../../../components/admin-api'
+import { ErrorState, Spinner } from '@/app/components/ui'
 
-const CATEGORIES = ['All-in-One', 'Faces', 'Kits', 'Gameplay', 'Đồ họa', 'Cơ chế game'] as const
-
-interface Mod {
-  id: string
+interface ModDetail {
   slug: string
   name: string
   author: string
@@ -18,571 +17,98 @@ interface Mod {
   long_description: string | null
   thumbnail: string | null
   download_url: string | null
-  tags: string[]
-  thumbnail_orientation: string
-  featured: boolean
+  tags: string[] | null
+  thumbnail_orientation: string | null
+  featured: boolean | null
   video_id: string | null
-  created_at: string
   credit_enabled?: boolean
   credit_cost?: number | null
 }
 
-interface ModForm {
-  name: string
-  author: string
-  category: string
-  version: string
-  updatedAt: string
-  description: string
-  longDescription: string
-  thumbnail: string
-  downloadUrl: string
-  tags: string
-  thumbnailOrientation: 'portrait' | 'landscape'
-  featured: boolean
-  videoId: string
-  creditEnabled: boolean
-  creditCost: string
-}
-
 export default function EditModPage({ params }: { params: Promise<{ slug: string }> }) {
-  const [mod, setMod] = useState<Mod | null>(null)
-  const [form, setForm] = useState<ModForm>({
-    name: '',
-    author: '',
-    category: 'Faces',
-    version: '',
-    updatedAt: '',
-    description: '',
-    longDescription: '',
-    thumbnail: '',
-    downloadUrl: '',
-    tags: '',
-    thumbnailOrientation: 'portrait',
-    featured: false,
-    videoId: '',
-    creditEnabled: false,
-    creditCost: '5',
-  })
-  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null)
-  const [isUploadingThumbnail, setIsUploadingThumbnail] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const { slug } = use(params)
+  const [initial, setInitial] = useState<ModFormState | null>(null)
   const [error, setError] = useState('')
-  const [toast, setToast] = useState('')
-  const router = useRouter()
-  const blobUrlRef = useRef<string | null>(null)
+  const [notFound, setNotFound] = useState(false)
+  const [authFailed, setAuthFailed] = useState(false)
 
   useEffect(() => {
-    fetchMod()
-  }, [])
-
-  const fetchMod = async () => {
-    try {
-      const { slug } = await params
-      const response = await fetch(`/api/admin/mods/${slug}`)
-      if (response.ok) {
-        const data = await response.json()
-        setMod(data)
-        setForm({
-          name: data.name,
-          author: data.author,
-          category: data.category,
-          version: data.version,
-          updatedAt: data.updated_at,
-          description: data.description || '',
-          longDescription: data.long_description || '',
-          thumbnail: data.thumbnail || '',
-          downloadUrl: data.download_url || '',
-          tags: data.tags.join(', '),
-          thumbnailOrientation: (data.thumbnail_orientation as 'portrait' | 'landscape') || 'portrait',
-          featured: data.featured || false,
-          videoId: data.video_id || '',
-          creditEnabled: data.credit_enabled === true,
-          creditCost: String(data.credit_cost ?? 5),
-        })
-        setThumbnailPreview(data.thumbnail)
-      } else {
-        setError('Không tìm thấy mod')
+    let cancelled = false
+    const load = async () => {
+      try {
+        const data = await adminFetchJson<ModDetail>(
+          `/api/admin/mods/${encodeURIComponent(slug)}`
+        )
+        if (!cancelled) setInitial(modToFormState(data))
+      } catch (err) {
+        if (cancelled) return
+        if (isAdminAuthError(err)) setAuthFailed(true)
+        else if (err instanceof Error && 'status' in err && (err as { status: number }).status === 404)
+          setNotFound(true)
+        else setError(adminErrorMessage(err, 'Chưa tải được dữ liệu mod'))
       }
-    } catch (err) {
-      setError('Lỗi khi tải dữ liệu mod')
     }
-  }
-
-  const handleChange = (field: keyof ModForm, value: string | boolean) => {
-    setForm(prev => ({ ...prev, [field]: value }))
-  }
-
-  const handleThumbnailChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    const localUrl = URL.createObjectURL(file)
-    blobUrlRef.current = localUrl
-    setThumbnailPreview(localUrl)
-    setForm(prev => ({ ...prev, thumbnail: '' }))
-
-    setIsUploadingThumbnail(true)
-
-    try {
-      const formData = new FormData()
-      formData.append('file', file)
-
-      const response = await fetch('/api/admin/upload', {
-        method: 'POST',
-        body: formData,
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        if (data?.url) {
-          setForm(prev => ({ ...prev, thumbnail: data.url }))
-        }
-      } else {
-        const errorData = await response.json().catch(() => ({}))
-        setError('Upload failed: ' + (errorData.error || response.statusText))
-      }
-    } catch (err) {
-      setError('Upload failed: ' + err)
-    } finally {
-      setIsUploadingThumbnail(false)
-      e.target.value = ''
+    void load()
+    return () => {
+      cancelled = true
     }
-  }
+  }, [slug])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
-
-    if (!form.name || !form.author || !form.version || !form.updatedAt) {
-      setError('Vui lòng điền đầy đủ các trường bắt buộc')
-      setLoading(false)
-      return
-    }
-
-    const tags = form.tags
-      .split(',')
-      .map(t => t.trim())
-      .filter(t => t.length > 0)
-
-    try {
-      const { slug } = await params
-      const response = await fetch(`/api/admin/mods/${slug}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: form.name,
-          author: form.author,
-          category: form.category,
-          version: form.version,
-          updated_at: form.updatedAt,
-          description: form.description,
-          long_description: form.longDescription,
-          thumbnail: form.thumbnail || null,
-          download_url: form.downloadUrl || null,
-          tags,
-          thumbnail_orientation: form.thumbnailOrientation,
-          featured: form.featured,
-          video_id: form.videoId || null,
-          credit_enabled: form.creditEnabled,
-          credit_cost: form.creditCost ? Number(form.creditCost) : null,
-        }),
-      })
-
-      const data = await response.json()
-
-      if (response.ok && data.success) {
-        setToast('Cập nhật mod thành công!')
-        setTimeout(() => {
-          router.push('/admin/mods')
-        }, 1000)
-      } else {
-        setError(data.error || 'Có lỗi xảy ra khi cập nhật mod')
-      }
-    } catch (err) {
-      setError('Có lỗi xảy ra. Vui lòng thử lại.')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleClearThumbnail = () => {
-    if (blobUrlRef.current) {
-      URL.revokeObjectURL(blobUrlRef.current)
-      blobUrlRef.current = null
-    }
-    setForm(prev => ({ ...prev, thumbnail: '' }))
-    setThumbnailPreview(null)
-  }
-
-  if (!mod && !error) {
+  if (authFailed) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] text-white flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin"></div>
-      </div>
+      <AdminPage size="form">
+        <ErrorState
+          title="Không còn quyền quản trị"
+          description="Phiên đăng nhập hết hạn hoặc tài khoản không còn quyền admin. Đăng nhập lại để tiếp tục."
+          onRetry={() => {
+            window.location.href = '/admin'
+          }}
+          retryLabel="Đăng nhập lại"
+        />
+      </AdminPage>
+    )
+  }
+
+  if (notFound) {
+    return (
+      <AdminPage size="form">
+        <ErrorState
+          title={`Không tìm thấy mod “${slug}”`}
+          description="Mod có thể đã bị xóa hoặc slug không đúng."
+          onRetry={() => {
+            window.location.href = '/admin/mods'
+          }}
+          retryLabel="Về danh sách mod"
+        />
+      </AdminPage>
+    )
+  }
+
+  if (error) {
+    return (
+      <AdminPage size="form">
+        <ErrorState
+          title="Chưa tải được dữ liệu mod"
+          description={error}
+          onRetry={() => window.location.reload()}
+        />
+      </AdminPage>
+    )
+  }
+
+  if (!initial) {
+    return (
+      <AdminPage size="form">
+        <div className="flex items-center gap-3 py-10 text-sm text-[var(--color-muted)]">
+          <Spinner size={20} /> Đang tải dữ liệu mod…
+        </div>
+      </AdminPage>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
-      {/* Toast */}
-      {toast && (
-        <div className="fixed top-4 right-4 z-50 px-6 py-3 bg-green-500/90 text-white rounded-lg shadow-lg">
-          {toast}
-        </div>
-      )}
-
-      {/* Header */}
-      <div className="bg-[#111111] border-b border-white/10">
-        <div className="max-w-6xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link
-                href="/admin/mods"
-                className="text-slate-400 hover:text-white transition-colors"
-              >
-                ← Quay lại
-              </Link>
-              <h1 className="text-xl font-bold">Chỉnh sửa Mod: {mod?.name}</h1>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        {error ? (
-          <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-4">
-            <p className="text-red-400">{error}</p>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Form fields - same as new form but with values */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Left column */}
-              <div className="space-y-6">
-                {/* Name */}
-                <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-white mb-2">
-                    Name *
-                  </label>
-                  <input
-                    id="name"
-                    type="text"
-                    value={form.name}
-                    onChange={(e) => handleChange('name', e.target.value)}
-                    className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[var(--color-primary)] transition-colors"
-                    required
-                  />
-                </div>
-
-                {/* Author */}
-                <div>
-                  <label htmlFor="author" className="block text-sm font-medium text-white mb-2">
-                    Author *
-                  </label>
-                  <input
-                    id="author"
-                    type="text"
-                    value={form.author}
-                    onChange={(e) => handleChange('author', e.target.value)}
-                    className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[var(--color-primary)] transition-colors"
-                    required
-                  />
-                </div>
-
-                {/* Category */}
-                <div>
-                  <label htmlFor="category" className="block text-sm font-medium text-white mb-2">
-                    Category *
-                  </label>
-                  <select
-                    id="category"
-                    value={form.category}
-                    onChange={(e) => handleChange('category', e.target.value)}
-                    className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white focus:outline-none focus:border-[var(--color-primary)] transition-colors"
-                  >
-                    {CATEGORIES.map(cat => (
-                      <option key={cat} value={cat}>{cat}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Version */}
-                <div>
-                  <label htmlFor="version" className="block text-sm font-medium text-white mb-2">
-                    Version *
-                  </label>
-                  <input
-                    id="version"
-                    type="text"
-                    value={form.version}
-                    onChange={(e) => handleChange('version', e.target.value)}
-                    className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[var(--color-primary)] transition-colors"
-                    required
-                  />
-                </div>
-
-                {/* Updated At */}
-                <div>
-                  <label htmlFor="updatedAt" className="block text-sm font-medium text-white mb-2">
-                    Updated At *
-                  </label>
-                  <input
-                    id="updatedAt"
-                    type="text"
-                    value={form.updatedAt}
-                    onChange={(e) => handleChange('updatedAt', e.target.value)}
-                    className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[var(--color-primary)] transition-colors"
-                    required
-                  />
-                </div>
-
-                {/* Description */}
-                <div>
-                  <label htmlFor="description" className="block text-sm font-medium text-white mb-2">
-                    Description
-                  </label>
-                  <textarea
-                    id="description"
-                    value={form.description}
-                    onChange={(e) => handleChange('description', e.target.value)}
-                    rows={3}
-                    className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[var(--color-primary)] transition-colors resize-none"
-                  />
-                </div>
-
-                {/* Long Description */}
-                <div>
-                  <label htmlFor="longDescription" className="block text-sm font-medium text-white mb-2">
-                    Long Description
-                  </label>
-                  <textarea
-                    id="longDescription"
-                    value={form.longDescription}
-                    onChange={(e) => handleChange('longDescription', e.target.value)}
-                    rows={6}
-                    className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[var(--color-primary)] transition-colors resize-none"
-                  />
-                </div>
-              </div>
-
-              {/* Right column */}
-              <div className="space-y-6">
-                {/* Thumbnail */}
-                <div>
-                  <label className="block text-sm font-medium text-white mb-2">
-                    Thumbnail
-                  </label>
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-4">
-                      <label className="px-4 py-2 bg-[#111111] border border-white/10 text-white text-sm rounded-lg hover:bg-white/10 transition-colors cursor-pointer">
-                        {isUploadingThumbnail ? 'Đang upload...' : 'Chọn ảnh thumbnail'}
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleThumbnailChange}
-                          disabled={isUploadingThumbnail}
-                          className="hidden"
-                        />
-                      </label>
-                      {thumbnailPreview && (
-                        <button
-                          type="button"
-                          onClick={handleClearThumbnail}
-                          className="px-3 py-1 bg-red-500/20 text-red-400 text-sm rounded-lg hover:bg-red-500/30 transition-colors"
-                        >
-                          Xóa
-                        </button>
-                      )}
-                    </div>
-
-                    {thumbnailPreview && (
-                      <div className="relative w-full aspect-video bg-[#111111] border border-white/10 rounded-lg overflow-hidden">
-                        <img
-                          src={thumbnailPreview}
-                          alt="Thumbnail preview"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    )}
-
-                    {!thumbnailPreview && (
-                      <input
-                        type="url"
-                        value={form.thumbnail}
-                        onChange={(e) => {
-                          handleChange('thumbnail', e.target.value)
-                          setThumbnailPreview(e.target.value || null)
-                        }}
-                        className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[var(--color-primary)] transition-colors"
-                        placeholder="/mods/thumbnail.jpg hoặc URL"
-                      />
-                    )}
-                  </div>
-                </div>
-
-                {/* Download URL */}
-                <div>
-                  <label htmlFor="downloadUrl" className="block text-sm font-medium text-white mb-2">
-                    Download URL
-                  </label>
-                  <input
-                    id="downloadUrl"
-                    type="url"
-                    value={form.downloadUrl}
-                    onChange={(e) => handleChange('downloadUrl', e.target.value)}
-                    className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[var(--color-primary)] transition-colors"
-                  />
-                </div>
-
-                {/* Tags */}
-                <div>
-                  <label htmlFor="tags" className="block text-sm font-medium text-white mb-2">
-                    Tags (comma-separated)
-                  </label>
-                  <input
-                    id="tags"
-                    type="text"
-                    value={form.tags}
-                    onChange={(e) => handleChange('tags', e.target.value)}
-                    className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[var(--color-primary)] transition-colors"
-                  />
-                </div>
-
-                {/* Thumbnail Orientation */}
-                <div>
-                  <label className="block text-sm font-medium text-white mb-2">
-                    Thumbnail Orientation
-                  </label>
-                  <div className="flex gap-6">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="thumbnailOrientation"
-                        value="portrait"
-                        checked={form.thumbnailOrientation === 'portrait'}
-                        onChange={() => handleChange('thumbnailOrientation', 'portrait')}
-                        className="w-4 h-4 accent-[var(--color-primary)]"
-                      />
-                      <span className="text-sm">Portrait</span>
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="thumbnailOrientation"
-                        value="landscape"
-                        checked={form.thumbnailOrientation === 'landscape'}
-                        onChange={() => handleChange('thumbnailOrientation', 'landscape')}
-                        className="w-4 h-4 accent-[var(--color-primary)]"
-                      />
-                      <span className="text-sm">Landscape</span>
-                    </label>
-                  </div>
-                </div>
-
-                {/* Featured */}
-                <div>
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={form.featured}
-                      onChange={(e) => handleChange('featured', e.target.checked)}
-                      className="w-4 h-4 accent-[var(--color-primary)]"
-                    />
-                    <span className="text-sm font-medium">Featured</span>
-                  </label>
-                </div>
-
-                {/* Mở khóa bằng credit */}
-                <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-bold text-amber-400">🔒 Mở khóa bằng Credit</p>
-                      <p className="text-xs text-slate-500 mt-0.5">User phải trả credit mới vào được trang mod này</p>
-                    </div>
-                    {/* Switch */}
-                    <button
-                      type="button"
-                      role="switch"
-                      aria-checked={form.creditEnabled}
-                      onClick={() => handleChange('creditEnabled', !form.creditEnabled)}
-                      className={`relative w-11 h-6 rounded-full transition-colors ${
-                        form.creditEnabled ? 'bg-amber-500' : 'bg-slate-700'
-                      }`}
-                    >
-                      <span
-                        className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${
-                          form.creditEnabled ? 'translate-x-[22px]' : 'translate-x-0.5'
-                        }`}
-                      />
-                    </button>
-                  </div>
-
-                  {form.creditEnabled && (
-                    <div>
-                      <label htmlFor="creditCost" className="block text-xs font-medium text-slate-300 mb-1.5">
-                        Số credit cần mở khóa
-                      </label>
-                      <input
-                        id="creditCost"
-                        type="number"
-                        min={1}
-                        max={100000}
-                        value={form.creditCost}
-                        onChange={(e) => handleChange('creditCost', e.target.value)}
-                        className="w-full px-4 py-2.5 bg-[#111111] border border-amber-500/30 rounded-lg text-white focus:outline-none focus:border-amber-400 transition-colors"
-                        placeholder="5"
-                      />
-                    </div>
-                  )}
-                </div>
-
-                {/* Video ID */}
-                <div>
-                  <label htmlFor="videoId" className="block text-sm font-medium text-white mb-2">
-                    Video ID (optional)
-                  </label>
-                  <input
-                    id="videoId"
-                    type="text"
-                    value={form.videoId}
-                    onChange={(e) => handleChange('videoId', e.target.value)}
-                    className="w-full px-4 py-3 bg-[#111111] border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-[var(--color-primary)] transition-colors"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Error */}
-            {error && (
-              <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-4">
-                <p className="text-red-400">{error}</p>
-              </div>
-            )}
-
-            {/* Submit button */}
-            <div className="flex gap-4 pt-4">
-              <button
-                type="submit"
-                disabled={loading}
-                className="flex-1 px-6 py-3 bg-[var(--color-primary)] text-white font-semibold rounded-lg hover:bg-[#b44c5c] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? 'Đang lưu...' : 'Lưu thay đổi'}
-              </button>
-              <Link
-                href="/admin/mods"
-                className="px-6 py-3 bg-[#111111] border border-white/10 text-white font-semibold rounded-lg hover:bg-white/10 transition-colors text-center"
-              >
-                Hủy
-              </Link>
-            </div>
-          </form>
-        )}
-      </div>
-    </div>
+    <AdminPage size="form">
+      <ModForm mode="edit" initial={initial} modSlug={slug} />
+    </AdminPage>
   )
 }

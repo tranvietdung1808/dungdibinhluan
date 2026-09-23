@@ -1,25 +1,46 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import Link from "next/link";
-import { MODS, type Mod } from "../../data/mods";
-import { FACES } from "../../data/faces";
 import { notFound } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabase";
 import { getModCreditConfigBySlug } from "@/lib/server/credit";
+import { DEFAULT_MOD_CREDIT_COST } from "@/lib/credit-core";
+import { MODS, type Mod } from "../../data/mods";
+import { FACES } from "../../data/faces";
 import ModUnlockWall from "../components/ModUnlockWall";
 import MixModsDetail from "../components/MixModsDetail";
-import { extractTopicTerms, overlapScore, parseFlexibleDate, stripHtml } from "@/lib/related-content";
-
-const TAG_COLORS: Record<string, string> = {
-  Faces: "#3b82f6",
-  Kits: "#8b5cf6",
-  Gameplay: "#10b981",
-  "Đồ họa": "#f59e0b",
-  "Cơ chế game": "var(--color-primary)",
-};
+import ShowcaseGallery from "../components/ShowcaseGallery";
+import ModCard, { OfferBadge } from "../components/ModCard";
+import { extractTopicTerms, overlapScore } from "@/lib/related-content";
+import {
+  buildCatalog,
+  formatUpdatedAt,
+  resolveMediaSrc,
+  type DbModRecord,
+  type ModSummary,
+  type StaticModInput,
+} from "@/lib/catalog";
+import {
+  Badge,
+  Breadcrumb,
+  ButtonLink,
+  Container,
+  InlineNotice,
+} from "@/app/components/ui";
+// SUPPORT_URL chỉ dùng trong SERVER component — client components
+// không import lib/payment/* (kéo directDownloadUrl vào bundle — §20.4).
+import { SUPPORT_URL } from "@/lib/payment/order-status";
 
 const ALL_STATIC_MODS: Mod[] = [...(FACES as Mod[]), ...MODS];
 const SITE_URL = "https://dungdibinhluan.com";
+
+// ISR 300s — đồng bộ chính sách /mods: credit config + metadata DB
+// tươi lại đủ nhanh, vẫn cache được.
+export const revalidate = 300;
+
+// =====================================================
+// Data — B02: DB ưu tiên thống nhất với catalog
+// (static chỉ làm fallback từng field / khi DB không có slug)
+// =====================================================
 
 // Database mod interface
 interface DbMod {
@@ -41,23 +62,39 @@ interface DbMod {
   created_at: string;
 }
 
-function mapDbModToMod(dbMod: DbMod): Mod {
+/**
+ * Merge chi tiết: DB record hợp lệ thắng, từng field trống/thiếu
+ * rơi về static cùng slug — cùng semantics với lib/catalog adapter.
+ */
+function mergeDbModDetail(dbMod: DbMod, staticMod?: Mod): Mod {
   return {
     slug: dbMod.slug,
-    name: dbMod.name,
-    author: dbMod.author,
-    category: dbMod.category,
-    version: dbMod.version,
-    updatedAt: dbMod.updated_at,
-    description: dbMod.description || "",
-    longDescription: dbMod.long_description || "",
-    thumbnail: dbMod.thumbnail || "",
-    downloadUrl: dbMod.download_url || "",
-    tags: dbMod.tags || [],
-    thumbnailOrientation: (dbMod.thumbnail_orientation as "portrait" | "landscape") || undefined,
-    featured: dbMod.featured,
-    videoId: dbMod.video_id || undefined,
-  } as unknown as Mod;
+    name: dbMod.name?.trim() || staticMod?.name || "",
+    author: dbMod.author?.trim() || staticMod?.author || "DungDiBinhLuan",
+    category: dbMod.category?.trim() || staticMod?.category || "Mod",
+    version: dbMod.version?.trim() || staticMod?.version || "",
+    // Ngày cập nhật THẬT, chuẩn hóa dd/mm/yyyy (§10.1) — không tự
+    // sinh ngày hôm nay (§4.3).
+    updatedAt:
+      formatUpdatedAt(dbMod.updated_at) ??
+      formatUpdatedAt(staticMod?.updatedAt) ??
+      "",
+    description: dbMod.description?.trim() || staticMod?.description || "",
+    longDescription:
+      dbMod.long_description || staticMod?.longDescription || "",
+    thumbnail:
+      resolveMediaSrc(dbMod.thumbnail) ??
+      resolveMediaSrc(staticMod?.thumbnail) ??
+      "",
+    downloadUrl: dbMod.download_url?.trim() || staticMod?.downloadUrl || "",
+    tags:
+      dbMod.tags && dbMod.tags.length > 0 ? dbMod.tags : (staticMod?.tags ?? []),
+    thumbnailOrientation:
+      (dbMod.thumbnail_orientation as "portrait" | "landscape") ||
+      staticMod?.thumbnailOrientation,
+    featured: Boolean(dbMod.featured) || staticMod?.featured === true,
+    videoId: dbMod.video_id || staticMod?.videoId,
+  } as Mod;
 }
 
 async function fetchDbMod(slug: string): Promise<DbMod | null> {
@@ -65,7 +102,7 @@ async function fetchDbMod(slug: string): Promise<DbMod | null> {
     .from("mods")
     .select("*")
     .eq("slug", slug)
-    .single();
+    .maybeSingle();
 
   if (error || !data) return null;
   return data as DbMod;
@@ -78,69 +115,86 @@ async function fetchDbMods(): Promise<DbMod[]> {
   if (_dbModsCache && Date.now() - _dbModsCache.ts < DB_MODS_CACHE_TTL) {
     return _dbModsCache.data;
   }
-  const { data, error } = await supabaseAdmin.from("mods").select("*");
+  // created_at desc — adapter giữ bản đầu khi trùng slug (bản mới nhất)
+  const { data, error } = await supabaseAdmin
+    .from("mods")
+    .select("*")
+    .order("created_at", { ascending: false });
   if (error || !data) return [];
   _dbModsCache = { data: data as DbMod[], ts: Date.now() };
   return _dbModsCache.data;
 }
 
-type RelatedModCandidate = {
-  mod: Mod;
-  sortDate: number;
-  score: number;
-};
-
-function getModTopicTerms(mod: Mod) {
-  const fullText = `${mod.name} ${mod.description || ""} ${stripHtml(mod.longDescription || "")}`;
-  return extractTopicTerms(fullText);
+/** B02: DB ưu tiên — giống catalog; static chỉ fallback. */
+async function getMod(slug: string): Promise<Mod | null> {
+  const staticMod = ALL_STATIC_MODS.find((m) => m.slug === slug);
+  const dbMod = await fetchDbMod(slug);
+  if (dbMod) return mergeDbModDetail(dbMod, staticMod);
+  if (!staticMod) return null;
+  return {
+    ...staticMod,
+    // Chuẩn hóa ngày + thumbnail qua cùng pipeline với DB path
+    updatedAt: formatUpdatedAt(staticMod.updatedAt) ?? staticMod.updatedAt,
+    thumbnail: resolveMediaSrc(staticMod.thumbnail) ?? staticMod.thumbnail,
+  };
 }
 
-function getRelatedScore(currentMod: Mod, candidateMod: Mod) {
-  const sharedTags = overlapScore(currentMod.tags || [], candidateMod.tags || []);
-  const sameCategory = currentMod.category === candidateMod.category ? 1 : 0;
-  const sharedTerms = overlapScore(getModTopicTerms(currentMod), getModTopicTerms(candidateMod));
+// ---------- Related mods — qua catalog (T03: cùng metadata với card) ----------
+
+function getRelatedScore(current: ModSummary, candidate: ModSummary) {
+  const sharedTags = overlapScore(current.tags, candidate.tags);
+  const sameCategory = current.category === candidate.category ? 1 : 0;
+  const currentTerms = extractTopicTerms(
+    `${current.name} ${current.description}`,
+  );
+  const candidateTerms = extractTopicTerms(
+    `${candidate.name} ${candidate.description}`,
+  );
+  const sharedTerms = overlapScore(currentTerms, candidateTerms);
   return sharedTags * 24 + sameCategory * 12 + sharedTerms * 3;
 }
 
-async function getRelatedMods(currentMod: Mod) {
-  const dbMods = (await fetchDbMods()).map(mapDbModToMod);
-  const merged = new Map<string, Mod>();
-  for (const item of ALL_STATIC_MODS) merged.set(item.slug, item);
-  for (const item of dbMods) merged.set(item.slug, item);
-  merged.delete(currentMod.slug);
+async function getRelatedMods(currentMod: Mod): Promise<ModSummary[]> {
+  const dbMods = (await fetchDbMods()) as DbModRecord[];
+  const catalog = buildCatalog(
+    ALL_STATIC_MODS as StaticModInput[],
+    dbMods,
+  );
 
-  const ranked: RelatedModCandidate[] = [...merged.values()]
-    .map((candidateMod) => ({
-      mod: candidateMod,
-      sortDate: parseFlexibleDate(candidateMod.updatedAt),
-      score: getRelatedScore(currentMod, candidateMod),
-    }))
-    .filter((item) => item.score > 0);
+  const current =
+    catalog.find((m) => m.slug === currentMod.slug) ??
+    buildCatalog([currentMod as StaticModInput], [])[0];
+  if (!current) return [];
 
-  ranked.sort((left, right) => right.score - left.score || right.sortDate - left.sortDate);
-  return ranked.slice(0, 8).map((item) => item.mod);
+  return catalog
+    .filter((m) => m.slug !== current.slug)
+    .map((m) => ({ m, score: getRelatedScore(current, m) }))
+    .filter((x) => x.score > 0)
+    .sort((a, b) => b.score - a.score || b.m.updatedAtTs - a.m.updatedAtTs)
+    .slice(0, 8)
+    .map((x) => x.m);
 }
 
-function getAbsoluteImageUrl(image?: string) {
+// ---------- SEO ----------
+
+function getAbsoluteImageUrl(image?: string | null) {
   if (!image) return `${SITE_URL}/og-image.jpg`;
   if (image.startsWith("http://") || image.startsWith("https://")) return image;
   return `${SITE_URL}${image.startsWith("/") ? image : `/${image}`}`;
 }
 
-function getSoftwareApplicationSchema(mod: Mod) {
+/**
+ * JSON-LD — §10.3/§20.4: mod khóa credit KHÔNG đặt downloadUrl vào
+ * structured data (đó là nội dung protected).
+ */
+function getSoftwareApplicationSchema(mod: Mod, locked: boolean) {
   return {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
     name: mod.name,
-    description: mod.description || mod.longDescription,
+    description: mod.description || undefined,
     applicationCategory: "GameApplication",
     operatingSystem: "Windows",
-    offers: {
-      "@type": "Offer",
-      price: "0",
-      priceCurrency: "VND",
-      availability: "https://schema.org/InStock",
-    },
     author: {
       "@type": "Person",
       name: mod.author || "DungDiBinhLuan",
@@ -150,9 +204,9 @@ function getSoftwareApplicationSchema(mod: Mod) {
       name: "DungDiBinhLuan",
       url: SITE_URL,
     },
-    softwareVersion: mod.version || "1.0",
+    softwareVersion: mod.version || undefined,
     screenshot: getAbsoluteImageUrl(mod.thumbnail),
-    downloadUrl: mod.downloadUrl,
+    ...(locked ? {} : { downloadUrl: mod.downloadUrl || undefined }),
     keywords: mod.tags?.join(", ") || "FC 26 mod, FIFA mod, game mod",
     url: `${SITE_URL}/mods/${mod.slug}`,
   };
@@ -170,22 +224,12 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  
-  // Try to find in static mods first
-  let mod = ALL_STATIC_MODS.find((m) => m.slug === slug);
-  
-  // If not found, try database
-  if (!mod) {
-    const dbMod = await fetchDbMod(slug);
-    if (dbMod) {
-      mod = mapDbModToMod(dbMod);
-    }
-  }
-  
+  const mod = await getMod(slug);
+
   if (!mod) return { title: "Mod không tồn tại" };
   const canonical = `${SITE_URL}/mods/${mod.slug}`;
   const imageUrl = getAbsoluteImageUrl(mod.thumbnail);
-  const description = mod.description || mod.longDescription;
+  const description = mod.description || "Chi tiết mod FC 26";
 
   return {
     title: mod.name,
@@ -208,20 +252,48 @@ export async function generateMetadata({
   };
 }
 
-async function getMod(slug: string): Promise<Mod | null> {
-  // Try to find in static mods first
-  let mod = ALL_STATIC_MODS.find((m) => m.slug === slug);
-  
-  // If not found, try database
-  if (!mod) {
-    const dbMod = await fetchDbMod(slug);
-    if (dbMod) {
-      mod = mapDbModToMod(dbMod);
-    }
-  }
-  
-  return (mod || null) as Mod | null;
+// ---------- View helpers ----------
+
+function MetaRow({
+  label,
+  value,
+}: {
+  label: string;
+  value: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-baseline justify-between gap-4 border-b border-[var(--color-line)] py-2.5 last:border-0">
+      <dt className="shrink-0 text-meta text-[var(--color-muted)]">{label}</dt>
+      <dd className="min-w-0 text-right text-sm font-medium text-[var(--color-title)]">
+        {value}
+      </dd>
+    </div>
+  );
 }
+
+/**
+ * Phiên bản mod vs phiên bản game (§10.1):
+ * field `version` chứa cả "TU x.y.z" (Title Update = bản cập nhật GAME)
+ * lẫn "v1.0" (bản mod). TU → nhãn "Tương thích", còn lại → "Phiên bản mod".
+ */
+function VersionMetaRow({ version }: { version: string }) {
+  if (!version.trim()) return null;
+  const isTu = /^TU[\s.]/i.test(version.trim());
+  return (
+    <MetaRow
+      label={isTu ? "Tương thích" : "Phiên bản mod"}
+      value={
+        isTu
+          ? `FC 26 — ${version.trim()} (bản cập nhật game)`
+          : version.trim()
+      }
+    />
+  );
+}
+
+// =====================================================
+// Page
+// =====================================================
 
 export default async function ModDetailPage({
   params,
@@ -230,353 +302,295 @@ export default async function ModDetailPage({
 }) {
   const { slug } = await params;
   const mod = await getMod(slug);
-  
+
   if (!mod) return notFound();
 
   const isMixMods = mod.slug === "mix-mods-fc26";
-  const isPortrait = mod.thumbnailOrientation !== "landscape";
   const thumbnailSrc = mod.thumbnail?.trim() ? mod.thumbnail : null;
-  const softwareApplicationSchema = getSoftwareApplicationSchema(mod);
+  const isPortrait = mod.thumbnailOrientation !== "landscape";
+  const hasDownload = Boolean(mod.downloadUrl?.trim());
   const relatedMods = await getRelatedMods(mod);
-  
-  // Luôn hiển thị ngày hôm nay cho MIX MODS
-  const displayUpdatedAt = isMixMods
-    ? new Date().toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
-    : mod.updatedAt;
-
-  // Mod yêu cầu mở khóa bằng credit → chặn toàn bộ trang chi tiết,
-  // hiện màn hình khóa; mở khóa xong client mới render nội dung thật.
   const creditConfig = await getModCreditConfigBySlug(slug);
-  if (creditConfig.enabled) {
+  const isLocked = creditConfig.enabled;
+
+  const breadcrumbItems = [
+    { label: "Trang chủ", href: "/" },
+    { label: "Kho mod", href: "/mods" },
+    { label: mod.name },
+  ];
+
+  // ---------- Mod yêu cầu credit → paywall có preview (§10.2/§10.3) ----------
+  if (isLocked) {
     return (
-      <main className="min-h-screen bg-[#050507] text-white">
-        <div className="border-b border-white/5 px-4 md:px-6 py-4 flex items-center gap-3">
-          <Link href="/" className="text-slate-500 hover:text-white transition-colors text-sm">← Trang chủ</Link>
-          <span className="text-slate-700">/</span>
-          <Link href="/mods" className="text-slate-500 hover:text-white transition-colors text-sm">Mod Hub</Link>
-          <span className="text-slate-700">/</span>
-          <span className="text-sm font-bold text-white truncate max-w-[200px]">{mod.name}</span>
-        </div>
-        <ModUnlockWall
-          slug={slug}
-          name={mod.name}
-          author={mod.author}
-          category={mod.category}
-          version={mod.version}
-          updatedAt={displayUpdatedAt}
-          tags={mod.tags ?? []}
-          thumbnail={thumbnailSrc}
-          creditCost={creditConfig.creditCost ?? 5}
+      <main className="min-h-screen bg-[var(--color-surface-0)]">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(getSoftwareApplicationSchema(mod, true)),
+          }}
         />
+        <Container className="py-6 md:py-10">
+          <Breadcrumb items={breadcrumbItems} />
+          <div className="mt-6">
+            <ModUnlockWall
+              slug={slug}
+              name={mod.name}
+              author={mod.author}
+              category={mod.category}
+              version={mod.version}
+              updatedAt={mod.updatedAt}
+              tags={mod.tags ?? []}
+              thumbnail={thumbnailSrc}
+              description={mod.description || ""}
+              creditCost={creditConfig.creditCost ?? DEFAULT_MOD_CREDIT_COST}
+            />
+          </div>
+        </Container>
+        <RelatedModsSection relatedMods={relatedMods} />
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-[#050507] text-white">
+    <main className="min-h-screen bg-[var(--color-surface-0)]">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(softwareApplicationSchema),
+          __html: JSON.stringify(getSoftwareApplicationSchema(mod, false)),
         }}
       />
-      <div className="border-b border-white/5 px-4 md:px-6 py-4 flex items-center gap-3">
-        <Link href="/" className="text-slate-500 hover:text-white transition-colors text-sm">← Trang chủ</Link>
-        <span className="text-slate-700">/</span>
-        <Link href="/mods" className="text-slate-500 hover:text-white transition-colors text-sm">Mod Hub</Link>
-        <span className="text-slate-700">/</span>
-        <span className="text-sm font-bold text-white truncate max-w-[200px]">{mod.name}</span>
-      </div>
+      <Container className="py-6 md:py-10">
+        <Breadcrumb items={breadcrumbItems} />
 
-      {isMixMods ? (
-        <MixModsDetail
-          mod={{
-            slug: mod.slug,
-            name: mod.name,
-            author: mod.author,
-            category: mod.category,
-            version: mod.version,
-            updatedAt: displayUpdatedAt,
-            description: mod.description || "",
-            longDescription: mod.longDescription || "",
-            thumbnail: thumbnailSrc,
-            tags: mod.tags ?? [],
-            featured: mod.featured,
-            videoId: mod.videoId,
-          }}
-        />
-      ) : isPortrait ? (
-        <div className="relative">
-          <div className="pointer-events-none absolute inset-0 opacity-60">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(206,90,103,0.22),transparent_60%)]" />
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(59,130,246,0.14),transparent_55%)]" />
+        {isMixMods ? (
+          <div className="mt-6">
+            <MixModsDetail
+              mod={{
+                slug: mod.slug,
+                name: mod.name,
+                author: mod.author,
+                category: mod.category,
+                version: mod.version,
+                // Ngày cập nhật THẬT của bản mod — không tự sinh theo render (§11.2)
+                updatedAt: mod.updatedAt,
+                description: mod.description || "",
+                longDescription: mod.longDescription || "",
+                thumbnail: thumbnailSrc,
+                tags: mod.tags ?? [],
+                featured: mod.featured,
+                videoId: mod.videoId,
+              }}
+            />
           </div>
-
-          <div className="relative max-w-5xl mx-auto px-4 md:px-6 py-10 md:py-14 flex flex-col items-center gap-8 md:gap-10">
-            
-            <div className="w-full text-center space-y-3">
-              <div className="flex items-center justify-center gap-2 flex-wrap">
-                <span className="px-3 py-1 rounded-full text-[10px] font-black bg-white/5 border border-white/10">
-                  Faces
-                </span>
-                {mod.featured && (
-                  <span className="px-3 py-1 rounded-full text-[10px] font-black bg-[var(--color-primary)] text-white">
-                    ⭐ FEATURED
-                  </span>
-                )}
-              </div>
-              <h1 className="text-2xl md:text-3xl font-black leading-tight">
-                {mod.name}
-              </h1>
-              <div className="flex items-center justify-center gap-2 flex-wrap text-[11px] text-slate-300">
-                <span className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
-                  👤 {mod.author}
-                </span>
-                <span className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
-                  📦 {mod.version}
-                </span>
-                <span className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
-                  🔄 {mod.updatedAt}
-                </span>
-              </div>
-            </div>
-
-            <div className="w-full flex flex-col md:flex-row md:items-center md:gap-10">
-              <div className="w-full md:w-[360px] flex-shrink-0 flex justify-center">
-                <div className="relative w-[260px] md:w-[320px] aspect-[3/4] rounded-[28px] overflow-hidden border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.7)] bg-[#050507]">
+        ) : (
+          <>
+            {/* ===== Hero 2 cột: gallery ~60% / summary+action ~40% (§10.1)
+                Mobile: tên/metadata → ảnh → giá/quyền/CTA → nội dung ===== */}
+            <div className="mt-6 grid gap-8 lg:grid-cols-5">
+              {/* Gallery — cover + showcase public */}
+              <div className="order-2 space-y-6 lg:order-none lg:col-span-3">
+                <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface-2)]">
                   {thumbnailSrc ? (
                     <Image
                       src={thumbnailSrc}
                       alt={mod.name}
                       fill
-                      className="object-cover object-center"
+                      className={
+                        isPortrait
+                          ? "object-contain object-center p-4"
+                          : "object-cover object-center"
+                      }
+                      sizes="(max-width: 1024px) 100vw, 720px"
                       priority
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-slate-500 text-xs">
-                      No thumbnail
+                    <div
+                      aria-hidden="true"
+                      className="absolute inset-0 flex items-center justify-center"
+                    >
+                      <span className="text-3xl font-black text-[var(--color-line-strong)]">
+                        {mod.name.charAt(0).toUpperCase() || "M"}
+                      </span>
                     </div>
                   )}
                 </div>
+                <ShowcaseGallery
+                  slug={mod.slug}
+                  hideWhenEmpty
+                  heading="Hình ảnh trong game"
+                />
               </div>
 
-              <div className="mt-6 md:mt-0 flex-1 flex flex-col gap-4">
-                <div className="flex flex-wrap gap-2">
-                  {mod.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="px-3 py-1.5 rounded-full text-[11px] font-black"
-                      style={{
-                        background: `${TAG_COLORS[tag]}20`,
-                        color: TAG_COLORS[tag],
-                        border: `1px solid ${TAG_COLORS[tag]}30`,
-                      }}
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-
-                <div className="bg-[#0c0c10] rounded-2xl border border-white/5 p-5 md:p-6 space-y-3">
-                  <h2 className="text-xs font-black tracking-widest uppercase text-slate-400">
-                    Mô tả
-                  </h2>
-                  <div 
-                    className="text-slate-300 text-sm leading-relaxed whitespace-pre-line overflow-hidden"
-                    dangerouslySetInnerHTML={{ __html: mod.longDescription || "" }}
-                  />
-                </div>
-
-                <div className="bg-gradient-to-br from-[var(--color-primary)]/20 via-[var(--color-primary)]/5 to-transparent border border-[var(--color-primary)]/40 rounded-2xl p-5 md:p-6 flex flex-col sm:flex-row items-center gap-4">
-                  <div className="flex-1 text-center sm:text-left">
-                    <p className="text-[11px] text-slate-400 uppercase tracking-widest">
-                      Sẵn sàng cài đặt
-                    </p>
-                    <p className="text-base md:text-lg font-black mt-0.5">
-                      Tải xuống miễn phí
-                    </p>
-                    <p className="text-[11px] text-slate-500 mt-0.5">
-                      An toàn · Miễn phí
-                    </p>
+              {/* Summary + action — contents trên mobile để order hoạt động */}
+              <div className="contents lg:col-span-2 lg:flex lg:flex-col lg:gap-6">
+                <div className="order-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge tone="neutral">{mod.category}</Badge>
+                    {mod.featured && <Badge tone="accent">Nổi bật</Badge>}
+                    <OfferBadge
+                      offer={
+                        hasDownload
+                          ? { kind: "free" }
+                          : { kind: "contact", label: "Liên hệ" }
+                      }
+                    />
                   </div>
-                  <a
-                    href={mod.downloadUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 px-8 py-3.5 bg-[var(--color-primary)] rounded-2xl font-black tracking-widest text-xs md:text-sm text-white hover:bg-[#b44c5c] transition-all shadow-[0_12px_40px_rgba(206,90,103,0.45)] whitespace-nowrap"
-                  >
-                    ⬇️ TẢI XUỐNG
-                  </a>
-                </div>
-
-                <div className="text-[11px] text-slate-600 italic text-center sm:text-left space-y-1">
-                  <p>Lưu ý: Bản mod chỉ dành cho anh em đã có game.</p>
-                  <p>
-                    Chưa có game?{" "}
-                    <Link href="/games/fc26/select" className="text-[var(--color-primary)] hover:underline font-semibold">
-                      Liên hệ admin mua ngay
-                    </Link>
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div className="max-w-4xl mx-auto px-4 md:px-6 py-8 md:py-12 space-y-8">
-          <div className="relative rounded-3xl overflow-hidden border border-white/10 h-56 md:h-96">
-            {thumbnailSrc ? (
-              <Image
-                src={thumbnailSrc}
-                alt={mod.name}
-                fill
-                className="opacity-70 object-cover object-center"
-                priority
-              />
-            ) : (
-              <div className="absolute inset-0 bg-gradient-to-br from-[#1a1a1f] to-[#0a0a0a]" />
-            )}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
-            <div className="absolute bottom-5 left-5 right-5 flex items-end justify-between gap-4 flex-wrap">
-              <div>
-                <div className="flex items-center gap-2 mb-2 flex-wrap">
-                  {mod.featured && (
-                    <span className="px-2.5 py-1 rounded-full text-[9px] font-black bg-[var(--color-primary)] text-white">
-                      ⭐ FEATURED
-                    </span>
-                  )}
-                  <span className="px-2.5 py-1 rounded-full text-[9px] font-black bg-white/10 text-white border border-white/20">
-                    {mod.category}
-                  </span>
-                </div>
-                <h1 className="text-xl md:text-3xl font-black leading-tight drop-shadow-lg">{mod.name}</h1>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 flex-wrap text-xs border-b border-white/5 pb-5">
-            <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-slate-300">
-              👤 <span className="font-bold">{mod.author}</span>
-            </span>
-            <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-slate-300">
-              📦 <span className="font-bold">{mod.version}</span>
-            </span>
-            <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-slate-300">
-              🔄 Cập nhật: <span className="font-bold">{mod.updatedAt}</span>
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2 flex-wrap">
-            {mod.tags.map((tag) => (
-              <span
-                key={tag}
-                className="px-3 py-1.5 rounded-full text-[11px] font-black"
-                style={{
-                  background: `${TAG_COLORS[tag]}20`,
-                  color: TAG_COLORS[tag],
-                  border: `1px solid ${TAG_COLORS[tag]}30`,
-                }}
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-
-          <div className="bg-[#111] rounded-2xl border border-white/5 p-5 md:p-7 space-y-3">
-            <h2 className="text-sm font-black tracking-widest uppercase text-slate-400">Mô tả</h2>
-            <div 
-              className="text-slate-300 text-sm md:text-base leading-relaxed whitespace-pre-line overflow-hidden"
-              dangerouslySetInnerHTML={{ __html: mod.longDescription || "" }}
-            />
-          </div>
-
-          <div className="bg-gradient-to-br from-[var(--color-primary)]/10 to-transparent border border-[var(--color-primary)]/20 rounded-3xl p-6 md:p-8 flex flex-col sm:flex-row items-center gap-5">
-            <div className="flex-1 text-center sm:text-left">
-              <p className="text-xs text-slate-500 uppercase tracking-widest">Sẵn sàng cài đặt</p>
-              <p className="text-lg md:text-xl font-black mt-1">
-                Tải xuống miễn phí
-              </p>
-              <p className="text-slate-500 text-xs mt-1">
-                An toàn · Miễn phí
-              </p>
-            </div>
-            <a
-              href={mod.downloadUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 px-8 py-4 bg-[var(--color-primary)] rounded-2xl font-black tracking-widest text-sm text-white hover:bg-[#b44c5c] transition-all shadow-[0_8px_30px_rgba(206,90,103,0.3)] whitespace-nowrap"
-            >
-              ⬇️ TẢI XUỐNG
-            </a>
-          </div>
-
-          <div className="text-xs text-slate-600 italic text-center space-y-1">
-            <p>Lưu ý: Bản mod chỉ dành cho anh em đã có game.</p>
-            <p>
-              Chưa có game?{" "}
-              <Link href="/games/fc26/select" className="text-[var(--color-primary)] hover:underline font-semibold">
-                Liên hệ admin mua ngay
-              </Link>
-            </p>
-          </div>
-        </div>
-      )}
-      <section id="mods-related" className="mx-auto max-w-6xl px-4 md:px-6 pb-14">
-        <div className="rounded-3xl border border-white/10 bg-[#0f0f14] p-5 md:p-6">
-          <div className="flex items-end justify-between gap-3">
-            <div>
-              <h2 className="text-xl md:text-2xl font-black text-white">Mods liên quan</h2>
-            </div>
-            <Link href="/mods" className="text-[11px] uppercase tracking-widest text-[var(--color-primary)] hover:underline font-black">
-              Xem tất cả
-            </Link>
-          </div>
-          <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-            {relatedMods.length > 0 ? (
-              relatedMods.map((relatedMod) => (
-                <Link
-                  key={relatedMod.slug}
-                  href={`/mods/${relatedMod.slug}`}
-                  className="group rounded-2xl border border-white/10 bg-white/[0.02] overflow-hidden transition-colors hover:border-[var(--color-primary)]/50"
-                >
-                  <div className="h-36 bg-[#16161d]">
-                    {relatedMod.thumbnail ? (
-                      <img src={relatedMod.thumbnail} alt={relatedMod.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" loading="lazy" />
-                    ) : (
-                      <div className="h-full w-full" />
-                    )}
-                  </div>
-                  <div className="p-3">
-                    <div className="flex flex-wrap gap-1">
-                      {relatedMod.tags.slice(0, 2).map((tag) => (
-                        <span
-                          key={`${relatedMod.slug}-${tag}`}
-                          className="rounded-full border px-2 py-0.5 text-[10px] font-semibold"
-                          style={{
-                            color: TAG_COLORS[tag] || "#cbd5e1",
-                            borderColor: `${TAG_COLORS[tag] || "#64748b"}66`,
-                            background: `${TAG_COLORS[tag] || "#64748b"}1f`,
-                          }}
-                        >
+                  <h1 className="mt-3 text-h1 text-[var(--color-title)]">
+                    {mod.name}
+                  </h1>
+                  {mod.tags.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-1.5">
+                      {mod.tags.map((tag) => (
+                        <Badge key={tag} tone="neutral">
                           {tag}
-                        </span>
+                        </Badge>
                       ))}
                     </div>
-                    <h3 className="mt-2 line-clamp-2 text-sm font-bold text-white">{relatedMod.name}</h3>
-                    <p className="mt-2 text-[11px] text-slate-400">
-                      {relatedMod.category} · {relatedMod.updatedAt}
+                  )}
+                  <dl className="mt-4 rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface-1)] px-5">
+                    <MetaRow label="Tác giả" value={mod.author} />
+                    <VersionMetaRow version={mod.version} />
+                    <MetaRow label="Game" value="EA FC 26" />
+                    <MetaRow label="Cập nhật" value={mod.updatedAt || "—"} />
+                    <MetaRow
+                      label="Loại quyền"
+                      value={hasDownload ? "Miễn phí" : "Liên hệ"}
+                    />
+                  </dl>
+                </div>
+
+                {/* Action — giá/quyền/CTA (mobile order-3: sau ảnh) */}
+                <div className="order-3">
+                  <div className="rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface-1)] p-5 md:p-6">
+                    {hasDownload ? (
+                      <>
+                        <p className="text-meta text-[var(--color-muted)]">
+                          Sẵn sàng cài đặt
+                        </p>
+                        <p className="mt-1 text-h3 text-[var(--color-title)]">
+                          Tải xuống miễn phí
+                        </p>
+                        <ButtonLink
+                          href={mod.downloadUrl}
+                          external
+                          size="lg"
+                          fullWidth
+                          className="mt-4"
+                        >
+                          Tải mod
+                        </ButtonLink>
+                      </>
+                    ) : (
+                      <>
+                        <InlineNotice
+                          tone="warning"
+                          title="Chưa có link tải"
+                        >
+                          Link tải cho phiên bản này chưa được cập nhật — liên
+                          hệ hỗ trợ để được cấp.
+                        </InlineNotice>
+                        <ButtonLink
+                          href={SUPPORT_URL}
+                          external
+                          variant="secondary"
+                          size="lg"
+                          fullWidth
+                          className="mt-4"
+                        >
+                          Liên hệ hỗ trợ
+                        </ButtonLink>
+                      </>
+                    )}
+                    <p className="mt-4 text-meta text-[var(--color-muted)]">
+                      Bản mod chỉ dành cho người đã có game. Chưa có game?{" "}
+                      <ButtonLink
+                        href="/games/fc26/select"
+                        variant="ghost"
+                        size="sm"
+                        className="!h-auto px-1 align-baseline text-[var(--color-accent-strong)]"
+                      >
+                        Xem FC 26
+                      </ButtonLink>
                     </p>
                   </div>
-                </Link>
-              ))
-            ) : (
-              <div className="col-span-full rounded-2xl border border-dashed border-white/10 bg-white/[0.02] p-6 text-center text-sm text-slate-400">
-                Chưa có mod liên quan phù hợp để hiển thị.
+                </div>
               </div>
-            )}
-          </div>
-        </div>
-      </section>
+            </div>
+
+            {/* ===== Nội dung ===== */}
+            {mod.description || mod.longDescription ? (
+              <section
+                aria-label="Mô tả chi tiết"
+                className="mt-10 rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface-1)] p-5 md:p-8"
+              >
+                <h2 className="text-h2 text-[var(--color-title)]">Mô tả</h2>
+                {mod.description ? (
+                  <p className="mt-3 text-[15px] font-medium leading-relaxed text-[var(--color-title)]">
+                    {mod.description}
+                  </p>
+                ) : null}
+                {mod.longDescription ? (
+                  <div
+                    className="mt-3 whitespace-pre-line text-[15px] leading-relaxed text-[var(--color-body)]"
+                    dangerouslySetInnerHTML={{ __html: mod.longDescription }}
+                  />
+                ) : null}
+              </section>
+            ) : null}
+
+            {/* ===== Hướng dẫn ===== */}
+            <section
+              aria-label="Hướng dẫn cài đặt"
+              className="mt-6 rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface-1)] p-5 md:p-6"
+            >
+              <h2 className="text-h3 text-[var(--color-title)]">
+                Cài đặt mod như thế nào?
+              </h2>
+              <p className="mt-2 text-[15px] leading-relaxed text-[var(--color-body)]">
+                Tải file, giải nén và làm theo hướng dẫn cài mod cho FC 26.
+                Gặp lỗi trong quá trình cài có thể nhắn kênh hỗ trợ.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <ButtonLink href="/huong-dan" variant="secondary" size="sm">
+                  Xem hướng dẫn cài mod
+                </ButtonLink>
+                <ButtonLink href={SUPPORT_URL} external variant="ghost" size="sm">
+                  Liên hệ hỗ trợ
+                </ButtonLink>
+              </div>
+            </section>
+          </>
+        )}
+      </Container>
+
+      <RelatedModsSection relatedMods={relatedMods} />
     </main>
+  );
+}
+
+// ---------- Related ----------
+
+function RelatedModsSection({ relatedMods }: { relatedMods: ModSummary[] }) {
+  if (relatedMods.length === 0) return null;
+  return (
+    <section id="mods-related" aria-label="Mod liên quan" className="pb-14">
+      <Container>
+        <div className="rounded-3xl border border-[var(--color-line)] bg-[var(--color-surface-1)] p-5 md:p-6">
+          <div className="flex items-end justify-between gap-3">
+            <h2 className="text-h2 text-[var(--color-title)]">Mods liên quan</h2>
+            <ButtonLink href="/mods" variant="ghost" size="sm">
+              Xem tất cả
+            </ButtonLink>
+          </div>
+          <ul className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {relatedMods.map((relatedMod) => (
+              <li key={relatedMod.slug} className="min-w-0">
+                <ModCard mod={relatedMod} />
+              </li>
+            ))}
+          </ul>
+        </div>
+      </Container>
+    </section>
   );
 }

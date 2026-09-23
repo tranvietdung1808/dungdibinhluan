@@ -1,134 +1,175 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
+import { Badge } from "@/app/components/ui/Badge";
+import { formatVnd, type AccessOffer, type ModSummary } from "@/lib/catalog";
 
-const TAG_COLORS: Record<string, string> = {
-  Faces: "#3b82f6",
-  Kits: "#8b5cf6",
-  Gameplay: "#10b981",
-  "Đồ họa": "#f59e0b",
-  "Cơ chế game": "var(--color-primary)",
-};
+// Ảnh grid: 1 cột mobile → 4 cột desktop (§9.3)
+const GRID_IMAGE_SIZES =
+  "(max-width: 479px) 100vw, (max-width: 767px) 50vw, (max-width: 1023px) 33vw, 25vw";
 
-interface ModCardProps {
-  mod: {
-    slug: string;
-    name: string;
-    description: string;
-    thumbnail: string;
-    category: string;
-    version: string;
-    updatedAt: string;
-    author: string;
-    thumbnailOrientation?: string;
-    tags: string[];
-    /** Số credit cần để mở khóa (có giá trị = mod yêu cầu mở khóa credit) */
-    creditCost?: number;
-  };
+function LockIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      aria-hidden="true"
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </svg>
+  );
 }
 
-export default function ModCard({ mod }: ModCardProps) {
-  const isPortrait = mod.thumbnailOrientation !== "landscape";
+/**
+ * OfferBadge — trạng thái giá/quyền ở vị trí ổn định (§9.3):
+ * "Miễn phí" · "X credit" (credit) · "Đã mở" (success) · "169.000đ" (product)
+ * · "Liên hệ" (chưa có kênh nhận tự động). Không dùng "VIP" chung chung.
+ */
+export function OfferBadge({
+  offer,
+  owned = false,
+}: {
+  offer: AccessOffer;
+  owned?: boolean;
+}) {
+  if (owned && offer.kind === "credit") {
+    return <Badge tone="success">Đã mở</Badge>;
+  }
+  switch (offer.kind) {
+    case "credit":
+      return (
+        <Badge tone="credit">
+          <LockIcon className="h-3.5 w-3.5" />
+          <span className="tabular">{offer.creditCost} credit</span>
+        </Badge>
+      );
+    case "product":
+      return <Badge tone="accent">{formatVnd(offer.priceVnd)}</Badge>;
+    case "contact":
+      return <Badge tone="neutral">{offer.label}</Badge>;
+    default:
+      return <Badge tone="neutral">Miễn phí</Badge>;
+  }
+}
+
+/** Fallback giữ đúng tỷ lệ khung khi ảnh thiếu/lỗi — tiêu đề/link vẫn còn trong body card. */
+function ThumbnailFallback({ name }: { name: string }) {
+  const initial = name.trim().charAt(0).toUpperCase() || "M";
+  return (
+    <div
+      aria-hidden="true"
+      className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-[var(--color-surface-2)]"
+    >
+      <svg
+        className="h-8 w-8 text-[var(--color-muted)]"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <rect x="3" y="3" width="18" height="18" rx="3" />
+        <circle cx="9" cy="9" r="2" />
+        <path d="m21 15-4.5-4.5a1.5 1.5 0 0 0-2 0L5 20" />
+      </svg>
+      <span className="text-2xl font-black text-[var(--color-line-strong)]">
+        {initial}
+      </span>
+    </div>
+  );
+}
+
+interface ModCardProps {
+  mod: ModSummary;
+  /** User đã mở khóa mod credit này (dữ liệu theo user, không nằm trong public payload) */
+  owned?: boolean;
+}
+
+export default function ModCard({ mod, owned = false }: ModCardProps) {
+  const [imageError, setImageError] = useState(false);
+  const isPortrait = mod.orientation !== "landscape";
+  const thumbnail = mod.thumbnail;
+  const showImage = Boolean(thumbnail) && !imageError;
 
   return (
-    <Link href={`/mods/${mod.slug}`}>
-      <div className="group relative rounded-2xl overflow-hidden border border-white/10 bg-[#0a0a0f] hover:border-[var(--color-primary)]/40 hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(206,90,103,0.15)] transition-all duration-300 flex flex-col h-full cursor-pointer isolate">
-
-        {/* Đường sáng viền trên cùng chìm */}
-        <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20" />
-
-        {/* Liên kết chìm (Shrink text) */}
-        <div className="relative w-full aspect-[16/10] flex-shrink-0 bg-[#08080a] overflow-hidden">
-          {/* Lớp mờ (Blurred Backdrop) phía sau cho ảnh dọc để không bị viền đen */}
-          {isPortrait && (
-            <div className="absolute inset-0 z-0 overflow-hidden">
-              <Image
-                src={mod.thumbnail}
-                alt={mod.name}
-                fill
-                className="object-cover blur-xl opacity-40 scale-125"
-                sizes="(max-width: 768px) 100vw, 25vw"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] to-transparent opacity-80" />
-            </div>
-          )}
-
-          {/* Ảnh chính */}
-          <div className="absolute inset-0 flex items-center justify-center z-10 w-full h-full">
+    <Link
+      href={`/mods/${mod.slug}`}
+      className="group block h-full rounded-2xl outline-none"
+    >
+      <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface-1)] shadow-[var(--shadow-ambient)] transition-all duration-200 group-hover:-translate-y-0.5 group-hover:border-[var(--color-accent-border)]">
+        {/* Ảnh 16:10 — portrait contain trong cùng khung, nền tĩnh surface-2 */}
+        <div className="relative aspect-[16/10] w-full flex-shrink-0 overflow-hidden bg-[var(--color-surface-2)]">
+          {showImage ? (
             <Image
-              src={mod.thumbnail}
+              src={thumbnail as string}
               alt={mod.name}
               fill
-              className={`opacity-90 group-hover:opacity-100 group-hover:scale-[1.04] transition-transform duration-700 ${isPortrait ? "object-contain py-2 object-bottom" : "object-cover object-top"}`}
-              sizes="(max-width: 768px) 100vw, 25vw"
+              className={`transition-transform duration-500 group-hover:scale-[1.03] ${
+                isPortrait
+                  ? "object-contain object-center p-3"
+                  : "object-cover object-top"
+              }`}
+              sizes={GRID_IMAGE_SIZES}
+              onError={() => setImageError(true)}
             />
-          </div>
-
-          {isPortrait && (
-            <div
-              className="absolute inset-0 z-10 pointer-events-none"
-              style={{
-                background:
-                  "radial-gradient(ellipse at center, rgba(10,10,15,0) 48%, rgba(10,10,15,0.82) 100%)",
-              }}
-            />
-          )}
-
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-transparent to-transparent z-10" />
-
-          <span
-            className="absolute top-3 left-3 z-20 px-2.5 py-0.5 rounded-full text-[8px] font-black tracking-widest backdrop-blur-md shadow-md"
-            style={{
-              background: `${TAG_COLORS[mod.tags?.[0] || "Cơ chế game"] || "var(--color-primary)"}1A`, // 10% opacity
-              color: TAG_COLORS[mod.tags?.[0] || "Cơ chế game"] || "var(--color-primary)",
-              border: `1px solid ${TAG_COLORS[mod.tags?.[0] || "Cơ chế game"] || "var(--color-primary)"}4D`, // 30% opacity
-            }}
-          >
-            {mod.category}
-          </span>
-
-          {/* Mod yêu cầu credit → ổ khóa + giá */}
-          {typeof mod.creditCost === "number" && mod.creditCost > 0 && (
-            <span
-              className="absolute bottom-2 right-2 z-20 inline-flex items-center gap-1 rounded-full bg-black/75 px-2.5 py-1 text-xs font-black text-amber-400 ring-1 ring-amber-400/50 backdrop-blur-md shadow-lg"
-              title={`Yêu cầu mở khóa bằng ${mod.creditCost} credit`}
-            >
-              <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-              <svg className="w-3 h-3 text-amber-300/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>
-              <span className="tabular-nums">{mod.creditCost}</span>
-            </span>
+          ) : (
+            <ThumbnailFallback name={mod.name} />
           )}
         </div>
 
-        {/* Khung nội dung Information */}
-        <div className="p-3.5 md:p-4 flex flex-col flex-1 relative z-20 -mt-5 pt-4 bg-gradient-to-b from-transparent to-[#0a0a0f]">
-          <h3 className="font-black text-xs md:text-sm leading-snug text-white group-hover:text-[var(--color-primary)] transition-colors line-clamp-2 mb-1">
+        {/* Nội dung: category → tên → mô tả → version/ngày → giá → tác giả */}
+        <div className="flex flex-1 flex-col gap-2 p-4">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <Badge tone="neutral">{mod.category}</Badge>
+            {mod.featured && <Badge tone="accent">Nổi bật</Badge>}
+          </div>
+
+          <h3
+            className="line-clamp-2 text-[15px] font-bold leading-snug text-[var(--color-title)] transition-colors group-hover:text-[var(--color-accent-strong)]"
+            title={mod.name}
+          >
             {mod.name}
           </h3>
-          <p className="text-slate-400 text-[10px] md:text-[11px] leading-relaxed line-clamp-2 mb-3 flex-1">{mod.description}</p>
 
-          {/* Metadata Badges */}
-          <div className="flex items-center gap-1.5 mb-3 flex-wrap">
-            <span className="text-[9px] px-2 py-0.5 rounded bg-white/5 border border-white/5 text-slate-300 font-bold tracking-widest flex items-center gap-1 uppercase">
-              <span className="text-slate-500">v</span>{mod.version}
-            </span>
-            <span className="text-[9px] px-2 py-0.5 rounded bg-white/5 border border-white/5 text-slate-300 font-bold tracking-widest flex items-center gap-1 uppercase">
-              <span className="text-[var(--color-primary)] text-[7px]">●</span>{mod.updatedAt}
-            </span>
-          </div>
+          {mod.description && (
+            <p className="text-meta line-clamp-2 text-[var(--color-muted)]">
+              {mod.description}
+            </p>
+          )}
 
-          {/* Footer Card */}
-          <div className="flex items-center justify-between pt-3 border-t border-white/5 mt-auto">
-            <span className="text-[9px] text-slate-500 uppercase tracking-widest font-bold">
-              MOD BY <span className="text-slate-200 ml-1">{mod.author}</span>
-            </span>
-            <span className="text-[var(--color-primary)] opacity-0 -translate-x-3 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 ease-out">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
+          {(mod.version || mod.updatedAt) && (
+            <p className="text-meta text-[var(--color-muted)]">
+              {mod.version && <span className="tabular">{mod.version}</span>}
+              {mod.version && mod.updatedAt && (
+                <span aria-hidden="true"> · </span>
+              )}
+              {mod.updatedAt && (
+                <span className="tabular">Cập nhật {mod.updatedAt}</span>
+              )}
+            </p>
+          )}
+
+          <div className="mt-auto flex items-center justify-between gap-3 border-t border-[var(--color-line)] pt-2.5">
+            <OfferBadge offer={mod.offer} owned={owned} />
+            <span
+              className="min-w-0 truncate text-meta text-[var(--color-muted)]"
+              title={mod.author}
+            >
+              <span className="sr-only">Tác giả: </span>
+              {mod.author}
             </span>
           </div>
         </div>
-      </div>
+      </article>
     </Link>
   );
 }

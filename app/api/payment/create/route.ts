@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
       orderCode,
       amount: product.price,
       description: `${product.name}`,
-      cancelUrl: `${baseUrl}/payment/cancel?orderCode=${orderCode}`,
+      cancelUrl: `${baseUrl}/payment/cancel?orderCode=${orderCode}&product=${productId}`,
       returnUrl: `${baseUrl}/payment/success?orderCode=${orderCode}`,
       buyerEmail: email,
       items: [

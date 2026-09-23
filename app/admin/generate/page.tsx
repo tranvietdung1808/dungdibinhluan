@@ -1,203 +1,238 @@
 'use client'
 
-import { useState } from 'react'
-import Link from 'next/link'
+import { useRef, useState } from 'react'
+import { AdminPage } from '../components/AdminPage'
+import { useAdminToast } from '../components/AdminShell'
+import { Button, Field, InlineNotice, inputClass } from '@/app/components/ui'
+
+// =====================================================
+// /admin/generate — tạo mã truy cập (§16.8)
+// Giữ nguyên cơ chế admin-key riêng (endpoint /api/gen-code
+// dùng adminKey, KHÔNG đổi auth). Hiển thị loại mã, số
+// lượng, tiến trình; lỗi giữa chừng vẫn giữ mã đã tạo.
+// =====================================================
+
+type CodeType = 'normal' | 'mods'
+
+const TYPE_META: Record<CodeType, { label: string; hint: string }> = {
+  normal: { label: 'DUNG-xxxx', hint: 'Bản thường — hiệu lực 24h' },
+  mods: { label: 'MODS-xxxx', hint: 'Full mods — hiệu lực 24h' },
+}
+
+const QUANTITIES = [1, 5, 10, 50, 100]
 
 export default function GenerateCodePage() {
+  const toast = useAdminToast()
   const [codes, setCodes] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
-  const [codeType, setCodeType] = useState<'normal' | 'mods'>('normal')
+  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null)
+  const [codeType, setCodeType] = useState<CodeType>('normal')
   const [adminKey, setAdminKey] = useState('')
+  const [error, setError] = useState('')
+  const [copied, setCopied] = useState<string | null>(null)
+  const cancelRef = useRef(false)
 
-  const genCode = async (count = 1) => {
-    if (!adminKey) {
-      alert('Vui lòng nhập admin key!')
+  const genCode = async (count: number) => {
+    if (!adminKey.trim()) {
+      setError('Vui lòng nhập admin key trước')
       return
     }
-
+    setError('')
     setLoading(true)
-    const newCodes: string[] = []
+    cancelRef.current = false
+    setProgress({ done: 0, total: count })
+
+    let firstError = ''
     for (let i = 0; i < count; i++) {
+      if (cancelRef.current) break
       try {
         const res = await fetch('/api/gen-code', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ adminKey, type: codeType }),
+          body: JSON.stringify({ adminKey: adminKey.trim(), type: codeType }),
         })
-        const data = await res.json()
-        if (data.code) {
-          newCodes.push(data.code)
+        const data = (await res.json().catch(() => ({}))) as { code?: string; error?: string }
+        if (res.ok && data.code) {
+          setCodes((prev) => [data.code as string, ...prev])
         } else {
-          alert('Sai admin key hoặc lỗi!')
+          firstError =
+            res.status === 401
+              ? 'Admin key không đúng'
+              : data.error || `Lỗi ${res.status}`
           break
         }
       } catch {
-        alert('Lỗi kết nối server!')
+        firstError = 'Lỗi kết nối server'
         break
       }
+      setProgress({ done: i + 1, total: count })
     }
-    setCodes(prev => [...newCodes, ...prev])
+
     setLoading(false)
+    setProgress(null)
+    if (firstError) {
+      setError(`${firstError} — các mã đã tạo vẫn được giữ lại bên dưới`)
+    }
   }
 
-  const copyAll = () => {
-    navigator.clipboard.writeText(codes.join('\n'))
-    alert('Đã copy tất cả!')
-  }
-
-  const logout = async () => {
+  const copyCode = async (code: string) => {
     try {
-      const { createClient } = await import('@/utils/supabase/client');
-      const supabase = createClient();
-      await supabase.auth.signOut();
-      await fetch('/api/auth/admin-session', { method: 'DELETE' });
-    } catch (e) {
-      console.error(e);
-    } finally {
-      window.location.href = '/admin';
+      await navigator.clipboard.writeText(code)
+      setCopied(code)
+      setTimeout(() => setCopied((c) => (c === code ? null : c)), 1500)
+    } catch {
+      setError('Không copy được — hãy chọn và copy thủ công')
+    }
+  }
+
+  const copyAll = async () => {
+    try {
+      await navigator.clipboard.writeText(codes.join('\n'))
+      toast(`Đã copy ${codes.length} mã`)
+    } catch {
+      setError('Không copy được — hãy chọn và copy thủ công')
     }
   }
 
   return (
-    <main className="min-h-screen bg-[#0a0a0a] text-white">
-      {/* Navigation */}
-      <div className="bg-[#111111] border-b border-white/10">
-        <div className="max-w-6xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-6">
-              <Link href="/admin/dashboard" className="text-slate-400 hover:text-white transition-colors">
-                ← Dashboard
-              </Link>
-              <h1 className="text-lg font-bold">Generate Access Code</h1>
-            </div>
-            <Link
-              href="/admin/guides"
-              className="px-3 py-1 bg-[var(--color-primary)] text-white text-sm rounded-lg hover:bg-[#b44c5c] transition-colors"
-            >
-              Quản lý bài viết
-            </Link>
-          </div>
-        </div>
-      </div>
+    <AdminPage size="form">
+      <section className="rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface-1)] p-5">
+        <h2 className="text-base font-bold text-[var(--color-title)]">Tạo mã truy cập</h2>
+        <p className="mt-1 text-sm text-[var(--color-muted)]">
+          Mã có hiệu lực 24 giờ, dùng được nhiều lần. Endpoint này dùng admin key riêng — không liên
+          quan tới phiên đăng nhập admin.
+        </p>
 
-      <div className="flex items-center justify-center p-6">
-        <div className="w-full max-w-lg space-y-6">
+        <div className="mt-5 space-y-5">
+          <Field label="Admin key" required hint="Khóa riêng của endpoint tạo mã">
+            {({ id, describedBy }) => (
+              <input
+                id={id}
+                aria-describedby={describedBy}
+                type="password"
+                autoComplete="off"
+                value={adminKey}
+                onChange={(e) => setAdminKey(e.target.value)}
+                className={inputClass}
+                placeholder="Nhập admin key…"
+              />
+            )}
+          </Field>
 
-          {/* Admin Key Input */}
-          <div className="space-y-2">
-            <p className="text-[10px] text-slate-500 tracking-widest uppercase text-center">Nhập Admin Key</p>
-            <input
-              type="password"
-              value={adminKey}
-              onChange={(e) => setAdminKey(e.target.value)}
-              placeholder="Admin key..."
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[var(--color-primary)]"
-            />
-          </div>
-
-          {/* Header */}
-          <div className="text-center">
-            <h1 className="text-xl font-black tracking-widest">GENERATE CODE</h1>
-            <p className="text-[10px] text-slate-500 tracking-widest uppercase mt-1">
-              Code hiệu lực 24h & không giới hạn
-            </p>
-          </div>
-
-          {/* Chọn loại code */}
-          <div className="space-y-2">
-            <p className="text-[10px] text-slate-500 tracking-widest uppercase text-center">Chọn loại code</p>
+          <fieldset>
+            <legend className="mb-1.5 text-sm font-medium text-[var(--color-title)]">
+              Loại mã
+            </legend>
             <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => setCodeType('normal')}
-                className={`py-4 rounded-xl font-black text-xs tracking-widest border transition-all ${
-                  codeType === 'normal'
-                    ? 'bg-[var(--color-primary)] border-[var(--color-primary)] text-white'
-                    : 'border-white/10 text-slate-400 hover:border-white/30 hover:text-white'
-                }`}
-              >
-                DUNG-xxxx
-                <br />
-                <span className="text-[9px] opacity-70 font-normal">Bản thường</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setCodeType('mods')}
-                className={`py-4 rounded-xl font-black text-xs tracking-widest border transition-all ${
-                  codeType === 'mods'
-                    ? 'bg-purple-500 border-purple-500 text-white'
-                    : 'border-white/10 text-slate-400 hover:border-white/30 hover:text-white'
-                }`}
-              >
-                MODS-xxxx
-                <br />
-                <span className="text-[9px] opacity-70 font-normal">Full Mods</span>
-              </button>
+              {(Object.keys(TYPE_META) as CodeType[]).map((t) => {
+                const active = codeType === t
+                return (
+                  <button
+                    key={t}
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() => setCodeType(t)}
+                    className={`rounded-xl border px-4 py-3.5 text-left transition-colors ${
+                      active
+                        ? 'border-[var(--color-accent-border)] bg-[var(--color-accent-subtle)]'
+                        : 'border-[var(--color-line)] bg-[var(--color-surface-2)] hover:border-[var(--color-accent-border)]'
+                    }`}
+                  >
+                    <span
+                      className={`block font-mono text-sm font-bold ${
+                        active ? 'text-[var(--color-title)]' : 'text-[var(--color-body)]'
+                      }`}
+                    >
+                      {TYPE_META[t].label}
+                    </span>
+                    <span className="mt-0.5 block text-xs text-[var(--color-muted)]">
+                      {TYPE_META[t].hint}
+                    </span>
+                  </button>
+                )
+              })}
             </div>
-          </div>
+          </fieldset>
 
-          {/* Gen buttons */}
-          <div className="grid grid-cols-5 gap-3">
-            {[1, 5, 10, 50, 100].map(count => (
-              <button
-                key={count}
-                type="button"
-                onClick={() => genCode(count)}
-                disabled={loading}
-                className="py-3 rounded-xl font-bold border border-white/10 text-white hover:bg-white/5 disabled:opacity-50 transition-colors"
-              >
-                {loading ? '...' : `x${count}`}
-              </button>
-            ))}
-          </div>
+          <fieldset>
+            <legend className="mb-1.5 text-sm font-medium text-[var(--color-title)]">
+              Số lượng
+            </legend>
+            <div className="flex flex-wrap gap-2">
+              {QUANTITIES.map((count) => (
+                <Button
+                  key={count}
+                  type="button"
+                  variant="secondary"
+                  onClick={() => void genCode(count)}
+                  disabled={loading}
+                >
+                  ×{count}
+                </Button>
+              ))}
+            </div>
+          </fieldset>
 
-          {/* Results */}
-          {codes.length > 0 && (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <p className="text-[10px] text-slate-500 tracking-widest uppercase">
-                  Codes đã tạo ({codes.length})
-                </p>
+          {progress && (
+            <InlineNotice tone="accent">
+              <div className="flex items-center gap-3">
+                <span
+                  className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--color-accent)] border-t-transparent"
+                  aria-hidden="true"
+                />
+                <span>
+                  Đang tạo {progress.done}/{progress.total} mã {TYPE_META[codeType].label}…
+                </span>
                 <button
                   type="button"
-                  onClick={copyAll}
-                  className="px-3 py-1 text-[10px] font-bold text-[var(--color-primary)] border border-[var(--color-primary)]/30 rounded-lg hover:bg-[var(--color-primary)]/10 transition-colors"
+                  onClick={() => {
+                    cancelRef.current = true
+                  }}
+                  className="ml-auto text-xs font-semibold text-[var(--color-title)] underline underline-offset-2"
                 >
-                  COPY ALL
+                  Dừng
                 </button>
               </div>
-              <div className="bg-[#111111] border border-white/10 rounded-xl p-4 max-h-96 overflow-y-auto space-y-1">
-                {codes.map((code, i) => (
-                  <div
-                    key={`${code}-${i}`}
-                    className="flex items-center justify-between group hover:bg-white/[0.02] px-2 py-1 rounded"
-                  >
-                    <code className="text-xs font-mono text-[var(--color-primary)]">{code}</code>
-                    <button
-                      type="button"
-                      onClick={() => { navigator.clipboard.writeText(code); alert('Đã copy!') }}
-                      className="opacity-0 group-hover:opacity-100 text-[10px] text-slate-500 hover:text-white transition-all"
-                    >
-                      Copy
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
+            </InlineNotice>
           )}
 
-          {/* Logout */}
-          <div className="text-center pt-4">
-            <button
-              type="button"
-              onClick={logout}
-              className="text-[10px] text-slate-600 hover:text-slate-400 transition-colors"
-            >
-              Đăng xuất
-            </button>
-          </div>
+          {error && <InlineNotice tone="danger">{error}</InlineNotice>}
         </div>
-      </div>
-    </main>
+      </section>
+
+      {/* Kết quả */}
+      {codes.length > 0 && (
+        <section className="rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface-1)] p-5">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-[var(--color-title)]">
+              Mã đã tạo <span className="tabular text-[var(--color-muted)]">({codes.length})</span>
+            </h2>
+            <Button variant="secondary" size="sm" onClick={copyAll}>
+              Copy tất cả
+            </Button>
+          </div>
+          <ul className="mt-3 max-h-96 space-y-1 overflow-y-auto" aria-label="Danh sách mã đã tạo">
+            {codes.map((code, i) => (
+              <li
+                key={`${code}-${i}`}
+                className="flex items-center justify-between rounded-lg px-3 py-2 hover:bg-[var(--color-surface-2)]"
+              >
+                <code className="font-mono text-sm font-semibold text-[var(--color-accent)]">
+                  {code}
+                </code>
+                <button
+                  type="button"
+                  onClick={() => void copyCode(code)}
+                  aria-label={`Copy mã ${code}`}
+                  className="rounded-lg border border-[var(--color-line)] px-3 py-1.5 text-xs font-medium text-[var(--color-muted)] transition-colors hover:text-[var(--color-title)]"
+                >
+                  {copied === code ? 'Đã copy ✓' : 'Copy'}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+    </AdminPage>
   )
 }

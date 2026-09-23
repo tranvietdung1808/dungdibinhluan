@@ -1,7 +1,27 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
+import { AdminPage } from '../components/AdminPage'
+import { AdminTable, AdminThead, AdminTh, AdminTr, AdminTd } from '../components/AdminTable'
+import { ConfirmDialog } from '../components/ConfirmDialog'
+import { useAdminToast } from '../components/AdminShell'
+import {
+  adminFetch,
+  adminFetchJson,
+  adminJson,
+  adminErrorMessage,
+  isAdminAuthError,
+} from '../components/admin-api'
+import { Badge, Button, ButtonLink, EmptyState, ErrorState, Field, InlineNotice, Spinner, inputClass } from '@/app/components/ui'
+
+// =====================================================
+// /admin/mods — danh sách mod (§16.3)
+// - Bảng desktop + thẻ mobile với menu thao tác từng mod
+// - Giá credit: draft → Lưu rõ ràng → pending theo hàng →
+//   thành công hoặc rollback (không báo thành công sớm)
+// - Xác nhận nêu rõ tên mod + hiệu ứng quyền truy cập
+// =====================================================
 
 interface Mod {
   id: string
@@ -11,276 +31,633 @@ interface Mod {
   category: string
   version: string
   updated_at: string
+  thumbnail: string | null
   featured: boolean
-  created_at: string
   credit_enabled?: boolean
   credit_cost?: number | null
 }
 
+type AccessFilter = 'all' | 'free' | 'credit'
+
+/** Menu thao tác gọn cho thẻ mobile (đủ lớn để chạm) */
+function ModActionsMenu({ mod, onDelete }: { mod: Mod; onDelete: () => void }) {
+  const [open, setOpen] = useState(false)
+  const wrapRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    const onDocDown = (e: MouseEvent) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false)
+    }
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false)
+    }
+    document.addEventListener('mousedown', onDocDown)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onDocDown)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [open])
+
+  return (
+    <div ref={wrapRef} className="relative">
+      <button
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-label={`Thao tác cho mod ${mod.name}`}
+        onClick={() => setOpen((v) => !v)}
+        className="inline-flex h-11 items-center gap-2 rounded-[10px] border border-[var(--color-line)] bg-[var(--color-surface-2)] px-4 text-sm font-semibold text-[var(--color-title)]"
+      >
+        Thao tác
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true" className={`h-4 w-4 transition-transform ${open ? 'rotate-180' : ''}`}>
+          <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
+      {open && (
+        <div
+          role="menu"
+          className="absolute right-0 z-20 mt-1 w-48 overflow-hidden rounded-xl border border-[var(--color-line-strong)] bg-[var(--color-surface-2)] shadow-xl"
+        >
+          {[
+            { href: `/mods/${mod.slug}`, label: 'Xem trang công khai', external: true },
+            { href: `/admin/mods/${mod.slug}/edit`, label: 'Sửa thông tin' },
+            { href: `/admin/mods/${mod.slug}/showcase`, label: 'Quản lý showcase' },
+          ].map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              role="menuitem"
+              target={item.external ? '_blank' : undefined}
+              onClick={() => setOpen(false)}
+              className="block px-4 py-3 text-sm text-[var(--color-body)] transition-colors hover:bg-[var(--color-surface-1)] hover:text-[var(--color-title)]"
+            >
+              {item.label}
+            </Link>
+          ))}
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              setOpen(false)
+              onDelete()
+            }}
+            className="block w-full px-4 py-3 text-left text-sm text-[var(--color-danger)] transition-colors hover:bg-[var(--color-danger-subtle)]"
+          >
+            Xóa mod
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
+/** Ô điều khiển credit: switch + giá draft + nút Lưu riêng */
+function CreditControl({
+  mod,
+  draft,
+  pending,
+  error,
+  onDraft,
+  onSave,
+  onToggle,
+}: {
+  mod: Mod
+  draft: string
+  pending: boolean
+  error?: string
+  onDraft: (v: string) => void
+  onSave: () => void
+  onToggle: () => void
+}) {
+  const saved = String(mod.credit_cost ?? 5)
+  const dirty = mod.credit_enabled && draft !== saved
+  const valid = Number.isFinite(Number(draft)) && Number(draft) >= 1
+  return (
+    <div className="space-y-1.5">
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          role="switch"
+          aria-checked={!!mod.credit_enabled}
+          aria-label={
+            mod.credit_enabled
+              ? `Tắt mở khóa credit cho ${mod.name}`
+              : `Bật mở khóa credit cho ${mod.name}`
+          }
+          disabled={pending}
+          onClick={onToggle}
+          className={`relative h-6 w-11 shrink-0 rounded-full transition-colors disabled:opacity-50 ${
+            mod.credit_enabled ? 'bg-[var(--color-credit)]' : 'bg-[var(--color-line-strong)]'
+          }`}
+        >
+          <span
+            className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
+              mod.credit_enabled ? 'translate-x-[22px]' : 'translate-x-0.5'
+            }`}
+          />
+        </button>
+        {mod.credit_enabled ? (
+          <>
+            <input
+              type="number"
+              min={1}
+              aria-label={`Giá credit của ${mod.name}`}
+              value={draft}
+              onChange={(e) => onDraft(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault()
+                  if (dirty && valid) onSave()
+                }
+              }}
+              disabled={pending}
+              className="h-9 w-20 rounded-lg border border-[var(--color-credit-border)] bg-[var(--color-surface-2)] px-2 text-center text-sm font-bold tabular text-[var(--color-credit-strong)] focus:border-[var(--color-credit)] focus:outline-none disabled:opacity-50"
+            />
+            <span className="text-xs text-[var(--color-muted)]">credit</span>
+            {pending ? (
+              <Spinner size={16} label={`Đang lưu giá credit của ${mod.name}`} />
+            ) : (
+              dirty && (
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={onSave}
+                  disabled={!valid}
+                >
+                  Lưu
+                </Button>
+              )
+            )}
+          </>
+        ) : (
+          <span className="text-xs text-[var(--color-muted)]">Miễn phí</span>
+        )}
+      </div>
+      {error && <p className="text-xs text-[var(--color-danger)]">{error}</p>}
+      {dirty && !pending && valid && (
+        <p className="text-xs text-[var(--color-muted)]">Giá mới chưa lưu — bấm Lưu để áp dụng</p>
+      )}
+    </div>
+  )
+}
+
+function ModThumb({ mod }: { mod: Mod }) {
+  if (!mod.thumbnail) {
+    return (
+      <div className="flex h-14 w-14 items-center justify-center rounded-lg border border-[var(--color-line)] bg-[var(--color-surface-2)] text-xs text-[var(--color-muted)]">
+        N/A
+      </div>
+    )
+  }
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={mod.thumbnail}
+      alt=""
+      className="h-14 w-14 rounded-lg border border-[var(--color-line)] object-cover"
+      loading="lazy"
+    />
+  )
+}
+
 export default function AdminModsPage() {
+  const toast = useAdminToast()
   const [mods, setMods] = useState<Mod[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [savingId, setSavingId] = useState<string | null>(null)
+  const [authFailed, setAuthFailed] = useState(false)
+  const [search, setSearch] = useState('')
+  const [categoryFilter, setCategoryFilter] = useState('all')
+  const [accessFilter, setAccessFilter] = useState<AccessFilter>('all')
   const [costDrafts, setCostDrafts] = useState<Record<string, string>>({})
+  const [pendingIds, setPendingIds] = useState<Set<string>>(new Set())
+  const [rowErrors, setRowErrors] = useState<Record<string, string>>({})
+  const [deleteTarget, setDeleteTarget] = useState<Mod | null>(null)
+  const [deleting, setDeleting] = useState(false)
+  const [creditConfirm, setCreditConfirm] = useState<{ mod: Mod; enable: boolean } | null>(null)
 
-  useEffect(() => {
-    fetchMods()
-  }, [])
+  const setPending = (id: string, on: boolean) =>
+    setPendingIds((prev) => {
+      const next = new Set(prev)
+      if (on) next.add(id)
+      else next.delete(id)
+      return next
+    })
 
-  // Lưu cấu hình credit (bật/tắt hoặc đổi số credit)
-  const persistCredit = async (mod: Mod, enabled: boolean, creditCost: number) => {
-    setSavingId(mod.id)
+  const fetchMods = useCallback(async () => {
+    setLoading(true)
+    setError('')
     try {
-      const response = await fetch('/api/admin/mods/credit-config', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ slug: mod.slug, enabled, creditCost }),
-      })
-      if (response.ok) {
-        const data = await response.json()
-        setMods(prev =>
-          prev.map(m =>
-            m.id === mod.id
-              ? { ...m, credit_enabled: data.credit_enabled, credit_cost: data.credit_cost }
-              : m
-          )
-        )
-        setCostDrafts(prev => ({ ...prev, [mod.id]: String(data.credit_cost ?? 5) }))
-      } else {
-        const err = await response.json().catch(() => ({}))
-        alert(err.error || 'Cập nhật thất bại')
-      }
+      const data = await adminFetchJson<Mod[]>('/api/admin/mods')
+      setMods(Array.isArray(data) ? data : [])
     } catch (err) {
-      alert('Có lỗi xảy ra khi cập nhật')
-    } finally {
-      setSavingId(null)
-    }
-  }
-
-  const handleToggleCredit = async (mod: Mod) => {
-    const enabled = !mod.credit_enabled
-    await persistCredit(mod, enabled, enabled ? (mod.credit_cost ?? 5) : 0)
-  }
-
-  // Lưu khi đổi số credit ở ô nhập nhanh (Enter hoặc blur)
-  const handleSaveCost = async (mod: Mod) => {
-    const raw = costDrafts[mod.id] ?? String(mod.credit_cost ?? 5)
-    const value = Number(raw)
-    if (!Number.isFinite(value) || value < 1) {
-      setCostDrafts(prev => ({ ...prev, [mod.id]: String(mod.credit_cost ?? 5) }))
-      return
-    }
-    await persistCredit(mod, true, Math.floor(value))
-  }
-
-  const handleDelete = async (slug: string, name: string) => {
-    if (!confirm(`Bạn có chắc muốn xóa mod "${name}" không?`)) {
-      return
-    }
-
-    try {
-      const response = await fetch(`/api/admin/mods/${slug}`, {
-        method: 'DELETE',
-      })
-
-      if (response.ok) {
-        setMods(mods.filter(mod => mod.slug !== slug))
-      } else {
-        const errorData = await response.json()
-        alert('Xóa thất bại: ' + errorData.error)
-      }
-    } catch (error) {
-      alert('Có lỗi xảy ra khi xóa')
-    }
-  }
-
-  const fetchMods = async () => {
-    try {
-      const response = await fetch('/api/admin/mods')
-      if (response.ok) {
-        const data = await response.json()
-        setMods(data || [])
-      } else {
-        setError('Failed to fetch mods')
-      }
-    } catch (err) {
-      setError('Error fetching mods')
+      if (isAdminAuthError(err)) setAuthFailed(true)
+      setError(adminErrorMessage(err, 'Chưa tải được danh sách mod'))
     } finally {
       setLoading(false)
     }
+  }, [])
+
+  useEffect(() => {
+    void fetchMods()
+  }, [fetchMods])
+
+  // Lưu cấu hình credit — pending theo hàng, rollback khi lỗi
+  const persistCredit = async (mod: Mod, enabled: boolean, creditCost: number) => {
+    setPending(mod.id, true)
+    setRowErrors((prev) => ({ ...prev, [mod.id]: '' }))
+    try {
+      const res = await adminFetch(
+        '/api/admin/mods/credit-config',
+        adminJson('POST', { slug: mod.slug, enabled, creditCost })
+      )
+      const data = (await res.json()) as { credit_enabled: boolean; credit_cost: number | null }
+      setMods((prev) =>
+        prev.map((m) =>
+          m.id === mod.id
+            ? { ...m, credit_enabled: data.credit_enabled, credit_cost: data.credit_cost }
+            : m
+        )
+      )
+      setCostDrafts((prev) => ({ ...prev, [mod.id]: String(data.credit_cost ?? 5) }))
+      toast(
+        data.credit_enabled
+          ? `“${mod.name}” cần ${data.credit_cost} credit để tải`
+          : `“${mod.name}” đã chuyển sang miễn phí`
+      )
+    } catch (err) {
+      if (isAdminAuthError(err)) {
+        setAuthFailed(true)
+      } else {
+        // Rollback: trả draft về giá đã lưu trên server
+        setCostDrafts((prev) => ({ ...prev, [mod.id]: String(mod.credit_cost ?? 5) }))
+        setRowErrors((prev) => ({
+          ...prev,
+          [mod.id]: adminErrorMessage(err, 'Lưu giá credit thất bại'),
+        }))
+      }
+    } finally {
+      setPending(mod.id, false)
+    }
   }
 
-  if (loading) {
+  const handleToggleRequest = (mod: Mod) => {
+    setCreditConfirm({ mod, enable: !mod.credit_enabled })
+  }
+
+  const handleToggleConfirm = async () => {
+    const c = creditConfirm
+    if (!c) return
+    setCreditConfirm(null)
+    await persistCredit(c.mod, c.enable, c.enable ? Number(costDrafts[c.mod.id] ?? c.mod.credit_cost ?? 5) || 5 : 0)
+  }
+
+  const handleSaveCost = (mod: Mod) => {
+    const raw = costDrafts[mod.id] ?? String(mod.credit_cost ?? 5)
+    const value = Math.floor(Number(raw))
+    if (!Number.isFinite(value) || value < 1) {
+      setRowErrors((prev) => ({ ...prev, [mod.id]: 'Số credit phải là số nguyên ≥ 1' }))
+      return
+    }
+    void persistCredit(mod, true, value)
+  }
+
+  const handleDelete = async () => {
+    const mod = deleteTarget
+    if (!mod) return
+    setDeleting(true)
+    try {
+      await adminFetch(`/api/admin/mods/${encodeURIComponent(mod.slug)}`, { method: 'DELETE' })
+      setMods((prev) => prev.filter((m) => m.id !== mod.id))
+      toast(`Đã xóa mod “${mod.name}”`)
+      setDeleteTarget(null)
+    } catch (err) {
+      if (isAdminAuthError(err)) {
+        setAuthFailed(true)
+        setDeleteTarget(null)
+      } else {
+        setRowErrors((prev) => ({
+          ...prev,
+          [mod.id]: adminErrorMessage(err, 'Xóa mod thất bại'),
+        }))
+        setDeleteTarget(null)
+      }
+    } finally {
+      setDeleting(false)
+    }
+  }
+
+  const categories = Array.from(new Set(mods.map((m) => m.category).filter(Boolean))).sort()
+
+  const filtered = mods.filter((m) => {
+    if (search) {
+      const s = search.toLowerCase()
+      if (
+        !m.name.toLowerCase().includes(s) &&
+        !m.slug.toLowerCase().includes(s) &&
+        !m.author.toLowerCase().includes(s)
+      )
+        return false
+    }
+    if (categoryFilter !== 'all' && m.category !== categoryFilter) return false
+    if (accessFilter === 'free' && m.credit_enabled) return false
+    if (accessFilter === 'credit' && !m.credit_enabled) return false
+    return true
+  })
+
+  if (authFailed) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] text-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-8 h-8 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p>Đang tải...</p>
-        </div>
-      </div>
+      <AdminPage>
+        <ErrorState
+          title="Không còn quyền quản trị"
+          description="Phiên đăng nhập hết hạn hoặc tài khoản không còn quyền admin. Đăng nhập lại để tiếp tục."
+          onRetry={() => {
+            window.location.href = '/admin'
+          }}
+          retryLabel="Đăng nhập lại"
+        />
+      </AdminPage>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
-      {/* Header */}
-      <div className="bg-[#111111] border-b border-white/10">
-        <div className="max-w-6xl mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold">Quản lý Mods</h1>
-              <p className="text-slate-400 mt-1">Tổng cộng: {mods.length} mods</p>
-            </div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <Link
-                href="/admin/mods/mix-mods-fc26/showcase"
-                className="px-4 py-2 bg-violet-600 text-white font-semibold rounded-lg hover:bg-violet-500 transition-colors text-center"
-              >
-                🖼️ Showcase MIX MODS
-              </Link>
-              <Link
-                href="/admin/mods/new"
-                className="px-4 py-2 bg-[var(--color-primary)] text-white font-semibold rounded-lg hover:bg-[#b44c5c] transition-colors"
-              >
-                + Thêm mod mới
-              </Link>
-            </div>
-          </div>
-        </div>
+    <AdminPage>
+      {/* Toolbar tìm kiếm + lọc */}
+      <div className="flex flex-col gap-3 rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface-1)] p-4 md:flex-row md:items-end">
+        <Field label="Tìm kiếm" className="flex-1">
+          {({ id }) => (
+            <input
+              id={id}
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className={inputClass}
+              placeholder="Tên, slug hoặc tác giả…"
+            />
+          )}
+        </Field>
+        <Field label="Danh mục" className="md:w-48">
+          {({ id }) => (
+            <select
+              id={id}
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              className={inputClass}
+            >
+              <option value="all">Tất cả</option>
+              {categories.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          )}
+        </Field>
+        <Field label="Quyền truy cập" className="md:w-48">
+          {({ id }) => (
+            <select
+              id={id}
+              value={accessFilter}
+              onChange={(e) => setAccessFilter(e.target.value as AccessFilter)}
+              className={inputClass}
+            >
+              <option value="all">Tất cả</option>
+              <option value="free">Miễn phí</option>
+              <option value="credit">Mở khóa bằng credit</option>
+            </select>
+          )}
+        </Field>
       </div>
 
-      {/* Content */}
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        {error && (
-          <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-4 mb-6">
-            <p className="text-red-400">{error}</p>
-          </div>
-        )}
-
-        {mods.length === 0 ? (
-          <div className="text-center py-16">
-            <p className="text-slate-400">Chưa có mod nào.</p>
-            <Link
-              href="/admin/mods/new"
-              className="inline-block mt-4 px-4 py-2 bg-[var(--color-primary)] text-white font-semibold rounded-lg hover:bg-[#b44c5c] transition-colors"
+      {error && (
+        <InlineNotice tone="danger">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span>{error}</span>
+            <button
+              type="button"
+              onClick={() => void fetchMods()}
+              className="font-semibold text-[var(--color-title)] underline underline-offset-2"
             >
-              Thêm mod đầu tiên
-            </Link>
+              Thử lại
+            </button>
           </div>
+        </InlineNotice>
+      )}
+
+      {loading ? (
+        <div className="flex items-center gap-3 py-10 text-sm text-[var(--color-muted)]">
+          <Spinner size={20} /> Đang tải danh sách mod…
+        </div>
+      ) : filtered.length === 0 ? (
+        mods.length === 0 ? (
+          <EmptyState
+            title="Chưa có mod nào"
+            description="Tạo mod đầu tiên để bắt đầu quản lý nội dung."
+            action="Thêm mod mới"
+            actionHref="/admin/mods/new"
+          />
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-white/10">
-                  <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">Name</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">Slug</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">Category</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">Author</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">Version</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">Updated</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">Featured</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">Mở khóa credit</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">Actions</th>
+          <EmptyState
+            title="Không có mod nào khớp bộ lọc"
+            description="Thử đổi từ khóa tìm kiếm hoặc bộ lọc."
+            action="Xóa bộ lọc"
+            onAction={() => {
+              setSearch('')
+              setCategoryFilter('all')
+              setAccessFilter('all')
+            }}
+          />
+        )
+      ) : (
+        <>
+          {/* ── Bảng desktop ── */}
+          <div className="hidden md:block">
+            <AdminTable label="Danh sách mod" minWidth={1000}>
+              <AdminThead>
+                <tr>
+                  <AdminTh>Mod</AdminTh>
+                  <AdminTh>Danh mục</AdminTh>
+                  <AdminTh>Phiên bản</AdminTh>
+                  <AdminTh>Cập nhật</AdminTh>
+                  <AdminTh>Nổi bật</AdminTh>
+                  <AdminTh>Quyền truy cập</AdminTh>
+                  <AdminTh className="text-right">Thao tác</AdminTh>
                 </tr>
-              </thead>
+              </AdminThead>
               <tbody>
-                {mods.map((mod) => (
-                  <tr key={mod.id} className="border-b border-white/5 hover:bg-white/5">
-                    <td className="py-3 px-4">
-                      <span className="font-medium">{mod.name}</span>
-                    </td>
-                    <td className="py-3 px-4 text-slate-400 text-sm">{mod.slug}</td>
-                    <td className="py-3 px-4">
-                      <span className="px-2 py-1 bg-white/10 rounded text-xs">{mod.category}</span>
-                    </td>
-                    <td className="py-3 px-4 text-slate-400 text-sm">{mod.author}</td>
-                    <td className="py-3 px-4 text-slate-400 text-sm">{mod.version}</td>
-                    <td className="py-3 px-4 text-slate-400 text-sm">{mod.updated_at}</td>
-                    <td className="py-3 px-4">
-                      {mod.featured ? (
-                        <span className="text-yellow-400">⭐</span>
-                      ) : (
-                        <span className="text-slate-600">-</span>
-                      )}
-                    </td>
-                    <td className="py-3 px-4">
-                      <div className="flex items-center gap-2">
-                        {/* Switch bật/tắt yêu cầu mở khóa credit */}
-                        <button
-                          type="button"
-                          disabled={savingId === mod.id}
-                          onClick={() => handleToggleCredit(mod)}
-                          role="switch"
-                          aria-checked={mod.credit_enabled}
-                          title={mod.credit_enabled ? 'Tắt yêu cầu mở khóa credit' : 'Bật yêu cầu mở khóa credit'}
-                          className={`relative w-10 h-6 rounded-full transition-colors disabled:opacity-50 disabled:cursor-wait ${
-                            mod.credit_enabled ? 'bg-amber-500' : 'bg-slate-600'
-                          }`}
-                        >
-                          <span
-                            className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${
-                              mod.credit_enabled ? 'translate-x-[18px]' : 'translate-x-0.5'
-                            }`}
-                          />
-                        </button>
-                        {mod.credit_enabled ? (
-                          <div className="flex items-center gap-1">
-                            <input
-                              type="number"
-                              min={1}
-                              max={100000}
-                              value={costDrafts[mod.id] ?? String(mod.credit_cost ?? 5)}
-                              onChange={(e) =>
-                                setCostDrafts(prev => ({ ...prev, [mod.id]: e.target.value }))
-                              }
-                              onBlur={() => handleSaveCost(mod)}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') (e.target as HTMLInputElement).blur()
-                              }}
-                              disabled={savingId === mod.id}
-                              className="w-16 px-1.5 py-0.5 rounded-md bg-black/40 border border-amber-500/40 text-amber-400 text-xs font-bold text-center focus:outline-none focus:border-amber-400 disabled:opacity-50"
-                              title="Số credit cần mở khóa — nhập rồi Enter"
-                            />
-                            <span className="text-[11px] text-amber-400/80">credit</span>
-                          </div>
-                        ) : (
-                          <span className="text-slate-600 text-xs">Tắt</span>
-                        )}
+                {filtered.map((mod) => (
+                  <AdminTr key={mod.id} pending={pendingIds.has(mod.id)}>
+                    <AdminTd>
+                      <div className="flex items-center gap-3">
+                        <ModThumb mod={mod} />
+                        <div className="min-w-0">
+                          <p className="truncate font-medium text-[var(--color-title)]">
+                            {mod.name}
+                          </p>
+                          <p className="truncate font-mono text-xs text-[var(--color-muted)]">
+                            {mod.slug}
+                          </p>
+                        </div>
                       </div>
-                    </td>
-                    <td className="py-3 px-4">
-                      <div className="flex items-center gap-2">
-                        <Link
+                    </AdminTd>
+                    <AdminTd>
+                      <Badge>{mod.category}</Badge>
+                    </AdminTd>
+                    <AdminTd className="tabular">{mod.version}</AdminTd>
+                    <AdminTd className="text-meta">{mod.updated_at}</AdminTd>
+                    <AdminTd>
+                      {mod.featured ? (
+                        <Badge tone="credit">Nổi bật</Badge>
+                      ) : (
+                        <span className="text-xs text-[var(--color-muted)]">—</span>
+                      )}
+                    </AdminTd>
+                    <AdminTd>
+                      <CreditControl
+                        mod={mod}
+                        draft={costDrafts[mod.id] ?? String(mod.credit_cost ?? 5)}
+                        pending={pendingIds.has(mod.id)}
+                        error={rowErrors[mod.id]}
+                        onDraft={(v) => setCostDrafts((prev) => ({ ...prev, [mod.id]: v }))}
+                        onSave={() => handleSaveCost(mod)}
+                        onToggle={() => handleToggleRequest(mod)}
+                      />
+                    </AdminTd>
+                    <AdminTd className="text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        <ButtonLink
                           href={`/mods/${mod.slug}`}
-                          className="text-blue-400 hover:text-blue-300 text-sm"
-                          target="_blank"
+                          variant="ghost"
+                          size="sm"
+                          external
                         >
                           Xem
-                        </Link>
-                        <span className="text-slate-600">|</span>
-                        <Link
-                          href={`/admin/mods/${mod.slug}/edit`}
-                          className="text-green-400 hover:text-green-300 text-sm"
-                        >
+                        </ButtonLink>
+                        <ButtonLink href={`/admin/mods/${mod.slug}/edit`} variant="ghost" size="sm">
                           Sửa
-                        </Link>
-                        <span className="text-slate-600">|</span>
-                        <button
-                          onClick={() => handleDelete(mod.slug, mod.name)}
-                          className="text-red-400 hover:text-red-300 text-sm"
+                        </ButtonLink>
+                        <ButtonLink
+                          href={`/admin/mods/${mod.slug}/showcase`}
+                          variant="ghost"
+                          size="sm"
                         >
-                          Xóa
-                        </button>
+                          Showcase
+                        </ButtonLink>
+                        <Button variant="ghost" size="sm" onClick={() => setDeleteTarget(mod)}>
+                          <span className="text-[var(--color-danger)]">Xóa</span>
+                        </Button>
                       </div>
-                    </td>
-                  </tr>
+                    </AdminTd>
+                  </AdminTr>
                 ))}
               </tbody>
-            </table>
+            </AdminTable>
           </div>
-        )}
-      </div>
-    </div>
+
+          {/* ── Thẻ mobile ── */}
+          <ul className="space-y-3 md:hidden" aria-label="Danh sách mod">
+            {filtered.map((mod) => (
+              <li
+                key={mod.id}
+                className={`rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface-1)] p-4 ${
+                  pendingIds.has(mod.id) ? 'opacity-60' : ''
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  <ModThumb mod={mod} />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-semibold text-[var(--color-title)]">{mod.name}</p>
+                    <p className="truncate font-mono text-xs text-[var(--color-muted)]">
+                      {mod.slug}
+                    </p>
+                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                      <Badge>{mod.category}</Badge>
+                      <span className="text-xs tabular text-[var(--color-muted)]">
+                        v{mod.version} · {mod.updated_at}
+                      </span>
+                      {mod.featured && <Badge tone="credit">Nổi bật</Badge>}
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-3 border-t border-[var(--color-line)] pt-3">
+                  <CreditControl
+                    mod={mod}
+                    draft={costDrafts[mod.id] ?? String(mod.credit_cost ?? 5)}
+                    pending={pendingIds.has(mod.id)}
+                    error={rowErrors[mod.id]}
+                    onDraft={(v) => setCostDrafts((prev) => ({ ...prev, [mod.id]: v }))}
+                    onSave={() => handleSaveCost(mod)}
+                    onToggle={() => handleToggleRequest(mod)}
+                  />
+                </div>
+                <div className="mt-3 flex justify-end">
+                  <ModActionsMenu mod={mod} onDelete={() => setDeleteTarget(mod)} />
+                </div>
+              </li>
+            ))}
+          </ul>
+
+          <p className="text-meta text-[var(--color-muted)]">
+            Hiển thị {filtered.length}/{mods.length} mod
+          </p>
+        </>
+      )}
+
+      {/* Xác nhận đổi quyền truy cập — nêu rõ tên mod + hiệu ứng */}
+      <ConfirmDialog
+        open={!!creditConfirm}
+        title={creditConfirm?.enable ? 'Bật mở khóa credit' : 'Tắt mở khóa credit'}
+        confirmLabel={creditConfirm?.enable ? 'Bật mở khóa' : 'Chuyển miễn phí'}
+        onConfirm={handleToggleConfirm}
+        onCancel={() => setCreditConfirm(null)}
+        description={
+          creditConfirm && (
+            <>
+              {creditConfirm.enable ? (
+                <>
+                  Mod{' '}
+                  <strong className="text-[var(--color-title)]">“{creditConfirm.mod.name}”</strong>{' '}
+                  sẽ yêu cầu{' '}
+                  <strong className="text-[var(--color-title)]">
+                    {costDrafts[creditConfirm.mod.id] ?? creditConfirm.mod.credit_cost ?? 5} credit
+                  </strong>{' '}
+                  để tải. Người dùng chưa đủ credit sẽ không vào được trang mod.
+                </>
+              ) : (
+                <>
+                  Mod{' '}
+                  <strong className="text-[var(--color-title)]">“{creditConfirm.mod.name}”</strong>{' '}
+                  sẽ chuyển sang <strong className="text-[var(--color-title)]">miễn phí</strong> —
+                  tất cả người dùng đều tải được, kể cả người đã trả credit trước đó.
+                </>
+              )}
+            </>
+          )
+        }
+      />
+
+      {/* Xác nhận xóa — nêu rõ tên mod */}
+      <ConfirmDialog
+        open={!!deleteTarget}
+        title="Xóa mod"
+        danger
+        busy={deleting}
+        confirmLabel="Xóa vĩnh viễn"
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteTarget(null)}
+        description={
+          deleteTarget && (
+            <>
+              Xóa vĩnh viễn mod{' '}
+              <strong className="text-[var(--color-title)]">“{deleteTarget.name}”</strong> (
+              {deleteTarget.slug})? Không hoàn tác được — ảnh showcase và cấu hình credit đi kèm cũng
+              mất.
+            </>
+          )
+        }
+      />
+    </AdminPage>
   )
 }

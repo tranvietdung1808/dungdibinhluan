@@ -1,12 +1,30 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
-import { createClient } from '@/utils/supabase/client'
+import { AdminPage } from '../components/AdminPage'
+import { ConfirmDialog } from '../components/ConfirmDialog'
+import { useAdminToast } from '../components/AdminShell'
+import {
+  adminFetch,
+  adminFetchJson,
+  adminJson,
+  adminErrorMessage,
+  isAdminAuthError,
+} from '../components/admin-api'
+import { Badge, Button, EmptyState, ErrorState, InlineNotice, Spinner } from '@/app/components/ui'
 
-type PendingComment = {
+// =====================================================
+// /admin/community — kiểm duyệt bình luận (§16.7)
+// Tabs: Chờ duyệt / Đã duyệt. Mỗi item: tác giả, thời
+// gian, trích nội dung, link bài/mod gốc. Xóa dùng
+// destructive confirm. Pending độc lập từng item; sau khi
+// xử lý giữ scroll + trả focus về item kế tiếp.
+// =====================================================
+
+interface CommentItem {
   id: string
-  scope_type: string
+  scope_type: 'guide' | 'mods' | string
   scope_id: string
   parent_id: string | null
   author_name: string
@@ -14,252 +32,361 @@ type PendingComment = {
   content: string
   is_admin_comment: boolean
   is_pinned: boolean
-  status: string
+  status: 'pending' | 'approved' | string
   created_at: string
 }
 
-export default function AdminCommunityPage() {
-  const [items, setItems] = useState<PendingComment[]>([])
-  const [loading, setLoading] = useState(true)
-  const [updatingId, setUpdatingId] = useState<string | null>(null)
-  const [error, setError] = useState('')
+type TabKey = 'pending' | 'approved'
 
-  const buildAuthHeaders = async () => {
-    const supabase = createClient()
-    const { data } = await supabase.auth.getSession()
-    const token = data.session?.access_token
-    if (!token) return null
-    return { Authorization: `Bearer ${token}` }
-  }
+const TABS: { key: TabKey; label: string }[] = [
+  { key: 'pending', label: 'Chờ duyệt' },
+  { key: 'approved', label: 'Đã duyệt' },
+]
+
+function excerpt(content: string, max = 280): string {
+  const clean = content.trim()
+  return clean.length > max ? `${clean.slice(0, max)}…` : clean
+}
+
+export default function AdminCommunityPage() {
+  const toast = useAdminToast()
+  const [items, setItems] = useState<CommentItem[]>([])
+  const [guideMap, setGuideMap] = useState<Record<string, { slug: string; title: string }>>({})
+  const [tab, setTab] = useState<TabKey>('pending')
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [authFailed, setAuthFailed] = useState(false)
+  const [pendingIds, setPendingIds] = useState<Set<string>>(new Set())
+  const [deleteTarget, setDeleteTarget] = useState<CommentItem | null>(null)
+  const itemRefs = useRef(new Map<string, HTMLElement>())
+  const panelRef = useRef<HTMLDivElement>(null)
+
+  const setPending = (id: string, on: boolean) =>
+    setPendingIds((prev) => {
+      const next = new Set(prev)
+      if (on) next.add(id)
+      else next.delete(id)
+      return next
+    })
 
   const loadItems = useCallback(async () => {
     setLoading(true)
     setError('')
     try {
-      const authHeaders = await buildAuthHeaders()
-      if (!authHeaders) {
-        setError('Bạn cần đăng nhập admin để kiểm duyệt')
+      const [comments, guides] = await Promise.allSettled([
+        adminFetchJson<CommentItem[]>('/api/admin/community'),
+        adminFetchJson<{ id: string; slug: string; title: string }[]>('/api/admin/guides'),
+      ])
+      if (comments.status === 'rejected') {
+        if (isAdminAuthError(comments.reason)) setAuthFailed(true)
+        setError(adminErrorMessage(comments.reason, 'Chưa tải được danh sách kiểm duyệt'))
         return
       }
-      const response = await fetch('/api/admin/community', {
-        cache: 'no-store',
-        headers: authHeaders,
-      })
-      if (!response.ok) {
-        setError('Không tải được danh sách kiểm duyệt')
-        return
+      setItems(Array.isArray(comments.value) ? comments.value : [])
+      if (guides.status === 'fulfilled' && Array.isArray(guides.value)) {
+        setGuideMap(
+          Object.fromEntries(guides.value.map((g) => [g.id, { slug: g.slug, title: g.title }]))
+        )
       }
-      const data = await response.json()
-      setItems(data || [])
-    } catch {
-      setError('Không tải được danh sách kiểm duyệt')
     } finally {
       setLoading(false)
     }
   }, [])
 
   useEffect(() => {
-    loadItems()
+    void loadItems()
   }, [loadItems])
 
-  const pendingByScope = useMemo(() => {
-    const pendingItems = items.filter((item) => item.status === 'pending')
-    const guide = pendingItems.filter((item) => item.scope_type === 'guide').length
-    const mods = pendingItems.filter((item) => item.scope_type === 'mods').length
-    return { guide, mods }
-  }, [items])
+  const pendingItems = useMemo(() => items.filter((i) => i.status === 'pending'), [items])
+  const approvedItems = useMemo(() => items.filter((i) => i.status === 'approved'), [items])
+  const visibleItems = tab === 'pending' ? pendingItems : approvedItems
 
-  const pendingItems = useMemo(() => items.filter((item) => item.status === 'pending'), [items])
-  const approvedItems = useMemo(() => items.filter((item) => item.status === 'approved'), [items])
+  const originOf = (item: CommentItem): { href: string; label: string } | null => {
+    if (item.scope_type === 'guide') {
+      const g = guideMap[item.scope_id]
+      return g
+        ? { href: `/huong-dan/${g.slug}`, label: `Bài: ${g.title}` }
+        : { href: '/admin/guides', label: 'Bài viết (đã xóa?)' }
+    }
+    if (item.scope_type === 'mods') return { href: '/mods', label: 'Mục chia sẻ mod' }
+    return null
+  }
 
-  const updateStatus = async (id: string, status: 'approved' | 'rejected') => {
-    setUpdatingId(id)
+  // Sau khi item bị xóa khỏi danh sách: giữ scroll, focus item kế tiếp
+  const focusAfterRemoval = (removedId: string, list: CommentItem[]) => {
+    requestAnimationFrame(() => {
+      const idx = list.findIndex((i) => i.id === removedId)
+      const next = list[idx + 1] ?? list[idx - 1]
+      const el = next ? itemRefs.current.get(next.id) : null
+      ;(el ?? panelRef.current)?.focus()
+    })
+  }
+
+  const updateStatus = async (item: CommentItem, status: 'approved' | 'rejected') => {
+    setPending(item.id, true)
+    setError('')
+    const list = visibleItems
     try {
-      const authHeaders = await buildAuthHeaders()
-      if (!authHeaders) {
-        setError('Bạn cần đăng nhập admin để kiểm duyệt')
-        return
-      }
-      const response = await fetch('/api/admin/community', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', ...authHeaders },
-        body: JSON.stringify({ id, status }),
-      })
-
-      if (!response.ok) {
-        setError('Không cập nhật được trạng thái')
-        return
-      }
-      setItems((prev) => prev.filter((item) => item.id !== id))
-    } catch {
-      setError('Không cập nhật được trạng thái')
+      await adminFetch('/api/admin/community', adminJson('PATCH', { id: item.id, status }))
+      setItems((prev) => prev.filter((i) => i.id !== item.id))
+      toast(status === 'approved' ? `Đã duyệt bình luận của ${item.author_name}` : `Đã từ chối bình luận của ${item.author_name}`)
+      focusAfterRemoval(item.id, list)
+    } catch (err) {
+      if (isAdminAuthError(err)) setAuthFailed(true)
+      setError(adminErrorMessage(err, 'Không cập nhật được trạng thái'))
     } finally {
-      setUpdatingId(null)
+      setPending(item.id, false)
     }
   }
 
-  const updatePin = async (id: string, isPinned: boolean) => {
-    setUpdatingId(id)
+  const updatePin = async (item: CommentItem, isPinned: boolean) => {
+    setPending(item.id, true)
+    setError('')
     try {
-      const authHeaders = await buildAuthHeaders()
-      if (!authHeaders) {
-        setError('Bạn cần đăng nhập admin để kiểm duyệt')
-        return
-      }
-      const response = await fetch('/api/admin/community', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', ...authHeaders },
-        body: JSON.stringify({ id, isPinned }),
-      })
-
-      if (!response.ok) {
-        setError('Không cập nhật được trạng thái ghim')
-        return
-      }
-      setItems((prev) => prev.map((item) => (item.id === id ? { ...item, is_pinned: isPinned } : item)))
-    } catch {
-      setError('Không cập nhật được trạng thái ghim')
+      await adminFetch(
+        '/api/admin/community',
+        adminJson('PATCH', { id: item.id, isPinned })
+      )
+      setItems((prev) => prev.map((i) => (i.id === item.id ? { ...i, is_pinned: isPinned } : i)))
+      toast(isPinned ? 'Đã ghim bình luận' : 'Đã bỏ ghim')
+    } catch (err) {
+      if (isAdminAuthError(err)) setAuthFailed(true)
+      setError(adminErrorMessage(err, 'Không cập nhật được trạng thái ghim'))
     } finally {
-      setUpdatingId(null)
+      setPending(item.id, false)
     }
+  }
+
+  const handleDelete = async () => {
+    const item = deleteTarget
+    if (!item) return
+    setPending(item.id, true)
+    const list = visibleItems
+    try {
+      await adminFetch(`/api/admin/community?id=${encodeURIComponent(item.id)}`, {
+        method: 'DELETE',
+      })
+      setItems((prev) => prev.filter((i) => i.id !== item.id))
+      toast('Đã xóa bình luận vĩnh viễn')
+      setDeleteTarget(null)
+      focusAfterRemoval(item.id, list)
+    } catch (err) {
+      if (isAdminAuthError(err)) setAuthFailed(true)
+      setError(adminErrorMessage(err, 'Xóa bình luận thất bại'))
+      setDeleteTarget(null)
+    } finally {
+      setPending(item.id, false)
+    }
+  }
+
+  if (authFailed) {
+    return (
+      <AdminPage>
+        <ErrorState
+          title="Không còn quyền quản trị"
+          description="Phiên đăng nhập hết hạn hoặc tài khoản không còn quyền admin. Đăng nhập lại để tiếp tục."
+          onRetry={() => {
+            window.location.href = '/admin'
+          }}
+          retryLabel="Đăng nhập lại"
+        />
+      </AdminPage>
+    )
+  }
+
+  const renderItem = (item: CommentItem) => {
+    const pending = pendingIds.has(item.id)
+    const origin = originOf(item)
+    return (
+      <article
+        key={item.id}
+        ref={(el) => {
+          if (el) itemRefs.current.set(item.id, el)
+          else itemRefs.current.delete(item.id)
+        }}
+        tabIndex={-1}
+        aria-label={`Bình luận của ${item.author_name}`}
+        className={`rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface-1)] p-4 outline-none transition-opacity focus-visible:border-[var(--color-accent-border)] ${
+          pending ? 'opacity-60' : ''
+        }`}
+      >
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-[var(--color-muted)]">
+          <Badge tone={item.scope_type === 'guide' ? 'violet' : 'accent'}>
+            {item.scope_type === 'guide' ? 'Bài viết' : 'Chia sẻ mod'}
+          </Badge>
+          {item.is_pinned && <Badge tone="warning">Đã ghim</Badge>}
+          {item.parent_id && <span>Trả lời bình luận</span>}
+          <time dateTime={item.created_at}>
+            {new Date(item.created_at).toLocaleString('vi-VN')}
+          </time>
+          {origin && (
+            <Link
+              href={origin.href}
+              target={origin.href.startsWith('/admin') ? undefined : '_blank'}
+              className="font-medium text-[var(--color-accent)] hover:underline"
+            >
+              {origin.label} ↗
+            </Link>
+          )}
+        </div>
+
+        <div className="mt-2.5 flex items-start gap-3">
+          {item.author_avatar ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={item.author_avatar}
+              alt=""
+              className="h-8 w-8 shrink-0 rounded-full border border-[var(--color-line)] object-cover"
+            />
+          ) : (
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--color-surface-2)] text-xs font-bold text-[var(--color-muted)]">
+              {item.author_name.slice(0, 1).toUpperCase()}
+            </span>
+          )}
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-[var(--color-title)]">
+              {item.author_name}
+              {item.is_admin_comment && (
+                <span className="ml-2 text-xs font-medium text-[var(--color-accent)]">admin</span>
+              )}
+            </p>
+            <p className="mt-0.5 whitespace-pre-wrap break-words text-sm text-[var(--color-body)]">
+              {excerpt(item.content)}
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-[var(--color-line)] pt-3">
+          {tab === 'pending' ? (
+            <>
+              <Button
+                size="sm"
+                loading={pending}
+                onClick={() => void updateStatus(item, 'approved')}
+              >
+                Duyệt
+              </Button>
+              <Button
+                size="sm"
+                variant="secondary"
+                disabled={pending}
+                onClick={() => void updateStatus(item, 'rejected')}
+              >
+                Từ chối
+              </Button>
+            </>
+          ) : (
+            <Button
+              size="sm"
+              variant="secondary"
+              loading={pending}
+              onClick={() => void updatePin(item, !item.is_pinned)}
+            >
+              {item.is_pinned ? 'Bỏ ghim' : 'Ghim'}
+            </Button>
+          )}
+          <Button
+            size="sm"
+            variant="danger"
+            disabled={pending}
+            onClick={() => setDeleteTarget(item)}
+          >
+            Xóa
+          </Button>
+          {pending && <Spinner size={16} label="Đang xử lý bình luận" />}
+        </div>
+      </article>
+    )
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
-      <div className="bg-[#111111] border-b border-white/10">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link href="/admin/dashboard" className="text-slate-400 hover:text-white transition-colors">
-              ← Dashboard
-            </Link>
-            <h1 className="text-xl font-bold">Kiểm duyệt bình luận</h1>
-          </div>
-          <button
-            type="button"
-            onClick={loadItems}
-            className="px-3 py-2 rounded-lg border border-white/15 text-xs text-slate-200 hover:bg-white/10"
-          >
-            Làm mới
-          </button>
-        </div>
+    <AdminPage>
+      {/* Tabs */}
+      <div role="tablist" aria-label="Trạng thái bình luận" className="flex gap-1 rounded-xl border border-[var(--color-line)] bg-[var(--color-surface-1)] p-1">
+        {TABS.map((t) => {
+          const active = tab === t.key
+          const count = t.key === 'pending' ? pendingItems.length : approvedItems.length
+          return (
+            <button
+              key={t.key}
+              type="button"
+              role="tab"
+              id={`tab-${t.key}`}
+              aria-selected={active}
+              aria-controls={`panel-${t.key}`}
+              onClick={() => setTab(t.key)}
+              className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors ${
+                active
+                  ? 'bg-[var(--color-accent-subtle)] text-[var(--color-title)]'
+                  : 'text-[var(--color-muted)] hover:text-[var(--color-title)]'
+              }`}
+            >
+              {t.label}
+              <span className="ml-2 tabular text-xs">({count})</span>
+            </button>
+          )
+        })}
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-          <div className="rounded-xl border border-white/10 bg-[#111111] p-4">
-            <p className="text-xs text-slate-400">Bình luận bài viết chờ duyệt</p>
-            <p className="text-2xl font-black text-white mt-1">{pendingByScope.guide}</p>
+      {error && (
+        <InlineNotice tone="danger">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span>{error}</span>
+            <button
+              type="button"
+              onClick={() => void loadItems()}
+              className="font-semibold text-[var(--color-title)] underline underline-offset-2"
+            >
+              Thử lại
+            </button>
           </div>
-          <div className="rounded-xl border border-white/10 bg-[#111111] p-4">
-            <p className="text-xs text-slate-400">Chia sẻ mod chờ duyệt</p>
-            <p className="text-2xl font-black text-white mt-1">{pendingByScope.mods}</p>
-          </div>
-        </div>
+        </InlineNotice>
+      )}
 
-        {error && (
-          <div className="mb-4 rounded-lg border border-red-500/50 bg-red-500/20 p-3 text-sm text-red-300">
-            {error}
-          </div>
-        )}
-
+      <div
+        id={`panel-${tab}`}
+        role="tabpanel"
+        aria-labelledby={`tab-${tab}`}
+        ref={panelRef}
+        tabIndex={-1}
+        className="space-y-3 outline-none"
+      >
         {loading ? (
-          <div className="text-slate-400">Đang tải dữ liệu...</div>
-        ) : items.length === 0 ? (
-          <div className="rounded-xl border border-white/10 bg-[#111111] p-6 text-slate-400">
-            Không có bình luận nào chờ duyệt.
+          <div className="flex items-center gap-3 py-10 text-sm text-[var(--color-muted)]">
+            <Spinner size={20} /> Đang tải bình luận…
           </div>
+        ) : visibleItems.length === 0 ? (
+          <EmptyState
+            title={tab === 'pending' ? 'Không có bình luận chờ duyệt' : 'Chưa có bình luận đã duyệt'}
+            description={
+              tab === 'pending'
+                ? 'Bình luận mới của người dùng sẽ xuất hiện ở đây.'
+                : 'Các bình luận đã duyệt sẽ hiển thị ở đây để ghim/xóa.'
+            }
+          />
         ) : (
-          <div className="space-y-8">
-            <div>
-              <h2 className="text-sm font-bold text-slate-300 mb-3 uppercase tracking-widest">Chờ duyệt</h2>
-              <div className="space-y-3">
-                {pendingItems.length === 0 && (
-                  <div className="rounded-xl border border-white/10 bg-[#111111] p-4 text-sm text-slate-500">
-                    Không có bình luận chờ duyệt.
-                  </div>
-                )}
-                {pendingItems.map((item) => (
-                  <article key={item.id} className="rounded-xl border border-white/10 bg-[#111111] p-4">
-                    <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">
-                      <span className="rounded-full border border-white/15 px-2 py-0.5">
-                        {item.scope_type === 'guide' ? 'Bài viết' : 'Chia sẻ mod'}
-                      </span>
-                      <span>ID scope: {item.scope_id}</span>
-                      <span>•</span>
-                      <span>{new Date(item.created_at).toLocaleString('vi-VN')}</span>
-                      {item.parent_id && <span>• Trả lời bình luận</span>}
-                    </div>
-                    <p className="mt-2 text-sm text-white">
-                      <span className="font-semibold">{item.author_name}: </span>
-                      {item.content}
-                    </p>
-                    <div className="mt-3 flex gap-2">
-                      <button
-                        type="button"
-                        disabled={updatingId === item.id}
-                        onClick={() => updateStatus(item.id, 'approved')}
-                        className="rounded-lg border border-emerald-500/40 bg-emerald-500/15 px-3 py-1.5 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/25 disabled:opacity-50"
-                      >
-                        Duyệt
-                      </button>
-                      <button
-                        type="button"
-                        disabled={updatingId === item.id}
-                        onClick={() => updateStatus(item.id, 'rejected')}
-                        className="rounded-lg border border-rose-500/40 bg-rose-500/15 px-3 py-1.5 text-xs font-semibold text-rose-300 hover:bg-rose-500/25 disabled:opacity-50"
-                      >
-                        Từ chối
-                      </button>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <h2 className="text-sm font-bold text-slate-300 mb-3 uppercase tracking-widest">Đã duyệt / Ghim</h2>
-              <div className="space-y-3">
-                {approvedItems.length === 0 && (
-                  <div className="rounded-xl border border-white/10 bg-[#111111] p-4 text-sm text-slate-500">
-                    Chưa có bình luận đã duyệt.
-                  </div>
-                )}
-                {approvedItems.map((item) => (
-                  <article key={item.id} className="rounded-xl border border-white/10 bg-[#111111] p-4">
-                    <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">
-                      <span className="rounded-full border border-white/15 px-2 py-0.5">
-                        {item.scope_type === 'guide' ? 'Bài viết' : 'Chia sẻ mod'}
-                      </span>
-                      {item.is_pinned && (
-                        <span className="rounded-full border border-amber-500/50 bg-amber-500/15 px-2 py-0.5 text-amber-300">
-                          Đã ghim
-                        </span>
-                      )}
-                      <span>ID scope: {item.scope_id}</span>
-                      <span>•</span>
-                      <span>{new Date(item.created_at).toLocaleString('vi-VN')}</span>
-                    </div>
-                    <p className="mt-2 text-sm text-white">
-                      <span className="font-semibold">{item.author_name}: </span>
-                      {item.content}
-                    </p>
-                    <div className="mt-3 flex gap-2">
-                      <button
-                        type="button"
-                        disabled={updatingId === item.id}
-                        onClick={() => updatePin(item.id, !item.is_pinned)}
-                        className="rounded-lg border border-amber-500/40 bg-amber-500/15 px-3 py-1.5 text-xs font-semibold text-amber-300 hover:bg-amber-500/25 disabled:opacity-50"
-                      >
-                        {item.is_pinned ? 'Bỏ ghim' : 'Ghim'}
-                      </button>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            </div>
-          </div>
+          visibleItems.map(renderItem)
         )}
       </div>
-    </div>
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        title="Xóa bình luận"
+        danger
+        busy={deleteTarget ? pendingIds.has(deleteTarget.id) : false}
+        confirmLabel="Xóa vĩnh viễn"
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteTarget(null)}
+        description={
+          deleteTarget && (
+            <>
+              Xóa vĩnh viễn bình luận của{' '}
+              <strong className="text-[var(--color-title)]">{deleteTarget.author_name}</strong>: “
+              {excerpt(deleteTarget.content, 120)}”? Không hoàn tác được.
+            </>
+          )
+        }
+      />
+    </AdminPage>
   )
 }

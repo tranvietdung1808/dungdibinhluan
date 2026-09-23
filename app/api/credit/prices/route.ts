@@ -1,5 +1,5 @@
 import { CREDIT_TOPUP_PACKAGES } from "@/lib/server/credit";
-import { errorResponse, runRoute, successResponse } from "@/lib/server/api-response";
+import { runRoute, successResponse } from "@/lib/server/api-response";
 
 // =====================================================
 // /api/credit/prices — danh sách các gói nạp credit (public, không cần auth)

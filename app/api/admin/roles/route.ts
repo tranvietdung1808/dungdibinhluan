@@ -84,8 +84,8 @@ export async function GET(request: NextRequest) {
 
     // Sort: users with roles first, then by email
     members.sort((a, b) => {
-      const aHas = (a as any).roleNames?.length > 0 ? 0 : 1;
-      const bHas = (b as any).roleNames?.length > 0 ? 0 : 1;
+      const aHas = Array.isArray(a.roleNames) && a.roleNames.length > 0 ? 0 : 1;
+      const bHas = Array.isArray(b.roleNames) && b.roleNames.length > 0 ? 0 : 1;
       if (aHas !== bHas) return aHas - bHas;
       return String(a.email).localeCompare(String(b.email));
     });

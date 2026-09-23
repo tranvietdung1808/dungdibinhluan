@@ -44,9 +44,9 @@ function AuthCallbackContent() {
   }, [router, searchParams]);
 
   return (
-    <main className="min-h-screen bg-[#0a0a0a] text-white flex items-center justify-center px-4">
+    <main className="min-h-screen bg-surface-0 text-white flex items-center justify-center px-4">
       <div className="text-center">
-        <div className="w-9 h-9 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+        <div className="w-9 h-9 border-2 border-[var(--color-accent)] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
         <p className="text-sm text-slate-300">Đang hoàn tất đăng nhập Google...</p>
       </div>
     </main>
@@ -57,9 +57,9 @@ export default function AuthCallbackPage() {
   return (
     <Suspense
       fallback={
-        <main className="min-h-screen bg-[#0a0a0a] text-white flex items-center justify-center px-4">
+        <main className="min-h-screen bg-surface-0 text-white flex items-center justify-center px-4">
           <div className="text-center">
-            <div className="w-9 h-9 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <div className="w-9 h-9 border-2 border-[var(--color-accent)] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
             <p className="text-sm text-slate-300">Đang hoàn tất đăng nhập Google...</p>
           </div>
         </main>

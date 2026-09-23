@@ -9,12 +9,14 @@ import { useCallback, useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import type { User } from "@supabase/supabase-js";
 import { isStaticAdminEmail } from "@/lib/admin";
+import { invalidateCreditBalance } from "@/utils/credit-balance";
 
 type UseAuthResult = {
   user: User | null;
   isAdmin: boolean;
   loading: boolean;
-  login: () => Promise<void>;
+  /** Trả về false nếu khởi tạo OAuth lỗi (để caller mở lại nút + báo lỗi). */
+  login: () => Promise<boolean>;
   logout: () => Promise<void>;
 };
 
@@ -119,15 +121,20 @@ export function useAuth(): UseAuthResult {
   }, [syncAdminStatus]);
 
   const login = useCallback(async () => {
-    const supabase = createClient();
-    const currentPath = `${window.location.pathname}${window.location.search}`;
-    const redirectTo = `${
-      window.location.origin
-    }/auth/callback?next=${encodeURIComponent(currentPath)}`;
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo },
-    });
+    try {
+      const supabase = createClient();
+      const currentPath = `${window.location.pathname}${window.location.search}`;
+      const redirectTo = `${
+        window.location.origin
+      }/auth/callback?next=${encodeURIComponent(currentPath)}`;
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo },
+      });
+      return !error;
+    } catch {
+      return false;
+    }
   }, []);
 
   const logout = useCallback(async () => {
@@ -142,6 +149,8 @@ export function useAuth(): UseAuthResult {
     if (user?.email) {
       localStorage.removeItem(`isAdmin_${user.email}`);
     }
+    // T12: dọn cache số dư + báo CreditNavChip ẩn ngay số dư của phiên cũ
+    invalidateCreditBalance();
     setUser(null);
     setIsAdmin(false);
   }, [user]);

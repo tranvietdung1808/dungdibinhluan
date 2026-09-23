@@ -1,103 +1,87 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
-
-const TAG_COLORS: Record<string, string> = {
-  Faces: "#3b82f6",
-  Kits: "#8b5cf6",
-  Gameplay: "#10b981",
-  "Đồ họa": "#f59e0b",
-  "Cơ chế game": "var(--color-primary)",
-};
+import { useState } from "react";
+import { Badge } from "@/app/components/ui/Badge";
+import type { ModSummary } from "@/lib/catalog";
+import { OfferBadge } from "./ModCard";
 
 interface FeaturedModCardProps {
-  mod: {
-    slug: string;
-    name: string;
-    description: string;
-    thumbnail: string;
-    category: string;
-    tags: string[];
-    downloadUrl?: string;
-    /** Số credit cần để mở khóa (có giá trị = mod yêu cầu mở khóa credit) */
-    creditCost?: number;
-  };
+  mod: ModSummary;
+  /** User đã mở khóa mod credit này */
+  owned?: boolean;
 }
 
-export default function FeaturedModCard({ mod }: FeaturedModCardProps) {
+export default function FeaturedModCard({ mod, owned = false }: FeaturedModCardProps) {
+  const [imageError, setImageError] = useState(false);
+  const showImage = Boolean(mod.thumbnail) && !imageError;
+
   return (
-    <Link href={`/mods/${mod.slug}`}>
-      <div
-        className="group relative rounded-3xl overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-1"
-        style={{
-          border: "1px solid rgba(206,90,103,0.45)",
-          boxShadow: "0 0 0 1px rgba(206,90,103,0.14), 0 20px 65px rgba(0,0,0,0.62)",
-        }}
-      >
-        {/* Đường accent đỏ trên cùng card */}
-        <div className="absolute top-0 left-0 right-0 h-[2px] z-10"
-          style={{ background: "linear-gradient(90deg, transparent 5%, rgba(206,90,103,0.7) 50%, transparent 95%)" }}
+    <Link href={`/mods/${mod.slug}`} className="group block">
+      <article className="relative overflow-hidden rounded-3xl border border-[var(--color-accent-border)] bg-[var(--color-surface-1)] shadow-[var(--shadow-ambient)] transition-transform duration-300 group-hover:-translate-y-1">
+        {/* Đường accent trên cùng card */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-x-0 top-0 z-10 h-[2px] bg-gradient-to-r from-transparent via-[var(--color-accent)] to-transparent opacity-70"
         />
 
-        <div className="relative h-60 md:h-72 lg:h-80">
-          <Image
-            src={mod.thumbnail}
-            alt={mod.name}
-            fill
-            className="object-cover opacity-90 group-hover:opacity-95 group-hover:scale-[1.04] transition-all duration-500"
-            sizes="100vw"
-            priority
-          />
-          <div className="absolute inset-0" style={{ background: "linear-gradient(100deg, rgba(8,8,16,0.70) 22%, rgba(8,8,16,0.30) 50%, rgba(8,8,16,0.02) 100%)" }} />
-          <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(8,8,16,0.75) 0%, rgba(8,8,16,0.25) 30%, transparent 58%)" }} />
-
-          <div className="absolute top-4 left-4 flex items-center gap-2 flex-wrap">
-            <span className="px-3 py-1 rounded-full text-[10px] font-black tracking-widest bg-[var(--color-primary)] text-white">
-              ⭐ FEATURED
-            </span>
-            <span className="px-3 py-1 rounded-full text-[10px] font-black tracking-widest bg-white/8 text-white/80 border border-white/15">
-              {mod.category}
-            </span>
-          </div>
-
-          {/* Mod yêu cầu credit → ổ khóa + giá */}
-          {typeof mod.creditCost === "number" && mod.creditCost > 0 && (
-            <span
-              className="absolute top-4 right-4 z-20 inline-flex items-center gap-1.5 rounded-full bg-black/75 px-3 py-1.5 text-xs font-black text-amber-400 ring-1 ring-amber-400/50 backdrop-blur-md shadow-lg"
-              title={`Yêu cầu mở khóa bằng ${mod.creditCost} credit`}
-            >
-              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-              <svg className="w-3.5 h-3.5 text-amber-300/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>
-              <span className="tabular-nums">{mod.creditCost}</span>
-            </span>
+        <div className="relative h-56 md:h-72 bg-[var(--color-surface-2)]">
+          {showImage ? (
+            <Image
+              src={mod.thumbnail as string}
+              alt={mod.name}
+              fill
+              className="object-cover object-center opacity-90 transition-transform duration-500 group-hover:scale-[1.03]"
+              sizes="(max-width: 1180px) 100vw, 1180px"
+              priority
+              onError={() => setImageError(true)}
+            />
+          ) : (
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 bg-gradient-to-br from-[var(--color-surface-2)] to-[var(--color-surface-0)]"
+            />
           )}
+
+          {/* Scrim giữ chữ đọc được trên ảnh */}
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent"
+          />
+
+          <div className="absolute left-4 top-4 z-10 flex flex-wrap items-center gap-2">
+            <Badge tone="accent">Nổi bật</Badge>
+            <Badge tone="neutral">{mod.category}</Badge>
+          </div>
+          <div className="absolute right-4 top-4 z-10">
+            <OfferBadge offer={mod.offer} owned={owned} />
+          </div>
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 p-5 md:p-7">
-          <p className="text-[10px] uppercase tracking-[0.25em] text-[var(--color-primary)]/80 font-bold mb-1">Bản mod nổi bật</p>
-          <h2 className="text-xl md:text-3xl font-black leading-tight text-white group-hover:text-[var(--color-primary)] transition-colors duration-300">
+        <div className="absolute inset-x-0 bottom-0 p-5 md:p-6">
+          <h2 className="line-clamp-2 text-xl font-bold leading-tight text-white transition-colors group-hover:text-[var(--color-accent-strong)] md:text-2xl">
             {mod.name}
           </h2>
-          <p className="text-slate-300 text-xs md:text-sm mt-2 max-w-2xl leading-relaxed line-clamp-2">{mod.description}</p>
-          <div className="flex items-center gap-2.5 mt-4 flex-wrap">
-            {mod.tags.map((tag) => (
-              <span
-                key={tag}
-                className="px-2.5 py-1 rounded-full text-[10px] font-bold"
-                style={{
-                  background: `${TAG_COLORS[tag]}18`,
-                  color: TAG_COLORS[tag],
-                  border: `1px solid ${TAG_COLORS[tag]}28`,
-                }}
-              >
-                {tag}
-              </span>
-            ))}
-            <span className="ml-auto text-[10px] text-slate-300 font-bold tracking-widest group-hover:text-white transition-colors">
-              XEM CHI TIẾT →
+          {mod.description && (
+            <p className="mt-2 line-clamp-2 max-w-2xl text-sm leading-relaxed text-[var(--color-body)]">
+              {mod.description}
+            </p>
+          )}
+          <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-meta text-[var(--color-muted)]">
+            <span className="truncate" title={mod.author}>
+              {mod.author}
+            </span>
+            {mod.version && <span className="tabular">{mod.version}</span>}
+            {mod.updatedAt && (
+              <span className="tabular">Cập nhật {mod.updatedAt}</span>
+            )}
+            <span className="ml-auto shrink-0 font-semibold text-[var(--color-accent-strong)] transition-colors group-hover:text-[var(--color-accent)]">
+              Xem chi tiết →
             </span>
           </div>
         </div>
-      </div>
+      </article>
     </Link>
   );
 }

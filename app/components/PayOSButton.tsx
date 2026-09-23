@@ -1,29 +1,49 @@
 "use client";
 
 import { useState } from "react";
+import { Field, inputClass } from "@/app/components/ui/Field";
+import { Button } from "@/app/components/ui/Button";
+
+// =====================================================
+// PayOSButton — form email + nút tạo đơn PayOS (§12.2)
+// - Email dùng Field + inputClass: label/hint/lỗi gắn field.
+// - GIỮ email khi lỗi — người dùng sửa được, không nhập lại.
+// - CTA chứa tổng tiền — không phải cuộn tìm lại giá.
+// - Một accent token duy nhất (không nhận màu riêng từng edition).
+// =====================================================
 
 interface PayOSButtonProps {
   productId: string;
+  /** Tổng tiền đã format, ví dụ "69.000đ" — in trong CTA */
   price: string;
-  color?: string;
+  /** Label field email, ví dụ "Email nhận mã kích hoạt" / "Email nhận link tải" */
+  emailLabel?: string;
+  /** Gợi ý dưới field — nên truyền product.fulfillment.receiveText */
+  emailHint?: string;
 }
 
-export default function PayOSButton({ productId, price, color = "var(--color-primary)" }: PayOSButtonProps) {
+export default function PayOSButton({
+  productId,
+  price,
+  emailLabel = "Email nhận nội dung",
+  emailHint,
+}: PayOSButtonProps) {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   const handlePay = async () => {
-    setError("");
+    setError(null);
 
-    if (!email.trim()) {
-      setError("Vui lòng nhập email để nhận code");
+    const trimmed = email.trim();
+    if (!trimmed) {
+      setError("Vui lòng nhập email để nhận nội dung sau thanh toán");
       return;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email.trim())) {
-      setError("Email không đúng định dạng");
+    if (!emailRegex.test(trimmed)) {
+      setError("Email không đúng định dạng — kiểm tra lại trước khi thanh toán");
       return;
     }
 
@@ -32,65 +52,62 @@ export default function PayOSButton({ productId, price, color = "var(--color-pri
       const res = await fetch("/api/payment/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId, email: email.trim() }),
+        body: JSON.stringify({ productId, email: trimmed }),
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => null);
 
       if (!res.ok) {
-        setError(data.error || "Lỗi tạo thanh toán");
+        setError(
+          (data && typeof data.error === "string" && data.error) ||
+            "Chưa tạo được yêu cầu thanh toán — thử lại"
+        );
         setLoading(false);
         return;
       }
 
-      window.location.href = data.checkoutUrl;
+      if (data && typeof data.checkoutUrl === "string" && data.checkoutUrl) {
+        window.location.href = data.checkoutUrl;
+        return; // giữ loading — đang chuyển sang PayOS
+      }
+
+      setError("Chưa tạo được yêu cầu thanh toán — thử lại");
+      setLoading(false);
     } catch {
-      setError("Lỗi kết nối, thử lại sau");
+      setError("Mất kết nối — kiểm tra mạng rồi thử lại");
       setLoading(false);
     }
   };
 
   return (
     <div className="space-y-4">
-      <div className="space-y-2">
-        <label className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
-          Nhập email nhận code
-        </label>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => { setEmail(e.target.value); setError(""); }}
-          placeholder="your-email@gmail.com"
-          className="w-full px-4 py-3 bg-[#111] border border-white/10 rounded-xl text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-white/30 transition-all"
-        />
-        {error && (
-          <p className="text-[11px] text-red-400">{error}</p>
+      <Field label={emailLabel} hint={emailHint} error={error} required>
+        {({ id, describedBy }) => (
+          <input
+            id={id}
+            type="email"
+            inputMode="email"
+            autoComplete="email"
+            aria-describedby={describedBy}
+            aria-invalid={error ? true : undefined}
+            value={email}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              if (error) setError(null);
+            }}
+            placeholder="you@example.com"
+            className={inputClass}
+          />
         )}
-      </div>
+      </Field>
 
-      <button
-        onClick={handlePay}
-        disabled={loading}
-        className="flex items-center justify-center gap-2 w-full py-4 rounded-2xl font-black tracking-widest text-sm text-white transition-all disabled:opacity-50"
-        style={{ background: color }}
-      >
-        {loading ? (
-          <>
-            <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-            </svg>
-            ĐANG XỬ LÝ...
-          </>
-        ) : (
-          <>
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z" />
-            </svg>
-            THANH TOÁN {price} QUA QR
-          </>
-        )}
-      </button>
+      <Button onClick={handlePay} loading={loading} size="lg" fullWidth>
+        Thanh toán {price} qua PayOS
+      </Button>
+      <p className="text-meta text-muted">
+        Quét QR hoặc đăng nhập ngân hàng trên cổng PayOS — hệ thống tự xác nhận
+        sau khi thanh toán.
+      </p>
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { PayOS } from "@payos/node";
 import { extractToken, getUserFromToken } from "@/lib/server/auth";
 import { calculateCredit, validateTopupAmount } from "@/lib/server/credit";
 import { errorResponse, runRoute, successResponse } from "@/lib/server/api-response";
+import { sanitizeInternalPath } from "@/lib/payment/order-status";
 import { clientIp, isRateLimited } from "@/lib/server/rate-limit";
 
 // =====================================================
@@ -43,11 +44,18 @@ export async function POST(request: Request) {
     if (!user) return errorResponse("Unauthorized", 401);
 
     // Parse body
-    const body = (await request.json().catch(() => null)) as { amountVnd: number } | null;
+    const body = (await request.json().catch(() => null)) as {
+      amountVnd: number;
+      next?: string;
+    } | null;
     if (!body || typeof body.amountVnd !== "number") {
       return errorResponse("Thiếu amountVnd hoặc không hợp lệ", 400);
     }
     const amountVnd = body.amountVnd;
+
+    // §5.3: giữ đường dẫn quay lại (vd trang mod đang mở) — chỉ nhận path nội bộ
+    const nextPath = sanitizeInternalPath(body.next);
+    const nextQuery = nextPath ? `&next=${encodeURIComponent(nextPath)}` : "";
 
     // Validate số tiền nạp
     const validationError = validateTopupAmount(amountVnd);
@@ -64,8 +72,8 @@ export async function POST(request: Request) {
       orderCode,
       amount: amountVnd,
       description: `Nạp ${credit.totalCredit} credit (${credit.bonusCredit} bonus)`,
-      cancelUrl: `${baseUrl}/credit/cancel?orderCode=${orderCode}`,
-      returnUrl: `${baseUrl}/credit/success?orderCode=${orderCode}`,
+      cancelUrl: `${baseUrl}/credit/cancel?orderCode=${orderCode}${nextQuery}`,
+      returnUrl: `${baseUrl}/credit/success?orderCode=${orderCode}${nextQuery}`,
       items: [{ name: "Nạp Credit DungDiBinhLuan", quantity: 1, price: amountVnd }],
       expiredAt: Math.floor(Date.now() / 1000) + 1800,
     };

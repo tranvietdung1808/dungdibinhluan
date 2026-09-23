@@ -1,12 +1,37 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  useSyncExternalStore,
+} from "react";
 import Image from "next/image";
+
+const REDUCE_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
+
+function subscribeReduceMotion(onChange: () => void) {
+  const mq = window.matchMedia(REDUCE_MOTION_QUERY);
+  mq.addEventListener("change", onChange);
+  return () => mq.removeEventListener("change", onChange);
+}
+const getReduceMotion = () => window.matchMedia(REDUCE_MOTION_QUERY).matches;
+const getReduceMotionServer = () => false;
+
+// =====================================================
+// FeatureSlider — slider tính năng nổi bật trên trang Mix Mods
+// §10.4-ish / a11y:
+// - Nút Tạm dừng/Phát tường minh + dừng khi hover hoặc focus
+//   trong slider; tôn trọng prefers-reduced-motion (không autoplay).
+// - Copy thống nhất số liệu với mô tả sản phẩm (≈2.000 faces —
+//   không claim "5000+" không kiểm chứng).
+// =====================================================
 
 const slides = [
   {
     img: "/features/feat-1.jpg",
     title: "FACE MOD SIÊU CHI TIẾT — GƯƠNG MẶT CHÂN THỰC",
-    desc: "Cập nhật face mod mới nhất với hơn 5000+ gương mặt cầu thủ được làm lại chi tiết, chân thực như ngoài đời.",
+    desc: "Gần 2.000 gương mặt cầu thủ được làm lại chi tiết, chân thực như ngoài đời.",
     tag: "Face / Visual Upgrade",
     type: "portrait",
   },
@@ -56,58 +81,122 @@ const slides = [
 
 const AUTO_PLAY_INTERVAL = 5000;
 
+function PlayPauseIcon({ playing }: { playing: boolean }) {
+  return playing ? (
+    <svg
+      className="h-4 w-4"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <path d="M7 5h4v14H7zM13 5h4v14h-4z" />
+    </svg>
+  ) : (
+    <svg
+      className="h-4 w-4 translate-x-px"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <path d="M8 5v14l11-7z" />
+    </svg>
+  );
+}
+
 export default function FeatureSlider() {
   const [current, setCurrent] = useState(0);
-  const [paused, setPaused] = useState(false);
+  // pausedByUser: nút play/pause + hover/focus giữ riêng
+  const [pausedByUser, setPausedByUser] = useState(false);
+  const [interactionPaused, setInteractionPaused] = useState(false);
+  // prefers-reduced-motion → không autoplay (vẫn điều khiển tay được).
+  // useSyncExternalStore: đọc media query không cần setState trong effect.
+  const reduceMotion = useSyncExternalStore(
+    subscribeReduceMotion,
+    getReduceMotion,
+    getReduceMotionServer,
+  );
+  const regionRef = useRef<HTMLDivElement>(null);
 
-  const next = useCallback(() => setCurrent((i) => (i + 1) % slides.length), []);
+  const next = useCallback(
+    () => setCurrent((i) => (i + 1) % slides.length),
+    [],
+  );
   const prev = () => setCurrent((i) => (i - 1 + slides.length) % slides.length);
 
+  const autoplayOn = !reduceMotion && !pausedByUser && !interactionPaused;
+
   useEffect(() => {
-    if (paused) return;
+    if (!autoplayOn) return;
     const timer = setInterval(next, AUTO_PLAY_INTERVAL);
     return () => clearInterval(timer);
-  }, [paused, next]);
+  }, [autoplayOn, next]);
+
+  // Dừng autoplay khi focus nằm trong slider (keyboard a11y)
+  const onFocusCapture = () => setInteractionPaused(true);
+  const onBlurCapture = (e: React.FocusEvent) => {
+    if (!regionRef.current?.contains(e.relatedTarget as Node)) {
+      setInteractionPaused(false);
+    }
+  };
 
   const slide = slides[current];
   const isPortrait = slide.type === "portrait";
 
   return (
-    <section className="bg-[#0a0a0a] pt-12 pb-10 md:pt-16 md:pb-14 overflow-hidden">
-      <div className="max-w-6xl mx-auto px-4 md:px-6">
-
+    <section className="overflow-hidden bg-[var(--color-surface-0)] pb-10 pt-12 md:pb-14 md:pt-16">
+      <div className="mx-auto max-w-6xl px-4 md:px-6">
         {/* Header */}
-        <div className="mb-6 md:mb-8 text-center">
-          <p className="text-[10px] md:text-xs uppercase tracking-[0.35em] text-slate-500">
+        <div className="mb-6 text-center md:mb-8">
+          <p className="text-[10px] uppercase tracking-[0.35em] text-[var(--color-muted)] md:text-xs">
             FC26 MOD SHOWCASE
           </p>
-          <h2 className="mt-2 text-2xl md:text-4xl font-black tracking-tight text-white">
-            TÍNH NĂNG <span className="text-[var(--color-primary)]">NỔI BẬT</span>
+          <h2 className="mt-2 text-2xl font-black tracking-tight text-[var(--color-title)] md:text-4xl">
+            TÍNH NĂNG{" "}
+            <span className="text-[var(--color-accent)]">NỔI BẬT</span>
           </h2>
         </div>
 
-        {/* Card */}
+        {/* Card — vùng carousel */}
         <div
-          className="relative rounded-[24px] border border-white/10 overflow-hidden shadow-[0_24px_80px_rgba(0,0,0,0.6)] bg-[#0c0c0c]"
-          onMouseEnter={() => setPaused(true)}
-          onMouseLeave={() => setPaused(false)}
+          ref={regionRef}
+          role="region"
+          aria-roledescription="carousel"
+          aria-label="Tính năng nổi bật của Mix Mods"
+          className="relative overflow-hidden rounded-[24px] border border-[var(--color-line)] bg-[var(--color-surface-0)] shadow-[var(--shadow-ambient)]"
+          onMouseEnter={() => setInteractionPaused(true)}
+          onMouseLeave={() => setInteractionPaused(false)}
+          onFocusCapture={onFocusCapture}
+          onBlurCapture={onBlurCapture}
         >
           {isPortrait ? (
-            <div className="relative h-[460px] md:h-[580px]">
+            <div
+              role="group"
+              aria-roledescription="slide"
+              aria-label={`${current + 1} / ${slides.length}: ${slide.title}`}
+              className="relative h-[460px] md:h-[580px]"
+            >
               <Image
                 src={slide.img}
-                alt={slide.title}
+                alt=""
+                aria-hidden="true"
                 fill
-                className="object-cover scale-110 blur-3xl opacity-25"
+                className="scale-110 object-cover opacity-25 blur-3xl"
                 sizes="100vw"
                 priority={current === 0}
               />
               <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/10 to-black/80" />
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(206,90,103,0.12),transparent_50%)]" />
+              <div
+                aria-hidden="true"
+                className="absolute inset-0"
+                style={{
+                  background:
+                    "radial-gradient(circle at center, color-mix(in srgb, var(--color-accent) 12%, transparent), transparent 50%)",
+                }}
+              />
 
-              <div className="relative z-10 h-full flex flex-col md:flex-row items-center gap-6 md:gap-12 px-6 md:px-12 py-8 md:py-10">
+              <div className="relative z-10 flex h-full flex-col items-center gap-6 px-6 py-8 md:flex-row md:gap-12 md:px-12 md:py-10">
                 <div className="flex-shrink-0">
-                  <div className="relative w-[200px] h-[268px] sm:w-[240px] sm:h-[320px] md:w-[310px] md:h-[415px] rounded-2xl overflow-hidden border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
+                  <div className="relative h-[268px] w-[200px] overflow-hidden rounded-2xl border border-[var(--color-line)] shadow-[var(--shadow-ambient)] sm:h-[320px] sm:w-[240px] md:h-[415px] md:w-[310px]">
                     <Image
                       src={slide.img}
                       alt={slide.title}
@@ -119,21 +208,25 @@ export default function FeatureSlider() {
                   </div>
                 </div>
                 <div className="flex flex-col gap-3 text-center md:text-left">
-                  <span className="inline-flex self-center md:self-start px-3 py-1 rounded-full text-[10px] font-black tracking-[0.2em] uppercase bg-[var(--color-primary)]/15 text-[#f08a95] border border-[var(--color-primary)]/25">
+                  <span className="inline-flex self-center rounded-full border border-[var(--color-violet)]/25 bg-[var(--color-violet-subtle)] px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--color-violet)] md:self-start">
                     {slide.tag}
                   </span>
-                  <h3 className="text-2xl md:text-4xl font-black text-white leading-tight tracking-tight">
+                  <h3 className="text-2xl font-black leading-tight tracking-tight text-[var(--color-title)] md:text-4xl">
                     {slide.title}
                   </h3>
-                  <p className="text-sm md:text-base text-slate-300 leading-relaxed max-w-lg">
+                  <p className="max-w-lg text-sm leading-relaxed text-[var(--color-body)] md:text-base">
                     {slide.desc}
                   </p>
                 </div>
               </div>
             </div>
           ) : (
-            <div>
-              <div className="relative w-full h-[260px] sm:h-[360px] md:h-[480px]">
+            <div
+              role="group"
+              aria-roledescription="slide"
+              aria-label={`${current + 1} / ${slides.length}: ${slide.title}`}
+            >
+              <div className="relative h-[260px] w-full sm:h-[360px] md:h-[480px]">
                 <Image
                   src={slide.img}
                   alt={slide.title}
@@ -143,15 +236,15 @@ export default function FeatureSlider() {
                   priority={current === 0}
                 />
               </div>
-              <div className="bg-[#0e0e0e] border-t border-white/5 px-6 md:px-10 py-5 md:py-6 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
-                <span className="inline-flex self-start sm:self-auto flex-shrink-0 px-3 py-1 rounded-full text-[10px] font-black tracking-[0.2em] uppercase bg-white/5 text-slate-400 border border-white/10">
+              <div className="flex flex-col gap-3 border-t border-[var(--color-line)] bg-[var(--color-surface-1)] px-6 py-5 sm:flex-row sm:items-center sm:gap-6 md:px-10 md:py-6">
+                <span className="inline-flex flex-shrink-0 self-start rounded-full border border-[var(--color-line)] bg-[var(--color-surface-2)] px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--color-muted)] sm:self-auto">
                   {slide.tag}
                 </span>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-base md:text-xl font-black text-white leading-tight tracking-tight">
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-base font-black leading-tight tracking-tight text-[var(--color-title)] md:text-xl">
                     {slide.title}
                   </h3>
-                  <p className="mt-1 text-xs md:text-sm text-slate-400 leading-relaxed">
+                  <p className="mt-1 text-xs leading-relaxed text-[var(--color-body)] md:text-sm">
                     {slide.desc}
                   </p>
                 </div>
@@ -159,46 +252,80 @@ export default function FeatureSlider() {
             </div>
           )}
 
-          {/* Arrows */}
+          {/* Arrows — hit target 44px */}
           <button
             onClick={prev}
-            aria-label="Previous"
-            className={`absolute z-20 left-3 md:left-5 ${
-              isPortrait ? "top-1/2 -translate-y-1/2" : "top-[130px] sm:top-[180px] md:top-[240px]"
-            } w-10 h-10 md:w-11 md:h-11 rounded-full bg-black/55 border border-white/10 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/10 hover:border-white/25 transition-all`}
+            aria-label="Slide trước"
+            className={`absolute left-3 z-20 md:left-5 ${
+              isPortrait
+                ? "top-1/2 -translate-y-1/2"
+                : "top-[130px] sm:top-[180px] md:top-[240px]"
+            } flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-[var(--color-line)] bg-black/55 text-white backdrop-blur-md transition-all hover:bg-[var(--color-surface-2)] focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]`}
           >
-            <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <svg
+              className="h-4 w-4 md:h-5 md:w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2.5}
+              aria-hidden="true"
+            >
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
           </button>
 
           <button
             onClick={next}
-            aria-label="Next"
-            className={`absolute z-20 right-3 md:right-5 ${
-              isPortrait ? "top-1/2 -translate-y-1/2" : "top-[130px] sm:top-[180px] md:top-[240px]"
-            } w-10 h-10 md:w-11 md:h-11 rounded-full bg-black/55 border border-white/10 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/10 hover:border-white/25 transition-all`}
+            aria-label="Slide sau"
+            className={`absolute right-3 z-20 md:right-5 ${
+              isPortrait
+                ? "top-1/2 -translate-y-1/2"
+                : "top-[130px] sm:top-[180px] md:top-[240px]"
+            } flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-[var(--color-line)] bg-black/55 text-white backdrop-blur-md transition-all hover:bg-[var(--color-surface-2)] focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]`}
           >
-            <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <svg
+              className="h-4 w-4 md:h-5 md:w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2.5}
+              aria-hidden="true"
+            >
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
             </svg>
           </button>
         </div>
 
-        {/* Dots */}
-        <div className="flex items-center justify-center gap-2.5 mt-5">
-          {slides.map((_, i) => (
-            <button
-              key={i}
-              aria-label={`Slide ${i + 1}`}
-              onClick={() => { setCurrent(i); setPaused(true); }}
-              className={`rounded-full transition-all duration-300 ${
-                i === current ? "w-8 h-2 bg-[var(--color-primary)]" : "w-2.5 h-2.5 bg-white/20 hover:bg-white/40"
-              }`}
-            />
-          ))}
+        {/* Dots + nút play/pause tường minh */}
+        <div className="mt-5 flex items-center justify-center gap-3">
+          <button
+            type="button"
+            onClick={() => setPausedByUser((v) => !v)}
+            aria-label={pausedByUser ? "Phát trình chiếu" : "Tạm dừng trình chiếu"}
+            aria-pressed={pausedByUser}
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--color-line)] bg-[var(--color-surface-1)] text-[var(--color-body)] transition-colors hover:text-[var(--color-title)] focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
+          >
+            <PlayPauseIcon playing={!pausedByUser && !reduceMotion} />
+          </button>
+          <div className="flex items-center gap-2.5">
+            {slides.map((_, i) => (
+              <button
+                key={i}
+                aria-label={`Slide ${i + 1}`}
+                aria-current={i === current || undefined}
+                onClick={() => {
+                  setCurrent(i);
+                  setPausedByUser(true);
+                }}
+                className={`rounded-full transition-all duration-300 ${
+                  i === current
+                    ? "h-2 w-8 bg-[var(--color-accent)]"
+                    : "h-2.5 w-2.5 bg-[var(--color-line-strong)] hover:bg-[var(--color-muted)]"
+                }`}
+              />
+            ))}
+          </div>
         </div>
-
       </div>
     </section>
   );

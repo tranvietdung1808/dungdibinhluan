@@ -1,10 +1,13 @@
 import { supabaseAdmin } from "@/lib/supabase";
 import { extractToken, getUserFromToken } from "@/lib/server/auth";
-import { errorResponse, runRoute, successResponse } from "@/lib/server/api-response";
+import { errorResponse, privateResponse, runRoute } from "@/lib/server/api-response";
 
 // =====================================================
 // /api/account/unlocks — ghi lại mod user đã mở/đã tải
-// (hiển thị trong "Mod đã mở", giữ tối đa 60 ngày)
+// (hiển thị trong "Mod đã mở").
+// A02: mod_access là bản ghi QUYỀN SỞ HỮU vĩnh viễn —
+// KHÔNG xóa theo tuổi bản ghi (khớp lời hứa UI
+// "mở khóa 1 lần — mod nằm vĩnh viễn trong tài khoản").
 // =====================================================
 export const maxDuration = 60;
 
@@ -46,6 +49,18 @@ export async function POST(request: Request) {
         .update({ created_at: new Date().toISOString() })
         .eq("id", existing[0].id);
     } else {
+      // mod yêu cầu credit: mod_access là QUYỀN — chỉ được tạo bởi
+      // /api/credit/spend/mod-unlock sau khi trừ credit. Endpoint ghi
+      // lịch sử này KHÔNG được phép cấp quyền mới cho mod credit
+      // (chặn tự mở khóa miễn phí qua API).
+      const { data: priceRow } = await supabaseAdmin
+        .from("mod_unlock_prices")
+        .select("mod_id")
+        .eq("mod_id", modId)
+        .maybeSingle();
+      if (priceRow) {
+        return errorResponse("Mod này cần mở khóa bằng credit", 403);
+      }
       await supabaseAdmin.from("mod_access").insert({
         user_id: userId,
         mod_id: modId,
@@ -53,10 +68,9 @@ export async function POST(request: Request) {
       });
     }
 
-    // Dọn bản ghi > 60 ngày
-    const cutoff = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString();
-    await supabaseAdmin.from("mod_access").delete().eq("user_id", userId).lt("created_at", cutoff);
+    // A02: KHÔNG cleanup mod_access theo tuổi — bản ghi là quyền sở hữu
+    // vĩnh viễn, endpoint access/content kiểm tra quyền dựa trên nó.
 
-    return successResponse({ ok: true });
+    return privateResponse({ ok: true });
   });
 }

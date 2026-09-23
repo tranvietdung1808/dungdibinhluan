@@ -4,64 +4,78 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 interface StickyBuyBarProps {
-  price?: string;
+  /** Giá đã format (vd "169.000đ") — caller server suy ra từ PRODUCTS */
+  price: string;
   href: string;
+  /** id của khối CTA chính trong trang — bar ẩn khi khối này vào viewport */
+  observeId?: string;
+  title?: string;
+  ctaLabel?: string;
 }
 
 /**
- * Thanh CTA dính dưới màn hình (mobile) — xuất hiện khi cuộn qua hero
- * và tự ẩn khi khối CTA chính trong trang đang hiển thị trên màn hình.
+ * Thanh CTA dính dưới màn hình (mobile) — §10.5:
+ * - IntersectionObserver gắn với CTA chính (#mix-cta): CTA hiển thị
+ *   → bar ẩn; CTA ra khỏi viewport → bar hiện. Không dùng ngưỡng
+ *   scrollY tùy ý.
+ * - Khi ẩn: inert + aria-hidden + translate ra khỏi màn hình →
+ *   không còn trong tab order/interaction, không chỉ che bằng mắt.
+ * - Layer: --layer-sticky-action; giữ safe-area-inset-bottom.
  */
-export default function StickyBuyBar({ price, href }: StickyBuyBarProps) {
-  const [visible, setVisible] = useState(false);
-  const [ctaBlockVisible, setCtaBlockVisible] = useState(false);
+export default function StickyBuyBar({
+  price,
+  href,
+  observeId = "mix-cta",
+  title = "MIX MODS FC 26",
+  ctaLabel = "Mua Mix Mods",
+}: StickyBuyBarProps) {
+  // Mặc định coi như CTA đang hiển thị → bar ẩn (fail-safe nếu
+  // không tìm thấy #mix-cta: không bật bar che nội dung).
+  const [ctaVisible, setCtaVisible] = useState(true);
 
   useEffect(() => {
-    const mainCta = document.getElementById("mix-cta");
+    const target = document.getElementById(observeId);
+    if (!target || typeof IntersectionObserver === "undefined") return;
 
-    const onScroll = () => {
-      setVisible(window.scrollY > 360);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          setCtaVisible(entry.isIntersecting);
+        }
+      },
+      // buffer nhỏ để bar không chồng lên mép CTA
+      { rootMargin: "-24px 0px", threshold: 0 },
+    );
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [observeId]);
 
-      if (mainCta) {
-        const rect = mainCta.getBoundingClientRect();
-        // Khối CTA chính nằm trong viewport → ẩn bar để tránh trùng
-        setCtaBlockVisible(rect.top < window.innerHeight - 24 && rect.bottom > 24);
-      }
-    };
-
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-    };
-  }, []);
-
-  const show = visible && !ctaBlockVisible;
+  const show = !ctaVisible;
 
   return (
     <div
       aria-hidden={!show}
-      className={`fixed inset-x-0 bottom-0 z-[60] md:hidden transition-transform duration-300 ease-out ${
-        show ? "translate-y-0" : "translate-y-full"
+      // inert khi ẩn: ra khỏi tab order + mọi tương tác (React 19 hỗ trợ)
+      inert={!show}
+      className={`fixed inset-x-0 bottom-0 z-[var(--layer-sticky-action)] transition-transform duration-300 ease-out md:hidden ${
+        show ? "translate-y-0" : "pointer-events-none translate-y-full"
       }`}
     >
-      <div className="border-t border-white/10 bg-[#0a0a0f]/95 backdrop-blur-xl px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+      <div className="border-t border-[var(--color-line)] bg-[var(--color-surface-0)]/95 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 backdrop-blur-xl">
         <div className="flex items-center gap-3">
-          <div className="flex-1 min-w-0">
-            {price && (
-              <>
-                <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">MIX MODS FC 26</p>
-                <p className="text-lg font-black leading-tight text-[var(--color-primary)]">{price}</p>
-              </>
-            )}
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--color-muted)]">
+              {title}
+            </p>
+            <p className="tabular text-lg font-black leading-tight text-[var(--color-accent)]">
+              {price}
+            </p>
           </div>
           <Link
             href={href}
-            className="flex-shrink-0 flex items-center gap-2 px-5 py-3 bg-[var(--color-primary)] rounded-xl font-black tracking-wider text-sm text-white hover:bg-[#b44c5c] active:scale-[0.98] transition-all shadow-[0_8px_24px_-8px_rgba(206,90,103,0.6)]"
+            className="flex h-11 flex-shrink-0 items-center justify-center rounded-[10px] bg-[var(--color-accent)] px-5 text-sm font-bold text-[var(--color-on-accent)] transition-colors hover:bg-[var(--color-accent-strong)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus-ring)]"
           >
-            MUA NGAY
+            {ctaLabel}
           </Link>
         </div>
       </div>

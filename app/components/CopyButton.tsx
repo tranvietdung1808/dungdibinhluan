@@ -21,7 +21,9 @@ export default function CopyButton({ text, className = "" }: CopyButtonProps) {
 
   return (
     <button
+      type="button"
       onClick={handleCopy}
+      aria-label={copied ? "Đã sao chép" : `Sao chép ${text}`}
       className={`p-1.5 rounded-lg bg-white/10 hover:bg-white/20 transition-all ${className}`}
       title={copied ? "Đã sao chép!" : "Sao chép"}
     >

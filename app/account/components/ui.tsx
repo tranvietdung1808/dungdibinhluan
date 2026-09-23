@@ -5,8 +5,11 @@
 // 3 lớp surface: page bg -> normal card -> raised/hover
 // Coral = primary accent (CTA/VIP) · Violet = phụ (profile/mod)
 // Không lạm dụng glow/glassmorphism/gradient/border/animation
+// Token: --color-signal giờ là alias của --color-violet (B04);
+// code mới/chạm vào dùng "violet".
 // =====================================================
 
+import Link from "next/link";
 import { useState } from "react";
 
 // ─── Icons (inline SVG, stroke-based) ───
@@ -199,11 +202,11 @@ export function CardHeader({
   subtitle?: string;
   action?: React.ReactNode;
   icon?: IconName;
-  iconTone?: "neutral" | "coral" | "violet" | "ok" | "warn";
+  iconTone?: "neutral" | "accent" | "violet" | "ok" | "warn";
 }) {
   const toneMap: Record<NonNullable<typeof iconTone>, string> = {
     neutral: "bg-surface-2 text-text-body",
-    coral: "bg-coral/15 text-coral",
+    accent: "bg-accent/15 text-accent",
     violet: "bg-violet/15 text-violet",
     ok: "bg-ok/15 text-ok",
     warn: "bg-warn/15 text-warn",
@@ -238,7 +241,7 @@ const BTN_BASE =
 const BTN_VARIANTS: Record<ButtonVariant, string> = {
   // Coral = primary CTA
   primary:
-    "bg-coral text-white hover:bg-coral-strong active:bg-coral-strong shadow-[0_8px_24px_-12px_rgba(240,96,120,0.55)]",
+    "bg-accent text-white hover:bg-accent-strong active:bg-accent-strong shadow-[0_8px_24px_-12px_rgba(110,242,160,0.55)]",
   secondary:
     "bg-surface-2 text-title border border-line hover:bg-surface-1 hover:border-white/20",
   ghost: "text-body hover:text-title hover:bg-surface-2",
@@ -273,21 +276,57 @@ export function Button({
   );
 }
 
+// ButtonLink — anchor có style nút (link nội bộ dùng next/link,
+// link ngoài mở tab mới an toàn). Dùng cho CTA điều hướng thật,
+// không giả lập hành động mua/chuyển trang sai đích.
+export function ButtonLink({
+  href,
+  children,
+  variant = "primary",
+  size = "md",
+  external,
+  className = "",
+}: {
+  href: string;
+  children: React.ReactNode;
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  external?: boolean;
+  className?: string;
+}) {
+  const cls = `${BTN_BASE} ${BTN_VARIANTS[variant]} ${BTN_SIZES[size]} ${className}`;
+  const isExternal = external ?? /^https?:\/\//.test(href);
+  if (isExternal) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" className={cls}>
+        {children}
+      </a>
+    );
+  }
+  return (
+    <Link href={href} className={cls}>
+      {children}
+    </Link>
+  );
+}
+
 // ─── Badge ───
 export type BadgeTone =
-  | "coral"
+  | "accent"
   | "violet"
   | "ok"
   | "warn"
   | "danger"
+  | "credit"
   | "neutral";
 
 const BADGE_TONES: Record<BadgeTone, string> = {
-  coral: "bg-coral/12 text-coral border-coral/25",
+  accent: "bg-accent/12 text-accent border-accent/25",
   violet: "bg-violet/12 text-violet border-violet/25",
   ok: "bg-ok/12 text-ok border-ok/25",
   warn: "bg-warn/12 text-warn border-warn/25",
   danger: "bg-danger/12 text-danger border-danger/25",
+  credit: "bg-credit-subtle text-credit-strong border-credit-border",
   neutral: "bg-white/6 text-text-body border-white/12",
 };
 
@@ -345,7 +384,7 @@ export function Input({
           } ${
             error
               ? "border-danger/50 focus:border-danger focus:ring-danger/25"
-              : "border-line focus:border-coral focus:ring-2 focus:ring-coral/20"
+              : "border-line focus:border-accent focus:ring-2 focus:ring-accent/20"
           } ${className}`}
           {...rest}
         />
@@ -385,15 +424,16 @@ export function StatCard({
   value: string | number;
   label: string;
   hint?: string;
-  accent?: "neutral" | "coral" | "violet" | "ok";
+  accent?: "neutral" | "accent" | "violet" | "ok" | "credit";
   href?: string;
   onClick?: () => void;
 }) {
   const accentMap: Record<NonNullable<typeof accent>, string> = {
     neutral: "bg-surface-2 text-text-body",
-    coral: "bg-coral/15 text-coral",
+    accent: "bg-accent/15 text-accent",
     violet: "bg-violet/15 text-violet",
     ok: "bg-ok/15 text-ok",
+    credit: "bg-credit-subtle text-credit-strong",
   };
   const clickable = Boolean(href || onClick);
   const content = (
@@ -415,7 +455,7 @@ export function StatCard({
       {clickable && (
         <Icon
           name="chevron-right"
-          className="w-4 h-4 text-muted/50 shrink-0 transition-colors duration-150 group-hover:text-coral"
+          className="w-4 h-4 text-muted/50 shrink-0 transition-colors duration-150 group-hover:text-accent"
         />
       )}
     </>

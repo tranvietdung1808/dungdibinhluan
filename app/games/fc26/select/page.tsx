@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { PRODUCTS, type ProductId } from "@/lib/payment/config";
 import CheckUyTinButton from "../../../components/CheckUyTinButton";
 import FlashSaleBanner from "../../../components/FlashSaleBanner";
+import { Badge, ButtonLink, Card, Container, InlineNotice } from "../../../components/ui";
+import { FC26_GAME_SIZE } from "../../../data/games";
+import { formatVnd } from "../../components/format";
 
 export const metadata: Metadata = {
   title: "Chọn phiên bản EA FC 26",
@@ -12,106 +16,219 @@ export const metadata: Metadata = {
   },
 };
 
-const editions = [
+// =====================================================
+// §12.1 — Chọn phiên bản FC 26
+// Giá/cách nhận lấy từ PRODUCTS (một nguồn với checkout/email).
+// Không giá cũ/% giảm khi chưa có chiến dịch thật; không bịa
+// chế độ chơi hay hình thức kích hoạt chưa xác minh.
+// =====================================================
+
+type EditionId = "normal" | "mods";
+
+const EDITIONS: {
+  id: EditionId;
+  productId: ProductId;
+  badge: string;
+  badgeTone: "neutral" | "violet";
+  image: string;
+  contentType: string;
+  includes: string[];
+  excludes: string[];
+}[] = [
   {
     id: "normal",
-    title: "EA FC 26",
-    subtitle: "STANDARD EDITION",
-    description: "Bộ cài đặt game đầy đủ, tối ưu hiệu năng theo máy của anh em. Hỗ trợ cài đặt full qua teamview/ultraview.",
-    features: ["✅ Game bản quyền", "✅Tối ưu FPS sẵn", "✅ Hỗ trợ cài đặt 1:1"],
-    tag: "GAME GỐC",
-    tagColor: "#ce5a67",
-    img: "/games/fc26n.jpg",
-    price: "69.000₫",
-    oldPrice: "149.000₫",
-    discount: "-54%",
-    href: "/games/fc26/payment?edition=normal",
+    productId: "fc26-normal",
+    badge: "Standard",
+    badgeTone: "neutral",
+    image: "/games/fc26n.jpg",
+    contentType: "Bộ cài đặt game",
+    includes: [
+      `Bộ cài đặt EA FC 26 đầy đủ (${FC26_GAME_SIZE}, file RAR)`,
+      "ClientTool hỗ trợ giải nén và cài đặt",
+      "Hỗ trợ cài đặt qua Fanpage/Zalo, kèm TeamViewer/UltraViewer",
+    ],
+    excludes: ["Gói Full Mods (faces, kits, đồ họa, gameplay)"],
   },
   {
     id: "mods",
-    title: "EA FC 26",
-    subtitle: "FULL MODS EDITION",
-    description: "Tất cả những gì bản thường có, kèm thêm bộ mods đỉnh cao: đồ họa đỉnh cao, gần 3000 faces mới được thêm vào, chuyển nhượng luôn mới nhất.",
-    features: ["✅ Tất cả từ bản thường", "✅ Face mods cao cấp", "✅ Kits + Đồ họa và hàng chục tính năng bổ sung khác tăng tính chân thực cho game"],
-    tag: "EXCLUSIVE",
-    tagColor: "#a855f7",
-    img: "/games/fc26-banner.jpg",
-    price: "199.000₫",
-    oldPrice: "269.000₫",
-    discount: "-26%",
-    href: "/games/fc26/payment?edition=mods",
+    productId: "fc26-mods",
+    badge: "Full Mods",
+    badgeTone: "violet",
+    image: "/games/fc26-banner.jpg",
+    contentType: "Bộ cài đặt game + gói mod",
+    includes: [
+      "Toàn bộ nội dung bản Standard",
+      "Gói Full Mods Pack: faces, kits, đồ họa, gameplay",
+      "Hỗ trợ cài đặt qua Fanpage/Zalo, kèm TeamViewer/UltraViewer",
+    ],
+    excludes: [],
   },
 ];
 
-export default function SelectEditionPage() {
+const COMPARISON: { label: string; values: [boolean | string, boolean | string] }[] = [
+  { label: `Bộ cài đặt game (${FC26_GAME_SIZE})`, values: [true, true] },
+  { label: "ClientTool cài đặt", values: [true, true] },
+  { label: "Gói Full Mods Pack", values: [false, true] },
+  { label: "Cách nhận", values: ["Mã kích hoạt qua email", "Mã kích hoạt qua email"] },
+];
+
+function ComparisonCell({ value }: { value: boolean | string }) {
+  if (value === true) {
+    return (
+      <span className="text-[var(--color-ok)]" aria-label="Có">
+        ✓
+      </span>
+    );
+  }
+  if (value === false) {
+    return (
+      <span className="text-[var(--color-muted)]" aria-label="Không có">
+        —
+      </span>
+    );
+  }
+  return <span className="text-[var(--color-body)]">{value}</span>;
+}
+
+export default async function SelectEditionPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const params = await searchParams;
+  const editionParam = params.edition;
+  const invalidEdition =
+    typeof editionParam === "string" &&
+    editionParam !== "" &&
+    !EDITIONS.some((e) => e.id === editionParam);
+
   return (
-    <main className="min-h-screen bg-[#0a0a0a] text-white flex flex-col items-center justify-center px-4 py-16">
-      <div className="text-center space-y-2 mb-6">
-        <h1 className="text-3xl md:text-4xl font-black">
-          CHỌN <span className="text-[#ce5a67]">PHIÊN BẢN</span>
-        </h1>
-        <p className="text-slate-500 text-xs tracking-widest uppercase">Chọn gói phù hợp với bạn</p>
-      </div>
+    <main className="min-h-screen bg-[var(--color-surface-0)] px-4 py-10 text-[var(--color-body)] md:py-14">
+      <Container className="max-w-4xl space-y-8">
+        <header className="space-y-3 text-center">
+          <h1 className="text-h1 text-[var(--color-title)]">Chọn phiên bản FC 26</h1>
+          <p className="mx-auto max-w-xl text-sm text-[var(--color-muted)]">
+            So sánh hai phiên bản trước khi thanh toán. Mã kích hoạt được gửi qua
+            email sau khi hệ thống xác nhận thanh toán.
+          </p>
+          <div className="flex justify-center pt-1">
+            <CheckUyTinButton />
+          </div>
+        </header>
 
-      <div className="w-full max-w-3xl mb-8">
+        {/* Chỉ hiện khi có endsAt/NEXT_PUBLIC_SALE_ENDS_AT thật */}
         <FlashSaleBanner />
-      </div>
 
-      <div className="mb-8">
-        <CheckUyTinButton />
-      </div>
+        {invalidEdition && (
+          <InlineNotice tone="warning" title="Phiên bản không hợp lệ">
+            Liên kết bạn mở có phiên bản “{editionParam}” không tồn tại. Hãy chọn
+            một trong hai phiên bản bên dưới — chúng tôi không tự chọn giúp bạn.
+          </InlineNotice>
+        )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl">
-        {editions.map(ed => (
-          <Link
-            key={ed.id}
-            href={ed.href}
-            className="group relative overflow-hidden rounded-3xl border border-white/10 hover:border-white/20 transition-all hover:scale-[1.02] duration-300 bg-[#111]"
-          >
-            <div className="relative h-48 overflow-hidden">
-              <Image src={ed.img} alt={ed.title} fill className="object-cover opacity-40 group-hover:opacity-55 group-hover:scale-105 transition-all duration-500" />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#111] via-[#111]/60 to-transparent" />
-              <span
-                className="absolute top-4 left-4 px-3 py-1 rounded-full text-[9px] font-black tracking-widest border"
-                style={{ color: ed.tagColor, borderColor: `${ed.tagColor}40`, background: `${ed.tagColor}15` }}
-              >
-                {ed.tag}
-              </span>
-            </div>
-
-            <div className="p-6 space-y-4">
-              <div>
-                <h2 className="text-xl font-black">{ed.title}</h2>
-                <p className="text-[10px] tracking-widest uppercase mt-0.5" style={{ color: ed.tagColor }}>{ed.subtitle}</p>
-                <p className="text-slate-400 text-sm mt-2 leading-relaxed">{ed.description}</p>
-              </div>
-              <ul className="space-y-1.5">
-                {ed.features.map(f => (
-                  <li key={f} className="text-xs text-slate-300">{f}</li>
-                ))}
-              </ul>
-
-              {/* Giá */}
-              <div className="flex items-center justify-between border-t border-white/5 pt-3">
-                <span className="text-xs text-slate-500 uppercase tracking-widest">Giá</span>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-slate-600 line-through">{ed.oldPrice}</span>
-                  <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-green-500/20 text-green-400 border border-green-500/30">{ed.discount}</span>
-                  <span className="text-xl font-black" style={{ color: ed.tagColor }}>{ed.price}</span>
+        {/* Hai card cùng chiều cao (desktop) / xếp dọc (mobile) */}
+        <div className="grid items-stretch gap-5 md:grid-cols-2">
+          {EDITIONS.map((ed) => {
+            const product = PRODUCTS[ed.productId];
+            const price = formatVnd(product.price);
+            return (
+              <Card key={ed.id} padding={false} className="flex h-full flex-col overflow-hidden">
+                <div className="relative h-40 shrink-0">
+                  <Image
+                    src={ed.image}
+                    alt={product.name}
+                    fill
+                    sizes="(min-width: 768px) 380px, 100vw"
+                    className="object-cover opacity-50"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-surface-1)] via-transparent to-transparent" />
+                  <div className="absolute left-4 top-4">
+                    <Badge tone={ed.badgeTone}>{ed.badge}</Badge>
+                  </div>
                 </div>
-              </div>
 
-              <div className="w-full py-3.5 rounded-2xl font-black text-xs tracking-widest text-center text-white transition-all" style={{ background: ed.tagColor }}>
-                MUA NGAY →
-              </div>
-            </div>
+                <div className="flex flex-1 flex-col gap-4 p-5">
+                  <div className="space-y-1">
+                    <h2 className="text-h3 text-[var(--color-title)]">{product.name}</h2>
+                    <p className="text-meta text-[var(--color-muted)]">{ed.contentType}</p>
+                  </div>
+
+                  <ul className="space-y-1.5 text-sm">
+                    {ed.includes.map((item) => (
+                      <li key={item} className="flex items-start gap-2 text-[var(--color-body)]">
+                        <span aria-hidden="true" className="mt-0.5 text-[var(--color-ok)]">✓</span>
+                        {item}
+                      </li>
+                    ))}
+                    {ed.excludes.map((item) => (
+                      <li key={item} className="flex items-start gap-2 text-[var(--color-muted)]">
+                        <span aria-hidden="true" className="mt-0.5">✗</span>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+
+                  <p className="text-meta leading-relaxed text-[var(--color-muted)]">
+                    {product.fulfillment.receiveText}
+                  </p>
+
+                  <div className="mt-auto space-y-3 border-t border-[var(--color-line)] pt-4">
+                    <div className="flex items-baseline justify-between">
+                      <span className="text-meta text-[var(--color-muted)]">Giá</span>
+                      <span className="tabular text-xl font-extrabold text-[var(--color-title)]">
+                        {price}
+                      </span>
+                    </div>
+                    {/* Một accent CTA duy nhất — edition phân biệt bằng tên + nhãn */}
+                    <ButtonLink href={product.checkoutPath} size="lg" fullWidth>
+                      Mua {ed.badge} — {price}
+                    </ButtonLink>
+                  </div>
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+
+        {/* Bảng so sánh ngắn */}
+        <Card padding={false} className="overflow-hidden">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-[var(--color-line)] text-left text-meta text-[var(--color-muted)]">
+                <th scope="col" className="px-5 py-3 font-medium">Nội dung</th>
+                <th scope="col" className="px-5 py-3 text-center font-medium">Standard</th>
+                <th scope="col" className="px-5 py-3 text-center font-medium">Full Mods</th>
+              </tr>
+            </thead>
+            <tbody>
+              {COMPARISON.map((row) => (
+                <tr key={row.label} className="border-b border-[var(--color-line)] last:border-0">
+                  <th scope="row" className="px-5 py-3 text-left font-normal text-[var(--color-body)]">
+                    {row.label}
+                  </th>
+                  <td className="px-5 py-3 text-center"><ComparisonCell value={row.values[0]} /></td>
+                  <td className="px-5 py-3 text-center"><ComparisonCell value={row.values[1]} /></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </Card>
+
+        <div className="flex flex-col items-center gap-3">
+          <Link
+            href="/games/fc26"
+            className="text-sm font-semibold text-[var(--color-accent-strong)] underline-offset-4 hover:underline"
+          >
+            Đã có mã? Nhập mã →
           </Link>
-        ))}
-      </div>
-
-      <Link href="/" className="mt-10 text-[10px] text-slate-600 hover:text-slate-400 transition-colors tracking-widest uppercase">
-        ← Quay lại trang chủ
-      </Link>
+          <Link
+            href="/"
+            className="text-meta text-[var(--color-muted)] transition-colors hover:text-[var(--color-body)]"
+          >
+            ← Về trang chủ
+          </Link>
+        </div>
+      </Container>
     </main>
   );
 }

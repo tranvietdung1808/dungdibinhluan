@@ -1,14 +1,16 @@
-import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { extractToken, getUserFromToken } from "@/lib/server/auth";
 import { getModCreditConfigBySlug } from "@/lib/server/credit";
 import { getModBySlug } from "@/lib/server/mods";
-import { errorResponse, runRoute } from "@/lib/server/api-response";
+import { errorResponse, privateResponse, runRoute, successResponse } from "@/lib/server/api-response";
 
 // =====================================================
 // /api/mods/[slug]/content — nội dung đầy đủ (mô tả + download_url)
 // CHỈ trả về khi user ĐÃ mở khóa credit mod này.
 // Chặn leak download_url/mô tả chi tiết của mod yêu cầu credit.
+// A02: quyền mod_access là vĩnh viễn — chỉ kiểm tra tồn tại, không
+// lọc theo tuổi bản ghi. Response chứa quyền/nội dung theo user
+// → privateResponse (không shared cache — §20.4).
 // =====================================================
 export const maxDuration = 60;
 
@@ -20,14 +22,12 @@ export async function GET(
     const { slug } = await params;
 
     const config = await getModCreditConfigBySlug(slug);
-    const json = (payload: object, status = 200) =>
-      NextResponse.json(payload, { status, headers: { "Cache-Control": "no-store" } });
 
     if (!config.enabled) {
-      // Mod công khai → ai cũng lấy được
+      // Mod công khai → nội dung public, cache được bằng shared cache
       const { data, error } = await getModBySlug(slug);
       if (error || !data) return errorResponse("Mod not found", 404);
-      return json(data);
+      return successResponse(data);
     }
 
     // Mod yêu cầu credit → bắt buộc phải có quyền
@@ -47,6 +47,6 @@ export async function GET(
       .maybeSingle();
     if (!granted) return errorResponse("Bạn chưa mở khóa mod này", 403);
 
-    return json(mod);
+    return privateResponse(mod);
   });
 }

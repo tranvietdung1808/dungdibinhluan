@@ -1,3 +1,5 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
+
 // =====================================================
 // Role-based access control system
 // Supports: admin, vip, moderator, or any custom role
@@ -85,7 +87,7 @@ function setCachedAdminCheck(normalizedEmail: string, result: boolean) {
  * Get all roles for a given email from the database
  */
 export async function getUserRoles(
-  supabaseClient: any,
+  supabaseClient: SupabaseClient,
   email?: string | null
 ): Promise<UserRole[]> {
   const normalized = normalizeEmail(email);
@@ -122,7 +124,7 @@ export async function getUserRoles(
  * Check if a user has a specific role
  */
 export async function hasRole(
-  supabaseClient: any,
+  supabaseClient: SupabaseClient,
   email: string | null | undefined,
   role: UserRole
 ): Promise<boolean> {
@@ -162,7 +164,7 @@ export async function hasRole(
  * Check if a user has ANY of the given roles
  */
 export async function hasAnyRole(
-  supabaseClient: any,
+  supabaseClient: SupabaseClient,
   email: string | null | undefined,
   roles: UserRole[]
 ): Promise<boolean> {
@@ -200,7 +202,7 @@ export async function hasAnyRole(
  * repeated DB queries in the same request lifecycle.
  */
 export async function checkIsAdminEmail(
-  supabaseClient: any,
+  supabaseClient: SupabaseClient,
   email?: string | null
 ): Promise<boolean> {
   const normalized = normalizeEmail(email);

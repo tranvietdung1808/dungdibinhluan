@@ -5,7 +5,7 @@
 // Mọi list rỗng / số liệu 0 đều có copy + CTA tiếp theo
 // =====================================================
 
-import { Button, Card, Icon, type IconName } from "./ui";
+import { Button, ButtonLink, Card, Icon, type IconName } from "./ui";
 
 // ─── Loading states ───
 export function PageSkeleton() {
@@ -26,8 +26,8 @@ export function PageSkeleton() {
 
 function SkeletonBlock({ className = "" }: { className?: string }) {
   return (
-    <div className="rounded-2xl surface-card p-4">
-      <div className={`animate-pulse rounded-xl bg-surface-2/80 ${className}`} />
+    <div className="rounded-lg surface-card p-4">
+      <div className={`animate-pulse rounded-md bg-surface-2/80 ${className}`} />
     </div>
   );
 }
@@ -42,7 +42,7 @@ export function ErrorState({
 }) {
   return (
     <Card className="p-8 sm:p-10 text-center" as="section">
-      <div className="mx-auto w-14 h-14 rounded-2xl bg-danger/10 border border-danger/20 flex items-center justify-center text-danger">
+      <div className="mx-auto w-14 h-14 rounded-lg bg-danger/10 border border-danger/20 flex items-center justify-center text-danger">
         <Icon name="shield" className="w-7 h-7" />
       </div>
       <h3 className="mt-4 text-lg font-bold text-title">Đã có lỗi xảy ra</h3>
@@ -54,6 +54,41 @@ export function ErrorState({
         </Button>
       )}
     </Card>
+  );
+}
+
+// ─── Inline error trong card (B09): lỗi theo từng resource,
+// không đẩy cả section sang ErrorState toàn trang ───
+export function InlineError({
+  message,
+  onRetry,
+}: {
+  message: string;
+  onRetry?: () => void;
+}) {
+  return (
+    <div
+      role="alert"
+      className="rounded-xl border border-danger/25 bg-danger/10 px-4 py-4 flex flex-col sm:flex-row sm:items-center gap-3"
+    >
+      <div className="flex items-center gap-2.5 min-w-0 flex-1">
+        <span className="text-danger shrink-0" aria-hidden="true">
+          <Icon name="shield" className="w-4 h-4" />
+        </span>
+        <p className="text-sm text-body">{message}</p>
+      </div>
+      {onRetry && (
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={onRetry}
+          className="shrink-0 self-start sm:self-auto"
+        >
+          <Icon name="refresh" className="w-3.5 h-3.5" />
+          Thử lại
+        </Button>
+      )}
+    </div>
   );
 }
 
@@ -77,7 +112,7 @@ export function EmptyState({
 }) {
   return (
     <Card className="p-8 sm:p-10 text-center" as="section">
-      <div className="mx-auto w-14 h-14 rounded-2xl bg-surface-2 border border-line flex items-center justify-center text-muted">
+      <div className="mx-auto w-14 h-14 rounded-lg bg-surface-2 border border-line flex items-center justify-center text-muted">
         <Icon name={icon} className="w-7 h-7" />
       </div>
       <h3 className="mt-4 text-lg font-bold text-title">{title}</h3>
@@ -85,12 +120,10 @@ export function EmptyState({
       {ctaLabel && (ctaHref || onCta) && (
         <div className="mt-5">
           {ctaHref ? (
-            <a href={ctaHref} className="inline-flex">
-              <Button variant="primary" size="md">
-                {ctaLabel}
-                <Icon name="chevron-right" className="w-4 h-4" />
-              </Button>
-            </a>
+            <ButtonLink href={ctaHref} variant="primary" size="md">
+              {ctaLabel}
+              <Icon name="chevron-right" className="w-4 h-4" />
+            </ButtonLink>
           ) : (
             <Button variant="primary" size="md" onClick={onCta}>
               {ctaLabel}
@@ -140,4 +173,22 @@ export function isSubscriptionActive(s: {
   expires_at: string;
 }, now: number) {
   return s.status === "active" && new Date(s.expires_at).getTime() > now;
+}
+
+// §14.3: tỷ lệ thanh thời hạn lấy từ starts_at/expires_at THẬT.
+// Trả null khi mốc thời gian không hợp lệ → caller ẩn progress bar,
+// không fallback mẫu số hardcode (trước đây cố định 90 ngày).
+export function subProgressPct(
+  startsAt: string | undefined,
+  expiresAt: string | undefined,
+  now: number
+): number | null {
+  if (!startsAt || !expiresAt) return null;
+  const start = new Date(startsAt).getTime();
+  const end = new Date(expiresAt).getTime();
+  if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) {
+    return null;
+  }
+  const pct = ((end - now) / (end - start)) * 100;
+  return Math.min(100, Math.max(0, Math.round(pct)));
 }

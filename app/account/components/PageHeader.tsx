@@ -2,10 +2,11 @@
 
 // =====================================================
 // PageHeader — đầu trang account dashboard
-// Avatar ring theo hạng (coral = VIP / neutral = member)
+// Avatar ring theo hạng (accent = VIP / neutral = member)
 // Greeting theo giờ + meta chips (email, thời điểm)
 // =====================================================
 
+import Link from "next/link";
 import { Badge, Icon } from "./ui";
 import { formatDateTime } from "./states";
 
@@ -47,18 +48,20 @@ export function PageHeader({
         }`}
         style={{
           background: isVip
-            ? "radial-gradient(closest-side, rgba(240,96,120,0.14), transparent)"
-            : "radial-gradient(closest-side, rgba(143,123,247,0.10), transparent)",
+            ? "radial-gradient(closest-side, rgba(110,242,160,0.14), transparent)"
+            : "radial-gradient(closest-side, rgba(255,79,163,0.10), transparent)",
         }}
       />
 
-      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 pt-20 md:pt-24 pb-6">
+      {/* Offset navbar duy nhất nằm ở root layout (pt-14 md:pt-16) — B13:
+          header chỉ giữ padding nội dung, không cộng thêm offset trùng. */}
+      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8 pb-6">
         <nav aria-label="Breadcrumb" className="mb-5">
           <ol className="flex items-center gap-1.5 text-xs text-muted font-medium">
             <li>
-              <a href="/" className="hover:text-title transition-colors">
+              <Link href="/" className="hover:text-title transition-colors">
                 Trang chủ
-              </a>
+              </Link>
             </li>
             <li aria-hidden="true" className="text-muted/60">
               /
@@ -76,7 +79,7 @@ export function PageHeader({
               <div
                 className={`rounded-2xl p-[2.5px] ${
                   isVip
-                    ? "bg-gradient-to-br from-coral via-coral-strong to-violet/60"
+                    ? "bg-gradient-to-br from-accent via-accent-strong to-violet/60"
                     : "bg-surface-2 border border-line"
                 }`}
               >
@@ -97,7 +100,7 @@ export function PageHeader({
               </div>
               {isVip && (
                 <span
-                  className="absolute -bottom-1.5 -right-1.5 w-7 h-7 rounded-lg bg-coral flex items-center justify-center text-white shadow-[0_8px_24px_-12px_rgba(240,96,120,0.55)]"
+                  className="absolute -bottom-1.5 -right-1.5 w-7 h-7 rounded-lg bg-accent flex items-center justify-center text-white shadow-[0_8px_24px_-12px_rgba(110,242,160,0.55)]"
                   title="Thành viên VIP"
                 >
                   <Icon name="crown" filled className="w-4 h-4" />
@@ -108,7 +111,7 @@ export function PageHeader({
             <div className="min-w-0">
               <p
                 className={`text-[11px] font-black uppercase tracking-wider ${
-                  isVip ? "text-coral" : "text-muted"
+                  isVip ? "text-accent" : "text-muted"
                 }`}
               >
                 {greeting()}
@@ -118,7 +121,7 @@ export function PageHeader({
               </h1>
               <div className="flex items-center gap-2 mt-2 flex-wrap">
                 {isVip ? (
-                  <Badge tone="coral">
+                  <Badge tone="accent">
                     <Icon name="crown" filled className="w-3 h-3" />
                     VIP
                     {typeof vipDaysLeft === "number" && vipDaysLeft > 0 && (
@@ -126,7 +129,7 @@ export function PageHeader({
                     )}
                   </Badge>
                 ) : (
-                  <Badge tone="neutral">Member</Badge>
+                  <Badge tone="neutral">Thành viên</Badge>
                 )}
                 {isAdmin && (
                   <Badge tone="violet">

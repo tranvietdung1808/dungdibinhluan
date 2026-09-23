@@ -2,45 +2,74 @@
 
 // =====================================================
 // /credit/cancel — user hủy giao dịch nạp credit
+// §13.4: hủy nạp dùng màu trung tính — đỏ chỉ dành cho lỗi thật.
+// Đích quay lại cố định /credit (không router.back()).
 // =====================================================
 
-import { Suspense } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { Suspense, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { ButtonLink, Card } from "@/app/components/ui";
+import { sanitizeInternalPath } from "@/lib/payment/order-status";
+
+function OrderCodeRow({ orderCode }: { orderCode: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <div className="flex items-center justify-center gap-2 text-meta text-muted">
+      <span>Mã đơn</span>
+      <code className="tabular font-semibold text-body">#{orderCode}</code>
+      <button
+        type="button"
+        onClick={async () => {
+          try {
+            await navigator.clipboard.writeText(orderCode);
+            setCopied(true);
+            window.setTimeout(() => setCopied(false), 2000);
+          } catch {
+            // Clipboard bị chặn — mã đơn vẫn hiển thị để copy tay
+          }
+        }}
+        className="rounded-md border border-line-strong px-2 py-0.5 text-xs text-body transition-colors hover:border-accent-border hover:text-title"
+      >
+        {copied ? "Đã copy" : "Copy"}
+      </button>
+    </div>
+  );
+}
 
 function CancelContent() {
   const params = useSearchParams();
-  const router = useRouter();
   const orderCode = params.get("orderCode");
+  // §5.3: quay về đúng ngữ cảnh (vd trang mod) nếu có next hợp lệ
+  const nextPath = sanitizeInternalPath(params.get("next"));
 
   return (
-    <main className="min-h-screen bg-[#0a0a0a] text-white flex items-center justify-center px-4">
-      <div className="w-full max-w-md space-y-8 text-center">
-        <div className="w-16 h-16 mx-auto rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-3xl">
-          ✕
-        </div>
-        <div className="space-y-2">
-          <h1 className="text-2xl font-black text-red-400">ĐÃ HỦY NẠP CREDIT</h1>
-          <p className="text-slate-400 text-sm">
-            Bạn đã hủy giao dịch nạp credit. Không có credit nào bị trừ.
-          </p>
-          {orderCode && (
-            <p className="text-[10px] text-slate-600">Mã đơn: #{orderCode}</p>
-          )}
-        </div>
-        <div className="space-y-3">
-          <button
-            onClick={() => router.back()}
-            className="w-full py-4 bg-[var(--color-primary)] rounded-2xl font-black tracking-widest text-sm text-white hover:bg-[#b44c5c] transition-all"
-          >
-            ← THỬ LẠI
-          </button>
-          <button
-            onClick={() => router.push("/credit")}
-            className="w-full py-3 rounded-2xl text-xs text-slate-500 border border-white/10 hover:border-white/20 hover:text-white transition-all"
-          >
-            Quay lại trang nạp credit
-          </button>
-        </div>
+    <main className="flex min-h-screen items-center justify-center bg-surface-0 px-4 py-16 text-body">
+      <div className="w-full max-w-md">
+        <Card className="space-y-6 text-center">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-line bg-surface-2 text-muted">
+            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="9" />
+              <path d="m9 9 6 6" />
+              <path d="m15 9-6 6" />
+            </svg>
+          </div>
+          <div className="space-y-1.5">
+            <h1 className="text-h2 text-title">Đã hủy nạp credit</h1>
+            <p className="text-sm text-muted">
+              Giao dịch đã được hủy — chưa có khoản tiền nào bị trừ và không có
+              credit nào được cộng.
+            </p>
+          </div>
+          {orderCode && <OrderCodeRow orderCode={orderCode} />}
+          <div className="space-y-2">
+            <ButtonLink href={nextPath ?? "/credit"} size="lg" fullWidth>
+              {nextPath ? "Quay lại trang mod" : "Quay lại trang nạp credit"}
+            </ButtonLink>
+            <ButtonLink href={nextPath ? "/credit" : "/mods"} variant="ghost" fullWidth>
+              {nextPath ? "Nạp lại credit" : "Khám phá mod"}
+            </ButtonLink>
+          </div>
+        </Card>
       </div>
     </main>
   );

@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
+import AdminShell from './components/AdminShell'
+import { Spinner } from '@/app/components/ui/states'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
@@ -11,10 +13,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [checking, setChecking] = useState(true)
 
   useEffect(() => {
-    if (isLoginPage) {
-      setChecking(false)
-      return
-    }
+    if (isLoginPage) return
 
     let cancelled = false
     const verify = async () => {
@@ -34,7 +33,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       if (!cancelled) {
         if (!res.ok) {
-          router.replace('/admin')
+          // 403: user hợp lệ nhưng không phải admin — báo rõ ở trang đăng nhập
+          router.replace(res.status === 403 ? '/admin?error=forbidden' : '/admin')
         } else {
           setChecking(false)
         }
@@ -42,23 +42,25 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
 
     void verify()
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+    }
   }, [isLoginPage, pathname, router])
 
-  if (!isLoginPage && checking) {
+  if (isLoginPage) {
+    return <>{children}</>
+  }
+
+  if (checking) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] text-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-8 h-8 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p>Đang kiểm tra...</p>
+      <div className="flex min-h-screen items-center justify-center bg-[var(--color-surface-0)]">
+        <div className="flex items-center gap-3 text-sm text-[var(--color-muted)]">
+          <Spinner size={22} label="Đang kiểm tra quyền truy cập" />
+          Đang kiểm tra quyền truy cập…
         </div>
       </div>
     )
   }
 
-  return (
-    <div className="min-h-screen bg-[#0a0a0a]">
-      {children}
-    </div>
-  )
+  return <AdminShell>{children}</AdminShell>
 }

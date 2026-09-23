@@ -6,7 +6,7 @@
 // Có keyboard accessibility (role tablist/tab, arrow keys)
 // =====================================================
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { SectionKey } from "../types";
 import { Icon, type IconName } from "./ui";
 
@@ -30,7 +30,7 @@ const ACCOUNT_GROUPS: { label: string; tabs: DashTab[] }[] = [
     label: "Giao dịch",
     tabs: [
       { key: "credit", label: "Ví Credit", icon: "coins" },
-      { key: "orders", label: "Đơn hàng", icon: "bag" },
+      { key: "orders", label: "Lịch sử membership", icon: "clock" },
       { key: "membership", label: "VIP / Membership", icon: "crown" },
     ],
   },
@@ -86,7 +86,7 @@ function Sidebar({
   return (
     <nav
       aria-label="Menu tài khoản"
-      className="rounded-2xl surface-card p-3 flex flex-col gap-4"
+      className="rounded-lg surface-card p-3 flex flex-col gap-4"
     >
       {ACCOUNT_GROUPS.map((group) => (
         <div key={group.label}>
@@ -102,7 +102,7 @@ function Sidebar({
                   type="button"
                   onClick={() => onNavigate(tab.key)}
                   aria-current={isActive ? "page" : undefined}
-                  className={`relative flex items-center gap-3 pl-3 pr-3.5 py-2.5 rounded-xl text-sm font-semibold transition-colors duration-150 text-left ${
+                  className={`relative flex items-center gap-3 pl-3 pr-3.5 py-2.5 rounded-md text-sm font-semibold transition-colors duration-150 text-left ${
                     isActive
                       ? "bg-surface-2 text-title border border-line"
                       : "text-body hover:text-title hover:bg-surface-2/60 border border-transparent"
@@ -111,10 +111,10 @@ function Sidebar({
                   {isActive && (
                     <span
                       aria-hidden="true"
-                      className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-l-md bg-coral"
+                      className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-l-md bg-accent"
                     />
                   )}
-                  <span className={isActive ? "text-coral" : "text-muted"}>
+                  <span className={isActive ? "text-accent" : "text-muted"}>
                     <Icon name={tab.icon} className="w-[18px] h-[18px]" />
                   </span>
                   {tab.label}
@@ -131,7 +131,7 @@ function Sidebar({
             <Icon name="shield" className="w-[18px] h-[18px]" />
           </span>
           <span className="text-[11px] text-muted leading-snug">
-            Tài khoản được đồng bộ an toàn từ Supabase
+            Thông tin tài khoản chỉ hiển thị cho chính bạn
           </span>
         </div>
       </div>
@@ -147,16 +147,14 @@ function MobileTabs({
   active: SectionKey;
   onNavigate: (s: SectionKey) => void;
 }) {
-  const [focusedIndex, setFocusedIndex] = useState(() =>
-    Math.max(
-      0,
-      ACCOUNT_TABS.findIndex((t) => t.key === active)
-    )
+  // Arrow-key di chuyển focus giữa tab; khi không có override thủ công,
+  // vị trí focus theo tab đang active (không cần effect setState).
+  const [focusOverride, setFocusOverride] = useState<number | null>(null);
+  const activeIndex = Math.max(
+    0,
+    ACCOUNT_TABS.findIndex((t) => t.key === active)
   );
-
-  useEffect(() => {
-    setFocusedIndex(ACCOUNT_TABS.findIndex((t) => t.key === active));
-  }, [active]);
+  const focusedIndex = focusOverride ?? activeIndex;
 
   const focusButton = (index: number) => {
     const el = document.getElementById(`mobile-tab-${ACCOUNT_TABS[index]?.key}`);
@@ -174,12 +172,12 @@ function MobileTabs({
         if (e.key === "ArrowRight") {
           e.preventDefault();
           const next = Math.min(ACCOUNT_TABS.length - 1, current + 1);
-          setFocusedIndex(next);
+          setFocusOverride(next);
           focusButton(next);
         } else if (e.key === "ArrowLeft") {
           e.preventDefault();
           const prev = Math.max(0, current - 1);
-          setFocusedIndex(prev);
+          setFocusOverride(prev);
           focusButton(prev);
         }
       }}
@@ -196,7 +194,7 @@ function MobileTabs({
             onClick={() => onNavigate(tab.key)}
             className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold whitespace-nowrap border transition-colors duration-150 ${
               isActive
-                ? "bg-coral/15 text-coral border-coral/30"
+                ? "bg-accent/15 text-accent border-accent/30"
                 : "bg-surface-1 text-body border-line hover:text-title"
             }`}
           >

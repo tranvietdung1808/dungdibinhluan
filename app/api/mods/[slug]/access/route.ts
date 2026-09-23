@@ -1,13 +1,15 @@
-import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { extractToken, getUserFromToken } from "@/lib/server/auth";
 import { getModCreditConfigBySlug } from "@/lib/server/credit";
-import { errorResponse, runRoute } from "@/lib/server/api-response";
+import { privateResponse, runRoute, successResponse } from "@/lib/server/api-response";
 
 // =====================================================
 // /api/mods/[slug]/access — kiểm tra quyền mở khóa credit của user
 // Trả về: { unlocked, modId, creditCost }
-// Token tùy chọn (chưa đăng nhập → luôn bị khóa)
+// Token tùy chọn (chưa đăng nhập → luôn bị khóa).
+// Dữ liệu quyền theo user → privateResponse (không shared cache — §20.4).
+// A02: quyền trong mod_access là VĨNH VIỄN — endpoint này chỉ đọc,
+// không giả định quyền hết hạn theo tuổi bản ghi.
 // =====================================================
 export const maxDuration = 60;
 
@@ -19,12 +21,10 @@ export async function GET(
     const { slug } = await params;
 
     const config = await getModCreditConfigBySlug(slug);
-    const json = (payload: object) =>
-      NextResponse.json(payload, { headers: { "Cache-Control": "no-store" } });
 
     if (!config.enabled || !config.modId) {
-      // Mod không yêu cầu credit → luôn xem được
-      return json({ unlocked: true, modId: config.modId, creditCost: null });
+      // Mod không yêu cầu credit → hằng số public, cache được
+      return successResponse({ unlocked: true, modId: config.modId, creditCost: null });
     }
 
     let unlocked = false;
@@ -42,7 +42,7 @@ export async function GET(
       }
     }
 
-    return json({
+    return privateResponse({
       unlocked,
       modId: config.modId,
       creditCost: config.creditCost,

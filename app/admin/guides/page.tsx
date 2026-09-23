@@ -1,7 +1,16 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
+import { useCallback, useEffect, useState } from 'react'
+import { AdminPage } from '../components/AdminPage'
+import { AdminTable, AdminThead, AdminTh, AdminTr, AdminTd } from '../components/AdminTable'
+import { ConfirmDialog } from '../components/ConfirmDialog'
+import { useAdminToast } from '../components/AdminShell'
+import { adminFetch, adminFetchJson, adminErrorMessage, isAdminAuthError } from '../components/admin-api'
+import { Button, ButtonLink, EmptyState, ErrorState, Field, InlineNotice, Spinner, inputClass } from '@/app/components/ui'
+
+// =====================================================
+// /admin/guides — danh sách bài hướng dẫn
+// =====================================================
 
 interface Guide {
   id: string
@@ -12,205 +21,230 @@ interface Guide {
 }
 
 export default function AdminGuidesPage() {
+  const toast = useAdminToast()
   const [guides, setGuides] = useState<Guide[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [authFailed, setAuthFailed] = useState(false)
+  const [search, setSearch] = useState('')
+  const [deleteTarget, setDeleteTarget] = useState<Guide | null>(null)
+  const [deleting, setDeleting] = useState(false)
 
-  useEffect(() => {
-    fetchGuides()
-  }, [])
-
-  const fetchGuides = async () => {
+  const fetchGuides = useCallback(async () => {
+    setLoading(true)
+    setError('')
     try {
-      const response = await fetch('/api/admin/guides')
-      if (response.ok) {
-        const guides = await response.json()
-        setGuides(guides || [])
-      } else {
-        setError('Failed to fetch guides')
-      }
+      const data = await adminFetchJson<Guide[]>('/api/admin/guides')
+      setGuides(Array.isArray(data) ? data : [])
     } catch (err) {
-      setError('Error fetching guides')
+      if (isAdminAuthError(err)) setAuthFailed(true)
+      setError(adminErrorMessage(err, 'Chưa tải được danh sách bài viết'))
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
-  const handleDelete = async (id: string, title: string) => {
-    console.log('Deleting guide ID:', id)
-    console.log('Guide title:', title)
-    
-    if (!id || id === 'undefined') {
-      alert('Lỗi: ID bài viết không hợp lệ')
-      return
-    }
-    
-    if (!confirm(`Bạn có chắc muốn xóa bài viết "${title}" không?`)) {
-      return
-    }
+  useEffect(() => {
+    void fetchGuides()
+  }, [fetchGuides])
 
+  const handleDelete = async () => {
+    const guide = deleteTarget
+    if (!guide?.id) return
+    setDeleting(true)
     try {
-      const response = await fetch(`/api/admin/guides/${id}`, {
-        method: 'DELETE',
-      })
-
-      if (response.ok) {
-        // Remove from local state
-        setGuides(guides.filter(guide => guide.id !== id))
-      } else {
-        const errorData = await response.json()
-        alert('Xóa thất bại: ' + errorData.error)
-      }
-    } catch (error) {
-      alert('Có lỗi xảy ra khi xóa')
+      await adminFetch(`/api/admin/guides/${guide.id}`, { method: 'DELETE' })
+      setGuides((prev) => prev.filter((g) => g.id !== guide.id))
+      toast(`Đã xóa bài viết “${guide.title}”`)
+      setDeleteTarget(null)
+    } catch (err) {
+      if (isAdminAuthError(err)) setAuthFailed(true)
+      setError(adminErrorMessage(err, 'Xóa bài viết thất bại'))
+      setDeleteTarget(null)
+    } finally {
+      setDeleting(false)
     }
   }
 
-  if (loading) {
+  const filtered = search
+    ? guides.filter(
+        (g) =>
+          g.title.toLowerCase().includes(search.toLowerCase()) ||
+          g.slug.toLowerCase().includes(search.toLowerCase())
+      )
+    : guides
+
+  if (authFailed) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] text-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-8 h-8 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p>Đang tải...</p>
-        </div>
-      </div>
+      <AdminPage>
+        <ErrorState
+          title="Không còn quyền quản trị"
+          description="Phiên đăng nhập hết hạn hoặc tài khoản không còn quyền admin. Đăng nhập lại để tiếp tục."
+          onRetry={() => {
+            window.location.href = '/admin'
+          }}
+          retryLabel="Đăng nhập lại"
+        />
+      </AdminPage>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
-      {/* Header */}
-      <div className="bg-[#111111] border-b border-white/10">
-        <div className="max-w-6xl mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold">Quản lý bài viết</h1>
-              <p className="text-slate-400 mt-1">Tổng cộng: {guides.length} bài viết</p>
-            </div>
-            <Link
-              href="/admin/guides/new"
-              className="px-4 py-2 bg-[var(--color-primary)] text-white font-semibold rounded-lg hover:bg-[#b44c5c] transition-colors"
-            >
-              + Tạo bài viết mới
-            </Link>
-          </div>
-        </div>
-      </div>
+    <AdminPage>
+      <InlineNotice tone="accent" title="Bài viết liên quan">
+        Khi tạo hoặc sửa bài, chọn tag phù hợp (Hướng dẫn mods, Career Mode, Thông tin game…) để mục
+        Bài viết liên quan gợi ý đúng nhóm.
+      </InlineNotice>
 
-      {/* Content */}
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="mb-6 rounded-xl border border-[var(--color-primary)]/35 bg-[var(--color-primary)]/10 px-4 py-4">
-          <h2 className="text-sm font-semibold text-white">Hướng dẫn vận hành nội dung liên quan</h2>
-          <p className="mt-1 text-xs text-slate-300">
-            Khi tạo hoặc sửa bài, admin cần chọn tag: Hướng dẫn mods, Hướng dẫn Career Mode, hoặc Thông tin game.
-          </p>
-          <p className="mt-1 text-xs text-slate-400">
-            Mục Bài viết liên quan sẽ lấy theo tag đã chọn và ưu tiên bài mới hơn.
-          </p>
-        </div>
-        {error ? (
-          <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-4">
-            <p className="text-red-400">{error}</p>
-          </div>
-        ) : guides.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="w-16 h-16 bg-[#111111] rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-semibold text-white mb-2">Chưa có bài viết nào</h3>
-            <p className="text-slate-400 mb-6">
-              Bắt đầu tạo bài viết đầu tiên của bạn
-            </p>
-            <Link
-              href="/admin/guides/new"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--color-primary)] text-white font-semibold rounded-lg hover:bg-[#b44c5c] transition-colors"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              Tạo bài viết mới
-            </Link>
-          </div>
-        ) : (
-          <div className="bg-[#111111] border border-white/10 rounded-lg overflow-hidden">
-            <table className="w-full">
-              <thead className="bg-[#1a1a1a] border-b border-white/10">
-                <tr>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
-                    Tiêu đề
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
-                    Slug
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
-                    Ngày tạo
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
-                    Cập nhật
-                  </th>
-                  <th className="px-6 py-4 text-right text-xs font-medium text-slate-400 uppercase tracking-wider">
-                    Thao tác
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/5">
-                {guides.map((guide, index) => {
-                  console.log(`Guide ${index}:`, guide)
-                  console.log(`Guide ${index} ID:`, guide.id)
-                  console.log(`Guide ${index} keys:`, Object.keys(guide))
-                  return (
-                    <tr key={guide.id || index} className="hover:bg-white/5 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="text-white font-medium">{guide.title}</div>
-                      <div className="text-slate-500 text-xs">ID: {guide.id || 'NO ID'}</div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-slate-400 text-sm">{guide.slug}</div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-slate-400 text-sm">
-                        {new Date(guide.created_at).toLocaleDateString('vi-VN')}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-slate-400 text-sm">
-                        {new Date(guide.updated_at).toLocaleDateString('vi-VN')}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <a
-                          href={`/huong-dan/${guide.slug}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="px-3 py-1 bg-white/10 text-white text-sm rounded hover:bg-white/20 transition-colors"
-                        >
-                          Xem
-                        </a>
-                        <Link
-                          href={`/admin/guides/${guide.id}/edit`}
-                          className="px-3 py-1 bg-[var(--color-primary)]/20 text-[var(--color-primary)] text-sm rounded hover:bg-[var(--color-primary)]/30 transition-colors"
-                        >
-                          Sửa
-                        </Link>
-                        <button
-                          onClick={() => handleDelete(guide.id, guide.title)}
-                          className="px-3 py-1 bg-red-500/20 text-red-400 text-sm rounded hover:bg-red-500/30 transition-colors"
-                        >
-                          Xóa
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
+      <Field label="Tìm kiếm" className="max-w-md">
+        {({ id }) => (
+          <input
+            id={id}
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className={inputClass}
+            placeholder="Tiêu đề hoặc slug…"
+          />
         )}
-      </div>
-    </div>
+      </Field>
+
+      {error && (
+        <InlineNotice tone="danger">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span>{error}</span>
+            <button
+              type="button"
+              onClick={() => void fetchGuides()}
+              className="font-semibold text-[var(--color-title)] underline underline-offset-2"
+            >
+              Thử lại
+            </button>
+          </div>
+        </InlineNotice>
+      )}
+
+      {loading ? (
+        <div className="flex items-center gap-3 py-10 text-sm text-[var(--color-muted)]">
+          <Spinner size={20} /> Đang tải danh sách bài viết…
+        </div>
+      ) : filtered.length === 0 ? (
+        guides.length === 0 ? (
+          <EmptyState
+            title="Chưa có bài viết nào"
+            description="Viết bài hướng dẫn đầu tiên để hiển thị trên site."
+            action="Tạo bài viết mới"
+            actionHref="/admin/guides/new"
+          />
+        ) : (
+          <EmptyState
+            title="Không có bài viết khớp từ khóa"
+            description="Thử từ khóa khác."
+            action="Xóa tìm kiếm"
+            onAction={() => setSearch('')}
+          />
+        )
+      ) : (
+        <>
+          {/* Bảng desktop */}
+          <div className="hidden md:block">
+            <AdminTable label="Danh sách bài hướng dẫn" minWidth={720}>
+              <AdminThead>
+                <tr>
+                  <AdminTh>Tiêu đề</AdminTh>
+                  <AdminTh>Slug</AdminTh>
+                  <AdminTh>Ngày tạo</AdminTh>
+                  <AdminTh>Cập nhật</AdminTh>
+                  <AdminTh className="text-right">Thao tác</AdminTh>
+                </tr>
+              </AdminThead>
+              <tbody>
+                {filtered.map((guide) => (
+                  <AdminTr key={guide.id}>
+                    <AdminTd>
+                      <span className="font-medium text-[var(--color-title)]">{guide.title}</span>
+                    </AdminTd>
+                    <AdminTd className="font-mono text-xs text-[var(--color-muted)]">
+                      {guide.slug}
+                    </AdminTd>
+                    <AdminTd className="text-meta">
+                      {new Date(guide.created_at).toLocaleDateString('vi-VN')}
+                    </AdminTd>
+                    <AdminTd className="text-meta">
+                      {new Date(guide.updated_at).toLocaleDateString('vi-VN')}
+                    </AdminTd>
+                    <AdminTd className="text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        <ButtonLink href={`/huong-dan/${guide.slug}`} variant="ghost" size="sm" external>
+                          Xem
+                        </ButtonLink>
+                        <ButtonLink href={`/admin/guides/${guide.id}/edit`} variant="ghost" size="sm">
+                          Sửa
+                        </ButtonLink>
+                        <Button variant="ghost" size="sm" onClick={() => setDeleteTarget(guide)}>
+                          <span className="text-[var(--color-danger)]">Xóa</span>
+                        </Button>
+                      </div>
+                    </AdminTd>
+                  </AdminTr>
+                ))}
+              </tbody>
+            </AdminTable>
+          </div>
+
+          {/* Thẻ mobile */}
+          <ul className="space-y-3 md:hidden" aria-label="Danh sách bài viết">
+            {filtered.map((guide) => (
+              <li
+                key={guide.id}
+                className="rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface-1)] p-4"
+              >
+                <p className="font-semibold text-[var(--color-title)]">{guide.title}</p>
+                <p className="mt-0.5 font-mono text-xs text-[var(--color-muted)]">
+                  /huong-dan/{guide.slug}
+                </p>
+                <p className="mt-1 text-xs text-[var(--color-muted)]">
+                  Cập nhật {new Date(guide.updated_at).toLocaleDateString('vi-VN')}
+                </p>
+                <div className="mt-3 flex items-center gap-2 border-t border-[var(--color-line)] pt-3">
+                  <ButtonLink href={`/huong-dan/${guide.slug}`} variant="secondary" size="sm" external>
+                    Xem
+                  </ButtonLink>
+                  <ButtonLink href={`/admin/guides/${guide.id}/edit`} variant="secondary" size="sm">
+                    Sửa
+                  </ButtonLink>
+                  <Button variant="danger" size="sm" onClick={() => setDeleteTarget(guide)}>
+                    Xóa
+                  </Button>
+                </div>
+              </li>
+            ))}
+          </ul>
+
+          <p className="text-meta text-[var(--color-muted)]">
+            Hiển thị {filtered.length}/{guides.length} bài viết
+          </p>
+        </>
+      )}
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        title="Xóa bài viết"
+        danger
+        busy={deleting}
+        confirmLabel="Xóa vĩnh viễn"
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteTarget(null)}
+        description={
+          deleteTarget && (
+            <>
+              Xóa vĩnh viễn bài viết{' '}
+              <strong className="text-[var(--color-title)]">“{deleteTarget.title}”</strong>? Bài viết
+              sẽ biến mất khỏi trang công khai ngay, không hoàn tác được.
+            </>
+          )
+        }
+      />
+    </AdminPage>
   )
 }

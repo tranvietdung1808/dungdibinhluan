@@ -1,26 +1,35 @@
+import { MOD_FILTER_TAGS } from "@/lib/catalog";
+
 interface FilterTagsProps {
   activeTag: string;
   onTagChange: (tag: string) => void;
 }
 
-const ALL_TAGS = ["Tất cả", "Faces", "Kits", "Gameplay", "Đồ họa", "Cơ chế game"];
-
 export default function FilterTags({ activeTag, onTagChange }: FilterTagsProps) {
   return (
-    <div className="flex items-center gap-2 flex-wrap">
-      {ALL_TAGS.map((tag) => (
-        <button
-          key={tag}
-          onClick={() => onTagChange(tag)}
-          className={`px-4 py-2 rounded-xl text-[11px] font-black tracking-widest transition-all border ${
-            activeTag === tag
-              ? "bg-[var(--color-primary)] text-white border-[var(--color-primary)]"
-              : "bg-white/5 text-slate-400 border-white/10 hover:border-white/30 hover:text-white"
-          }`}
-        >
-          {tag.toUpperCase()}
-        </button>
-      ))}
+    <div
+      role="group"
+      aria-label="Lọc theo danh mục mod"
+      className="flex flex-wrap items-center gap-2"
+    >
+      {MOD_FILTER_TAGS.map((tag) => {
+        const active = tag === activeTag;
+        return (
+          <button
+            key={tag}
+            type="button"
+            aria-pressed={active}
+            onClick={() => onTagChange(tag)}
+            className={`h-9 rounded-full border px-4 text-sm font-medium transition-colors ${
+              active
+                ? "border-transparent bg-[var(--color-accent)] text-[var(--color-on-accent)]"
+                : "border-[var(--color-line)] bg-[var(--color-surface-2)] text-[var(--color-body)] hover:border-[var(--color-accent-border)] hover:text-[var(--color-title)]"
+            }`}
+          >
+            {tag}
+          </button>
+        );
+      })}
     </div>
   );
 }

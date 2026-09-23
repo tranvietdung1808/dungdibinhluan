@@ -4,35 +4,64 @@ interface PaginationProps {
   onPageChange: (page: number) => void;
 }
 
-export default function Pagination({ currentPage, totalPages, onPageChange }: PaginationProps) {
+const pageButtonClass =
+  "inline-flex h-9 min-w-9 items-center justify-center rounded-[10px] border px-2 text-sm font-medium transition-colors";
+const idleClass =
+  "border-[var(--color-line)] bg-[var(--color-surface-2)] text-[var(--color-body)] hover:border-[var(--color-accent-border)] hover:text-[var(--color-title)]";
+const navButtonClass = `${pageButtonClass} gap-1.5 px-3.5 disabled:cursor-not-allowed disabled:opacity-40 ${idleClass}`;
+
+export default function Pagination({
+  currentPage,
+  totalPages,
+  onPageChange,
+}: PaginationProps) {
   if (totalPages <= 1) return null;
 
   return (
-    <div className="flex items-center justify-center gap-2 pt-4 flex-wrap">
+    <nav
+      aria-label="Phân trang danh sách mod"
+      className="flex flex-wrap items-center justify-center gap-1.5 pt-2"
+    >
       <button
+        type="button"
         onClick={() => onPageChange(currentPage - 1)}
-        disabled={currentPage === 1}
-        className="px-4 py-2 rounded-xl text-xs font-black tracking-widest border border-white/10 bg-white/5 text-slate-400 hover:border-white/30 hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+        disabled={currentPage <= 1}
+        aria-label="Trang trước"
+        className={navButtonClass}
       >
-        ← Trước
+        <span aria-hidden="true">←</span> Trước
       </button>
 
       {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => {
-        const isNear = Math.abs(p - currentPage) <= 2 || p === 1 || p === totalPages;
+        const isNear =
+          Math.abs(p - currentPage) <= 2 || p === 1 || p === totalPages;
         if (!isNear) {
           if (p === currentPage - 3 || p === currentPage + 3) {
-            return <span key={p} className="text-slate-600 text-xs px-1">…</span>;
+            return (
+              <span
+                key={p}
+                aria-hidden="true"
+                className="px-1 text-sm text-[var(--color-muted)]"
+              >
+                …
+              </span>
+            );
           }
           return null;
         }
+        const isCurrent = p === currentPage;
         return (
           <button
             key={p}
+            type="button"
             onClick={() => onPageChange(p)}
-            className={`w-9 h-9 rounded-xl text-xs font-black border transition-all ${
-              p === currentPage
-                ? "bg-[var(--color-primary)] text-white border-[var(--color-primary)]"
-                : "bg-white/5 text-slate-400 border-white/10 hover:border-white/30 hover:text-white"
+            disabled={isCurrent}
+            aria-label={`Trang ${p}`}
+            aria-current={isCurrent ? "page" : undefined}
+            className={`${pageButtonClass} ${
+              isCurrent
+                ? "border-transparent bg-[var(--color-accent)] font-semibold text-[var(--color-on-accent)]"
+                : idleClass
             }`}
           >
             {p}
@@ -41,12 +70,14 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
       })}
 
       <button
+        type="button"
         onClick={() => onPageChange(currentPage + 1)}
-        disabled={currentPage === totalPages}
-        className="px-4 py-2 rounded-xl text-xs font-black tracking-widest border border-white/10 bg-white/5 text-slate-400 hover:border-white/30 hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+        disabled={currentPage >= totalPages}
+        aria-label="Trang sau"
+        className={navButtonClass}
       >
-        Tiếp →
+        Tiếp <span aria-hidden="true">→</span>
       </button>
-    </div>
+    </nav>
   );
 }

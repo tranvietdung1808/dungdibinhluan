@@ -1,14 +1,14 @@
 import { supabaseAdmin } from "@/lib/supabase";
 import { extractToken, getUserFromToken } from "@/lib/server/auth";
 import { getActiveSubscription } from "@/lib/server/membership";
-import { errorResponse, runRoute, successResponse } from "@/lib/server/api-response";
+import { errorResponse, privateResponse, runRoute } from "@/lib/server/api-response";
 
 // =====================================================
 // /api/account — dữ liệu cho trang tài khoản cá nhân
 // =====================================================
 export const maxDuration = 60;
 
-// GET — trả về: profile, roles, subscription active, lịch sử đơn hàng, mod đã mở (60 ngày)
+// GET — trả về: profile, roles, subscription active, lịch sử đơn hàng, mod đã mở (vĩnh viễn)
 export async function GET(request: Request) {
   return runRoute(async () => {
     const token = extractToken(request as never);
@@ -21,7 +21,6 @@ export async function GET(request: Request) {
     const email = user.email?.toLowerCase() ?? "";
 
     // ── Chạy song song tất cả query để loại bỏ độ trễ N+1 tuần tự ──
-    const since = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString();
 
     const [
       profileRes,
@@ -48,12 +47,11 @@ export async function GET(request: Request) {
         .eq("user_id", userId)
         .order("created_at", { ascending: false })
         .limit(50),
-      // Mod đã mở trong 60 ngày gần nhất
+      // Mod đã mở (quyền vĩnh viễn — không lọc theo thời gian)
       supabaseAdmin
         .from("mod_access")
         .select("*, mods(id, slug, name, thumbnail, category, tags)")
         .eq("user_id", userId)
-        .gte("created_at", since)
         .order("created_at", { ascending: false })
         .limit(100),
       // Gói membership active (hiển thị công khai trên trang account)
@@ -85,13 +83,9 @@ export async function GET(request: Request) {
 
     const provider = user.app_metadata?.provider ?? user.identities?.[0]?.provider ?? null;
 
-    if ((modAccess ?? []).length > 0) {
-      // Dọn bản ghi > 60 ngày (sau khi đã lấy dữ liệu hiển thị)
-      const cutoff = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString();
-      await supabaseAdmin.from("mod_access").delete().eq("user_id", userId).lt("created_at", cutoff);
-    }
+    // mod_access là bản ghi QUYỀN SỞ HỮU — không xóa theo tuổi (A02)
 
-    return successResponse({
+    return privateResponse({
       user: {
         id: userId,
         email: user.email ?? "",
@@ -182,6 +176,6 @@ export async function PATCH(request: Request) {
 
     if (error) return errorResponse("Không lưu được profile: " + error.message, 500);
 
-    return successResponse({ ok: true });
+    return privateResponse({ ok: true });
   });
 }

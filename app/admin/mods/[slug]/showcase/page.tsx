@@ -1,7 +1,29 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { use, useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
+import { AdminPage } from '../../../components/AdminPage'
+import { ConfirmDialog } from '../../../components/ConfirmDialog'
+import { useAdminToast } from '../../../components/AdminShell'
+import {
+  adminFetch,
+  adminFetchJson,
+  adminJson,
+  adminErrorMessage,
+  isAdminAuthError,
+} from '../../../components/admin-api'
+import { Button, EmptyState, ErrorState, InlineNotice, Spinner, inputClass } from '@/app/components/ui'
+
+// =====================================================
+// /admin/mods/[slug]/showcase — thư viện ảnh (§16.6, T18)
+// - Lưới ảnh: caption, thứ tự, xóa
+// - Nút Lên/Xuống làm phương án bàn phím cho kéo-thả
+// - Sắp xếp lỗi → rollback + thông báo
+// - Upload nhiều ảnh: báo kết quả từng file
+// =====================================================
+
+const MAX_UPLOAD_MB = 5
+const ALLOWED_MIME = new Set(['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'])
 
 interface ShowcaseImage {
   id: string
@@ -9,340 +31,448 @@ interface ShowcaseImage {
   image_url: string
   caption: string | null
   sort_order: number
-  created_at: string
 }
 
-const MAX_UPLOAD_MB = 5
+interface UploadResult {
+  name: string
+  ok: boolean
+  message?: string
+}
 
 export default function AdminModShowcasePage({
   params,
 }: {
   params: Promise<{ slug: string }>
 }) {
-  const [slug, setSlug] = useState<string | null>(null)
+  const { slug } = use(params)
+  const toast = useAdminToast()
   const [images, setImages] = useState<ShowcaseImage[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [authFailed, setAuthFailed] = useState(false)
   const [uploading, setUploading] = useState(false)
-  const [toast, setToast] = useState('')
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [uploadReport, setUploadReport] = useState<UploadResult[] | null>(null)
+  const [pendingIds, setPendingIds] = useState<Set<string>>(new Set())
+  const [captionDrafts, setCaptionDrafts] = useState<Record<string, string>>({})
+  const [sortError, setSortError] = useState('')
+  const [sorting, setSorting] = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState<ShowcaseImage | null>(null)
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
-  useEffect(() => {
-    let cancelled = false
-    params.then(({ slug }) => {
-      if (!cancelled) setSlug(slug)
+  const setPending = (id: string, on: boolean) =>
+    setPendingIds((prev) => {
+      const next = new Set(prev)
+      if (on) next.add(id)
+      else next.delete(id)
+      return next
     })
-    return () => {
-      cancelled = true
-    }
-  }, [params])
 
-  const fetchImages = useCallback(async (targetSlug: string) => {
+  const fetchImages = useCallback(async () => {
     setLoading(true)
     setError('')
     try {
-      const res = await fetch(`/api/admin/showcases?slug=${encodeURIComponent(targetSlug)}`)
-      if (res.ok) {
-        const data = await res.json()
-        setImages(data.images || [])
-      } else {
-        const err = await res.json().catch(() => ({}))
-        setError(err.error || 'Không tải được danh sách ảnh')
-      }
-    } catch {
-      setError('Có lỗi xảy ra khi tải danh sách')
+      const data = await adminFetchJson<{ images: ShowcaseImage[] }>(
+        `/api/admin/showcases?slug=${encodeURIComponent(slug)}`
+      )
+      setImages(data.images || [])
+    } catch (err) {
+      if (isAdminAuthError(err)) setAuthFailed(true)
+      setError(adminErrorMessage(err, 'Chưa tải được danh sách ảnh'))
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [slug])
 
   useEffect(() => {
-    if (slug) void fetchImages(slug)
-  }, [slug, fetchImages])
+    void fetchImages()
+  }, [fetchImages])
 
-  const uploadFile = async (file: File): Promise<string> => {
-    const formData = new FormData()
-    formData.append('file', file)
-    const res = await fetch('/api/admin/upload', {
-      method: 'POST',
-      body: formData,
-    })
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}))
-      throw new Error(err.error || `Upload thất bại: ${file.name}`)
-    }
-    const data = await res.json()
-    return data.url
-  }
-
+  // ── Upload nhiều file — báo kết quả từng file ──
   const handleAddImages = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
-    if (!files.length || !slug) return
+    e.target.value = ''
+    if (!files.length) return
 
     setUploading(true)
     setError('')
-    const added: string[] = []
+    const report: UploadResult[] = []
 
-    try {
-      for (const file of files) {
-        if (!file.type.startsWith('image/')) {
-          setError(`"${file.name}" không phải ảnh — đã bỏ qua`)
-          continue
-        }
-        if (file.size > MAX_UPLOAD_MB * 1024 * 1024) {
-          setError(`"${file.name}" quá ${MAX_UPLOAD_MB}MB — đã bỏ qua`)
-          continue
-        }
-        const url = await uploadFile(file)
-        const res = await fetch('/api/admin/showcases', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ slug, image_url: url }),
+    for (const file of files) {
+      if (!ALLOWED_MIME.has(file.type)) {
+        report.push({
+          name: file.name,
+          ok: false,
+          message: 'Không đúng định dạng (chỉ JPEG, PNG, GIF, WebP)',
         })
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({}))
-          throw new Error(err.error || `Lưu "${file.name}" thất bại`)
-        }
-        added.push(file.name)
+        continue
       }
-
-      if (added.length) {
-        setToast(`Đã thêm ${added.length} ảnh!`)
-        await fetchImages(slug)
+      if (file.size > MAX_UPLOAD_MB * 1024 * 1024) {
+        report.push({ name: file.name, ok: false, message: `Vượt quá ${MAX_UPLOAD_MB}MB` })
+        continue
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Có lỗi xảy ra khi upload')
-    } finally {
-      setUploading(false)
-      if (fileInputRef.current) fileInputRef.current.value = ''
-    }
-  }
+      try {
+        const fd = new FormData()
+        fd.append('file', file)
+        const upRes = await adminFetch('/api/admin/upload', { method: 'POST', body: fd })
+        const upData = (await upRes.json()) as { url?: string }
+        if (!upData.url) throw new Error('Không nhận được URL ảnh')
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Xóa ảnh này khỏi showcase?')) return
-    try {
-      const res = await fetch(`/api/admin/showcases/${id}`, { method: 'DELETE' })
-      if (res.ok) {
-        setImages((prev) => prev.filter((img) => img.id !== id))
-        setToast('Đã xóa ảnh')
-      } else {
-        const err = await res.json().catch(() => ({}))
-        setError(err.error || 'Xóa thất bại')
-      }
-    } catch {
-      setError('Có lỗi xảy ra khi xóa')
-    }
-  }
-
-  const handleSaveCaption = async (id: string, caption: string) => {
-    try {
-      const res = await fetch(`/api/admin/showcases/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ caption }),
-      })
-      if (res.ok) {
-        setImages((prev) =>
-          prev.map((img) => (img.id === id ? { ...img, caption } : img))
+        await adminFetch(
+          '/api/admin/showcases',
+          adminJson('POST', { slug, image_url: upData.url })
         )
-        setToast('Đã lưu chú thích')
+        report.push({ name: file.name, ok: true })
+      } catch (err) {
+        if (isAdminAuthError(err)) {
+          setAuthFailed(true)
+          break
+        }
+        report.push({
+          name: file.name,
+          ok: false,
+          message: adminErrorMessage(err, 'Upload hoặc lưu thất bại'),
+        })
       }
-    } catch {
-      setError('Lưu chú thích thất bại')
+    }
+
+    setUploadReport(report)
+    const okCount = report.filter((r) => r.ok).length
+    if (okCount > 0) {
+      toast(`Đã thêm ${okCount}/${report.length} ảnh`)
+      await fetchImages()
+    }
+    setUploading(false)
+  }
+
+  // ── Xóa ảnh ──
+  const handleDelete = async () => {
+    const img = deleteTarget
+    if (!img) return
+    setPending(img.id, true)
+    try {
+      await adminFetch(`/api/admin/showcases/${img.id}`, { method: 'DELETE' })
+      setImages((prev) => prev.filter((i) => i.id !== img.id))
+      toast('Đã xóa ảnh khỏi showcase')
+      setDeleteTarget(null)
+    } catch (err) {
+      if (isAdminAuthError(err)) setAuthFailed(true)
+      setError(adminErrorMessage(err, 'Xóa ảnh thất bại'))
+      setDeleteTarget(null)
+    } finally {
+      setPending(img.id, false)
     }
   }
 
-  // Kéo-thả sắp xếp (HTML5 drag & drop)
-  const persistOrder = async (ordered: ShowcaseImage[]) => {
-    if (!slug) return
+  // ── Caption: draft → Lưu → pending → rollback khi lỗi ──
+  const handleSaveCaption = async (img: ShowcaseImage) => {
+    const caption = (captionDrafts[img.id] ?? img.caption ?? '').trim()
+    setPending(img.id, true)
     try {
-      const res = await fetch('/api/admin/showcases', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          slug,
-          ids: ordered.map((img) => img.id),
-        }),
-      })
-      if (res.ok) {
-        setToast('Đã cập nhật thứ tự')
-      } else {
-        setError('Cập nhật thứ tự thất bại')
-      }
-    } catch {
-      setError('Có lỗi xảy ra khi sắp xếp')
+      await adminFetch(`/api/admin/showcases/${img.id}`, adminJson('PATCH', { caption }))
+      setImages((prev) => prev.map((i) => (i.id === img.id ? { ...i, caption } : i)))
+      toast('Đã lưu chú thích')
+    } catch (err) {
+      if (isAdminAuthError(err)) setAuthFailed(true)
+      // Rollback draft về caption đã lưu
+      setCaptionDrafts((prev) => ({ ...prev, [img.id]: img.caption ?? '' }))
+      setError(adminErrorMessage(err, 'Lưu chú thích thất bại'))
+    } finally {
+      setPending(img.id, false)
     }
+  }
+
+  // ── Sắp xếp: optimistic + rollback khi lỗi ──
+  const persistOrder = async (ordered: ShowcaseImage[], previous: ShowcaseImage[]) => {
+    setSorting(true)
+    setSortError('')
+    try {
+      await adminFetch(
+        '/api/admin/showcases',
+        adminJson('PATCH', { slug, ids: ordered.map((i) => i.id) })
+      )
+      toast('Đã cập nhật thứ tự ảnh')
+    } catch (err) {
+      if (isAdminAuthError(err)) {
+        setAuthFailed(true)
+      } else {
+        setImages(previous) // rollback
+        setSortError(adminErrorMessage(err, 'Đổi thứ tự thất bại — đã khôi phục thứ tự cũ'))
+      }
+    } finally {
+      setSorting(false)
+    }
+  }
+
+  const moveImage = (index: number, delta: -1 | 1) => {
+    const target = index + delta
+    if (target < 0 || target >= images.length || sorting) return
+    const previous = images
+    const reordered = [...images]
+    const [moved] = reordered.splice(index, 1)
+    reordered.splice(target, 0, moved)
+    setImages(reordered)
+    void persistOrder(reordered, previous)
   }
 
   const onDropAt = (targetIndex: number) => {
-    if (draggedIndex === null) return
-    if (draggedIndex === targetIndex) return
-
+    if (draggedIndex === null || draggedIndex === targetIndex || sorting) return
+    const previous = images
     const reordered = [...images]
     const [moved] = reordered.splice(draggedIndex, 1)
     reordered.splice(targetIndex, 0, moved)
     setImages(reordered)
     setDraggedIndex(null)
-    void persistOrder(reordered)
+    void persistOrder(reordered, previous)
   }
 
-  if (!slug) {
+  if (authFailed) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] text-white flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin" />
-      </div>
+      <AdminPage>
+        <ErrorState
+          title="Không còn quyền quản trị"
+          description="Phiên đăng nhập hết hạn hoặc tài khoản không còn quyền admin. Đăng nhập lại để tiếp tục."
+          onRetry={() => {
+            window.location.href = '/admin'
+          }}
+          retryLabel="Đăng nhập lại"
+        />
+      </AdminPage>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
-      {/* Toast */}
-      {toast && (
-        <div className="fixed top-4 right-4 z-50 px-6 py-3 bg-green-500/90 text-white rounded-lg shadow-lg">
-          {toast}
-        </div>
-      )}
+    <AdminPage>
+      <p className="text-sm text-[var(--color-muted)]">
+        Thư viện ảnh của mod{' '}
+        <Link
+          href={`/mods/${slug}`}
+          target="_blank"
+          className="font-mono font-semibold text-[var(--color-accent)] hover:underline"
+        >
+          /mods/{slug}
+        </Link>
+      </p>
 
-      {/* Header */}
-      <div className="bg-[#111111] border-b border-white/10">
-        <div className="max-w-6xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <div className="flex items-center gap-4">
-              <Link
-                href="/admin/mods"
-                className="text-slate-400 hover:text-white transition-colors"
-              >
-                ← Quay lại
-              </Link>
-              <div>
-                <h1 className="text-lg md:text-xl font-bold">Quản lý Showcase</h1>
-                <p className="text-slate-500 text-xs mt-0.5 font-mono">/{slug}</p>
-              </div>
-            </div>
-            <Link
-              href={`/mods/${slug}`}
-              target="_blank"
-              className="px-3 py-1.5 text-xs bg-white/5 border border-white/10 rounded-lg text-slate-300 hover:text-white hover:border-white/25 transition-colors"
+      {error && (
+        <InlineNotice tone="danger">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span>{error}</span>
+            <button
+              type="button"
+              onClick={() => void fetchImages()}
+              className="font-semibold text-[var(--color-title)] underline underline-offset-2"
             >
-              Xem trang mod →
-            </Link>
+              Thử lại
+            </button>
           </div>
-        </div>
-      </div>
+        </InlineNotice>
+      )}
+      {sortError && <InlineNotice tone="danger">{sortError}</InlineNotice>}
 
-      {/* Content */}
-      <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
-        {error && (
-          <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-4 text-sm text-red-300">
-            {error}
+      {/* Upload */}
+      <section className="rounded-2xl border border-dashed border-[var(--color-line-strong)] bg-[var(--color-surface-1)] p-6 text-center sm:p-8">
+        <h2 className="text-base font-bold text-[var(--color-title)]">Thêm ảnh showcase</h2>
+        <p className="mx-auto mt-1 max-w-md text-sm text-[var(--color-muted)]">
+          JPEG / PNG / GIF / WebP, tối đa {MAX_UPLOAD_MB}MB mỗi ảnh. Chọn được nhiều ảnh cùng lúc —
+          kết quả từng file sẽ báo bên dưới.
+        </p>
+        <Button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          loading={uploading}
+          className="mt-5"
+        >
+          {uploading ? 'Đang tải lên…' : '+ Chọn ảnh để upload'}
+        </Button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/gif,image/webp"
+          multiple
+          onChange={handleAddImages}
+          disabled={uploading}
+          className="sr-only"
+          aria-label="Chọn ảnh showcase để upload"
+        />
+
+        {/* Báo kết quả từng file — không chỉ lỗi cuối */}
+        {uploadReport && (
+          <div className="mx-auto mt-5 max-w-lg text-left">
+            <p className="mb-2 text-sm font-semibold text-[var(--color-title)]">
+              Kết quả: {uploadReport.filter((r) => r.ok).length}/{uploadReport.length} ảnh thành công
+            </p>
+            <ul className="space-y-1">
+              {uploadReport.map((r, i) => (
+                <li
+                  key={`${r.name}-${i}`}
+                  className={`flex items-start gap-2 rounded-lg border px-3 py-2 text-xs ${
+                    r.ok
+                      ? 'border-[var(--color-ok)]/30 bg-[var(--color-ok-subtle)] text-[var(--color-ok)]'
+                      : 'border-[var(--color-danger)]/30 bg-[var(--color-danger-subtle)] text-[var(--color-danger)]'
+                  }`}
+                >
+                  <span aria-hidden="true">{r.ok ? '✓' : '✕'}</span>
+                  <span className="min-w-0 flex-1 truncate font-medium">{r.name}</span>
+                  <span className="shrink-0">{r.ok ? 'Đã thêm' : r.message}</span>
+                </li>
+              ))}
+            </ul>
           </div>
         )}
+      </section>
 
-        {/* Upload */}
-        <section className="rounded-2xl border border-dashed border-white/20 bg-white/[0.02] p-8 text-center">
-          <p className="text-2xl mb-2">🖼️</p>
-          <h2 className="text-base font-bold">Thêm ảnh showcase</h2>
-          <p className="text-slate-500 text-xs mt-1 max-w-md mx-auto">
-            JPG / PNG / WebP, tối đa {MAX_UPLOAD_MB}MB mỗi ảnh. Chọn nhiều ảnh cùng lúc — ảnh đầu sẽ
-            được dùng làm ảnh chính (nếu muốn đổi, hãy kéo-thả để đưa ảnh mong muốn lên đầu).
+      {/* Lưới ảnh */}
+      <section aria-label="Ảnh showcase hiện có">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-base font-bold text-[var(--color-title)]">
+            Ảnh hiện có{' '}
+            <span className="text-sm font-normal tabular text-[var(--color-muted)]">
+              ({images.length})
+            </span>
+          </h2>
+          <p className="hidden text-xs text-[var(--color-muted)] sm:block">
+            Kéo-thả hoặc dùng nút Lên/Xuống để đổi thứ tự — ảnh đầu tiên là ảnh chính
           </p>
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={uploading}
-            className="mt-5 inline-flex items-center gap-2 px-6 py-3 bg-[var(--color-primary)] text-white font-semibold rounded-lg hover:bg-[#b44c5c] transition-colors disabled:opacity-50 disabled:cursor-wait"
-          >
-            {uploading ? 'Đang upload...' : '+ Chọn ảnh để upload'}
-          </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={handleAddImages}
-            disabled={uploading}
-            className="hidden"
-          />
-        </section>
+        </div>
 
-        {/* Danh sách ảnh hiện có */}
-        <section>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-base font-bold">
-              Ảnh hiện có{' '}
-              <span className="text-slate-500 font-normal text-sm">({images.length})</span>
-            </h2>
-            <p className="text-[11px] text-slate-500 hidden sm:block">
-              💡 Kéo-thả các thẻ để đổi thứ tự
-            </p>
+        {loading ? (
+          <div className="flex items-center gap-3 py-10 text-sm text-[var(--color-muted)]">
+            <Spinner size={20} /> Đang tải ảnh…
           </div>
-
-          {loading ? (
-            <div className="text-center py-12 text-slate-500">Đang tải...</div>
-          ) : images.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] p-10 text-center">
-              <p className="text-slate-500 text-sm">
-                Chưa có ảnh showcase. Hãy upload ảnh ở mục bên trên — chúng sẽ hiển thị ngay trên
-                trang chi tiết MIX MODS.
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-              {images.map((image, index) => (
+        ) : images.length === 0 ? (
+          <EmptyState
+            title="Chưa có ảnh showcase"
+            description="Upload ảnh ở mục trên — chúng sẽ hiển thị trên trang chi tiết mod."
+          />
+        ) : (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {images.map((image, index) => {
+              const pending = pendingIds.has(image.id) || sorting
+              const captionDraft = captionDrafts[image.id] ?? image.caption ?? ''
+              const captionDirty = captionDraft.trim() !== (image.caption ?? '')
+              return (
                 <div
                   key={image.id}
-                  draggable
+                  draggable={!pending}
                   onDragStart={() => setDraggedIndex(index)}
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={() => onDropAt(index)}
                   onDragEnd={() => setDraggedIndex(null)}
-                  className={`group rounded-xl border border-white/10 bg-[#111111] overflow-hidden transition-all ${
+                  className={`overflow-hidden rounded-xl border border-[var(--color-line)] bg-[var(--color-surface-1)] transition-opacity ${
                     draggedIndex === index ? 'opacity-40' : ''
-                  } cursor-grab active:cursor-grabbing`}
+                  } ${pending ? 'opacity-60' : ''}`}
                 >
-                  <div className="relative aspect-video bg-[#0c0c0c]">
+                  <div className="relative aspect-video bg-[var(--color-surface-0)]">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={image.image_url}
-                      alt={image.caption || `Showcase ${index + 1}`}
-                      className="w-full h-full object-cover"
+                      alt={image.caption || `Ảnh showcase ${index + 1}`}
+                      className="h-full w-full object-cover"
                     />
                     {index === 0 && (
-                      <span className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-[var(--color-primary)] text-[9px] font-black tracking-wider text-white">
+                      <span className="absolute left-2 top-2 rounded-md bg-[var(--color-accent)] px-2 py-0.5 text-xs font-bold text-[var(--color-on-accent)]">
                         Ảnh chính
                       </span>
                     )}
-                    <button
-                      type="button"
-                      onClick={() => handleDelete(image.id)}
-                      className="absolute top-2 right-2 w-7 h-7 rounded-md bg-black/70 text-red-400 hover:bg-red-500 hover:text-white text-xs font-bold transition-colors backdrop-blur-sm"
-                      title="Xóa ảnh"
-                    >
-                      ✕
-                    </button>
+                    <span className="absolute bottom-2 left-2 rounded-md bg-black/70 px-2 py-0.5 text-xs tabular text-white">
+                      #{index + 1}
+                    </span>
                   </div>
-                  <div className="p-2.5">
-                    <input
-                      type="text"
-                      defaultValue={image.caption || ''}
-                      placeholder="Chú thích (tùy chọn)"
-                      onBlur={(e) => {
-                        const value = e.target.value.trim()
-                        if (value !== (image.caption || '')) handleSaveCaption(image.id, value)
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') (e.target as HTMLInputElement).blur()
-                      }}
-                      className="w-full px-2.5 py-1.5 bg-[#0c0c0c] border border-white/10 rounded-md text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-[var(--color-primary)] transition-colors"
-                    />
+                  <div className="space-y-2 p-3">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={captionDraft}
+                        aria-label={`Chú thích ảnh ${index + 1}`}
+                        placeholder="Chú thích (tùy chọn)"
+                        disabled={pending}
+                        onChange={(e) =>
+                          setCaptionDrafts((prev) => ({ ...prev, [image.id]: e.target.value }))
+                        }
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && captionDirty) {
+                            e.preventDefault()
+                            void handleSaveCaption(image)
+                          }
+                        }}
+                        className={`${inputClass} h-9 px-2.5 text-xs`}
+                      />
+                      {captionDirty && (
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          loading={pendingIds.has(image.id)}
+                          onClick={() => void handleSaveCaption(image)}
+                        >
+                          Lưu
+                        </Button>
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between gap-1">
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => moveImage(index, -1)}
+                          disabled={index === 0 || pending}
+                          aria-label={`Đưa ảnh ${index + 1} lên trước`}
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-line)] text-[var(--color-body)] transition-colors hover:bg-[var(--color-surface-2)] disabled:opacity-40"
+                        >
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
+                            <path d="M18 15l-6-6-6 6" />
+                          </svg>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => moveImage(index, 1)}
+                          disabled={index === images.length - 1 || pending}
+                          aria-label={`Đưa ảnh ${index + 1} xuống sau`}
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-line)] text-[var(--color-body)] transition-colors hover:bg-[var(--color-surface-2)] disabled:opacity-40"
+                        >
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
+                            <path d="M6 9l6 6 6-6" />
+                          </svg>
+                        </button>
+                        <span className="ml-1 hidden text-xs text-[var(--color-muted)] lg:inline">
+                          Lên / Xuống
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setDeleteTarget(image)}
+                        disabled={pending}
+                        aria-label={`Xóa ảnh ${index + 1}`}
+                        className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[var(--color-danger)]/30 bg-[var(--color-danger-subtle)] px-3 text-xs font-semibold text-[var(--color-danger)] transition-colors hover:bg-[var(--color-danger)]/20 disabled:opacity-40"
+                      >
+                        Xóa
+                      </button>
+                    </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </section>
-      </div>
-    </div>
+              )
+            })}
+          </div>
+        )}
+      </section>
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        title="Xóa ảnh showcase"
+        danger
+        busy={deleteTarget ? pendingIds.has(deleteTarget.id) : false}
+        confirmLabel="Xóa ảnh"
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteTarget(null)}
+        description={
+          deleteTarget && (
+            <>
+              Xóa ảnh này khỏi showcase của mod{' '}
+              <strong className="text-[var(--color-title)]">“{slug}”</strong>? Ảnh sẽ biến mất khỏi
+              trang mod công khai ngay.
+            </>
+          )
+        }
+      />
+    </AdminPage>
   )
 }

@@ -122,7 +122,7 @@ export default function TopProgressBar() {
 
   return (
     <div
-      className="pointer-events-none fixed left-0 top-0 z-[9999] h-1 w-full transition-opacity duration-200"
+      className="pointer-events-none fixed left-0 top-0 z-[var(--layer-toast)] h-1 w-full transition-opacity duration-200"
       style={{ opacity: visible ? 1 : 0 }}
       aria-hidden
     >
@@ -131,8 +131,9 @@ export default function TopProgressBar() {
         style={{
           transform: `translateZ(0) scaleX(${progress / 100})`,
           background:
-            "linear-gradient(90deg, rgba(206,90,103,0.2) 0%, var(--accent) 42%, #f48ca0 64%, var(--accent) 100%)",
-          boxShadow: "0 0 18px rgba(206,90,103,0.55)",
+            "linear-gradient(90deg, color-mix(in srgb, var(--color-accent) 25%, transparent) 0%, var(--color-accent) 42%, var(--color-accent-strong) 64%, var(--color-accent) 100%)",
+          boxShadow:
+            "0 0 18px color-mix(in srgb, var(--color-accent) 55%, transparent)",
           transition: progress === 100 ? "transform 220ms ease-out" : "transform 120ms linear",
         }}
       >

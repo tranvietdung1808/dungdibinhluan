@@ -11,45 +11,46 @@ import { MembershipHero } from "./MembershipSection";
 import { formatDate, daysLeft } from "./states";
 
 export function OverviewSection({
-  displayName,
   isVip,
+  hasVipRole,
   activeSub,
   now,
-  orderCount,
+  subscriptionCount,
   unlockedItems,
   onNavigate,
-  onUpgrade,
 }: {
-  displayName: string;
   isVip: boolean;
+  hasVipRole?: boolean;
   activeSub: SubscriptionInfo | null;
   now: number;
-  orderCount: number;
+  subscriptionCount: number;
   unlockedItems: UnlockedMod[];
   onNavigate: (s: SectionKey) => void;
-  onUpgrade: () => void;
 }) {
-  const emptyOrders = orderCount === 0;
+  const emptySubs = subscriptionCount === 0;
   const emptyMods = unlockedItems.length === 0;
 
   return (
     <div className="space-y-6">
-      {/* Focal point: membership */}
+      {/* Focal point: membership — CTA dẫn tới section gói trong trang này
+          (chưa có checkout membership → không link sang sản phẩm khác, A05) */}
       <MembershipHero
         hasVip={isVip}
+        hasVipRole={hasVipRole}
         planName={activeSub?.plan_name}
+        startsAt={activeSub?.starts_at}
         expiresAt={activeSub?.expires_at}
         now={now}
-        onUpgrade={onUpgrade}
+        cta={{ href: "/account?section=membership", label: "Xem gói membership" }}
       />
 
       {/* Stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <StatCard
-          icon="bag"
-          value={emptyOrders ? "0" : orderCount}
-          label="Đơn hàng"
-          hint={emptyOrders ? "Chưa có đơn nào" : daysLeftText(activeSub, now)}
+          icon="crown"
+          value={emptySubs ? "0" : subscriptionCount}
+          label="Gói đã đăng ký"
+          hint={emptySubs ? "Chưa đăng ký gói nào" : daysLeftText(activeSub, now)}
           onClick={() => onNavigate("orders")}
         />
         <StatCard
@@ -61,11 +62,11 @@ export function OverviewSection({
           onClick={() => onNavigate("unlocked")}
         />
         <StatCard
-          icon="crown"
-          value={isVip ? "VIP" : "Member"}
+          icon="sparkles"
+          value={isVip ? "VIP" : "Thành viên"}
           label="Hạng thành viên"
-          accent={isVip ? "coral" : "neutral"}
-          hint={isVip ? "Quyền lợi đang hoạt động" : "Nâng cấp ngay"}
+          accent={isVip ? "accent" : "neutral"}
+          hint={isVip ? "Quyền lợi đang hoạt động" : "Xem các gói"}
           onClick={() => onNavigate("membership")}
         />
         <StatCard
@@ -76,8 +77,14 @@ export function OverviewSection({
               : "—"
           }
           label="Còn lại"
-          accent={isVip ? "ok" : "neutral"}
-          hint={isVip && activeSub ? `Hết hạn ${formatDate(activeSub.expires_at)}` : "Chưa có gói"}
+          accent={isVip && activeSub ? "ok" : "neutral"}
+          hint={
+            isVip && activeSub
+              ? `Hết hạn ${formatDate(activeSub.expires_at)}`
+              : isVip
+                ? "Quyền được cấp trực tiếp"
+                : "Chưa có gói"
+          }
           onClick={() => onNavigate("membership")}
         />
       </div>
@@ -99,7 +106,7 @@ export function OverviewSection({
           />
           <QuickLink
             label="Gói VIP / Membership"
-            desc="Chọn gói, kích hoạt mã"
+            desc="Xem quyền lợi và gia hạn gói"
             icon="crown"
             onClick={() => onNavigate("membership")}
           />
@@ -122,7 +129,7 @@ export function OverviewSection({
 }
 
 function daysLeftText(activeSub: SubscriptionInfo | null, now: number) {
-  if (!activeSub) return "Mua gói để xem lịch sử";
+  if (!activeSub) return "Xem lịch sử đăng ký";
   const left = daysLeft(activeSub.expires_at, now);
   return left > 0 ? `Gói còn ${left} ngày` : "Gói vừa hết hạn";
 }
@@ -141,10 +148,10 @@ function QuickLink({
   onClick?: () => void;
 }) {
   const cls =
-    "flex items-center gap-3.5 p-3.5 rounded-xl surface-0 border border-line text-left hover:surface-raised transition-colors duration-150 group";
+    "flex items-center gap-3.5 p-3.5 rounded-md surface-0 border border-line text-left hover:surface-raised transition-colors duration-150 group";
   const content = (
     <>
-      <span className="w-10 h-10 shrink-0 rounded-xl bg-surface-2 border border-line flex items-center justify-center text-text-body group-hover:text-coral group-hover:border-coral/30 transition-colors duration-150">
+      <span className="w-10 h-10 shrink-0 rounded-md bg-surface-2 border border-line flex items-center justify-center text-text-body group-hover:text-accent group-hover:border-accent/30 transition-colors duration-150">
         <Icon name={icon} className="w-5 h-5" />
       </span>
       <span className="min-w-0 flex-1">
@@ -153,7 +160,7 @@ function QuickLink({
       </span>
       <Icon
         name="arrow-right"
-        className="w-4 h-4 text-muted/50 shrink-0 transition-all duration-150 group-hover:text-coral group-hover:translate-x-0.5"
+        className="w-4 h-4 text-muted/50 shrink-0 transition-all duration-150 group-hover:text-accent group-hover:translate-x-0.5"
       />
     </>
   );

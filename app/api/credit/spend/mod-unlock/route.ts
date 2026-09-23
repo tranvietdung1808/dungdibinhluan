@@ -1,7 +1,7 @@
 import { supabaseAdmin } from "@/lib/supabase";
 import { extractToken, getUserFromToken } from "@/lib/server/auth";
 import { getCreditWallet, getModCreditCost, deductCredits } from "@/lib/server/credit";
-import { errorResponse, runRoute, successResponse } from "@/lib/server/api-response";
+import { errorResponse, privateResponse, runRoute } from "@/lib/server/api-response";
 
 // =====================================================
 // /api/credit/spend/mod-unlock — trừ credit để mở khóa mod
@@ -48,7 +48,7 @@ export async function POST(request: Request) {
 
     if (grantErr?.code === "23505") {
       // Đã mở khóa trước đó → không tính phí
-      return successResponse({
+      return privateResponse({
         modId,
         modSlug: mod.slug,
         modName: mod.name,
@@ -92,11 +92,10 @@ export async function POST(request: Request) {
       throw err;
     }
 
-    // Dọn bản ghi > 60 ngày
-    const cutoff = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString();
-    await supabaseAdmin.from("mod_access").delete().eq("user_id", userId).lt("created_at", cutoff);
+    // A02: KHÔNG cleanup mod_access theo tuổi — quyền mở khóa bằng credit
+    // là quyền sở hữu vĩnh viễn (khớp lời hứa UI "mở 1 lần, giữ mãi").
 
-    return successResponse({
+    return privateResponse({
       modId,
       modSlug: mod.slug,
       modName: mod.name,

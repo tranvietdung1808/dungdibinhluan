@@ -41,7 +41,7 @@ export function SecuritySection({
   return (
     <div>
       {/* ─── 1. XÁC THỰC — card duy nhất của trang ─── */}
-      <section className="surface-card rounded-2xl" aria-labelledby="sec-auth">
+      <section className="surface-card rounded-lg" aria-labelledby="sec-auth">
         {/* Header gọn, áp sát nội dung */}
         <div className="flex items-center gap-2.5 px-4 pt-3.5 pb-2 sm:px-5">
           <span className="text-violet shrink-0">
@@ -60,7 +60,7 @@ export function SecuritySection({
         {/* Google login — row chính, không bọc card lồng nhau */}
         <div className="flex items-center justify-between gap-3 border-t border-line px-4 py-3 sm:px-5">
           <div className="flex items-center gap-3 min-w-0">
-            <span className="w-9 h-9 rounded-xl bg-violet/15 text-violet flex items-center justify-center shrink-0">
+            <span className="w-9 h-9 rounded-md bg-violet/15 text-violet flex items-center justify-center shrink-0">
               <Icon name="shield" className="w-4 h-4" />
             </span>
             <div className="min-w-0">
@@ -151,7 +151,7 @@ export function SecuritySection({
         </div>
 
         {confirm && (
-          <div className="mt-3 rounded-xl bg-surface-0 border border-line p-4 space-y-3">
+          <div className="mt-3 rounded-md bg-surface-0 border border-line p-4 space-y-3">
             <p className="text-sm text-body">
               Bạn có chắc muốn <span className="font-bold text-danger">đăng xuất</span> khỏi tài khoản?
             </p>

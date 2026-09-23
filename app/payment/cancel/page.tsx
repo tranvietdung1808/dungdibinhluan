@@ -1,42 +1,106 @@
 "use client";
 
-import { Suspense } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+// =====================================================
+// /payment/cancel — user hủy giao dịch mua sản phẩm
+// T15: quay về đúng checkout theo query `product`, hoặc tra
+//      productId từ order qua orderCode; fallback /games/fc26/select.
+//      Không dùng router.back() (tránh vòng lại PayOS).
+// Hủy là lựa chọn của user → màu trung tính, không phải lỗi.
+// =====================================================
+
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import {
+  checkoutPathFor,
+  parsePaymentOrder,
+} from "@/lib/payment/order-status";
+import { ButtonLink, Card } from "@/app/components/ui";
+
+function OrderCodeRow({ orderCode }: { orderCode: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <div className="flex items-center justify-center gap-2 text-meta text-muted">
+      <span>Mã đơn</span>
+      <code className="tabular font-semibold text-body">#{orderCode}</code>
+      <button
+        type="button"
+        onClick={async () => {
+          try {
+            await navigator.clipboard.writeText(orderCode);
+            setCopied(true);
+            window.setTimeout(() => setCopied(false), 2000);
+          } catch {
+            // Clipboard bị chặn — mã đơn vẫn hiển thị để copy tay
+          }
+        }}
+        className="rounded-md border border-line-strong px-2 py-0.5 text-xs text-body transition-colors hover:border-accent-border hover:text-title"
+      >
+        {copied ? "Đã copy" : "Copy"}
+      </button>
+    </div>
+  );
+}
 
 function CancelContent() {
   const params = useSearchParams();
-  const router = useRouter();
   const orderCode = params.get("orderCode");
+  const productParam = params.get("product");
+  // Đích quay lại: query `product` trước, nếu không có thì tra từ order
+  const [checkoutHref, setCheckoutHref] = useState(() => checkoutPathFor(productParam));
+
+  useEffect(() => {
+    if (productParam || !orderCode) return;
+    let cancelled = false;
+    const controller = new AbortController();
+    (async () => {
+      try {
+        const res = await fetch(`/api/payment/order?orderCode=${orderCode}`, {
+          signal: controller.signal,
+          cache: "no-store",
+        });
+        if (!res.ok) return;
+        const order = parsePaymentOrder(await res.json());
+        if (!cancelled && order?.productId) {
+          setCheckoutHref(checkoutPathFor(order.productId));
+        }
+      } catch {
+        // Giữ fallback /games/fc26/select
+      }
+    })();
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [orderCode, productParam]);
 
   return (
-    <main className="min-h-screen bg-[#0a0a0a] text-white flex items-center justify-center px-4">
-      <div className="w-full max-w-md space-y-8 text-center">
-        <div className="w-16 h-16 mx-auto rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-3xl">
-          ✕
-        </div>
-        <div className="space-y-2">
-          <h1 className="text-2xl font-black text-red-400">ĐÃ HỦY THANH TOÁN</h1>
-          <p className="text-slate-400 text-sm">
-            Bạn đã hủy giao dịch thanh toán.
-          </p>
-          {orderCode && (
-            <p className="text-[10px] text-slate-600">Mã đơn: #{orderCode}</p>
-          )}
-        </div>
-        <div className="space-y-3">
-          <button
-            onClick={() => router.back()}
-            className="w-full py-4 bg-[var(--color-primary)] rounded-2xl font-black tracking-widest text-sm text-white hover:bg-[#b44c5c] transition-all"
-          >
-            ← THỬ LẠI
-          </button>
-          <button
-            onClick={() => router.push("/")}
-            className="w-full py-3 rounded-2xl text-xs text-slate-500 border border-white/10 hover:border-white/20 hover:text-white transition-all"
-          >
-            Về trang chủ
-          </button>
-        </div>
+    <main className="flex min-h-screen items-center justify-center bg-surface-0 px-4 py-16 text-body">
+      <div className="w-full max-w-md">
+        <Card className="space-y-6 text-center">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-line bg-surface-2 text-muted">
+            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="9" />
+              <path d="m9 9 6 6" />
+              <path d="m15 9-6 6" />
+            </svg>
+          </div>
+          <div className="space-y-1.5">
+            <h1 className="text-h2 text-title">Đã hủy thanh toán</h1>
+            <p className="text-sm text-muted">
+              Bạn chưa bị trừ tiền cho giao dịch này. Khi sẵn sàng, quay lại trang
+              thanh toán để đặt hàng.
+            </p>
+          </div>
+          {orderCode && <OrderCodeRow orderCode={orderCode} />}
+          <div className="space-y-2">
+            <ButtonLink href={checkoutHref} size="lg" fullWidth>
+              Quay lại thanh toán
+            </ButtonLink>
+            <ButtonLink href="/" variant="ghost" fullWidth>
+              Về trang chủ
+            </ButtonLink>
+          </div>
+        </Card>
       </div>
     </main>
   );

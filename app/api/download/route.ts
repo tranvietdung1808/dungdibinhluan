@@ -27,7 +27,7 @@ export async function GET(request: Request) {
         // Tạo link tải có hiệu lực trong 1 giờ (3600 giây)
         const url = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
         return NextResponse.json({ url });
-    } catch (error) {
+    } catch {
         return NextResponse.json({ error: "Lỗi tạo link" }, { status: 500 });
     }
 }

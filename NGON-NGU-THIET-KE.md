@@ -1,7 +1,8 @@
 # DungDiBinhLuan — Design language / FC 27
 
-Cập nhật: 15/09/2026. Áp dụng cho trang chủ mới và định hướng đồng bộ các trang tiếp theo.
+Cập nhật: 23/09/2026. Sau đợt UI-UPGRADE-BLUEPRINT: áp dụng toàn site, không chỉ trang chủ.
 Nguồn sự thật về màu: app/globals.css. Quy tắc triển khai trang chủ: app/home.module.css.
+Primitives dùng chung: app/components/ui/ (Button, Badge, Card, Field, Dialog, states, ...).
 
 ## 1. Tinh thần thiết kế
 
@@ -24,11 +25,21 @@ Mục tiêu trang chủ: khách hiểu ngay FC 27 đang nhận đặt trước, 
 | --color-muted | #9499a8 | Metadata, chú thích |
 | --color-line | rgba(255,255,255,.08) | Viền thường |
 | --color-line-strong | rgba(255,255,255,.14) | Viền rõ hơn |
-| --color-campaign-amber | #f5a623 | Cam điểm nhấn cho chiến dịch, dùng tiết chế |
-| --color-violet | #8f7bf7 | Chức năng thư viện/tài khoản khi cần |
+| --color-campaign-amber / --color-credit | #f5a623 | Cam điểm nhấn chiến dịch; đồng thời là màu credit/ví |
+| --color-credit-strong | #ffc15c | Hover/nhấn mạnh của credit |
+| --color-violet / --color-signal | #8f7bf7 | Nhấn phụ: thư viện, tài khoản, tính năng nổi bật |
+| --color-signal-strong | #a794ff | Hover của violet |
 | --color-ok | #3ddc97 | Thành công/uy tín |
-| --color-warn | #f4b860 | Cảnh báo |
+| --color-warn | #f4b860 | Cảnh báo/pending |
 | --color-danger | #f45d6a | Lỗi/xóa |
+| --color-*-subtle | color-mix(14–16% màu + surface-1) | Nền nhạt cho badge/notice của accent, credit, ok, warn, danger, violet |
+| --color-*-border | color-mix(38% màu + transparent) | Viền tương ứng của accent và credit |
+| --color-overlay | rgba(5,5,9,.72) | Lớp phủ dialog/lightbox/drawer |
+| --color-focus-ring | --color-coral-strong | Màu vòng focus |
+
+**Lớp z-index chuẩn** (không dùng số ngẫu nhiên): `--layer-sticky` 10 · `--layer-navbar` 30 · `--layer-sticky-action` 40 · `--layer-popover` 50 · `--layer-support` 60 · `--layer-overlay` 80 · `--layer-modal` 90 · `--layer-toast` 100. Dùng qua `z-[var(--layer-…)]`.
+
+**Không nối alpha vào var()** (`var(--color-x)1A` là sai). Muốn bản nhạt/border của một màu: dùng token `-subtle`/`-border` đã khai báo, hoặc `color-mix()`.
 
 Màu được chọn gần với ảnh người dùng cung cấp; không khẳng định là giá trị gốc tuyệt đối vì ảnh chụp có lớp phủ/độ sáng khác nhau. Nền trước lần sửa này đang là #0f0708, surfaces #140a0d/#1d1015/#2a161d, accent #f06078. Những thay đổi đó đã tồn tại trên đĩa và chưa commit.
 
@@ -56,6 +67,8 @@ Font duy nhất: Be Vietnam Pro, hỗ trợ tiếng Việt; giữ loader hiện 
 | Eyebrow/metadata | 9–10px | 8–10px | 700 |
 
 Chữ nhỏ chỉ dành cho thông tin phụ; giá, phiên bản, trạng thái, nút đặt phải luôn đọc được. Tiêu đề tracking -0.04em; tên game -0.07em. Uppercase giới hạn cho nhãn ngắn. Không viết toàn bộ đoạn văn bằng chữ hoa.
+
+Type scale utility cho toàn site (định nghĩa trong globals.css): `text-h1`, `text-h2`, `text-h3` cho tiêu đề; `text-body`, `text-meta` cho nội dung/metadata; `text-price` + `tabular` cho giá và số (tabular-nums để cột số không nhảy). Trang chủ giữ scale lớn riêng của hero; các trang còn lại dùng scale utility này.
 
 ## 4. Bố cục
 
@@ -99,6 +112,8 @@ Không tự thêm ngày phát hành, quyền lợi Ultimate, chơi online, quà 
 
 ## 7. Phạm vi migration
 
-Đã áp dụng: homepage, menu, global primitives, ảnh FC 27, SEO riêng trang chủ. Các chỉnh sửa người dùng ở account/admin/payment được giữ lại. Không coi tài liệu này là bằng chứng các màn hình đó đã được kiểm thử hoặc migrate toàn bộ.
+Đã áp dụng: homepage, navbar/footer, mods catalog + mod detail, credit, payment/checkout, account, hướng dẫn/bài viết, DMCA, admin shell. Toàn site dùng chung tokens + primitives trong `app/components/ui/`; admin có shell riêng (`AdminShell`) không lẫn chrome công khai.
 
-Blueprint cụ thể: FC27-HOMEPAGE-BLUEPRINT.md.
+Dialog/lightbox ghi `body[data-modal-open]` để support bubble tự ẩn. Trạng thái route (tab account, filter/search/sort/page của catalog) nằm trên URL. Motion 150–250ms, tôn trọng prefers-reduced-motion.
+
+Blueprint cụ thể: FC27-HOMEPAGE-BLUEPRINT.md (trang chủ), UI-UPGRADE-BLUEPRINT.md (toàn site).

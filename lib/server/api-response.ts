@@ -13,6 +13,14 @@ export function successResponse<T>(payload: T, status = 200, cacheMaxAge = 300) 
   })
 }
 
+// Dữ liệu cá nhân/quyền truy cập: không cho shared cache (§20.4 blueprint)
+export function privateResponse<T>(payload: T, status = 200) {
+  return NextResponse.json(payload, {
+    status,
+    headers: { 'Cache-Control': 'private, no-store' },
+  })
+}
+
 export async function parseJsonBody<T>(request: Request): Promise<T | null> {
   try {
     return (await request.json()) as T
