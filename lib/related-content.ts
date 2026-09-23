@@ -132,17 +132,24 @@ export function extractTopicTerms(input: string, maxTerms = 14) {
 
 export function parseFlexibleDate(input?: string | null) {
   if (!input) return 0
-  const parsed = Date.parse(input)
-  if (!Number.isNaN(parsed)) return parsed
   const normalized = input.trim()
+  // dd/mm/yyyy (format static data) phải thử TRƯỚC Date.parse:
+  // V8 parse "11/03/2026" theo MM/DD/YYYY (US) → ngày ≤12 bị hoán
+  // đổi ngày/tháng, làm sai cả label lẫn thứ tự sort.
   const ddmmyyyy = normalized.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/)
   if (ddmmyyyy) {
     const day = Number(ddmmyyyy[1])
-    const month = Number(ddmmyyyy[2]) - 1
+    const month = Number(ddmmyyyy[2])
     const year = Number(ddmmyyyy[3])
-    const value = new Date(year, month, day).getTime()
-    if (!Number.isNaN(value)) return value
+    const d = new Date(year, month - 1, day)
+    // Reject ngày rollover (31/02 → 03/03) thay vì lặng lẽ đổi ngày
+    if (d.getFullYear() === year && d.getMonth() === month - 1 && d.getDate() === day) {
+      return d.getTime()
+    }
+    return 0
   }
+  const parsed = Date.parse(normalized)
+  if (!Number.isNaN(parsed)) return parsed
   return 0
 }
 

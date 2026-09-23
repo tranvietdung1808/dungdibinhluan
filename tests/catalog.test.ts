@@ -9,7 +9,9 @@ import {
   buildCatalog,
   buildSearchText,
   dedupeBySlug,
+  formatUpdatedAt,
   normalizeVi,
+  toUpdatedAtTs,
   viIncludes,
   type DbModRecord,
   type StaticModInput,
@@ -168,6 +170,55 @@ describe("buildCatalog — offer resolution", () => {
       [dbRow({ credit_cost: 30, download_url: null })],
     );
     expect(mod.offer).toEqual({ kind: "credit", creditCost: 30 });
+  });
+});
+
+describe("toUpdatedAtTs / formatUpdatedAt — dd/mm/yyyy đúng ngày (regression)", () => {
+  it("dd/mm/yyyy KHÔNG bị parse thành MM/DD/YYYY", () => {
+    // 11/03/2026 = 11 tháng 3, KHÔNG phải 3 tháng 11 (lỗi Date.parse US-format)
+    const ts = toUpdatedAtTs("11/03/2026");
+    const d = new Date(ts);
+    expect(d.getDate()).toBe(11);
+    expect(d.getMonth()).toBe(2); // March
+    expect(d.getFullYear()).toBe(2026);
+  });
+
+  it("sort 'mới cập nhật' đúng: 15/03/2026 xếp trên 11/03/2026", () => {
+    // Regression: trước đây 11/03 → Nov 3 (sort sai lên đầu),
+    // 15/03 fail Date.parse → fallback regex → Mar 15 đúng.
+    expect(toUpdatedAtTs("15/03/2026")).toBeGreaterThan(toUpdatedAtTs("11/03/2026"));
+    expect(toUpdatedAtTs("02/09/2026")).toBeGreaterThan(toUpdatedAtTs("15/03/2026"));
+  });
+
+  it("ngày rollover không hợp lệ (31/02) → 0", () => {
+    expect(toUpdatedAtTs("31/02/2026")).toBe(0);
+    expect(toUpdatedAtTs("30/02/2026")).toBe(0);
+  });
+
+  it("ISO timestamp (DB updated_at) vẫn parse đúng", () => {
+    const ts = toUpdatedAtTs("2026-03-11T10:00:00Z");
+    expect(ts).toBe(Date.parse("2026-03-11T10:00:00Z"));
+  });
+
+  it("formatUpdatedAt giữ đúng dd/mm/yyyy hai chiều", () => {
+    expect(formatUpdatedAt("11/03/2026")).toBe("11/03/2026");
+    expect(formatUpdatedAt("02/09/2026")).toBe("02/09/2026");
+    // ISO → định dạng vi-VN (máy local timezone)
+    const iso = formatUpdatedAt("2026-03-11T10:00:00Z");
+    expect(iso).toMatch(/^\d{2}\/\d{2}\/2026$/);
+  });
+
+  it("catalog sort dùng updatedAtTs đúng ngày", () => {
+    const catalog = buildCatalog(
+      [
+        staticMod({ slug: "mar-11", updatedAt: "11/03/2026" }),
+        staticMod({ slug: "mar-15", updatedAt: "15/03/2026" }),
+        staticMod({ slug: "sep-02", updatedAt: "02/09/2026" }),
+      ],
+      [],
+    );
+    const sorted = [...catalog].sort((a, b) => b.updatedAtTs - a.updatedAtTs);
+    expect(sorted.map((m) => m.slug)).toEqual(["sep-02", "mar-15", "mar-11"]);
   });
 });
 
