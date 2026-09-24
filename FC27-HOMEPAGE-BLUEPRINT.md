@@ -21,18 +21,18 @@ Cập nhật: 24/09/2026. Trạng thái: đã triển khai local, chưa tạo gi
 7. Khách nhập mã tại `/games/fc27`; mã đúng tạo cookie HTTP-only một giờ.
 8. `/api/download-fc27` kiểm tra cookie và record mã trong Redis trước khi cấp presigned URL R2.
 
-## 3. R2 placeholder
+## 3. Kho tải production
 
 Endpoint tải FC 27 hỗ trợ hai biến môi trường:
 
 | Biến               | Mặc định       | Ý nghĩa                  |
 | ------------------ | -------------- | ------------------------ |
-| `R2_FC27_BUCKET`   | `fc27download` | Bucket chứa bộ cài FC 27 |
-| `R2_FC27_GAME_KEY` | `FC27.rar`     | Object key của bộ cài    |
+| `R2_FC27_BUCKET`   | `fc27download`          | Bucket chứa bộ cài FC 27 |
+| `R2_FC27_GAME_KEY` | `EA SPORTS FC 27.rar`   | Object key của bộ cài    |
 
-Cách nhanh nhất: tạo bucket `fc27download` và upload file với key `FC27.rar`. Nếu muốn tên khác, cấu hình hai biến trên rồi redeploy. Endpoint dùng chung credentials `R2_ENDPOINT`, `ACCESS_KEY_ID`, `SECRET_ACCESS_KEY` đang có.
+Cấu hình hiện tại dùng bucket `fc27download` và object `EA SPORTS FC 27.rar` (60.667.256.060 byte). Nếu đổi tên file, cấu hình hai biến trên rồi redeploy. Endpoint dùng chung credentials `R2_ENDPOINT`, `ACCESS_KEY_ID`, `SECRET_ACCESS_KEY` đang có.
 
-Link được ký trong một giờ. Khi object chưa được upload, hệ thống vẫn có thể tạo URL ký nhưng R2 sẽ trả lỗi lúc tải; giao diện đã ghi rõ đây là vị trí placeholder.
+Link được ký trong một giờ, yêu cầu mã FC 27 hợp lệ và tải xuống với tên file thân thiện. Object production đã được kiểm tra bằng `HeadObject` và yêu cầu byte-range.
 
 ## 4. Tách quyền FC 26 / FC 27
 
@@ -65,9 +65,9 @@ Không lặp giá 180.000đ trong logic thanh toán phía client. Copy marketing
 
 ## 7. Checklist trước khi đưa khách tải
 
-- [ ] Tạo bucket hoặc cấu hình `R2_FC27_BUCKET`.
-- [ ] Upload object hoặc cấu hình `R2_FC27_GAME_KEY`.
-- [ ] Kiểm tra credentials R2 production có quyền `GetObject`.
+- [x] Tạo bucket hoặc cấu hình `R2_FC27_BUCKET`.
+- [x] Upload object hoặc cấu hình `R2_FC27_GAME_KEY`.
+- [x] Kiểm tra credentials R2 production có quyền `GetObject`.
 - [ ] Tạo một giao dịch PayOS test hợp lệ với email kiểm thử.
 - [ ] Xác nhận webhook chuyển đơn thành `COMPLETED` hoặc `CODE_GENERATED`.
 - [ ] Xác nhận email có mã prefix `FC27`.

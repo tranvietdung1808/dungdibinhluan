@@ -26,15 +26,21 @@ function supportSection() {
   `;
 }
 
-function codeSection(code: string, productName: string) {
+function codeSection(code: string, productName: string, codeLabel: string) {
   return `
     <div style="background:#111;border:1px solid #333;border-radius:12px;padding:20px;margin:0 0 24px;text-align:center">
       <p style="color:#888;font-size:11px;margin:0 0 6px;text-transform:uppercase;letter-spacing:1px">Sản phẩm</p>
       <p style="font-size:16px;font-weight:bold;margin:0 0 16px">${productName}</p>
-      <p style="color:#888;font-size:11px;margin:0 0 6px;text-transform:uppercase;letter-spacing:1px">Code kích hoạt</p>
+      <p style="color:#888;font-size:11px;margin:0 0 6px;text-transform:uppercase;letter-spacing:1px">${codeLabel}</p>
       <p style="font-size:30px;font-weight:bold;letter-spacing:4px;color:#6ef2a0;margin:0;font-family:monospace">${code}</p>
     </div>
   `;
+}
+
+function inlineCodeLabel(codeLabel: string) {
+  return codeLabel === "Mã truy cập FC 27"
+    ? "mã truy cập FC 27"
+    : "code kích hoạt";
 }
 
 function downloadSection(productName: string, downloadUrl: string) {
@@ -49,18 +55,19 @@ function downloadSection(productName: string, downloadUrl: string) {
   `;
 }
 
-function stepsSection(codeEntryUrl: string, hasCode: boolean) {
+function stepsSection(codeEntryUrl: string, hasCode: boolean, codeLabel: string) {
+  const inlineLabel = inlineCodeLabel(codeLabel);
   if (hasCode) {
     return `
       <div style="background:#111;border:1px solid #333;border-radius:12px;padding:20px;margin:0 0 24px">
-        <p style="color:#6ef2a0;font-size:13px;font-weight:bold;margin:0 0 14px;text-transform:uppercase;letter-spacing:1px">Các bước sau khi nhận code</p>
+        <p style="color:#6ef2a0;font-size:13px;font-weight:bold;margin:0 0 14px;text-transform:uppercase;letter-spacing:1px">Các bước sau khi nhận ${inlineLabel}</p>
         <table cellpadding="0" cellspacing="0" border="0" width="100%">
           <tr>
             <td style="vertical-align:top;padding:0 10px 14px 0;width:24px">
               <span style="display:inline-block;width:24px;height:24px;line-height:24px;text-align:center;background:rgba(110,242,160,0.1);color:#6ef2a0;border-radius:50%;font-size:12px;font-weight:bold;border:1px solid rgba(110,242,160,0.2)">1</span>
             </td>
             <td style="vertical-align:top;padding:0 0 14px 0">
-              <p style="margin:0;font-size:12px;color:#ddd">Nhập code tại trang</p>
+              <p style="margin:0;font-size:12px;color:#ddd">Nhập ${inlineLabel} tại trang</p>
               <a href="${codeEntryUrl}" style="display:inline-block;margin-top:4px;font-size:11px;color:#6ef2a0;word-break:break-all">${codeEntryUrl}</a>
             </td>
           </tr>
@@ -78,7 +85,7 @@ function stepsSection(codeEntryUrl: string, hasCode: boolean) {
               <span style="display:inline-block;width:24px;height:24px;line-height:24px;text-align:center;background:rgba(110,242,160,0.1);color:#6ef2a0;border-radius:50%;font-size:12px;font-weight:bold;border:1px solid rgba(110,242,160,0.2)">3</span>
             </td>
             <td style="vertical-align:top;padding:0 0 0 0">
-              <p style="margin:0;font-size:12px;color:#ddd">Liên hệ admin qua fanpage để add key và cài đặt</p>
+              <p style="margin:0;font-size:12px;color:#ddd">Liên hệ fanpage để được hỗ trợ kích hoạt và cài đặt</p>
             </td>
           </tr>
         </table>
@@ -111,7 +118,7 @@ function stepsSection(codeEntryUrl: string, hasCode: boolean) {
             <span style="display:inline-block;width:24px;height:24px;line-height:24px;text-align:center;background:rgba(110,242,160,0.1);color:#6ef2a0;border-radius:50%;font-size:12px;font-weight:bold;border:1px solid rgba(110,242,160,0.2)">3</span>
           </td>
           <td style="vertical-align:top;padding:0 0 0 0">
-            <p style="margin:0;font-size:12px;color:#ddd">Liên hệ admin qua fanpage để add key và cài đặt</p>
+            <p style="margin:0;font-size:12px;color:#ddd">Liên hệ fanpage để được hỗ trợ cài đặt</p>
           </td>
         </tr>
       </table>
@@ -119,11 +126,11 @@ function stepsSection(codeEntryUrl: string, hasCode: boolean) {
   `;
 }
 
-function footerSection(hasCode: boolean) {
+function footerSection(hasCode: boolean, codeLabel: string) {
   if (hasCode) {
     return `
-      <p style="font-size:10px;color:#555;text-align:center;margin:0 0 6px">Code có hiệu lực trong 24 giờ</p>
-      <p style="font-size:10px;color:#555;text-align:center;margin:0">Vui lòng không chia sẻ code cho người khác</p>
+      <p style="font-size:10px;color:#555;text-align:center;margin:0 0 6px">${codeLabel} có hiệu lực trong 24 giờ</p>
+      <p style="font-size:10px;color:#555;text-align:center;margin:0">Vui lòng không chia sẻ ${inlineCodeLabel(codeLabel)} cho người khác</p>
     `;
   }
   return `
@@ -133,25 +140,27 @@ function footerSection(hasCode: boolean) {
 
 function plainTextVersion(code: string, productName: string, codeEntryUrl: string, downloadUrl?: string) {
   const hasCode = !downloadUrl;
+  const codeLabel = code.startsWith("FC27-") ? "Mã truy cập FC 27" : "Code kích hoạt";
+  const inlineLabel = inlineCodeLabel(codeLabel);
   if (hasCode) {
     return `
 DUNGDIBINHLUAN - Cảm ơn bạn đã mua hàng!
 
 Sản phẩm: ${productName}
-Code kích hoạt: ${code}
+${codeLabel}: ${code}
 
-Các bước sau khi nhận code:
-1. Nhập code tại trang ${codeEntryUrl}
+Các bước sau khi nhận ${inlineLabel}:
+1. Nhập ${inlineLabel} tại trang ${codeEntryUrl}
 2. Tải và giải nén (nếu có vấn đề thì liên hệ admin)
-3. Liên hệ admin qua fanpage để add key và cài đặt
+3. Liên hệ fanpage để được hỗ trợ kích hoạt và cài đặt
 
 Thông tin hỗ trợ:
 - Mọi vấn đề vui lòng liên hệ fanpage: https://web.facebook.com/dungbinhluan/
 - Page sẽ trả lời trong vòng tối đa 6 tiếng (với những thời gian cao điểm), vui lòng không spam
 - Nếu sau 6 tiếng không có phản hồi, ib Zalo: 0917742686
 
-Code có hiệu lực trong 24 giờ
-Vui lòng không chia sẻ code cho người khác
+${codeLabel} có hiệu lực trong 24 giờ
+Vui lòng không chia sẻ ${inlineLabel} cho người khác
     `.trim();
   }
   return `
@@ -163,7 +172,7 @@ Link tải: ${downloadUrl}
 Các bước tiếp theo:
 1. Tải file từ link trên
 2. Giải nén (nếu có vấn đề thì liên hệ admin)
-3. Liên hệ admin qua fanpage để add key và cài đặt
+3. Liên hệ fanpage để được hỗ trợ cài đặt
 
 Thông tin hỗ trợ:
 - Mọi vấn đề vui lòng liên hệ fanpage: https://web.facebook.com/dungbinhluan/
@@ -182,8 +191,9 @@ export async function sendCodeEmail(
   downloadUrl?: string
 ): Promise<boolean> {
   const hasCode = !downloadUrl;
+  const codeLabel = code.startsWith("FC27-") ? "Mã truy cập FC 27" : "Code kích hoạt";
   const mainSection = hasCode
-    ? codeSection(code, productName)
+    ? codeSection(code, productName, codeLabel)
     : downloadSection(productName, downloadUrl);
 
   try {
@@ -191,7 +201,7 @@ export async function sendCodeEmail(
       from: `"DungDiBinhLuan" <${process.env.EMAIL_USER}>`,
       to,
       replyTo: process.env.EMAIL_USER,
-      subject: `[DungDiBinhLuan] ${hasCode ? "Code kích hoạt" : "Link tải"} ${productName}`,
+      subject: `[DungDiBinhLuan] ${hasCode ? codeLabel : "Link tải"} ${productName}`,
       text: plainTextVersion(code, productName, codeEntryUrl, downloadUrl),
       html: `
         <!DOCTYPE html>
@@ -205,9 +215,9 @@ export async function sendCodeEmail(
             <h1 style="color:#6ef2a0;font-size:20px;text-align:center;letter-spacing:2px;margin:0 0 4px;">DUNGDIBINHLUAN</h1>
             <p style="text-align:center;color:#888;font-size:12px;margin:0 0 24px;">Cảm ơn bạn đã mua hàng!</p>
             ${mainSection}
-            ${stepsSection(codeEntryUrl, hasCode)}
+            ${stepsSection(codeEntryUrl, hasCode, codeLabel)}
             ${supportSection()}
-            ${footerSection(hasCode)}
+            ${footerSection(hasCode, codeLabel)}
           </div>
         </body>
         </html>

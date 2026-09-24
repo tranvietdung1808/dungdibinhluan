@@ -23,11 +23,12 @@ Ngày kiểm tra: 24/09/2026.
 ## Chưa kiểm thử bằng giao dịch thật
 
 - Không tạo link PayOS thật và không chuyển tiền trong quá trình kiểm tra.
-- Chưa thể tải file cuối vì object R2 FC 27 chưa được chủ website upload.
+- Đã xác nhận object production và tạo được link tải có chữ ký sau khi nhập mã FC 27 hợp lệ.
 - Cần hoàn thành checklist production trong `FC27-HOMEPAGE-BLUEPRINT.md`: upload file, kiểm tra webhook, email, mã thật và tải file từ mạng ngoài.
 
-## R2 placeholder
+## Kho tải production
 
 - Bucket mặc định: `fc27download`.
-- Object key mặc định: `FC27.rar`.
+- Object key mặc định: `EA SPORTS FC 27.rar`.
+- Dung lượng xác nhận: `60.667.256.060 byte` (hiển thị `60.67 GB`).
 - Có thể thay bằng `R2_FC27_BUCKET` và `R2_FC27_GAME_KEY` trong môi trường production.

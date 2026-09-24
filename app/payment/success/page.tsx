@@ -308,6 +308,7 @@ function SuccessContent() {
   const product: ProductConfig | null =
     productForOrder(order) ?? (productParam ? getProduct(productParam) : null);
   const isLinkProduct = product?.fulfillment.kind === "link";
+  const isFC27 = product?.id === "fc27-standard";
   const steps = order ? buildPaymentSteps(order.status, product) : null;
   // CTA "tiếp tục đúng sản phẩm": code → trang nhập mã, link → trang Mix Mods
   const continueHref = product?.returnUrl ?? "/";
@@ -349,7 +350,7 @@ function SuccessContent() {
                 <p className="text-sm text-muted">
                   {isLinkProduct
                     ? `Link tải đã được gửi đến email ${order?.email ?? "của bạn"}.`
-                    : `Mã kích hoạt đã được gửi đến email ${order?.email ?? "của bạn"}.`}
+                    : `${isFC27 ? "Mã truy cập FC 27" : "Mã kích hoạt"} đã được gửi đến email ${order?.email ?? "của bạn"}.`}
                 </p>
                 <p className="text-meta text-muted">
                   Kiểm tra cả thư mục spam nếu chưa thấy email.
@@ -378,7 +379,7 @@ function SuccessContent() {
               <InlineNotice tone="warning" className="text-left">
                 {isLinkProduct
                   ? "Link tải đã sẵn sàng nhưng email chưa gửi được. Hệ thống có thể tự gửi lại — nếu chưa nhận được, liên hệ hỗ trợ kèm mã đơn."
-                  : "Mã kích hoạt đã được tạo nhưng email chưa gửi được. Hệ thống có thể tự gửi lại — nếu chưa nhận được, liên hệ hỗ trợ kèm mã đơn."}
+                  : `${isFC27 ? "Mã truy cập FC 27" : "Mã kích hoạt"} đã được tạo nhưng email chưa gửi được. Hệ thống có thể tự gửi lại — nếu chưa nhận được, liên hệ hỗ trợ kèm mã đơn.`}
               </InlineNotice>
               {orderCode && <OrderCodeRow orderCode={orderCode} />}
               <div className="space-y-2">

@@ -6,14 +6,10 @@ import { clientIp, isRateLimited } from "@/lib/server/rate-limit";
 
 const kv = Redis.fromEnv();
 
-/**
- * Placeholder R2 cho FC 27.
- * Có thể upload trực tiếp `FC27.rar` vào bucket `fc27download`, hoặc cấu hình:
- * - R2_FC27_BUCKET
- * - R2_FC27_GAME_KEY
- */
+/** Kho tải production FC 27; có thể ghi đè bằng biến môi trường khi đổi file. */
 const FC27_BUCKET = process.env.R2_FC27_BUCKET || "fc27download";
-const FC27_GAME_KEY = process.env.R2_FC27_GAME_KEY || "FC27.rar";
+const FC27_GAME_KEY =
+  process.env.R2_FC27_GAME_KEY || "EA SPORTS FC 27.rar";
 
 export async function GET(request: NextRequest) {
   if (await isRateLimited(`rl:download-fc27:${clientIp(request)}`, 30, 60)) {
@@ -53,7 +49,13 @@ export async function GET(request: NextRequest) {
   try {
     const url = await getSignedUrl(
       s3,
-      new GetObjectCommand({ Bucket: FC27_BUCKET, Key: FC27_GAME_KEY }),
+      new GetObjectCommand({
+        Bucket: FC27_BUCKET,
+        Key: FC27_GAME_KEY,
+        ResponseContentDisposition:
+          "attachment; filename*=UTF-8''EA%20SPORTS%20FC%2027.rar",
+        ResponseContentType: "application/octet-stream",
+      }),
       { expiresIn: 3600 },
     );
     return NextResponse.json({ url });

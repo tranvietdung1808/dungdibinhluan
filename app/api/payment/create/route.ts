@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Redis } from "@upstash/redis";
 import { PayOS } from "@payos/node";
 import { getProduct } from "@/lib/payment/config";
+import { clientIp, isRateLimited } from "@/lib/server/rate-limit";
 
 const kv = Redis.fromEnv();
 
@@ -27,6 +28,13 @@ function generateOrderCode(): number {
 
 export async function POST(req: NextRequest) {
   try {
+    if (await isRateLimited(`rl:payment-create:${clientIp(req)}`, 10, 600)) {
+      return NextResponse.json(
+        { error: "Bạn tạo quá nhiều yêu cầu thanh toán. Vui lòng thử lại sau." },
+        { status: 429 },
+      );
+    }
+
     const { productId, email } = await req.json();
 
     if (!productId || !email) {
@@ -93,8 +101,12 @@ export async function POST(req: NextRequest) {
     });
   } catch (error: unknown) {
     console.error("Payment create error:", error);
-    const message =
-      error instanceof Error ? error.message : "Lỗi tạo thanh toán";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json(
+      {
+        error:
+          "Chưa tạo được yêu cầu thanh toán. Vui lòng thử lại hoặc liên hệ hỗ trợ.",
+      },
+      { status: 500 },
+    );
   }
 }

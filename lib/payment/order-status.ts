@@ -116,7 +116,9 @@ function contentLabel(product: ProductConfig | null): string {
     case "link":
       return "Link tải đã sẵn sàng";
     case "code":
-      return "Mã kích hoạt đã được tạo";
+      return product.id === "fc27-standard"
+        ? "Mã truy cập FC 27 đã được tạo"
+        : "Mã kích hoạt đã được tạo";
     default:
       return "Nội dung đã được cấp";
   }

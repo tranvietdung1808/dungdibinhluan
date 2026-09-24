@@ -182,6 +182,9 @@ describe("fulfillment trong product config (A03/T13)", () => {
     expect(product.codePrefix).toBe("FC27");
     expect(product.fulfillment.kind).toBe("code");
     expect(product.returnUrl).toBe("/games/fc27");
+    expect(buildPaymentSteps("COMPLETED", product)[1].label).toBe(
+      "Mã truy cập FC 27 đã được tạo",
+    );
   });
 });
 

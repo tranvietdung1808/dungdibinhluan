@@ -6,6 +6,7 @@ import { sendCodeEmail } from "@/lib/server/email";
 import { getProduct } from "@/lib/payment/config";
 
 const kv = Redis.fromEnv();
+const COMPLETED_ORDER_TTL = 60 * 60 * 24 * 7;
 
 let payos: PayOS | null = null;
 function getPayOS(): PayOS {
@@ -73,6 +74,7 @@ export async function POST(req: NextRequest) {
       productId: string;
       email: string;
       status: string;
+      code?: string;
     }>(orderKey);
     if (!order) {
       return NextResponse.json({ success: true });
@@ -87,38 +89,62 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true });
     }
 
-    let generatedCode = "";
-    let emailSent = false;
-
-    if (product.noCode) {
-      emailSent = await sendCodeEmail(
-        order.email,
-        "",
-        product.name,
-        product.codeEntryUrl,
-        product.directDownloadUrl,
+    const paidAmount = data?.amount;
+    if (typeof paidAmount !== "number" || paidAmount !== product.price) {
+      console.error(
+        `Payment webhook: amount mismatch for order ${orderCode}`,
       );
-    } else {
-      generatedCode = await createCode(product.codePrefix, product.id);
-      emailSent = await sendCodeEmail(
-        order.email,
-        generatedCode,
-        product.name,
-        product.codeEntryUrl,
-      );
+      return NextResponse.json({ success: true });
     }
 
-    await kv.set(orderKey, {
-      ...order,
-      status: emailSent ? "COMPLETED" : "CODE_GENERATED",
-      code: generatedCode,
-      completedAt: Date.now(),
-    });
+    const lockKey = `lock:payment:${orderCode}`;
+    const lock = await kv.set(lockKey, "1", { nx: true, ex: 30 });
+    if (!lock) {
+      return NextResponse.json({ success: true });
+    }
 
-    console.log(
-      `Payment done - order:${orderCode}, email:${emailSent ? "sent" : "failed"}`,
-    );
-    return NextResponse.json({ success: true });
+    try {
+      let generatedCode = order.code ?? "";
+      let emailSent = false;
+
+      if (product.noCode) {
+        emailSent = await sendCodeEmail(
+          order.email,
+          "",
+          product.name,
+          product.codeEntryUrl,
+          product.directDownloadUrl,
+        );
+      } else {
+        if (!generatedCode) {
+          generatedCode = await createCode(product.codePrefix, product.id);
+        }
+        emailSent = await sendCodeEmail(
+          order.email,
+          generatedCode,
+          product.name,
+          product.codeEntryUrl,
+        );
+      }
+
+      await kv.set(
+        orderKey,
+        {
+          ...order,
+          status: emailSent ? "COMPLETED" : "CODE_GENERATED",
+          code: generatedCode,
+          completedAt: Date.now(),
+        },
+        { ex: COMPLETED_ORDER_TTL },
+      );
+
+      console.log(
+        `Payment done - order:${orderCode}, email:${emailSent ? "sent" : "failed"}`,
+      );
+      return NextResponse.json({ success: true });
+    } finally {
+      await kv.del(lockKey);
+    }
   } catch (error: unknown) {
     console.error("Webhook error:", error);
     return NextResponse.json({ success: true });
