@@ -40,7 +40,7 @@ const BASE = "https://www.dungdibinhluan.com";
 export const PRODUCTS: Record<ProductId, ProductConfig> = {
   "fc27-standard": {
     id: "fc27-standard",
-    name: "EA FC 27 Launch Edition",
+    name: "EA FC 27 Standard Edition",
     price: 180000,
     codePrefix: "FC27",
     returnUrl: "/games/fc27",

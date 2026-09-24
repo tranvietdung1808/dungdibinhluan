@@ -8,8 +8,8 @@ export default function FC27PaymentPage() {
     <Checkout
       product={product}
       image="/games/fc27/fc27-city.webp"
-      imageAlt="EA FC 27 Launch Edition"
-      editionLabel="Launch Edition"
+      imageAlt="EA FC 27 Standard Edition"
+      editionLabel="Standard Edition"
       bankNote="FC27"
       backHref="/games/fc27/select"
       backLabel="Quay lại trang FC 27"

@@ -5,7 +5,7 @@ Cập nhật: 24/09/2026. Trạng thái: đã triển khai local, chưa tạo gi
 ## 1. Trạng thái sản phẩm
 
 - EA FC 27 đã chính thức ra mắt.
-- Một sản phẩm đang bán: `fc27-standard` — EA FC 27 Launch Edition.
+- Một sản phẩm đang bán: `fc27-standard` — EA FC 27 Standard Edition.
 - Giá chuẩn phía server: `180000` VND trong `lib/payment/config.ts`.
 - Hình thức nhận: PayOS xác nhận thanh toán → tạo mã `FC27-XXXX-XXXX` → gửi email → khách nhập mã để mở khu tải.
 - FC 26 và thư viện mod hiện tại tiếp tục hoạt động độc lập.

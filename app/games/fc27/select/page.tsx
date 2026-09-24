@@ -11,7 +11,7 @@ const product = PRODUCTS["fc27-standard"];
 export const metadata: Metadata = {
   title: "Mua EA FC 27 — 180.000đ",
   description:
-    "EA FC 27 đã ra mắt. Mua Launch Edition giá 180.000đ, thanh toán QR ngân hàng và nhận mã truy cập qua email.",
+    "EA FC 27 đã ra mắt. Mua Standard Edition giá 180.000đ, thanh toán QR ngân hàng và nhận mã truy cập qua email.",
   alternates: { canonical: "https://dungdibinhluan.com/games/fc27/select" },
 };
 
@@ -39,36 +39,47 @@ export default function FC27SelectPage() {
           </div>
         </header>
 
-        <Card padding={false} className="mx-auto flex max-w-md flex-col overflow-hidden">
-          <div className="relative h-48 shrink-0 sm:h-52">
+        <Card
+          padding={false}
+          className="mx-auto grid w-full max-w-4xl overflow-hidden md:grid-cols-[minmax(0,0.95fr)_minmax(0,1.25fr)]"
+        >
+          <div className="relative min-h-64 md:min-h-[480px]">
             <Image
               src="/games/fc27/fc27-city.webp"
-              alt="EA FC 27 Launch Edition"
+              alt="EA FC 27 Standard Edition"
               fill
               priority
-              sizes="(min-width: 640px) 448px, 100vw"
-              className="object-cover"
+              sizes="(min-width: 768px) 42vw, 100vw"
+              className="object-cover object-center"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-surface-1)] via-transparent to-transparent" />
-            <div className="absolute left-4 top-4 flex gap-2">
+            <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-surface-1)]/80 via-transparent to-transparent md:bg-gradient-to-r md:from-transparent md:to-[var(--color-surface-1)]/35" />
+            <div className="absolute left-5 top-5 flex gap-2">
               <Badge tone="accent">Đã ra mắt</Badge>
-              <Badge tone="neutral">Launch Edition</Badge>
+              <Badge tone="neutral">Standard Edition</Badge>
             </div>
           </div>
 
-          <div className="flex flex-1 flex-col gap-4 p-5">
-            <div className="space-y-1">
-              <h2 className="text-h3 text-[var(--color-title)]">{product.name}</h2>
-              <p className="text-meta text-[var(--color-muted)]">Bộ cài đặt game</p>
+          <div className="flex flex-col justify-center gap-6 p-6 sm:p-8 md:p-10">
+            <div className="space-y-2">
+              <p className="text-meta font-semibold uppercase tracking-[0.16em] text-[var(--color-accent-strong)]">
+                Phiên bản tiêu chuẩn
+              </p>
+              <h2 className="text-h2 text-[var(--color-title)]">{product.name}</h2>
+              <p className="text-sm leading-relaxed text-[var(--color-muted)]">
+                Bộ cài đặt đầy đủ để bắt đầu mùa giải FC 27 ngay hôm nay.
+              </p>
             </div>
 
-            <ul className="space-y-1.5 text-sm">
+            <ul className="grid gap-3 text-sm sm:grid-cols-2 md:grid-cols-1">
               {benefits.map((benefit) => (
-                <li key={benefit} className="flex items-start gap-2 text-[var(--color-body)]">
-                  <span aria-hidden="true" className="mt-0.5 text-[var(--color-ok)]">
+                <li key={benefit} className="flex items-start gap-3 text-[var(--color-body)]">
+                  <span
+                    aria-hidden="true"
+                    className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--color-ok)_14%,transparent)] text-xs text-[var(--color-ok)]"
+                  >
                     ✓
                   </span>
-                  {benefit}
+                  <span className="leading-relaxed">{benefit}</span>
                 </li>
               ))}
             </ul>
@@ -77,16 +88,18 @@ export default function FC27SelectPage() {
               {product.fulfillment.receiveText}
             </InlineNotice>
 
-            <div className="mt-auto space-y-3 border-t border-[var(--color-line)] pt-4">
-              <div className="flex items-baseline justify-between">
-                <span className="text-meta text-[var(--color-muted)]">Giá</span>
-                <span className="tabular text-xl font-extrabold text-[var(--color-title)]">
+            <div className="mt-auto grid gap-4 border-t border-[var(--color-line)] pt-5 sm:grid-cols-[auto_1fr] sm:items-end">
+              <div className="space-y-1">
+                <span className="text-meta text-[var(--color-muted)]">Giá trọn gói</span>
+                <span className="tabular block text-2xl font-extrabold text-[var(--color-title)]">
                   {price}
                 </span>
               </div>
-              <ButtonLink href={product.checkoutPath} size="lg" fullWidth>
-                Mua FC 27 — {price}
-              </ButtonLink>
+              <div className="sm:justify-self-end sm:min-w-56">
+                <ButtonLink href={product.checkoutPath} size="lg" fullWidth>
+                  Mua FC 27 ngay →
+                </ButtonLink>
+              </div>
             </div>
           </div>
         </Card>

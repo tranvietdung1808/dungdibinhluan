@@ -18,7 +18,7 @@ Ngày kiểm tra: 24/09/2026.
 - Desktop 1440px: không có ảnh lỗi, page error hoặc tràn ngang.
 - Mobile 390px: không tràn ngang; hero hiển thị trạng thái ra mắt, giá 180.000đ và CTA mua.
 - Mỗi màn hình chính có đúng một `h1`.
-- Checkout hiển thị sản phẩm EA FC 27 Launch Edition và lấy giá từ cấu hình server.
+- Checkout hiển thị sản phẩm EA FC 27 Standard Edition và lấy giá từ cấu hình server.
 
 ## Chưa kiểm thử bằng giao dịch thật
 

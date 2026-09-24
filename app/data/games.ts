@@ -48,7 +48,7 @@ export const GAMES: Game[] = [
   {
     slug: "fc27",
     name: "EA FC 27",
-    subtitle: "LAUNCH EDITION",
+    subtitle: "STANDARD EDITION",
     description: "Mùa giải mới đã chính thức bắt đầu.",
     tag: "MỚI RA MẮT",
     spotlight: true,

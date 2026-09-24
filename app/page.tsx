@@ -19,11 +19,11 @@ const contactUrl = "https://web.facebook.com/dungbinhluan/";
 export const metadata: Metadata = {
   title: "EA FC 27 đã ra mắt — Mua ngay 180.000đ",
   description:
-    "EA FC 27 đã chính thức ra mắt. Mua Launch Edition giá 180.000đ, thanh toán QR ngân hàng và nhận mã tải game qua email.",
+    "EA FC 27 đã chính thức ra mắt. Mua Standard Edition giá 180.000đ, thanh toán QR ngân hàng và nhận mã tải game qua email.",
   alternates: { canonical: "https://dungdibinhluan.com" },
   openGraph: {
     title: "EA FC 27 đã ra mắt — Chơi ngay hôm nay",
-    description: "Mua EA FC 27 Launch Edition giá 180.000đ.",
+    description: "Mua EA FC 27 Standard Edition giá 180.000đ.",
     images: [
       {
         url: "/games/fc27/fc27-city.webp",
@@ -52,7 +52,7 @@ const Arrow = () => <span aria-hidden="true">↗</span>;
 const faqs = [
   [
     "EA FC 27 giá bao nhiêu?",
-    "EA FC 27 Launch Edition có giá 180.000đ. Giá được xác nhận phía máy chủ khi tạo đơn thanh toán.",
+    "EA FC 27 Standard Edition có giá 180.000đ. Giá được xác nhận phía máy chủ khi tạo đơn thanh toán.",
   ],
   [
     "Mua xong nhận game như thế nào?",
@@ -60,7 +60,7 @@ const faqs = [
   ],
   [
     "Gói 180.000đ bao gồm gì?",
-    "Gói Launch Edition gồm quyền truy cập bộ cài EA FC 27, ClientTool và hỗ trợ cài đặt. Nội dung cụ thể được hiển thị trước khi thanh toán.",
+    "Gói Standard Edition gồm quyền truy cập bộ cài EA FC 27, ClientTool và hỗ trợ cài đặt. Nội dung cụ thể được hiển thị trước khi thanh toán.",
   ],
   [
     "FC 26 và các bản mod có còn không?",
@@ -254,7 +254,7 @@ export default async function HomePage() {
             </div>
           </div>
           <div className={s.orderCard}>
-            <p className={s.eyebrow}>LAUNCH EDITION</p>
+            <p className={s.eyebrow}>STANDARD EDITION</p>
             <h3>Mua EA FC 27</h3>
             <p className={s.orderPrice}>{price}</p>
             <p className={s.orderPromise}>Chơi ngay hôm nay.</p>
@@ -281,7 +281,7 @@ export default async function HomePage() {
           <div>
             <span>01</span>
             <h3>Chọn FC 27</h3>
-            <p>Launch Edition có giá {price}.</p>
+            <p>Standard Edition có giá {price}.</p>
           </div>
           <div>
             <span>02</span>

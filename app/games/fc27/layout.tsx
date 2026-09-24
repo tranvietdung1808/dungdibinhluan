@@ -6,7 +6,7 @@ export const metadata: Metadata = {
     template: "%s | EA FC 27 | DungDiBinhLuan",
   },
   description:
-    "Mua EA FC 27 Launch Edition giá 180.000đ, thanh toán QR ngân hàng và nhận mã truy cập khu tải qua email.",
+    "Mua EA FC 27 Standard Edition giá 180.000đ, thanh toán QR ngân hàng và nhận mã truy cập khu tải qua email.",
 };
 
 export default function FC27Layout({
