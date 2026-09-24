@@ -41,7 +41,10 @@ export function OverviewSection({
         startsAt={activeSub?.starts_at}
         expiresAt={activeSub?.expires_at}
         now={now}
-        cta={{ href: "/account?section=membership", label: "Xem gói membership" }}
+        cta={{
+          href: "/account?section=membership",
+          label: "Xem gói membership",
+        }}
       />
 
       {/* Stat cards */}
@@ -50,14 +53,20 @@ export function OverviewSection({
           icon="crown"
           value={emptySubs ? "0" : subscriptionCount}
           label="Gói đã đăng ký"
-          hint={emptySubs ? "Chưa đăng ký gói nào" : daysLeftText(activeSub, now)}
+          hint={
+            emptySubs ? "Chưa đăng ký gói nào" : daysLeftText(activeSub, now)
+          }
           onClick={() => onNavigate("orders")}
         />
         <StatCard
           icon="unlock"
           value={emptyMods ? "0" : unlockedItems.length}
           label="Mod đã mở"
-          hint={emptyMods ? "Thư viện trống" : `Mở vào ${formatDate(unlockedItems[0].unlocked_at)}`}
+          hint={
+            emptyMods
+              ? "Thư viện trống"
+              : `Mở vào ${formatDate(unlockedItems[0].unlocked_at)}`
+          }
           accent={emptyMods ? "neutral" : "violet"}
           onClick={() => onNavigate("unlocked")}
         />
@@ -117,10 +126,10 @@ export function OverviewSection({
             href="/huong-dan"
           />
           <QuickLink
-            label="Game FC 26"
-            desc="Hướng dẫn tải & cài game"
+            label="Game FC 27"
+            desc="Mua, tải & cài mùa giải mới"
             icon="gamepad"
-            href="/games/fc26"
+            href="/games/fc27/select"
           />
         </div>
       </Card>

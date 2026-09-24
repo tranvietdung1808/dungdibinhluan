@@ -518,7 +518,7 @@ export function CreditSection() {
         onRetry={() => void fetchTransactions()}
       />
       <p className="text-[11px] text-muted/70 text-center">
-        Credit không có hạn sử dụng. Thanh toán qua PayOS.
+        Credit không có hạn sử dụng. Thanh toán qua QR ngân hàng.
       </p>
     </div>
   );

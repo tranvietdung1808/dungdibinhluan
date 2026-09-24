@@ -8,34 +8,34 @@ Primitives dùng chung: app/components/ui/ (Button, Badge, Card, Field, Dialog, 
 
 **Đêm trước mùa giải mới.** Một trang game có chất biên tập: ảnh cầu thủ đủ lớn, tiêu đề mạnh, nền gần đen, coral trầm dẫn mắt đến hành động. Khoảng trống giúp ảnh và giá có sức nặng. Ưu tiên sự rõ ràng và cảm xúc bóng đá.
 
-Mục tiêu trang chủ: khách hiểu ngay FC 27 đang nhận đặt trước, giá 180.000đ, chơi khi game ra mắt; khách FC 26 vẫn tìm được game và mods hiện tại.
+Mục tiêu trang chủ: khách hiểu ngay FC 27 đã ra mắt, giá 180.000đ và có thể mua qua PayOS; khách FC 26 vẫn tìm được game và mods hiện tại.
 
 ## 2. Bảng màu chuẩn
 
-| Primitive / semantic | Giá trị | Vai trò |
-| --- | --- | --- |
-| --brand-canvas / --color-surface-0 | #090a0f | Nền trang gần đen, giống tinh thần ảnh tham chiếu |
-| --brand-card / --color-surface-1 | #14131b | Card, thanh chuyển mùa, vùng bài viết |
-| --brand-raised / --color-surface-2 | #201c26 | Nút phụ, hover, vùng nổi |
-| --brand-coral / --color-accent / --color-coral / --color-primary | #cf5c69 | CTA, giá, nhấn FC 27 |
-| --brand-coral-hover / --color-accent-strong | #dd7480 | Hover CTA |
-| --color-on-accent | #100c10 | Chữ tối trên coral, tăng độ tương phản |
-| --color-title | #f4f5f7 | Tiêu đề |
-| --color-body | #b6bcc9 | Nội dung |
-| --color-muted | #9499a8 | Metadata, chú thích |
-| --color-line | rgba(255,255,255,.08) | Viền thường |
-| --color-line-strong | rgba(255,255,255,.14) | Viền rõ hơn |
-| --color-campaign-amber / --color-credit | #f5a623 | Cam điểm nhấn chiến dịch; đồng thời là màu credit/ví |
-| --color-credit-strong | #ffc15c | Hover/nhấn mạnh của credit |
-| --color-violet / --color-signal | #8f7bf7 | Nhấn phụ: thư viện, tài khoản, tính năng nổi bật |
-| --color-signal-strong | #a794ff | Hover của violet |
-| --color-ok | #3ddc97 | Thành công/uy tín |
-| --color-warn | #f4b860 | Cảnh báo/pending |
-| --color-danger | #f45d6a | Lỗi/xóa |
-| --color-*-subtle | color-mix(14–16% màu + surface-1) | Nền nhạt cho badge/notice của accent, credit, ok, warn, danger, violet |
-| --color-*-border | color-mix(38% màu + transparent) | Viền tương ứng của accent và credit |
-| --color-overlay | rgba(5,5,9,.72) | Lớp phủ dialog/lightbox/drawer |
-| --color-focus-ring | --color-coral-strong | Màu vòng focus |
+| Primitive / semantic                                             | Giá trị                           | Vai trò                                                                |
+| ---------------------------------------------------------------- | --------------------------------- | ---------------------------------------------------------------------- |
+| --brand-canvas / --color-surface-0                               | #090a0f                           | Nền trang gần đen, giống tinh thần ảnh tham chiếu                      |
+| --brand-card / --color-surface-1                                 | #14131b                           | Card, thanh chuyển mùa, vùng bài viết                                  |
+| --brand-raised / --color-surface-2                               | #201c26                           | Nút phụ, hover, vùng nổi                                               |
+| --brand-coral / --color-accent / --color-coral / --color-primary | #cf5c69                           | CTA, giá, nhấn FC 27                                                   |
+| --brand-coral-hover / --color-accent-strong                      | #dd7480                           | Hover CTA                                                              |
+| --color-on-accent                                                | #100c10                           | Chữ tối trên coral, tăng độ tương phản                                 |
+| --color-title                                                    | #f4f5f7                           | Tiêu đề                                                                |
+| --color-body                                                     | #b6bcc9                           | Nội dung                                                               |
+| --color-muted                                                    | #9499a8                           | Metadata, chú thích                                                    |
+| --color-line                                                     | rgba(255,255,255,.08)             | Viền thường                                                            |
+| --color-line-strong                                              | rgba(255,255,255,.14)             | Viền rõ hơn                                                            |
+| --color-campaign-amber / --color-credit                          | #f5a623                           | Cam điểm nhấn chiến dịch; đồng thời là màu credit/ví                   |
+| --color-credit-strong                                            | #ffc15c                           | Hover/nhấn mạnh của credit                                             |
+| --color-violet / --color-signal                                  | #8f7bf7                           | Nhấn phụ: thư viện, tài khoản, tính năng nổi bật                       |
+| --color-signal-strong                                            | #a794ff                           | Hover của violet                                                       |
+| --color-ok                                                       | #3ddc97                           | Thành công/uy tín                                                      |
+| --color-warn                                                     | #f4b860                           | Cảnh báo/pending                                                       |
+| --color-danger                                                   | #f45d6a                           | Lỗi/xóa                                                                |
+| --color-\*-subtle                                                | color-mix(14–16% màu + surface-1) | Nền nhạt cho badge/notice của accent, credit, ok, warn, danger, violet |
+| --color-\*-border                                                | color-mix(38% màu + transparent)  | Viền tương ứng của accent và credit                                    |
+| --color-overlay                                                  | rgba(5,5,9,.72)                   | Lớp phủ dialog/lightbox/drawer                                         |
+| --color-focus-ring                                               | --color-coral-strong              | Màu vòng focus                                                         |
 
 **Lớp z-index chuẩn** (không dùng số ngẫu nhiên): `--layer-sticky` 10 · `--layer-navbar` 30 · `--layer-sticky-action` 40 · `--layer-popover` 50 · `--layer-support` 60 · `--layer-overlay` 80 · `--layer-modal` 90 · `--layer-toast` 100. Dùng qua `z-[var(--layer-…)]`.
 
@@ -56,15 +56,15 @@ Màu được chọn gần với ảnh người dùng cung cấp; không khẳng
 
 Font duy nhất: Be Vietnam Pro, hỗ trợ tiếng Việt; giữ loader hiện tại.
 
-| Cấp | Desktop | Mobile | Weight / line height |
-| --- | --- | --- | --- |
-| Tên EA FC 27 | 90–116px | 76px | 900 / 1; italic |
-| Thông điệp hero | 46px | 32px | 900 / 1.22 |
-| Tiêu đề section | 26–38px | 26px | 900 / 1.25 |
-| Tiêu đề card | 19–23px | 17–23px | 700 / 1.4 |
-| Nội dung | 13–15px | 13px | 400 / 1.7–1.9 |
-| CTA | 11px | 10–11px | 900 |
-| Eyebrow/metadata | 9–10px | 8–10px | 700 |
+| Cấp              | Desktop  | Mobile  | Weight / line height |
+| ---------------- | -------- | ------- | -------------------- |
+| Tên EA FC 27     | 90–116px | 76px    | 900 / 1; italic      |
+| Thông điệp hero  | 46px     | 32px    | 900 / 1.22           |
+| Tiêu đề section  | 26–38px  | 26px    | 900 / 1.25           |
+| Tiêu đề card     | 19–23px  | 17–23px | 700 / 1.4            |
+| Nội dung         | 13–15px  | 13px    | 400 / 1.7–1.9        |
+| CTA              | 11px     | 10–11px | 900                  |
+| Eyebrow/metadata | 9–10px   | 8–10px  | 700                  |
 
 Chữ nhỏ chỉ dành cho thông tin phụ; giá, phiên bản, trạng thái, nút đặt phải luôn đọc được. Tiêu đề tracking -0.04em; tên game -0.07em. Uppercase giới hạn cho nhãn ngắn. Không viết toàn bộ đoạn văn bằng chữ hoa.
 
@@ -73,7 +73,7 @@ Type scale utility cho toàn site (định nghĩa trong globals.css): `text-h1`,
 ## 4. Bố cục
 
 - Container trang chủ 1200px, lề desktop 32px, mobile 20px.
-- Grid chính: khu đặt trước 60/40; bài viết và FAQ 38/62; mods 4 → 2 → 1 cột.
+- Grid chính: khu mua FC 27 60/40; bài viết và FAQ 38/62; mods 4 → 2 → 1 cột.
 - Section cách nhau khoảng 64px desktop / 42px mobile.
 - Hero mở đầu bằng một ảnh chủ đạo và một CTA. Không carousel tự chạy.
 - FC 26 có ảnh và nút chọn phiên bản riêng; mức nhấn thấp hơn FC 27.
@@ -86,7 +86,7 @@ Type scale utility cho toàn site (định nghĩa trong globals.css): `text-h1`,
 
 Primary: coral, chữ tối, radius 10px, cao tối thiểu 52px, bóng nhẹ. Hover sáng hơn và dịch lên 2px. Secondary: raised surface, viền mảnh, chữ sáng. Link thường có mũi tên, hover sáng lên.
 
-Hero CTA cuộn đến #dat-truoc. CTA xác nhận mở Facebook với nhãn rõ “Liên hệ đặt trước”. Không mô phỏng thanh toán thành công.
+Hero CTA mở `/games/fc27/select`. CTA mua dẫn tới checkout PayOS thật; trạng thái thành công chỉ hiển thị sau khi webhook xác nhận đơn.
 
 ### Card và hình ảnh
 

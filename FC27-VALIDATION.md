@@ -1,36 +1,33 @@
-# FC 27 — Báo cáo kiểm tra local
+# FC 27 — Báo cáo kiểm tra sau ra mắt
 
-Ngày: 15/09/2026.
+Ngày kiểm tra: 24/09/2026.
 
-## Kết quả
+## Kết quả tự động
 
-- TypeScript: npx tsc --noEmit thành công. Lần đầu vướng generated types của route players cũ; npx next typegen tạo lại route types và giải quyết lỗi.
-- ESLint: app/page.tsx và app/components/Navbar.tsx qua kiểm tra.
-- Unit tests hiện có: 3 file, 12/12 tests thành công. Không thêm test chỉ lặp lại markup.
-- Production build: npm run build thành công; 120 trang được tạo; homepage có revalidate 1 giờ.
-- Browser Chromium headless, dữ liệu local thật: không ghi nhận pageerror; không có ảnh lỗi sau khi cuộn tải tất cả ảnh.
-- Độ rộng 320, 390, 768, 1024, 1440px: scrollWidth bằng viewport, một h1, giá hiện diện, anchor nội bộ tồn tại.
-- Mobile menu: mở có aria-expanded=true, chọn FC 26 đóng menu và đến #fc26.
-- FAQ: focus summary và Enter mở nội dung.
-- Hai CTA liên hệ đặt trước trỏ đúng Facebook của cửa hàng. Không gửi tin nhắn hoặc thanh toán.
-- Đã xem ảnh chụp desktop toàn trang và mobile; tinh chỉnh crop khu đặt trước, khoảng cách navbar, font hero/CTA ở 320px.
+- TypeScript: `npx tsc --noEmit` thành công.
+- ESLint: toàn bộ file thay đổi của luồng FC 27 thành công.
+- Unit tests: 7 file, 78/78 tests thành công.
+- Production build: `npm run build` thành công; 125 trang được tạo.
+- Các route `/games/fc27`, `/games/fc27/select`, `/games/fc27/payment`, `/games/fc27/download` có trong build.
+- Endpoint `/api/download-fc27` có trong build và trả 401 khi chưa xác thực mã.
+- Test quyền xác nhận mã FC 26 không mở được FC 27 và mã FC 27 không mở được FC 26.
 
-## Tối ưu ảnh
+## Kiểm tra trình duyệt local
 
-Bốn ảnh gốc tổng 1.787.796 bytes; bốn WebP tổng 344.712 bytes, giảm khoảng 80.7%. Thư mục fc27pic giữ nguyên; public chỉ giữ bản WebP phục vụ trang.
+- Trang chủ, trang sản phẩm, checkout và trang nhập mã đều trả HTTP 200.
+- Desktop 1440px: không có ảnh lỗi, page error hoặc tràn ngang.
+- Mobile 390px: không tràn ngang; hero hiển thị trạng thái ra mắt, giá 180.000đ và CTA mua.
+- Mỗi màn hình chính có đúng một `h1`.
+- Checkout hiển thị sản phẩm EA FC 27 Launch Edition và lấy giá từ cấu hình server.
 
-## Giới hạn
+## Chưa kiểm thử bằng giao dịch thật
 
-- Chưa deploy website hoặc commit git.
-- Chưa xây checkout FC 27; dùng luồng liên hệ đặt trước. Không kiểm thử giao dịch tiền thật.
-- Browser kiểm tra ở trạng thái chưa đăng nhập; không thao tác tài khoản/đơn hàng người dùng.
-- Token toàn cục ảnh hưởng các màn hình đang dùng semantic tokens; không thực hiện visual regression đầy đủ mọi trang account/admin.
-- Ảnh edition là minh họa, không xác minh thông tin phát hành hay quyền lợi edition qua nguồn chính thức trong task này.
+- Không tạo link PayOS thật và không chuyển tiền trong quá trình kiểm tra.
+- Chưa thể tải file cuối vì object R2 FC 27 chưa được chủ website upload.
+- Cần hoàn thành checklist production trong `FC27-HOMEPAGE-BLUEPRINT.md`: upload file, kiểm tra webhook, email, mã thật và tải file từ mạng ngoài.
 
-## Xem kết quả
+## R2 placeholder
 
-- Local preview: http://localhost:5000
-- fc27-desktop-preview.png
-- fc27-mobile-preview.png
-- FC27-HOMEPAGE-BLUEPRINT.md
-- NGON-NGU-THIET-KE.md
+- Bucket mặc định: `fc27download`.
+- Object key mặc định: `FC27.rar`.
+- Có thể thay bằng `R2_FC27_BUCKET` và `R2_FC27_GAME_KEY` trong môi trường production.

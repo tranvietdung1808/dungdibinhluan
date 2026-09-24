@@ -14,7 +14,7 @@ const FANPAGE_URL = "https://web.facebook.com/dungbinhluan/";
 const MESSENGER_URL = "https://m.me/dungbinhluan";
 
 const exploreLinks = [
-  { label: "Đặt trước FC 27", href: "/#dat-truoc" },
+  { label: "FC 27 — mua ngay", href: "/games/fc27/select" },
   { label: "FC 26 — chọn phiên bản", href: "/games/fc26/select" },
   { label: "Kho mod", href: "/mods" },
   { label: "Hướng dẫn", href: "/huong-dan" },
@@ -55,8 +55,8 @@ export default function Footer() {
               </span>
             </Link>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-[var(--color-muted)]">
-              Kho mod FC 26, hướng dẫn Career Mode và bộ cài đặt game cho cộng
-              đồng game thủ Việt Nam.
+              EA FC 27, kho mod FC 26, hướng dẫn Career Mode và bộ cài đặt game
+              cho cộng đồng game thủ Việt Nam.
             </p>
           </div>
 
@@ -86,7 +86,10 @@ export default function Footer() {
                   className={linkClass}
                 >
                   Fanpage Facebook{" "}
-                  <span aria-hidden="true" className="text-[var(--color-muted)]">
+                  <span
+                    aria-hidden="true"
+                    className="text-[var(--color-muted)]"
+                  >
                     ↗
                   </span>
                 </a>
@@ -99,7 +102,10 @@ export default function Footer() {
                   className={linkClass}
                 >
                   Chat qua Messenger{" "}
-                  <span aria-hidden="true" className="text-[var(--color-muted)]">
+                  <span
+                    aria-hidden="true"
+                    className="text-[var(--color-muted)]"
+                  >
                     ↗
                   </span>
                 </a>

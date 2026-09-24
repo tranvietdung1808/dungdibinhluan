@@ -191,7 +191,8 @@ export function Checkout({
 }: CheckoutProps) {
   const price = formatVnd(product.price);
   const isCode = product.fulfillment.kind === "code";
-  const emailLabel = isCode ? "Email nhận mã kích hoạt" : "Email nhận link tải";
+  const codeLabel = product.id === "fc27-standard" ? "mã truy cập" : "mã kích hoạt";
+  const emailLabel = isCode ? `Email nhận ${codeLabel}` : "Email nhận link tải";
 
   return (
     <main className="min-h-screen bg-[var(--color-surface-0)] px-4 py-10 text-[var(--color-body)] md:py-14">
@@ -222,7 +223,9 @@ export function Checkout({
           <section className="space-y-4" aria-label="Hình thức thanh toán">
             <Card>
               <div className="space-y-1.5">
-                <h2 className="text-h3 text-[var(--color-title)]">Thanh toán qua PayOS</h2>
+                <h2 className="text-h3 text-[var(--color-title)]">
+                  Thanh toán qua QR ngân hàng
+                </h2>
                 <p className="text-sm text-[var(--color-muted)]">
                   Phương thức chính — tự động xác nhận và cấp nội dung sau khi thanh toán.
                 </p>
@@ -261,7 +264,7 @@ export function Checkout({
               />
               <div className="mt-4 border-t border-[var(--color-line)] pt-4">
                 <Badge tone={isCode ? "accent" : "violet"}>
-                  {isCode ? "Nhận mã kích hoạt qua email" : "Nhận link tải qua email"}
+                  {isCode ? `Nhận ${codeLabel} qua email` : "Nhận link tải qua email"}
                 </Badge>
               </div>
             </Card>

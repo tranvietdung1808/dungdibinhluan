@@ -1,13 +1,13 @@
 # DungDiBinhLuan Design System
 
-Current direction: FC 27 launch campaign, updated 2026-09-15.
+Current direction: FC 27 post-launch storefront, updated 2026-09-24.
 
 The canonical design specification is [NGON-NGU-THIET-KE.md](./NGON-NGU-THIET-KE.md).
 The homepage implementation and release blueprint is [FC27-HOMEPAGE-BLUEPRINT.md](./FC27-HOMEPAGE-BLUEPRINT.md).
 
 ## Visual direction
 
-A football editorial storefront at night: near-black surfaces, muted coral conversion accents, large player photography, bold Vietnamese typography and restrained motion. FC 27 is the primary campaign; FC 26 and its mod ecosystem remain available below it.
+A football editorial storefront at night: near-black surfaces, muted coral conversion accents, large player photography, bold Vietnamese typography and restrained motion. FC 27 is the primary live product with a complete checkout and download flow; FC 26 and its mod ecosystem remain available below it.
 
 ## Source of truth
 

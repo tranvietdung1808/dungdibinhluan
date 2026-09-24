@@ -23,7 +23,13 @@ import {
   type ProgressStep,
 } from "@/lib/payment/order-status";
 import { getProduct, type ProductConfig } from "@/lib/payment/config";
-import { Button, ButtonLink, Card, InlineNotice, Spinner } from "@/app/components/ui";
+import {
+  Button,
+  ButtonLink,
+  Card,
+  InlineNotice,
+  Spinner,
+} from "@/app/components/ui";
 
 type Stage =
   | "checking"
@@ -42,7 +48,16 @@ const MAX_NET_ERRORS = 3; // lỗi mạng liên tiếp → network-error
 
 function IconCheck({ className = "h-7 w-7" }: { className?: string }) {
   return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M20 6 9 17l-5-5" />
     </svg>
   );
@@ -50,7 +65,16 @@ function IconCheck({ className = "h-7 w-7" }: { className?: string }) {
 
 function IconClock() {
   return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      className="h-7 w-7"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <circle cx="12" cy="12" r="9" />
       <path d="M12 7v5l3 3" />
     </svg>
@@ -59,7 +83,16 @@ function IconClock() {
 
 function IconAlert() {
   return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      className="h-7 w-7"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" />
       <path d="M12 9v4" />
       <path d="M12 17h.01" />
@@ -69,7 +102,16 @@ function IconAlert() {
 
 function IconInfo() {
   return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      className="h-7 w-7"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <circle cx="12" cy="12" r="9" />
       <path d="M12 16v-4" />
       <path d="M12 8h.01" />
@@ -77,7 +119,13 @@ function IconInfo() {
   );
 }
 
-function IconBadge({ tone, children }: { tone: "ok" | "warn" | "danger" | "muted"; children: ReactNode }) {
+function IconBadge({
+  tone,
+  children,
+}: {
+  tone: "ok" | "warn" | "danger" | "muted";
+  children: ReactNode;
+}) {
   const tones = {
     ok: "border-ok/30 bg-ok-subtle text-ok",
     warn: "border-warn/30 bg-warn-subtle text-warn",
@@ -85,7 +133,9 @@ function IconBadge({ tone, children }: { tone: "ok" | "warn" | "danger" | "muted
     muted: "border-line bg-surface-2 text-muted",
   } as const;
   return (
-    <div className={`mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border ${tones[tone]}`}>
+    <div
+      className={`mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border ${tones[tone]}`}
+    >
       {children}
     </div>
   );
@@ -134,9 +184,17 @@ function StepList({ steps }: { steps: ProgressStep[] }) {
             {step.state === "done" ? (
               <IconCheck className="h-3.5 w-3.5" />
             ) : step.state === "issue" ? (
-              <span aria-hidden="true" className="text-[11px] font-bold leading-none">!</span>
+              <span
+                aria-hidden="true"
+                className="text-[11px] font-bold leading-none"
+              >
+                !
+              </span>
             ) : (
-              <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-current" />
+              <span
+                aria-hidden="true"
+                className="h-1.5 w-1.5 rounded-full bg-current"
+              />
             )}
           </span>
           <span
@@ -253,10 +311,11 @@ function SuccessContent() {
   const steps = order ? buildPaymentSteps(order.status, product) : null;
   // CTA "tiếp tục đúng sản phẩm": code → trang nhập mã, link → trang Mix Mods
   const continueHref = product?.returnUrl ?? "/";
+  const codeProductLabel = product?.id.startsWith("fc27-") ? "FC 27" : "FC 26";
   const continueLabel = product
     ? isLinkProduct
       ? "Xem trang Mix Mods"
-      : "Nhập mã tại trang FC 26"
+      : `Nhập mã tại trang ${codeProductLabel}`
     : "Về trang chủ";
 
   return (
@@ -265,7 +324,11 @@ function SuccessContent() {
         <Card className="space-y-6 text-center">
           {stage === "checking" && (
             <>
-              <Spinner size={40} label="Đang xác nhận thanh toán" className="mx-auto text-accent" />
+              <Spinner
+                size={40}
+                label="Đang xác nhận thanh toán"
+                className="mx-auto text-accent"
+              />
               <div className="space-y-1.5">
                 <h1 className="text-h2 text-title">Đang xác nhận thanh toán</h1>
                 <p className="text-sm text-muted">
@@ -322,7 +385,12 @@ function SuccessContent() {
                 <Button onClick={retry} fullWidth>
                   Kiểm tra lại
                 </Button>
-                <ButtonLink href={SUPPORT_URL} external variant="secondary" fullWidth>
+                <ButtonLink
+                  href={SUPPORT_URL}
+                  external
+                  variant="secondary"
+                  fullWidth
+                >
                   Liên hệ hỗ trợ
                 </ButtonLink>
               </div>
@@ -334,17 +402,24 @@ function SuccessContent() {
               <IconBadge tone="warn">
                 <IconClock />
               </IconBadge>
-              <h1 className="text-h2 text-title">Chưa xác nhận được thanh toán</h1>
+              <h1 className="text-h2 text-title">
+                Chưa xác nhận được thanh toán
+              </h1>
               <InlineNotice tone="warning" className="text-left">
-                Nếu bạn đã thanh toán xong, nội dung sẽ được cấp tự động sau khi hệ
-                thống đối chiếu — bạn không cần thanh toán lại.
+                Nếu bạn đã thanh toán xong, nội dung sẽ được cấp tự động sau khi
+                hệ thống đối chiếu — bạn không cần thanh toán lại.
               </InlineNotice>
               {orderCode && <OrderCodeRow orderCode={orderCode} />}
               <div className="space-y-2">
                 <Button onClick={retry} fullWidth>
                   Kiểm tra lại
                 </Button>
-                <ButtonLink href={SUPPORT_URL} external variant="secondary" fullWidth>
+                <ButtonLink
+                  href={SUPPORT_URL}
+                  external
+                  variant="secondary"
+                  fullWidth
+                >
                   Liên hệ hỗ trợ
                 </ButtonLink>
               </div>
@@ -356,17 +431,24 @@ function SuccessContent() {
               <IconBadge tone="danger">
                 <IconAlert />
               </IconBadge>
-              <h1 className="text-h2 text-title">Chưa kiểm tra được trạng thái</h1>
+              <h1 className="text-h2 text-title">
+                Chưa kiểm tra được trạng thái
+              </h1>
               <InlineNotice tone="danger" className="text-left">
-                Kết nối bị gián đoạn nên chưa đối chiếu được giao dịch. Đơn hàng của
-                bạn vẫn được giữ nguyên — hãy thử kiểm tra lại.
+                Kết nối bị gián đoạn nên chưa đối chiếu được giao dịch. Đơn hàng
+                của bạn vẫn được giữ nguyên — hãy thử kiểm tra lại.
               </InlineNotice>
               {orderCode && <OrderCodeRow orderCode={orderCode} />}
               <div className="space-y-2">
                 <Button onClick={retry} fullWidth>
                   Kiểm tra lại
                 </Button>
-                <ButtonLink href={SUPPORT_URL} external variant="secondary" fullWidth>
+                <ButtonLink
+                  href={SUPPORT_URL}
+                  external
+                  variant="secondary"
+                  fullWidth
+                >
                   Liên hệ hỗ trợ
                 </ButtonLink>
               </div>
@@ -379,10 +461,12 @@ function SuccessContent() {
                 <IconInfo />
               </IconBadge>
               <div className="space-y-1.5">
-                <h1 className="text-h2 text-title">Không tìm thấy thông tin giao dịch</h1>
+                <h1 className="text-h2 text-title">
+                  Không tìm thấy thông tin giao dịch
+                </h1>
                 <p className="text-sm text-muted">
-                  Trang này chỉ mở được từ liên kết sau khi thanh toán. Bạn có thể quay
-                  lại trang thanh toán để đặt hàng.
+                  Trang này chỉ mở được từ liên kết sau khi thanh toán. Bạn có
+                  thể quay lại trang thanh toán để đặt hàng.
                 </p>
               </div>
               <div className="space-y-2">

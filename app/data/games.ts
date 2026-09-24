@@ -31,7 +31,11 @@ export type GameFile = {
   /** Phiên bản ĐÃ XÁC NHẬN — để trống nếu chưa rõ */
   version?: string;
   /** Endpoint trả presigned URL { url } hoặc { error } */
-  endpoint: "/api/download" | "/api/download-mods" | "/api/download-tool";
+  endpoint:
+    | "/api/download"
+    | "/api/download-mods"
+    | "/api/download-tool"
+    | "/api/download-fc27";
   /** true = chỉ bản Full Mods mới có quyền tải file này */
   modsOnly?: boolean;
   /** Ghi chú/hướng dẫn ngắn hiển thị ngay trên file card */
@@ -41,6 +45,36 @@ export type GameFile = {
 export const FC26_GAME_SIZE = "~57 GB";
 
 export const GAMES: Game[] = [
+  {
+    slug: "fc27",
+    name: "EA FC 27",
+    subtitle: "LAUNCH EDITION",
+    description: "Mùa giải mới đã chính thức bắt đầu.",
+    tag: "MỚI RA MẮT",
+    spotlight: true,
+    hasDownload: true,
+    passSum: 16,
+    fileFormat: "RAR",
+    thumbnail: "/games/fc27/fc27-city.webp",
+    coverColor: "var(--color-accent)",
+    files: [
+      {
+        id: "fc27-setup",
+        name: "EA FC 27 — Bộ cài đặt",
+        kind: "File cài đặt game",
+        version: "FC 27",
+        endpoint: "/api/download-fc27",
+        note: "Link tải có hiệu lực trong một giờ. Nên dùng IDM hoặc Neat Download Manager để tải file lớn ổn định hơn.",
+      },
+      {
+        id: "fc27-client-tool",
+        name: "ClientTool DungDiBinhLuan",
+        kind: "Công cụ hỗ trợ cài đặt",
+        endpoint: "/api/download-tool",
+        note: "Công cụ hỗ trợ giải nén và cài đặt — làm theo video hướng dẫn trên trang.",
+      },
+    ],
+  },
   {
     slug: "fc26",
     name: "EA FC 26",

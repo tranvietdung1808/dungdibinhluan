@@ -52,7 +52,10 @@ export async function POST(req: NextRequest) {
     await getPayOS().webhooks.verify(body as unknown as Webhook);
   } catch {
     console.error("Payment webhook: signature verification failed");
-    return NextResponse.json({ success: false, error: "Invalid signature" }, { status: 401 });
+    return NextResponse.json(
+      { success: false, error: "Invalid signature" },
+      { status: 401 },
+    );
   }
 
   const data = body.data as Record<string, unknown> | undefined;
@@ -66,7 +69,11 @@ export async function POST(req: NextRequest) {
   try {
     const orderKey = `order:${orderCode}`;
 
-    const order = await kv.get<{ productId: string; email: string; status: string }>(orderKey);
+    const order = await kv.get<{
+      productId: string;
+      email: string;
+      status: string;
+    }>(orderKey);
     if (!order) {
       return NextResponse.json({ success: true });
     }
@@ -84,10 +91,21 @@ export async function POST(req: NextRequest) {
     let emailSent = false;
 
     if (product.noCode) {
-      emailSent = await sendCodeEmail(order.email, "", product.name, product.codeEntryUrl, product.directDownloadUrl);
+      emailSent = await sendCodeEmail(
+        order.email,
+        "",
+        product.name,
+        product.codeEntryUrl,
+        product.directDownloadUrl,
+      );
     } else {
-      generatedCode = await createCode(product.codePrefix);
-      emailSent = await sendCodeEmail(order.email, generatedCode, product.name, product.codeEntryUrl);
+      generatedCode = await createCode(product.codePrefix, product.id);
+      emailSent = await sendCodeEmail(
+        order.email,
+        generatedCode,
+        product.name,
+        product.codeEntryUrl,
+      );
     }
 
     await kv.set(orderKey, {
@@ -97,7 +115,9 @@ export async function POST(req: NextRequest) {
       completedAt: Date.now(),
     });
 
-    console.log(`Payment done - order:${orderCode}, email:${emailSent ? "sent" : "failed"}`);
+    console.log(
+      `Payment done - order:${orderCode}, email:${emailSent ? "sent" : "failed"}`,
+    );
     return NextResponse.json({ success: true });
   } catch (error: unknown) {
     console.error("Webhook error:", error);

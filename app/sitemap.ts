@@ -6,7 +6,7 @@ import { supabaseAdmin } from "@/lib/supabase";
 
 const SITE_URL = "https://dungdibinhluan.com";
 const BUILD_LASTMOD = new Date();
-const SUPPORTED_GAME_SLUGS = new Set(["fc26"]);
+const SUPPORTED_GAME_SLUGS = new Set(["fc27", "fc26"]);
 
 const parseDate = (str: string) => {
   try {
@@ -20,8 +20,12 @@ const parseDate = (str: string) => {
 };
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const { data: dbMods } = await supabaseAdmin.from("mods").select("slug, updated_at");
-  const { data: dbGuides } = await supabaseAdmin.from("guides").select("slug, updated_at");
+  const { data: dbMods } = await supabaseAdmin
+    .from("mods")
+    .select("slug, updated_at");
+  const { data: dbGuides } = await supabaseAdmin
+    .from("guides")
+    .select("slug, updated_at");
 
   const staticModsUrls = [...MODS, ...FACES].map((mod) => ({
     url: `${SITE_URL}/mods/${mod.slug}`,
@@ -32,7 +36,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const dynamicModsUrls = (dbMods || []).map((mod) => {
     const dateStr = mod.updated_at || "";
-    const dateObj = dateStr.includes("/") ? parseDate(dateStr) : new Date(dateStr);
+    const dateObj = dateStr.includes("/")
+      ? parseDate(dateStr)
+      : new Date(dateStr);
     return {
       url: `${SITE_URL}/mods/${mod.slug}`,
       lastModified: isNaN(dateObj.getTime()) ? BUILD_LASTMOD : dateObj,
@@ -51,12 +57,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     };
   });
 
-  const games = GAMES.filter((game) => SUPPORTED_GAME_SLUGS.has(game.slug)).map((game) => ({
-    url: `${SITE_URL}/games/${game.slug}`,
-    lastModified: BUILD_LASTMOD,
-    changeFrequency: "monthly" as const,
-    priority: 0.7,
-  }));
+  const games = GAMES.filter((game) => SUPPORTED_GAME_SLUGS.has(game.slug)).map(
+    (game) => ({
+      url: `${SITE_URL}/games/${game.slug}`,
+      lastModified: BUILD_LASTMOD,
+      changeFrequency: "monthly" as const,
+      priority: 0.7,
+    }),
+  );
 
   return [
     {

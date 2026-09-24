@@ -13,17 +13,17 @@ import ModCard from "./mods/components/ModCard";
 import { InlineNotice } from "./components/ui";
 import s from "./home.module.css";
 
-const PREORDER_PRICE = 180000;
-const price = new Intl.NumberFormat("vi-VN").format(PREORDER_PRICE) + "đ";
+const FC27_PRICE = 180000;
+const price = new Intl.NumberFormat("vi-VN").format(FC27_PRICE) + "đ";
 const contactUrl = "https://web.facebook.com/dungbinhluan/";
 export const metadata: Metadata = {
-  title: "Đặt trước EA FC 27 — 180.000đ | FC 26 & Mods",
+  title: "EA FC 27 đã ra mắt — Mua ngay 180.000đ",
   description:
-    "Đặt trước FC 27 giá 180.000đ tại DungDiBinhLuan. Chơi ngay khi game ra mắt. Khám phá FC 26, mods và hướng dẫn Career Mode.",
+    "EA FC 27 đã chính thức ra mắt. Mua Launch Edition giá 180.000đ, thanh toán QR ngân hàng và nhận mã tải game qua email.",
   alternates: { canonical: "https://dungdibinhluan.com" },
   openGraph: {
-    title: "EA FC 27 — Sẵn sàng cho mùa giải mới",
-    description: "Đặt trước 180.000đ. Chơi ngay khi game ra mắt.",
+    title: "EA FC 27 đã ra mắt — Chơi ngay hôm nay",
+    description: "Mua EA FC 27 Launch Edition giá 180.000đ.",
     images: [
       {
         url: "/games/fc27/fc27-city.webp",
@@ -35,8 +35,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Đặt trước EA FC 27 — 180.000đ",
-    description: "Chơi ngay khi game ra mắt.",
+    title: "EA FC 27 đã ra mắt — 180.000đ",
+    description: "Thanh toán QR ngân hàng, nhận mã truy cập qua email và tải game.",
     images: ["/games/fc27/fc27-city.webp"],
   },
 };
@@ -51,20 +51,20 @@ type HomeGuide = {
 const Arrow = () => <span aria-hidden="true">↗</span>;
 const faqs = [
   [
-    "Đặt trước FC 27 giá bao nhiêu?",
-    "Giá đặt trước là 180.000đ. Nhấn “Liên hệ đặt trước” để trao đổi với DungDiBinhLuan trên Facebook và xác nhận thông tin gói trước khi thanh toán.",
+    "EA FC 27 giá bao nhiêu?",
+    "EA FC 27 Launch Edition có giá 180.000đ. Giá được xác nhận phía máy chủ khi tạo đơn thanh toán.",
   ],
   [
-    "Khi nào mình được chơi FC 27?",
-    "Chơi ngay khi game ra mắt. Thời điểm mở chơi và hướng dẫn nhận game sẽ được xác nhận trực tiếp qua kênh hỗ trợ khi đặt trước.",
+    "Mua xong nhận game như thế nào?",
+    "Sau khi giao dịch QR ngân hàng được xác nhận, hệ thống tạo mã FC 27 và gửi đến email. Nhập mã tại trang FC 27 để mở khu tải game.",
   ],
   [
-    "Gói đặt trước bao gồm phiên bản nào?",
-    "Liên hệ để xác nhận phiên bản, hình thức kích hoạt, chế độ chơi và cấu hình phù hợp trước khi đặt. Hình ảnh trên trang dùng để minh họa, không đại diện cho quyền lợi của gói.",
+    "Gói 180.000đ bao gồm gì?",
+    "Gói Launch Edition gồm quyền truy cập bộ cài EA FC 27, ClientTool và hỗ trợ cài đặt. Nội dung cụ thể được hiển thị trước khi thanh toán.",
   ],
   [
     "FC 26 và các bản mod có còn không?",
-    "Có. FC 26 vẫn có khu chọn phiên bản riêng, cùng thư viện mods và hướng dẫn hiện tại. Bạn có thể tiếp tục chơi FC 26 trong lúc chờ FC 27.",
+    "Có. FC 26 vẫn có khu chọn phiên bản riêng, cùng thư viện mods và hướng dẫn hiện tại.",
   ],
   [
     "Mods FC 26 có dùng được cho FC 27 không?",
@@ -111,7 +111,9 @@ export default async function HomePage() {
       description: (m.description as string | null) ?? null,
       long_description: null,
       thumbnail: (m.thumbnail as string | null) ?? null,
-      download_url: isLocked ? null : ((m.download_url as string | null) ?? null),
+      download_url: isLocked
+        ? null
+        : ((m.download_url as string | null) ?? null),
       tags: (m.tags as string[] | null) ?? [],
       thumbnail_orientation: (m.thumbnail_orientation as string) ?? "portrait",
       featured: Boolean(m.featured),
@@ -130,13 +132,14 @@ export default async function HomePage() {
     <main className={s.home} id="home">
       {/* 1. Announcement — chỉ hiển thị khi chiến dịch đang hoạt động */}
       <div className={s.announcement}>
-        <span className={s.dot} aria-hidden="true" /> MÙA GIẢI MỚI ĐANG ĐẾN{" "}
+        <span className={s.dot} aria-hidden="true" /> EA FC 27 ĐÃ CHÍNH THỨC RA
+        MẮT{" "}
         <span className={s.announcementDivider} aria-hidden="true">
           /
         </span>{" "}
-        <a href="#dat-truoc">
-          Đặt trước FC 27 · {price} <Arrow />
-        </a>
+        <Link href="/games/fc27/select">
+          Mua ngay · {price} <Arrow />
+        </Link>
       </div>
 
       {/* 2. Hero FC 27 */}
@@ -154,13 +157,13 @@ export default async function HomePage() {
         <div className={s.heroShade} aria-hidden="true" />
         <div className={s.container}>
           <div className={s.heroTop}>
-            <span>DUNGDIBINHLUAN / NEXT SEASON</span>
-            <span>FC 27 — ĐẶT TRƯỚC</span>
+            <span>DUNGDIBINHLUAN / NEW SEASON</span>
+            <span>FC 27 — ĐÃ RA MẮT</span>
           </div>
           <div className={s.heroContent}>
             <p className={s.eyebrow}>
-              <span className={s.dot} aria-hidden="true" /> SẴN SÀNG CHO NGÀY RA
-              MẮT
+              <span className={s.dot} aria-hidden="true" /> MÙA GIẢI MỚI ĐÃ BẮT
+              ĐẦU
             </p>
             <h1 id="hero-title" className={s.heroTitle}>
               EA FC <span>27</span>
@@ -171,28 +174,28 @@ export default async function HomePage() {
               </small>
             </h1>
             <p className={s.heroDescription}>
-              Chơi ngay khi game ra mắt.
+              EA FC 27 đã chính thức có mặt.
               <br />
-              Đặt trước hôm nay, sẵn sàng bước vào sân.
+              Thanh toán, nhận mã và tải game ngay hôm nay.
             </p>
             <div className={s.heroOffer}>
               <div>
-                <span className={s.overline}>GIÁ ĐẶT TRƯỚC</span>
+                <span className={s.overline}>GIÁ RA MẮT</span>
                 <strong>{price}</strong>
               </div>
-              <a href="#dat-truoc" className={s.primary}>
-                ĐẶT TRƯỚC FC 27 <Arrow />
-              </a>
+              <Link href="/games/fc27/select" className={s.primary}>
+                MUA FC 27 NGAY <Arrow />
+              </Link>
             </div>
-            <Link href="/games/fc26/select" className={s.quietLink}>
-              Muốn chơi ngay? Khám phá FC 26 <span aria-hidden="true">→</span>
+            <Link href="/games/fc27" className={s.quietLink}>
+              Đã mua FC 27? Nhập mã để tải <span aria-hidden="true">→</span>
             </Link>
           </div>
           <div className={s.heroBottom}>
-            <span>01 / MÙA GIẢI TIẾP THEO</span>
-            <a href="#dat-truoc">
-              KHÁM PHÁ FC 27 <span aria-hidden="true">↓</span>
-            </a>
+            <span>01 / MÙA GIẢI HIỆN TẠI</span>
+            <Link href="/games/fc27/select">
+              CHƠI FC 27 NGAY <span aria-hidden="true">↗</span>
+            </Link>
             <span>HÌNH ẢNH MINH HỌA</span>
           </div>
         </div>
@@ -201,9 +204,14 @@ export default async function HomePage() {
       {/* 3. Lối tắt FC 26 / Kho mod / Hướng dẫn */}
       <div className={s.seasonRail}>
         <div className={s.container}>
+          <Link href="/games/fc27/select">
+            <b>FC 27</b>
+            <span>Đã ra mắt · Mua ngay</span>
+            <Arrow />
+          </Link>
           <Link href="/games/fc26/select">
             <b>FC 26</b>
-            <span>Chọn phiên bản & chơi ngay</span>
+            <span>Phiên bản mùa trước</span>
             <Arrow />
           </Link>
           <Link href="/mods">
@@ -211,26 +219,21 @@ export default async function HomePage() {
             <span>Faces, kits, gameplay</span>
             <Arrow />
           </Link>
-          <Link href="/huong-dan">
-            <b>HƯỚNG DẪN</b>
-            <span>Cài đặt & mẹo Career Mode</span>
-            <Arrow />
-          </Link>
         </div>
       </div>
 
-      {/* 4. Khối đặt trước */}
+      {/* 4. Khối mua FC 27 */}
       <section
-        id="dat-truoc"
+        id="mua-fc27"
         className={s.section}
-        aria-labelledby="preorder-title"
+        aria-labelledby="fc27-buy-title"
       >
         <div className={s.sectionHeader}>
           <div>
-            <p className={s.eyebrow}>01 / KHỞI ĐỘNG MÙA GIẢI MỚI</p>
-            <h2 id="preorder-title">Sẵn sàng. Ngay từ hôm nay.</h2>
+            <p className={s.eyebrow}>01 / FC 27 ĐÃ RA MẮT</p>
+            <h2 id="fc27-buy-title">Bước vào mùa giải mới.</h2>
           </div>
-          <span className={s.status}>ĐANG NHẬN ĐẶT TRƯỚC</span>
+          <span className={s.status}>ĐANG CÓ SẴN</span>
         </div>
         <div className={s.preorderGrid}>
           <div className={s.cityCard}>
@@ -245,56 +248,50 @@ export default async function HomePage() {
             <div className={s.cityCaption}>
               <div>
                 <span className={s.overline}>EA SPORTS FC 27</span>
-                <h3>Một mùa giải để mong chờ.</h3>
+                <h3>Mùa giải mới đã bắt đầu.</h3>
               </div>
               <span aria-hidden="true">↗</span>
             </div>
           </div>
           <div className={s.orderCard}>
-            <p className={s.eyebrow}>DÀNH CHO ANH EM SẴN SÀNG</p>
-            <h3>Đặt trước FC 27</h3>
+            <p className={s.eyebrow}>LAUNCH EDITION</p>
+            <h3>Mua EA FC 27</h3>
             <p className={s.orderPrice}>{price}</p>
-            <p className={s.orderPromise}>Chơi ngay khi game ra mắt.</p>
+            <p className={s.orderPromise}>Chơi ngay hôm nay.</p>
             <ul className={s.benefits}>
               <li>
-                <span>01</span> Xác nhận gói phù hợp trước khi đặt
+                <span>01</span> Thanh toán bằng QR ngân hàng
               </li>
               <li>
-                <span>02</span> Nhận thông tin mở chơi qua hỗ trợ
+                <span>02</span> Nhận mã FC 27 qua email
               </li>
               <li>
-                <span>03</span> Hướng dẫn nhận game khi ra mắt
+                <span>03</span> Mở khu tải game từ R2
               </li>
             </ul>
-            <a
-              className={s.primary}
-              href={contactUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              LIÊN HỆ ĐẶT TRƯỚC QUA FACEBOOK <Arrow />
-            </a>
+            <Link className={s.primary} href="/games/fc27/payment">
+              MUA FC 27 — {price} <Arrow />
+            </Link>
             <p className={s.fineprint}>
-              Mở fanpage Facebook của DungDiBinhLuan để xác nhận gói và đặt
-              trước.
+              Hệ thống tự xác nhận thanh toán và gửi mã truy cập qua email.
             </p>
           </div>
         </div>
         <div className={s.steps}>
           <div>
             <span>01</span>
-            <h3>Chọn mùa giải mới</h3>
-            <p>FC 27 với giá đặt trước {price}.</p>
+            <h3>Chọn FC 27</h3>
+            <p>Launch Edition có giá {price}.</p>
           </div>
           <div>
             <span>02</span>
-            <h3>Kết nối với fanpage</h3>
-            <p>Nhắn fanpage để xác nhận phiên bản và cách nhận game.</p>
+            <h3>Thanh toán QR ngân hàng</h3>
+            <p>Quét QR và chờ hệ thống xác nhận tự động.</p>
           </div>
           <div>
             <span>03</span>
-            <h3>Sẵn sàng vào sân</h3>
-            <p>Chơi ngay khi game ra mắt.</p>
+            <h3>Nhận mã & tải game</h3>
+            <p>Nhập mã gửi qua email để mở link R2.</p>
           </div>
         </div>
       </section>
@@ -303,8 +300,8 @@ export default async function HomePage() {
       <section id="fc26" className={s.section} aria-labelledby="fc26-title">
         <div className={s.sectionHeader}>
           <div>
-            <p className={s.eyebrow}>02 / TRONG LÚC CHỜ FC 27</p>
-            <h2 id="fc26-title">Sân cỏ vẫn đang chờ bạn.</h2>
+            <p className={s.eyebrow}>02 / MÙA GIẢI TRƯỚC</p>
+            <h2 id="fc26-title">FC 26 vẫn luôn sẵn sàng.</h2>
           </div>
           <Link href="/games/fc26/select" className={s.textLink}>
             Chi tiết FC 26 <Arrow />
@@ -415,10 +412,7 @@ export default async function HomePage() {
           </div>
           <div className={s.guideList}>
             {guidesFailed ? (
-              <InlineNotice
-                tone="warning"
-                title="Chưa tải được bài hướng dẫn"
-              >
+              <InlineNotice tone="warning" title="Chưa tải được bài hướng dẫn">
                 Các khối khác trên trang vẫn hoạt động.{" "}
                 <Link href="/huong-dan" className={s.noticeLink}>
                   Mở chuyên mục hướng dẫn →
@@ -444,7 +438,9 @@ export default async function HomePage() {
                           alt=""
                           fill
                           sizes="80px"
-                          unoptimized={guide.thumbnail.startsWith("/api/media/")}
+                          unoptimized={guide.thumbnail.startsWith(
+                            "/api/media/",
+                          )}
                         />
                       </div>
                     ) : (
@@ -534,7 +530,7 @@ export default async function HomePage() {
               Dũng trả lời.
             </h2>
             <p className={s.sectionDescription}>
-              Những điều cần biết về đặt trước FC 27.
+              Những điều cần biết trước khi mua và tải FC 27.
             </p>
             <Image
               className={s.faqLogo}

@@ -26,7 +26,12 @@ describe("parseTopupOrder — /api/credit/topup/order (A01/T09)", () => {
     const order = parseTopupOrder({
       status: "paid",
       paid: true,
-      breakdown: { amountVnd: 100000, creditBase: 100, creditBonus: 10, creditTotal: 110 },
+      breakdown: {
+        amountVnd: 100000,
+        creditBase: 100,
+        creditBonus: 10,
+        creditTotal: 110,
+      },
     });
     expect(order).not.toBeNull();
     expect(order!.paid).toBe(true);
@@ -43,7 +48,12 @@ describe("parseTopupOrder — /api/credit/topup/order (A01/T09)", () => {
     const order = parseTopupOrder({
       status: "pending",
       paid: false,
-      breakdown: { amountVnd: 50000, creditBase: 50, creditBonus: 0, creditTotal: 50 },
+      breakdown: {
+        amountVnd: 50000,
+        creditBase: 50,
+        creditBonus: 0,
+        creditTotal: 50,
+      },
     });
     expect(order!.paid).toBe(false);
     expect(order!.status).toBe("pending");
@@ -109,7 +119,10 @@ describe("tách trạng thái fulfillment (A04/T14)", () => {
   });
 
   it("buildPaymentSteps — CODE_GENERATED có bước email ở trạng thái issue", () => {
-    const steps = buildPaymentSteps("CODE_GENERATED", getProduct("fc26-normal"));
+    const steps = buildPaymentSteps(
+      "CODE_GENERATED",
+      getProduct("fc26-normal"),
+    );
     expect(steps.map((s) => [s.key, s.state])).toEqual([
       ["paid", "done"],
       ["content", "done"],
@@ -162,13 +175,26 @@ describe("fulfillment trong product config (A03/T13)", () => {
     expect(getProduct("fc26-normal")!.fulfillment.kind).toBe("code");
     expect(getProduct("fc26-mods")!.fulfillment.kind).toBe("code");
   });
+
+  it("FC27 có giá server 180.000đ và dùng mã truy cập riêng", () => {
+    const product = getProduct("fc27-standard")!;
+    expect(product.price).toBe(180000);
+    expect(product.codePrefix).toBe("FC27");
+    expect(product.fulfillment.kind).toBe("code");
+    expect(product.returnUrl).toBe("/games/fc27");
+  });
 });
 
 describe("checkoutPathFor — đích quay lại của /payment/cancel (T15)", () => {
   it("map đúng checkout từng sản phẩm", () => {
-    expect(checkoutPathFor("fc26-normal")).toBe("/games/fc26/payment?edition=normal");
-    expect(checkoutPathFor("fc26-mods")).toBe("/games/fc26/payment?edition=mods");
+    expect(checkoutPathFor("fc26-normal")).toBe(
+      "/games/fc26/payment?edition=normal",
+    );
+    expect(checkoutPathFor("fc26-mods")).toBe(
+      "/games/fc26/payment?edition=mods",
+    );
     expect(checkoutPathFor("mix-mods")).toBe("/mods/mix-mods-fc26/payment");
+    expect(checkoutPathFor("fc27-standard")).toBe("/games/fc27/payment");
   });
 
   it("productId lạ/thiếu → fallback trang chọn phiên bản", () => {
@@ -180,8 +206,12 @@ describe("checkoutPathFor — đích quay lại của /payment/cancel (T15)", ()
 
 describe("sanitizeInternalPath — ?next= sau nạp credit (§5.3, open-redirect guard)", () => {
   it("chấp nhận path nội bộ, giữ query/hash", () => {
-    expect(sanitizeInternalPath("/mods/mix-mods-fc26")).toBe("/mods/mix-mods-fc26");
-    expect(sanitizeInternalPath("/account?section=credit")).toBe("/account?section=credit");
+    expect(sanitizeInternalPath("/mods/mix-mods-fc26")).toBe(
+      "/mods/mix-mods-fc26",
+    );
+    expect(sanitizeInternalPath("/account?section=credit")).toBe(
+      "/account?section=credit",
+    );
     expect(sanitizeInternalPath("/mods/x#download")).toBe("/mods/x#download");
   });
 

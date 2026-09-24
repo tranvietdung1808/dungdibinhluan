@@ -55,10 +55,23 @@ function CodeEntryView({
       const res = await fetch("/api/verify-code", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: trimmed }),
+        body: JSON.stringify({
+          code: trimmed,
+          productId:
+            expectedEdition === "mods"
+              ? "fc26-mods"
+              : expectedEdition === "normal"
+                ? "fc26-normal"
+                : undefined,
+        }),
       });
       const data = (await res.json().catch(() => null)) as
-        | { valid?: boolean; type?: string; message?: string }
+        | {
+            valid?: boolean;
+            type?: string;
+            productId?: string | null;
+            message?: string;
+          }
         | null;
 
       if (res.status === 429) {
@@ -74,6 +87,10 @@ function CodeEntryView({
         return;
       }
       if (data?.valid) {
+        if (data.productId && !data.productId.startsWith("fc26-")) {
+          setError("Mã này không thuộc sản phẩm FC 26.");
+          return;
+        }
         onSuccess(data.type === "mods" ? "mods" : "normal");
         return;
       }

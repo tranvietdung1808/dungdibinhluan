@@ -102,11 +102,11 @@ export default function PayOSButton({
       </Field>
 
       <Button onClick={handlePay} loading={loading} size="lg" fullWidth>
-        Thanh toán {price} qua PayOS
+        Thanh toán {price} qua QR ngân hàng
       </Button>
       <p className="text-meta text-muted">
-        Quét QR hoặc đăng nhập ngân hàng trên cổng PayOS — hệ thống tự xác nhận
-        sau khi thanh toán.
+        Quét mã QR bằng ứng dụng ngân hàng — hệ thống tự xác nhận sau khi thanh
+        toán.
       </p>
     </div>
   );

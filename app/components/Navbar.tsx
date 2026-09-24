@@ -23,16 +23,16 @@ export const ZALO_URL = "https://zalo.me/0917742686";
 export const TIKTOK_URL = "https://www.tiktok.com/@dungdibinhluan";
 
 const navItems = [
-  { label: "FC 27", href: "/#dat-truoc" },
+  { label: "FC 27 — Mới", href: "/games/fc27/select" },
   { label: "FC 26", href: "/games/fc26/select" },
   { label: "Kho mod", href: "/mods" },
   { label: "Hướng dẫn", href: "/huong-dan" },
 ];
 
 function isActivePath(pathname: string, href: string): boolean {
-  if (href === "/#dat-truoc") return pathname === "/";
   const path = href.split("#")[0];
-  if (path === "/games/fc26/select") return pathname.startsWith("/games");
+  if (path === "/games/fc27/select") return pathname.startsWith("/games/fc27");
+  if (path === "/games/fc26/select") return pathname.startsWith("/games/fc26");
   return pathname === path || pathname.startsWith(`${path}/`);
 }
 

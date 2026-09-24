@@ -17,7 +17,12 @@ const MESSENGER_URL = "https://m.me/dungbinhluan";
 
 function MessengerGlyph({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+    <svg
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      className={className}
+      aria-hidden="true"
+    >
       <path d="M12 2C6.477 2 2 6.145 2 11.26c0 2.91 1.488 5.503 3.82 7.243v3.497l3.488-1.928c.866.241 1.77.368 2.692.368 5.523 0 10-4.145 10-9.26S17.523 2 12 2zm1.157 12.394l-2.986-3.18-5.839 3.18 6.417-6.815 3.056 3.18 5.766-3.18-6.414 6.815z" />
     </svg>
   );
@@ -118,9 +123,7 @@ export default function MessengerButton() {
                 <h3 className="truncate text-sm font-bold text-white">
                   DungDiBinhLuan
                 </h3>
-                <p className="text-xs text-white/85">
-                  Kênh hỗ trợ chính thức
-                </p>
+                <p className="text-xs text-white/85">Kênh hỗ trợ chính thức</p>
               </div>
             </div>
             <button
@@ -129,8 +132,19 @@ export default function MessengerButton() {
               className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white transition-colors hover:bg-white/15"
               aria-label="Đóng hỗ trợ"
             >
-              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="h-5 w-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2.5}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>
@@ -148,7 +162,7 @@ export default function MessengerButton() {
                 />
               </span>
               <p className="max-w-[85%] rounded-2xl rounded-tl-sm border border-[var(--color-line)] bg-[var(--color-surface-1)] p-3 text-sm leading-relaxed text-[var(--color-body)] shadow-sm">
-                Chào bạn! Cần hỗ trợ về mod FC 26, tải game hay đặt trước FC 27?
+                Chào bạn! Cần hỗ trợ mua và cài FC 27, tải game hay mod FC 26?
                 Nhắn cho DungDiBinhLuan qua Messenger nhé.
               </p>
             </div>
@@ -182,18 +196,33 @@ export default function MessengerButton() {
       >
         <span
           className={`absolute transition-all duration-200 ${
-            isOpen ? "rotate-90 scale-50 opacity-0" : "rotate-0 scale-100 opacity-100"
+            isOpen
+              ? "rotate-90 scale-50 opacity-0"
+              : "rotate-0 scale-100 opacity-100"
           }`}
         >
           <MessengerGlyph className="h-6 w-6" />
         </span>
         <span
           className={`absolute transition-all duration-200 ${
-            isOpen ? "rotate-0 scale-100 opacity-100" : "-rotate-90 scale-50 opacity-0"
+            isOpen
+              ? "rotate-0 scale-100 opacity-100"
+              : "-rotate-90 scale-50 opacity-0"
           }`}
         >
-          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+          <svg
+            className="h-5 w-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2.5}
+              d="M19 9l-7 7-7-7"
+            />
           </svg>
         </span>
       </button>

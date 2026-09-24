@@ -389,7 +389,7 @@ function CreditPageContent() {
     : !user
       ? "Đăng nhập để nạp credit"
       : credit
-        ? `Nạp ${vnd(amountVnd)} qua PayOS`
+        ? `Nạp ${vnd(amountVnd)} qua QR ngân hàng`
         : "Chọn số tiền nạp";
 
   return (
@@ -409,7 +409,7 @@ function CreditPageContent() {
           <p className="mt-3 text-[15px] leading-relaxed text-muted">
             Credit là đơn vị dùng để mở khóa mod trên DungDiBinhLuan. Nạp tối
             thiểu {vnd(MIN_TOPUP)} — từ {vnd(BONUS_THRESHOLD)} trở lên được tặng
-            thêm +{BONUS_PERCENT_LABEL}% credit. Thanh toán qua PayOS.
+            thêm +{BONUS_PERCENT_LABEL}% credit. Thanh toán qua QR ngân hàng.
           </p>
           {nextPath && (
             <InlineNotice tone="accent" className="mt-4">
@@ -665,7 +665,7 @@ function CreditPageContent() {
             )}
 
             <p className="text-meta leading-relaxed text-muted">
-              Sau khi PayOS xác nhận thanh toán, credit được cộng tự động vào
+              Sau khi giao dịch được xác nhận, credit được cộng tự động vào
               ví — thường trong vài giây. Bạn có thể theo dõi số dư ở navbar
               hoặc mục ví credit trong tài khoản.
             </p>

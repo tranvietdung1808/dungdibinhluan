@@ -20,7 +20,9 @@ function getPayOS(): PayOS {
 const ORDER_TTL = 60 * 60;
 
 function generateOrderCode(): number {
-  return Math.floor(Date.now() / 1000) * 1000 + Math.floor(Math.random() * 1000);
+  return (
+    Math.floor(Date.now() / 1000) * 1000 + Math.floor(Math.random() * 1000)
+  );
 }
 
 export async function POST(req: NextRequest) {
@@ -28,28 +30,38 @@ export async function POST(req: NextRequest) {
     const { productId, email } = await req.json();
 
     if (!productId || !email) {
-      return NextResponse.json({ error: "Thiếu productId hoặc email" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Thiếu productId hoặc email" },
+        { status: 400 },
+      );
     }
 
     const product = getProduct(productId);
     if (!product) {
-      return NextResponse.json({ error: "Sản phẩm không hợp lệ" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Sản phẩm không hợp lệ" },
+        { status: 400 },
+      );
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      return NextResponse.json({ error: "Email không hợp lệ" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Email không hợp lệ" },
+        { status: 400 },
+      );
     }
 
     const orderCode = generateOrderCode();
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://dungdibinhluan.com";
+    const baseUrl =
+      process.env.NEXT_PUBLIC_BASE_URL || "https://dungdibinhluan.com";
 
     const paymentData = {
       orderCode,
       amount: product.price,
       description: `${product.name}`,
       cancelUrl: `${baseUrl}/payment/cancel?orderCode=${orderCode}&product=${productId}`,
-      returnUrl: `${baseUrl}/payment/success?orderCode=${orderCode}`,
+      returnUrl: `${baseUrl}/payment/success?orderCode=${orderCode}&product=${productId}`,
       buyerEmail: email,
       items: [
         {
@@ -81,7 +93,8 @@ export async function POST(req: NextRequest) {
     });
   } catch (error: unknown) {
     console.error("Payment create error:", error);
-    const message = error instanceof Error ? error.message : "Lỗi tạo thanh toán";
+    const message =
+      error instanceof Error ? error.message : "Lỗi tạo thanh toán";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

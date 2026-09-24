@@ -18,12 +18,12 @@ const beVietnamPro = Be_Vietnam_Pro({
 
 export const metadata: Metadata = {
   title: {
-    default: "DungDiBinhLuan — Mod Game FC 26, FIFA, Facepack",
+    default: "DungDiBinhLuan — EA FC 27, Mod FC 26 & Career Mode",
     template: "%s | DungDiBinhLuan",
   },
 
   description:
-    "Tải mod FC 26, FIFA, facepack, kits và bộ cài đặt game tối ưu hiệu năng. Mod chất lượng cao được tuyển chọn bởi DungDiBinhLuan.",
+    "Mua EA FC 27, tải mod FC 26, facepack, kits và khám phá hướng dẫn Career Mode tại DungDiBinhLuan.",
 
   metadataBase: new URL("https://dungdibinhluan.com"),
 
@@ -34,6 +34,10 @@ export const metadata: Metadata = {
   },
 
   keywords: [
+    "EA FC 27",
+    "mua FC 27",
+    "tải FC 27",
+    "EA Sports FC 27 Việt Nam",
     "FC 26 mod",
     "FIFA mod",
     "FC 26 facepack",
@@ -58,7 +62,7 @@ export const metadata: Metadata = {
     "tải mod FC 26",
     "career mode FC 26",
     "cài đặt mod FIFA",
-    "mod update EA FC"
+    "mod update EA FC",
   ],
 
   authors: [{ name: "DungDiBinhLuan" }],
@@ -69,9 +73,9 @@ export const metadata: Metadata = {
     locale: "vi_VN",
     url: "https://dungdibinhluan.com",
     siteName: "DungDiBinhLuan",
-    title: "DungDiBinhLuan — Mod FC 26, FIFA chất lượng cao",
+    title: "DungDiBinhLuan — EA FC 27 & Mod bóng đá",
     description:
-      "Website chia sẻ mod FC 26, FIFA, facepack, kits và bộ cài đặt game tối ưu hiệu năng.",
+      "Mua EA FC 27 và khám phá mod FC 26, facepack, kits cùng hướng dẫn Career Mode.",
     images: [
       {
         url: "/og-image.jpg",
@@ -84,8 +88,8 @@ export const metadata: Metadata = {
 
   twitter: {
     card: "summary_large_image",
-    title: "DungDiBinhLuan — Mod FC 26, FIFA",
-    description: "Website chia sẻ mod game chất lượng cao.",
+    title: "DungDiBinhLuan — EA FC 27 & Mod bóng đá",
+    description: "Mua FC 27 và khám phá mod game bóng đá chất lượng cao.",
     images: ["/og-image.jpg"],
   },
 
