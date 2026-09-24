@@ -266,7 +266,7 @@ export default async function HomePage() {
                 <span>02</span> Nhận mã FC 27 qua email
               </li>
               <li>
-                <span>03</span> Mở khu tải game từ R2
+                <span>03</span> Mở khu tải và nhận game
               </li>
             </ul>
             <Link className={s.primary} href="/games/fc27/payment">
@@ -291,7 +291,7 @@ export default async function HomePage() {
           <div>
             <span>03</span>
             <h3>Nhận mã & tải game</h3>
-            <p>Nhập mã gửi qua email để mở link R2.</p>
+            <p>Nhập mã gửi qua email để mở khu tải game.</p>
           </div>
         </div>
       </section>
