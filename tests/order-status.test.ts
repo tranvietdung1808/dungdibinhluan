@@ -20,6 +20,7 @@ import {
   DEFAULT_CHECKOUT_PATH,
 } from "@/lib/payment/order-status";
 import { PRODUCTS, getProduct, type ProductId } from "@/lib/payment/config";
+import { getManualCodeOption } from "@/lib/payment/manual-code";
 
 describe("parseTopupOrder — /api/credit/topup/order (A01/T09)", () => {
   it("đọc `paid` ở ROOT của response, không phải data.data.paid", () => {
@@ -234,5 +235,19 @@ describe("sanitizeInternalPath — ?next= sau nạp credit (§5.3, open-redirect
     expect(sanitizeInternalPath(null)).toBeNull();
     expect(sanitizeInternalPath(undefined)).toBeNull();
     expect(sanitizeInternalPath("  /mods/x  ")).toBe("/mods/x");
+  });
+});
+
+describe("cấp mã thủ công trong admin", () => {
+  it("map mã FC27 vào đúng sản phẩm FC 27", () => {
+    expect(getManualCodeOption("fc27")).toMatchObject({
+      prefix: "FC27",
+      productId: "fc27-standard",
+    });
+  });
+
+  it("không fallback loại mã lạ sang mã FC 26", () => {
+    expect(getManualCodeOption("unknown")).toBeNull();
+    expect(getManualCodeOption(null)).toBeNull();
   });
 });

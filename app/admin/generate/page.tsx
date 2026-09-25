@@ -4,6 +4,10 @@ import { useRef, useState } from 'react'
 import { AdminPage } from '../components/AdminPage'
 import { useAdminToast } from '../components/AdminShell'
 import { Button, Field, InlineNotice, inputClass } from '@/app/components/ui'
+import {
+  MANUAL_CODE_OPTIONS,
+  type ManualCodeType,
+} from '@/lib/payment/manual-code'
 
 // =====================================================
 // /admin/generate — tạo mã truy cập (§16.8)
@@ -12,13 +16,6 @@ import { Button, Field, InlineNotice, inputClass } from '@/app/components/ui'
 // lượng, tiến trình; lỗi giữa chừng vẫn giữ mã đã tạo.
 // =====================================================
 
-type CodeType = 'normal' | 'mods'
-
-const TYPE_META: Record<CodeType, { label: string; hint: string }> = {
-  normal: { label: 'DUNG-xxxx', hint: 'Bản thường — hiệu lực 24h' },
-  mods: { label: 'MODS-xxxx', hint: 'Full mods — hiệu lực 24h' },
-}
-
 const QUANTITIES = [1, 5, 10, 50, 100]
 
 export default function GenerateCodePage() {
@@ -26,7 +23,7 @@ export default function GenerateCodePage() {
   const [codes, setCodes] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null)
-  const [codeType, setCodeType] = useState<CodeType>('normal')
+  const [codeType, setCodeType] = useState<ManualCodeType>('fc27')
   const [adminKey, setAdminKey] = useState('')
   const [error, setError] = useState('')
   const [copied, setCopied] = useState<string | null>(null)
@@ -123,8 +120,8 @@ export default function GenerateCodePage() {
             <legend className="mb-1.5 text-sm font-medium text-[var(--color-title)]">
               Loại mã
             </legend>
-            <div className="grid grid-cols-2 gap-3">
-              {(Object.keys(TYPE_META) as CodeType[]).map((t) => {
+            <div className="grid gap-3 sm:grid-cols-3">
+              {(Object.keys(MANUAL_CODE_OPTIONS) as ManualCodeType[]).map((t) => {
                 const active = codeType === t
                 return (
                   <button
@@ -143,10 +140,10 @@ export default function GenerateCodePage() {
                         active ? 'text-[var(--color-title)]' : 'text-[var(--color-body)]'
                       }`}
                     >
-                      {TYPE_META[t].label}
+                      {MANUAL_CODE_OPTIONS[t].label}
                     </span>
                     <span className="mt-0.5 block text-xs text-[var(--color-muted)]">
-                      {TYPE_META[t].hint}
+                      {MANUAL_CODE_OPTIONS[t].hint}
                     </span>
                   </button>
                 )
@@ -181,7 +178,8 @@ export default function GenerateCodePage() {
                   aria-hidden="true"
                 />
                 <span>
-                  Đang tạo {progress.done}/{progress.total} mã {TYPE_META[codeType].label}…
+                  Đang tạo {progress.done}/{progress.total} mã{' '}
+                  {MANUAL_CODE_OPTIONS[codeType].label}…
                 </span>
                 <button
                   type="button"
