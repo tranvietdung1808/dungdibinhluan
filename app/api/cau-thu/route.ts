@@ -1,6 +1,6 @@
 // =====================================================
 // GET /api/cau-thu — danh sách catalog cầu thủ (bản active duy nhất)
-// Blueprint §8: chỉ trả list DTO + phân trang + revision đích (release);
+// Blueprint §8: chỉ trả list DTO + phân trang (không lộ id/release nội bộ);
 // validate/escape params qua parseCatalogParams; lỗi public tiếng Việt.
 // =====================================================
 
@@ -32,7 +32,6 @@ export async function GET(req: Request) {
       count: result.count,
       page: result.page,
       totalPages: result.totalPages,
-      release: result.releaseId,
     });
   }, "Chưa tải được danh sách. Thử lại nhé.");
 }
