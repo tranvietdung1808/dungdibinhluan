@@ -86,6 +86,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     },
     {
+      // Danh bạ cầu thủ — chỉ entry trang list; slug để index qua list
+      url: `${SITE_URL}/cau-thu`,
+      lastModified: BUILD_LASTMOD,
+      changeFrequency: "daily" as const,
+      priority: 0.8,
+    },
+    {
       url: `${SITE_URL}/dmca`,
       lastModified: BUILD_LASTMOD,
       changeFrequency: "yearly" as const,

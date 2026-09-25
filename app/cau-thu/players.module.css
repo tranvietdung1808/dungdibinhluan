@@ -1,0 +1,65 @@
+/* =====================================================
+   players.module.css — phần Tailwind không cover gọn:
+   chiều cao hàng bảng cố định + accordion <details> chỉ số.
+   Chỉ dùng design token có sẵn trong globals.css.
+   ===================================================== */
+
+/* Hàng bảng ~70px (§9.1: 68–76px) */
+.tableRow {
+  height: 70px;
+}
+
+/* --- Accordion nhóm chỉ số (trang chi tiết, §9.3) --- */
+.statDetails {
+  border: 1px solid var(--color-line);
+  border-radius: 14px;
+  background: var(--color-surface-1);
+  overflow: hidden;
+}
+
+.statDetails summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 48px; /* mục tiêu chạm ≥44px */
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: var(--color-title);
+  transition: background-color 0.15s ease;
+}
+
+.statDetails summary::-webkit-details-marker {
+  display: none;
+}
+
+.statDetails summary::marker {
+  content: "";
+}
+
+.statDetails summary:hover {
+  background: var(--color-surface-2);
+}
+
+.statDetails summary:focus-visible {
+  outline: 2px solid var(--color-coral);
+  outline-offset: -2px;
+}
+
+.statDetails .chev {
+  flex-shrink: 0;
+  color: var(--color-muted);
+  transition: transform 0.18s ease;
+}
+
+.statDetails[open] .chev {
+  transform: rotate(180deg);
+}
+
+.statBody {
+  border-top: 1px solid var(--color-line);
+  padding: 0.25rem 1rem 0.875rem;
+}

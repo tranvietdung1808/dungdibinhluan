@@ -26,6 +26,7 @@ const navItems = [
   { label: "FC 27 — Mới", href: "/games/fc27/select" },
   { label: "FC 26", href: "/games/fc26/select" },
   { label: "Kho mod", href: "/mods" },
+  { label: "Cầu thủ", href: "/cau-thu" },
   { label: "Hướng dẫn", href: "/huong-dan" },
 ];
 
