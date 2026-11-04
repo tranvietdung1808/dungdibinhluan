@@ -88,11 +88,15 @@ function OrderSummary({
           </p>
           <div className="space-y-2 border-t border-[var(--color-line)] pt-4 text-sm">
             <div className="flex items-center justify-between">
-              <span className="text-[var(--color-muted)]">Đơn giá</span>
+              <span className="text-[var(--color-muted)]">
+                {product.donation ? "Mức donate" : "Đơn giá"}
+              </span>
               <span className="tabular font-medium text-[var(--color-body)]">{price}</span>
             </div>
             <div className="flex items-center justify-between border-t border-[var(--color-line)] pt-3">
-              <span className="font-semibold text-[var(--color-title)]">Tổng thanh toán</span>
+              <span className="font-semibold text-[var(--color-title)]">
+                {product.donation ? "Tổng donate" : "Tổng thanh toán"}
+              </span>
               <span className="tabular text-price text-[var(--color-accent-strong)]">{price}</span>
             </div>
           </div>
@@ -190,17 +194,37 @@ export function Checkout({
   codeEntryHref,
 }: CheckoutProps) {
   const price = formatVnd(product.price);
-  const isCode = product.fulfillment.kind === "code";
+  const kind = product.fulfillment.kind;
+  const isCode = kind === "code";
+  const action = product.donation ? "Donate" : "Thanh toán";
   const codeLabel = product.id === "fc27-standard" ? "mã truy cập" : "mã kích hoạt";
-  const emailLabel = isCode ? `Email nhận ${codeLabel}` : "Email nhận link tải";
+  const emailLabel = isCode
+    ? `Email nhận ${codeLabel}`
+    : kind === "manual"
+      ? "Email nhận hướng dẫn hỗ trợ"
+      : "Email nhận link tải";
+  const receiveBadge = isCode
+    ? `Nhận ${codeLabel} qua email`
+    : kind === "manual"
+      ? "Hỗ trợ cài đặt qua UltraViewer"
+      : "Nhận link tải qua email";
 
   return (
     <main className="min-h-screen bg-[var(--color-surface-0)] px-4 py-10 text-[var(--color-body)] md:py-14">
       <div className="mx-auto w-full max-w-4xl space-y-6">
         <header className="space-y-3">
-          <CheckoutSteps current={1} />
+          <CheckoutSteps
+            current={1}
+            steps={
+              product.donation
+                ? ["Xem gói hỗ trợ", "Donate", "Cài đặt qua UltraViewer"]
+                : undefined
+            }
+          />
           <div className="space-y-1.5">
-            <h1 className="text-h2 text-[var(--color-title)]">Thanh toán — {product.name}</h1>
+            <h1 className="text-h2 text-[var(--color-title)]">
+              {action} — {product.name}
+            </h1>
             <p className="text-sm text-[var(--color-muted)]">
               {product.fulfillment.receiveText}
             </p>
@@ -220,14 +244,14 @@ export function Checkout({
 
         <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_340px] md:items-start">
           {/* ===== Cột trái: form thanh toán ===== */}
-          <section className="space-y-4" aria-label="Hình thức thanh toán">
+          <section className="space-y-4" aria-label={`Hình thức ${action.toLowerCase()}`}>
             <Card>
               <div className="space-y-1.5">
                 <h2 className="text-h3 text-[var(--color-title)]">
-                  Thanh toán qua QR ngân hàng
+                  {action} qua QR ngân hàng
                 </h2>
                 <p className="text-sm text-[var(--color-muted)]">
-                  Phương thức chính — tự động xác nhận và cấp nội dung sau khi thanh toán.
+                  Phương thức chính — tự động xác nhận sau khi {action.toLowerCase()}.
                 </p>
               </div>
               <div className="mt-5">
@@ -236,6 +260,7 @@ export function Checkout({
                   price={price}
                   emailLabel={emailLabel}
                   emailHint={product.fulfillment.receiveText}
+                  actionLabel={action}
                 />
               </div>
             </Card>
@@ -244,7 +269,7 @@ export function Checkout({
 
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface-1)] px-5 py-4">
               <p className="text-sm text-[var(--color-muted)]">
-                Cần hỗ trợ về thanh toán?
+                Cần hỗ trợ về {action.toLowerCase()}?
               </p>
               <CheckUyTinButton />
             </div>
@@ -254,7 +279,7 @@ export function Checkout({
           <aside className="hidden md:block" aria-label="Tóm tắt đơn hàng">
             <Card className="sticky top-24">
               <p className="mb-4 text-meta font-semibold uppercase tracking-wider text-[var(--color-muted)]">
-                Tóm tắt đơn hàng
+                {product.donation ? "Tóm tắt donate" : "Tóm tắt đơn hàng"}
               </p>
               <OrderSummary
                 product={product}
@@ -263,9 +288,7 @@ export function Checkout({
                 editionLabel={editionLabel}
               />
               <div className="mt-4 border-t border-[var(--color-line)] pt-4">
-                <Badge tone={isCode ? "accent" : "violet"}>
-                  {isCode ? `Nhận ${codeLabel} qua email` : "Nhận link tải qua email"}
-                </Badge>
+                <Badge tone={isCode ? "accent" : "violet"}>{receiveBadge}</Badge>
               </div>
             </Card>
           </aside>
@@ -273,7 +296,9 @@ export function Checkout({
 
         {/* ===== Các bước sau thanh toán — từ product.fulfillment.steps ===== */}
         <Card>
-          <h2 className="text-h3 text-[var(--color-title)]">Sau khi thanh toán</h2>
+          <h2 className="text-h3 text-[var(--color-title)]">
+            Sau khi {action.toLowerCase()}
+          </h2>
           <ol className="mt-4 space-y-3">
             {product.fulfillment.steps.map((step, i) => (
               <li key={step} className="flex items-start gap-3 text-sm text-[var(--color-body)]">

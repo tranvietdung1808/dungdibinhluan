@@ -115,6 +115,8 @@ function contentLabel(product: ProductConfig | null): string {
   switch (product?.fulfillment.kind) {
     case "link":
       return "Link tải đã sẵn sàng";
+    case "manual":
+      return "Đã ghi nhận yêu cầu hỗ trợ cài đặt";
     case "code":
       return product.id === "fc27-standard"
         ? "Mã truy cập FC 27 đã được tạo"
@@ -134,7 +136,11 @@ export function buildPaymentSteps(status: string, product: ProductConfig | null)
   const issued = isContentIssued(status);
   const emailSent = isEmailSent(status);
   return [
-    { key: "paid", label: "Thanh toán đã xác nhận", state: paid ? "done" : "waiting" },
+    {
+      key: "paid",
+      label: product?.donation ? "Donate đã xác nhận" : "Thanh toán đã xác nhận",
+      state: paid ? "done" : "waiting",
+    },
     { key: "content", label: contentLabel(product), state: issued ? "done" : "waiting" },
     {
       key: "email",

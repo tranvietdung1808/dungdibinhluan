@@ -308,16 +308,31 @@ function SuccessContent() {
   const product: ProductConfig | null =
     productForOrder(order) ?? (productParam ? getProduct(productParam) : null);
   const isLinkProduct = product?.fulfillment.kind === "link";
+  const isManual = product?.fulfillment.kind === "manual";
   const isFC27 = product?.id === "fc27-standard";
   const steps = order ? buildPaymentSteps(order.status, product) : null;
-  // CTA "tiếp tục đúng sản phẩm": code → trang nhập mã, link → trang Mix Mods
-  const continueHref = product?.returnUrl ?? "/";
+  // CTA "tiếp tục đúng sản phẩm": code → trang nhập mã, link → trang Mix Mods,
+  // manual → nhắn fanpage để được cài đặt
+  const continueHref = isManual ? SUPPORT_URL : (product?.returnUrl ?? "/");
   const codeProductLabel = product?.id.startsWith("fc27-") ? "FC 27" : "FC 26";
   const continueLabel = product
-    ? isLinkProduct
-      ? "Xem trang Mix Mods"
-      : `Nhập mã tại trang ${codeProductLabel}`
+    ? isManual
+      ? "Nhắn fanpage để được cài đặt ngay"
+      : isLinkProduct
+        ? "Xem trang Mix Mods"
+        : `Nhập mã tại trang ${codeProductLabel}`
     : "Về trang chủ";
+  const successTitle = product?.donation ? "Cảm ơn bạn đã donate!" : "Thanh toán thành công";
+  const deliveredText = isManual
+    ? `Gửi mã đơn và ID UltraViewer cho fanpage để admin cài ${product?.name ?? ""} cho bạn. Hướng dẫn đã được gửi đến ${order?.email ?? "email của bạn"}.`
+    : isLinkProduct
+      ? `Link tải đã được gửi đến email ${order?.email ?? "của bạn"}.`
+      : `${isFC27 ? "Mã truy cập FC 27" : "Mã kích hoạt"} đã được gửi đến email ${order?.email ?? "của bạn"}.`;
+  const deliveryIssueText = isManual
+    ? "Donate đã được ghi nhận nhưng email hướng dẫn chưa gửi được. Bạn không cần chờ email — nhắn fanpage kèm mã đơn để được cài đặt ngay."
+    : isLinkProduct
+      ? "Link tải đã sẵn sàng nhưng email chưa gửi được. Hệ thống có thể tự gửi lại — nếu chưa nhận được, liên hệ hỗ trợ kèm mã đơn."
+      : `${isFC27 ? "Mã truy cập FC 27" : "Mã kích hoạt"} đã được tạo nhưng email chưa gửi được. Hệ thống có thể tự gửi lại — nếu chưa nhận được, liên hệ hỗ trợ kèm mã đơn.`;
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-surface-0 px-4 py-16 text-body">
@@ -346,12 +361,8 @@ function SuccessContent() {
                 <IconCheck />
               </IconBadge>
               <div className="space-y-1.5">
-                <h1 className="text-h2 text-title">Thanh toán thành công</h1>
-                <p className="text-sm text-muted">
-                  {isLinkProduct
-                    ? `Link tải đã được gửi đến email ${order?.email ?? "của bạn"}.`
-                    : `${isFC27 ? "Mã truy cập FC 27" : "Mã kích hoạt"} đã được gửi đến email ${order?.email ?? "của bạn"}.`}
-                </p>
+                <h1 className="text-h2 text-title">{successTitle}</h1>
+                <p className="text-sm text-muted">{deliveredText}</p>
                 <p className="text-meta text-muted">
                   Kiểm tra cả thư mục spam nếu chưa thấy email.
                 </p>
@@ -359,7 +370,12 @@ function SuccessContent() {
               {steps && <StepList steps={steps} />}
               {orderCode && <OrderCodeRow orderCode={orderCode} />}
               <div className="space-y-2">
-                <ButtonLink href={continueHref} size="lg" fullWidth>
+                <ButtonLink
+                  href={continueHref}
+                  external={isManual}
+                  size="lg"
+                  fullWidth
+                >
                   {continueLabel}
                 </ButtonLink>
                 <ButtonLink href="/" variant="ghost" fullWidth>
@@ -374,12 +390,12 @@ function SuccessContent() {
               <IconBadge tone="warn">
                 <IconAlert />
               </IconBadge>
-              <h1 className="text-h2 text-title">Đã ghi nhận thanh toán</h1>
+              <h1 className="text-h2 text-title">
+                {product?.donation ? "Đã ghi nhận donate" : "Đã ghi nhận thanh toán"}
+              </h1>
               {steps && <StepList steps={steps} />}
               <InlineNotice tone="warning" className="text-left">
-                {isLinkProduct
-                  ? "Link tải đã sẵn sàng nhưng email chưa gửi được. Hệ thống có thể tự gửi lại — nếu chưa nhận được, liên hệ hỗ trợ kèm mã đơn."
-                  : `${isFC27 ? "Mã truy cập FC 27" : "Mã kích hoạt"} đã được tạo nhưng email chưa gửi được. Hệ thống có thể tự gửi lại — nếu chưa nhận được, liên hệ hỗ trợ kèm mã đơn.`}
+                {deliveryIssueText}
               </InlineNotice>
               {orderCode && <OrderCodeRow orderCode={orderCode} />}
               <div className="space-y-2">

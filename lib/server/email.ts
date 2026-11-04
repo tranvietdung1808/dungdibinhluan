@@ -183,6 +183,97 @@ Vui lòng không chia sẻ link tải cho người khác
     `.trim();
 }
 
+const MAIL_HEADERS = () => ({
+  "Message-ID": `<${crypto.randomBytes(16).toString("hex")}@dungdibinhluan.com>`,
+  "X-Priority": "3",
+  "X-MSMail-Priority": "Normal",
+  "Importance": "Normal",
+  "X-Mailer": "Nodemailer",
+  "Precedence": "bulk",
+  "List-Unsubscribe": `<mailto:${process.env.EMAIL_USER}?subject=Unsubscribe>`,
+});
+
+/** Email cho sản phẩm hỗ trợ thủ công (donate → admin cài qua UltraViewer) */
+export async function sendSupportEmail(
+  to: string,
+  productName: string,
+  orderCode: string,
+  steps: string[],
+): Promise<boolean> {
+  const fanpage = "https://web.facebook.com/dungbinhluan/";
+  const stepsHtml = steps
+    .map(
+      (step, i) => `
+        <tr>
+          <td style="vertical-align:top;padding:0 10px 14px 0;width:24px">
+            <span style="display:inline-block;width:24px;height:24px;line-height:24px;text-align:center;background:rgba(110,242,160,0.1);color:#6ef2a0;border-radius:50%;font-size:12px;font-weight:bold;border:1px solid rgba(110,242,160,0.2)">${i + 1}</span>
+          </td>
+          <td style="vertical-align:top;padding:0 0 14px 0">
+            <p style="margin:0;font-size:12px;color:#ddd">${step}</p>
+          </td>
+        </tr>`,
+    )
+    .join("");
+
+  try {
+    await transporter.sendMail({
+      from: `"DungDiBinhLuan" <${process.env.EMAIL_USER}>`,
+      to,
+      replyTo: process.env.EMAIL_USER,
+      subject: `[DungDiBinhLuan] Cảm ơn bạn đã donate — ${productName}`,
+      text: `
+DUNGDIBINHLUAN - Cảm ơn bạn đã donate!
+
+Gói hỗ trợ: ${productName}
+Mã đơn: #${orderCode}
+
+Các bước tiếp theo:
+${steps.map((s, i) => `${i + 1}. ${s}`).join("\n")}
+
+Nhắn fanpage: ${fanpage}
+Chuẩn bị sẵn UltraViewer (https://ultraviewer.net) trên máy tính đã cài EA FC 27.
+
+Thông tin hỗ trợ:
+- Page sẽ trả lời trong vòng tối đa 6 tiếng (với những thời gian cao điểm), vui lòng không spam
+- Nếu sau 6 tiếng không có phản hồi, ib Zalo: 0917742686
+      `.trim(),
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="margin:0;padding:0;background:#000;">
+          <div style="max-width:500px;margin:0 auto;font-family:Arial,sans-serif;background:#0a0e0c;color:#fff;border-radius:16px;padding:32px;border:1px solid #222;">
+            <h1 style="color:#6ef2a0;font-size:20px;text-align:center;letter-spacing:2px;margin:0 0 4px;">DUNGDIBINHLUAN</h1>
+            <p style="text-align:center;color:#888;font-size:12px;margin:0 0 24px;">Cảm ơn bạn đã donate!</p>
+            <div style="background:#111;border:1px solid #333;border-radius:12px;padding:20px;margin:0 0 24px;text-align:center">
+              <p style="color:#888;font-size:11px;margin:0 0 6px;text-transform:uppercase;letter-spacing:1px">Gói hỗ trợ</p>
+              <p style="font-size:16px;font-weight:bold;margin:0 0 16px">${productName}</p>
+              <p style="color:#888;font-size:11px;margin:0 0 6px;text-transform:uppercase;letter-spacing:1px">Mã đơn</p>
+              <p style="font-size:26px;font-weight:bold;letter-spacing:2px;color:#6ef2a0;margin:0 0 18px;font-family:monospace">#${orderCode}</p>
+              <a href="${fanpage}" style="display:inline-block;padding:12px 24px;background:#6ef2a0;color:#05140b;text-decoration:none;border-radius:10px;font-size:13px;font-weight:bold;letter-spacing:1px">NHẮN FANPAGE ĐỂ CÀI ĐẶT</a>
+            </div>
+            <div style="background:#111;border:1px solid #333;border-radius:12px;padding:20px;margin:0 0 24px">
+              <p style="color:#6ef2a0;font-size:13px;font-weight:bold;margin:0 0 14px;text-transform:uppercase;letter-spacing:1px">Các bước tiếp theo</p>
+              <table cellpadding="0" cellspacing="0" border="0" width="100%">${stepsHtml}</table>
+              <p style="margin:4px 0 0;font-size:11px;color:#888">Chuẩn bị sẵn UltraViewer (ultraviewer.net) trên máy tính đã cài EA FC 27.</p>
+            </div>
+            ${supportSection()}
+          </div>
+        </body>
+        </html>
+      `,
+      headers: MAIL_HEADERS(),
+    });
+    return true;
+  } catch (error) {
+    console.error("Failed to send email:", error);
+    return false;
+  }
+}
+
 export async function sendCodeEmail(
   to: string,
   code: string,
@@ -222,15 +313,7 @@ export async function sendCodeEmail(
         </body>
         </html>
       `,
-      headers: {
-        "Message-ID": `<${crypto.randomBytes(16).toString("hex")}@dungdibinhluan.com>`,
-        "X-Priority": "3",
-        "X-MSMail-Priority": "Normal",
-        "Importance": "Normal",
-        "X-Mailer": "Nodemailer",
-        "Precedence": "bulk",
-        "List-Unsubscribe": `<mailto:${process.env.EMAIL_USER}?subject=Unsubscribe>`,
-      },
+      headers: MAIL_HEADERS(),
     });
     return true;
   } catch (error) {

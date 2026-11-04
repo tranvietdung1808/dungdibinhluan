@@ -11,10 +11,14 @@ import { buildCatalog, type DbModRecord } from "@/lib/catalog";
 import { resolveThumbnailSrc } from "@/utils/r2";
 import ModCard from "./mods/components/ModCard";
 import { InlineNotice } from "./components/ui";
+import { PRODUCTS } from "@/lib/payment/config";
+import { VIET_HOA_PERKS, VIET_HOA_SHOTS } from "./viet-hoa-fc27/data";
 import s from "./home.module.css";
 
 const FC27_PRICE = 180000;
 const price = new Intl.NumberFormat("vi-VN").format(FC27_PRICE) + "đ";
+const vietHoaPrice =
+  new Intl.NumberFormat("vi-VN").format(PRODUCTS["fc27-viet-hoa"].price) + "đ";
 const contactUrl = "https://web.facebook.com/dungbinhluan/";
 export const metadata: Metadata = {
   title: "EA FC 27 đã ra mắt — Mua ngay 180.000đ",
@@ -61,6 +65,10 @@ const faqs = [
   [
     "Gói 180.000đ bao gồm gì?",
     "Gói Standard Edition gồm quyền truy cập bộ cài EA FC 27, ClientTool và hỗ trợ cài đặt. Nội dung cụ thể được hiển thị trước khi thanh toán.",
+  ],
+  [
+    "Bản Việt hóa FC 27 cài đặt như thế nào?",
+    "Donate 99.000đ tại trang Việt hóa FC 27, sau đó nhắn fanpage kèm mã đơn và ID UltraViewer. Admin sẽ cài bản Việt hóa trực tiếp trên máy bạn.",
   ],
   [
     "FC 26 và các bản mod có còn không?",
@@ -132,13 +140,13 @@ export default async function HomePage() {
     <main className={s.home} id="home">
       {/* 1. Announcement — chỉ hiển thị khi chiến dịch đang hoạt động */}
       <div className={s.announcement}>
-        <span className={s.dot} aria-hidden="true" /> EA FC 27 ĐÃ CHÍNH THỨC RA
-        MẮT{" "}
+        <span className={s.dot} aria-hidden="true" /> MỚI: BẢN VIỆT HÓA EA FC
+        27{" "}
         <span className={s.announcementDivider} aria-hidden="true">
           /
         </span>{" "}
-        <Link href="/games/fc27/select">
-          Mua ngay · {price} <Arrow />
+        <Link href="/viet-hoa-fc27">
+          Donate {vietHoaPrice} · Cài đặt qua UltraViewer <Arrow />
         </Link>
       </div>
 
@@ -201,9 +209,85 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* 2b. Việt hóa FC 27 — sản phẩm mới, nổi bật ngay dưới hero */}
+      <section
+        id="viet-hoa-fc27"
+        className={s.vhSection}
+        aria-labelledby="viet-hoa-title"
+      >
+        <div className={s.vhCard}>
+          <div className={s.vhArt}>
+            <Link href="/viet-hoa-fc27" className={s.vhMain}>
+              <Image
+                src={VIET_HOA_SHOTS[0].src}
+                alt={VIET_HOA_SHOTS[0].alt}
+                width={2048}
+                height={1150}
+                sizes="(max-width: 900px) 100vw, 640px"
+              />
+            </Link>
+            <div className={s.vhThumbs}>
+              {VIET_HOA_SHOTS.slice(1).map((shot) => (
+                <Link
+                  key={shot.src}
+                  href="/viet-hoa-fc27#anh-thuc-te"
+                  className={s.vhThumb}
+                >
+                  <Image
+                    src={shot.src}
+                    alt={shot.alt}
+                    width={2048}
+                    height={1150}
+                    sizes="(max-width: 900px) 33vw, 210px"
+                  />
+                  <span>{shot.title}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+          <div className={s.vhCopy}>
+            <p className={s.vhBadge}>
+              <span className={s.dot} aria-hidden="true" /> MỚI RA MẮT
+            </p>
+            <h2 id="viet-hoa-title">
+              EA FC 27 <span>Việt hóa</span>
+            </h2>
+            <p className={s.vhLead}>
+              Chơi FC 27 bằng tiếng Việt — menu, Career Mode, hồ sơ
+              cầu thủ, chuyển nhượng và hợp đồng.
+            </p>
+            <ul className={s.vhPerks}>
+              {VIET_HOA_PERKS.map((perk) => (
+                <li key={perk}>
+                  <span aria-hidden="true">✓</span>
+                  {perk}
+                </li>
+              ))}
+            </ul>
+            <div className={s.vhOffer}>
+              <div>
+                <span className={s.overline}>DONATE ĐỂ ĐƯỢC CÀI ĐẶT NGAY</span>
+                <strong>{vietHoaPrice}</strong>
+              </div>
+              <Link href="/viet-hoa-fc27/donate" className={s.primary}>
+                DONATE &amp; CÀI NGAY <Arrow />
+              </Link>
+            </div>
+            <Link href="/viet-hoa-fc27" className={s.quietLink}>
+              Xem chi tiết & ảnh thực tế <span aria-hidden="true">→</span>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* 3. Lối tắt FC 26 / Kho mod / Hướng dẫn */}
       <div className={s.seasonRail}>
         <div className={s.container}>
+          <Link href="/viet-hoa-fc27">
+            <b>VIỆT HÓA FC 27</b>
+            <span>Mới · Donate {vietHoaPrice}</span>
+            <Arrow />
+          </Link>
           <Link href="/games/fc27/select">
             <b>FC 27</b>
             <span>Đã ra mắt · Mua ngay</span>

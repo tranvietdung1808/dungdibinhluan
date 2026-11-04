@@ -1,5 +1,6 @@
 export type ProductId =
   | "fc27-standard"
+  | "fc27-viet-hoa"
   | "fc26-normal"
   | "fc26-mods"
   | "mix-mods";
@@ -33,6 +34,8 @@ export interface ProductConfig {
   fulfillment: ProductFulfillment;
   noCode?: boolean;
   directDownloadUrl?: string;
+  /** Hiển thị dạng "donate để được hỗ trợ" thay vì "mua/thanh toán" */
+  donation?: boolean;
 }
 
 const BASE = "https://www.dungdibinhluan.com";
@@ -56,6 +59,27 @@ export const PRODUCTS: Record<ProductId, ProductConfig> = {
         "Nhập mã tại trang FC 27 để mở khu tải game",
       ],
     },
+  },
+  "fc27-viet-hoa": {
+    id: "fc27-viet-hoa",
+    name: "Việt hóa EA FC 27",
+    price: 99000,
+    codePrefix: "FC27",
+    returnUrl: "/viet-hoa-fc27",
+    codeEntryUrl: `${BASE}/viet-hoa-fc27`,
+    checkoutPath: "/viet-hoa-fc27/donate",
+    fulfillment: {
+      kind: "manual",
+      receiveText:
+        "Sau khi donate, nhắn fanpage kèm mã đơn để được cài bản Việt hóa FC 27 qua UltraViewer.",
+      steps: [
+        "Donate 99.000đ qua QR ngân hàng",
+        "Nhắn fanpage DungDiBinhLuan kèm mã đơn hoặc ảnh giao dịch",
+        "Gửi ID và mật khẩu UltraViewer — admin cài Việt hóa trực tiếp trên máy bạn",
+      ],
+    },
+    noCode: true,
+    donation: true,
   },
   "fc26-normal": {
     id: "fc26-normal",

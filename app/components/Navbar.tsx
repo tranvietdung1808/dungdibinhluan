@@ -23,7 +23,8 @@ export const ZALO_URL = "https://zalo.me/0917742686";
 export const TIKTOK_URL = "https://www.tiktok.com/@dungdibinhluan";
 
 const navItems = [
-  { label: "FC 27 — Mới", href: "/games/fc27/select" },
+  { label: "Việt hóa FC 27", href: "/viet-hoa-fc27", badge: "Mới" },
+  { label: "FC 27", href: "/games/fc27/select" },
   { label: "FC 26", href: "/games/fc26/select" },
   { label: "Kho mod", href: "/mods" },
   { label: "Cầu thủ", href: "/cau-thu" },
@@ -211,6 +212,11 @@ export default function Navbar() {
                 }`}
               >
                 {item.label}
+                {"badge" in item && item.badge && (
+                  <span className="ml-1.5 rounded-full bg-[var(--color-ok)] px-1.5 py-0.5 text-[10px] font-extrabold uppercase leading-none text-[#05140b]">
+                    {item.badge}
+                  </span>
+                )}
               </Link>
             );
           })}
@@ -388,6 +394,11 @@ export default function Navbar() {
                   }`}
                 >
                   {item.label}
+                  {"badge" in item && item.badge && (
+                    <span className="ml-1.5 rounded-full bg-[var(--color-ok)] px-1.5 py-0.5 text-[10px] font-extrabold uppercase leading-none text-[#05140b]">
+                      {item.badge}
+                    </span>
+                  )}
                 </Link>
               );
             })}

@@ -20,6 +20,8 @@ interface PayOSButtonProps {
   emailLabel?: string;
   /** Gợi ý dưới field — nên truyền product.fulfillment.receiveText */
   emailHint?: string;
+  /** Động từ trên CTA, ví dụ "Thanh toán" / "Donate" */
+  actionLabel?: string;
 }
 
 export default function PayOSButton({
@@ -27,6 +29,7 @@ export default function PayOSButton({
   price,
   emailLabel = "Email nhận nội dung",
   emailHint,
+  actionLabel = "Thanh toán",
 }: PayOSButtonProps) {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -102,11 +105,11 @@ export default function PayOSButton({
       </Field>
 
       <Button onClick={handlePay} loading={loading} size="lg" fullWidth>
-        Thanh toán {price} qua QR ngân hàng
+        {actionLabel} {price} qua QR ngân hàng
       </Button>
       <p className="text-meta text-muted">
-        Quét mã QR bằng ứng dụng ngân hàng — hệ thống tự xác nhận sau khi thanh
-        toán.
+        Quét mã QR bằng ứng dụng ngân hàng — hệ thống tự xác nhận sau khi{" "}
+        {actionLabel.toLowerCase()}.
       </p>
     </div>
   );

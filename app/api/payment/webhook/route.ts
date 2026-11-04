@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Redis } from "@upstash/redis";
 import { PayOS, type Webhook } from "@payos/node";
 import { createCode } from "@/lib/server/gen-code";
-import { sendCodeEmail } from "@/lib/server/email";
+import { sendCodeEmail, sendSupportEmail } from "@/lib/server/email";
 import { getProduct } from "@/lib/payment/config";
 
 const kv = Redis.fromEnv();
@@ -107,7 +107,14 @@ export async function POST(req: NextRequest) {
       let generatedCode = order.code ?? "";
       let emailSent = false;
 
-      if (product.noCode) {
+      if (product.fulfillment.kind === "manual") {
+        emailSent = await sendSupportEmail(
+          order.email,
+          product.name,
+          String(orderCode),
+          product.fulfillment.steps,
+        );
+      } else if (product.noCode) {
         emailSent = await sendCodeEmail(
           order.email,
           "",

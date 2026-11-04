@@ -189,6 +189,25 @@ describe("fulfillment trong product config (A03/T13)", () => {
   });
 });
 
+describe("Việt hóa FC 27 — donate + hỗ trợ cài đặt thủ công", () => {
+  it("giá server 99.000đ, fulfillment manual, không cấp mã", () => {
+    const p = getProduct("fc27-viet-hoa")!;
+    expect(p.price).toBe(99000);
+    expect(p.donation).toBe(true);
+    expect(p.noCode).toBe(true);
+    expect(p.fulfillment.kind).toBe("manual");
+    expect(p.fulfillment.steps.join(" ")).toMatch(/UltraViewer/);
+    expect(p.fulfillment.steps.join(" ")).not.toMatch(/nhập mã/i);
+  });
+
+  it("checklist dùng nhãn donate và hỗ trợ cài đặt", () => {
+    const steps = buildPaymentSteps("COMPLETED", getProduct("fc27-viet-hoa"));
+    expect(steps[0].label).toBe("Donate đã xác nhận");
+    expect(steps[1].label).toBe("Đã ghi nhận yêu cầu hỗ trợ cài đặt");
+    expect(checkoutPathFor("fc27-viet-hoa")).toBe("/viet-hoa-fc27/donate");
+  });
+});
+
 describe("checkoutPathFor — đích quay lại của /payment/cancel (T15)", () => {
   it("map đúng checkout từng sản phẩm", () => {
     expect(checkoutPathFor("fc26-normal")).toBe(

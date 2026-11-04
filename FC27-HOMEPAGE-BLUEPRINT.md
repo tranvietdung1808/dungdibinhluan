@@ -76,6 +76,14 @@ Không lặp giá 180.000đ trong logic thanh toán phía client. Copy marketing
 - [ ] Thay video/hướng dẫn cài đặt nếu FC 27 cần quy trình khác FC 26.
 - [ ] Sau khi nghiệm thu mới thông báo rộng rãi cho khách.
 
+## 7b. Việt hóa FC 27 (donate + hỗ trợ cài đặt)
+
+- Sản phẩm `fc27-viet-hoa` — 99.000đ, `donation: true`, `noCode: true`, `fulfillment.kind = "manual"`.
+- Landing `/viet-hoa-fc27`, checkout `/viet-hoa-fc27/donate` (component `Checkout` hiển thị chữ "Donate" khi `product.donation`).
+- Webhook không tạo mã: gửi `sendSupportEmail` kèm mã đơn; khách nhắn fanpage + ID UltraViewer để admin cài.
+- Trang chủ: announcement bar, khối nổi bật ngay dưới hero, lối tắt rail, FAQ; navbar có badge "Mới".
+- Ảnh: `public/viet-hoa-fc27/*.webp` (upscale 2x + sharpen từ ảnh gốc trong `fc27pic/viet-hoa/`, thư mục này bị gitignore).
+
 ## 8. Tiêu chí nghiệm thu kỹ thuật
 
 - Homepage và bốn route FC 27 render không lỗi ở desktop/mobile.
