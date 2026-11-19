@@ -198,9 +198,9 @@ describe("fulfillment trong product config (A03/T13)", () => {
 });
 
 describe("Combo Siêu sale FC 27 + Việt hóa", () => {
-  it("giá 140.000đ, mã cấp ra mở quyền FC 27 Standard", () => {
+  it("giá 149.000đ, mã cấp ra mở quyền FC 27 Standard", () => {
     const p = getProduct("fc27-combo")!;
-    expect(p.price).toBe(140000);
+    expect(p.price).toBe(149000);
     expect(p.listPrice).toBe(279000);
     expect(p.codePrefix).toBe("FC27");
     expect(accessProductIdOf(p)).toBe("fc27-standard");

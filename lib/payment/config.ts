@@ -92,7 +92,7 @@ export const PRODUCTS: Record<ProductId, ProductConfig> = {
   "fc27-combo": {
     id: "fc27-combo",
     name: "Combo EA FC 27 + Việt hóa",
-    price: 140000,
+    price: 149000,
     listPrice: 279000,
     codePrefix: "FC27",
     accessProductId: "fc27-standard",

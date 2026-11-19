@@ -36,7 +36,7 @@ const rows: [string, boolean, boolean, boolean][] = [
 
 const faqs = [
   [
-    "Combo 140.000đ nhận những gì?",
+    `Combo ${formatVnd(combo.price)} nhận những gì?`,
     "Bạn nhận mã tải EA FC 27 qua email ngay sau khi thanh toán, sau đó nhắn fanpage kèm mã đơn và ID UltraViewer để admin cài bản Việt hóa cho bạn.",
   ],
   [
