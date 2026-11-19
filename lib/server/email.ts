@@ -279,13 +279,22 @@ export async function sendCodeEmail(
   code: string,
   productName: string,
   codeEntryUrl: string,
-  downloadUrl?: string
+  downloadUrl?: string,
+  bonusNote?: string,
 ): Promise<boolean> {
   const hasCode = !downloadUrl;
   const codeLabel = code.startsWith("FC27-") ? "Mã truy cập FC 27" : "Code kích hoạt";
   const mainSection = hasCode
     ? codeSection(code, productName, codeLabel)
     : downloadSection(productName, downloadUrl);
+  const bonusSection = bonusNote
+    ? `
+      <div style="background:#10251a;border:1px solid rgba(110,242,160,0.35);border-radius:12px;padding:16px;margin:0 0 24px">
+        <p style="color:#6ef2a0;font-size:12px;font-weight:bold;margin:0 0 8px;text-transform:uppercase;letter-spacing:1px">Quà trong combo</p>
+        <p style="margin:0 0 12px;font-size:12px;color:#ddd;line-height:1.6">${bonusNote}</p>
+        <a href="https://web.facebook.com/dungbinhluan/" style="display:inline-block;padding:10px 18px;background:#6ef2a0;color:#05140b;text-decoration:none;border-radius:8px;font-size:12px;font-weight:bold">NHẮN FANPAGE CÀI VIỆT HÓA</a>
+      </div>`
+    : "";
 
   try {
     await transporter.sendMail({
@@ -293,7 +302,9 @@ export async function sendCodeEmail(
       to,
       replyTo: process.env.EMAIL_USER,
       subject: `[DungDiBinhLuan] ${hasCode ? codeLabel : "Link tải"} ${productName}`,
-      text: plainTextVersion(code, productName, codeEntryUrl, downloadUrl),
+      text:
+        plainTextVersion(code, productName, codeEntryUrl, downloadUrl) +
+        (bonusNote ? `\n\nQuà trong combo: ${bonusNote}` : ""),
       html: `
         <!DOCTYPE html>
         <html>
@@ -306,6 +317,7 @@ export async function sendCodeEmail(
             <h1 style="color:#6ef2a0;font-size:20px;text-align:center;letter-spacing:2px;margin:0 0 4px;">DUNGDIBINHLUAN</h1>
             <p style="text-align:center;color:#888;font-size:12px;margin:0 0 24px;">Cảm ơn bạn đã mua hàng!</p>
             ${mainSection}
+            ${bonusSection}
             ${stepsSection(codeEntryUrl, hasCode, codeLabel)}
             ${supportSection()}
             ${footerSection(hasCode, codeLabel)}

@@ -74,6 +74,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 1.0,
     },
     {
+      url: `${SITE_URL}/sieu-sale`,
+      lastModified: BUILD_LASTMOD,
+      changeFrequency: "daily" as const,
+      priority: 0.95,
+    },
+    {
       url: `${SITE_URL}/viet-hoa-fc27`,
       lastModified: BUILD_LASTMOD,
       changeFrequency: "weekly" as const,

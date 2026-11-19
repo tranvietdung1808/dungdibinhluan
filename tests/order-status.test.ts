@@ -19,7 +19,14 @@ import {
   sanitizeInternalPath,
   DEFAULT_CHECKOUT_PATH,
 } from "@/lib/payment/order-status";
-import { PRODUCTS, getProduct, type ProductId } from "@/lib/payment/config";
+import {
+  PRODUCTS,
+  accessProductIdOf,
+  bonusNoteFor,
+  getProduct,
+  grantsFC27Code,
+  type ProductId,
+} from "@/lib/payment/config";
 import { getManualCodeOption } from "@/lib/payment/manual-code";
 
 describe("parseTopupOrder — /api/credit/topup/order (A01/T09)", () => {
@@ -177,15 +184,45 @@ describe("fulfillment trong product config (A03/T13)", () => {
     expect(getProduct("fc26-mods")!.fulfillment.kind).toBe("code");
   });
 
-  it("FC27 có giá server 180.000đ và dùng mã truy cập riêng", () => {
+  it("FC27 Siêu sale: giá server 99.000đ (gốc 180.000đ) và dùng mã truy cập riêng", () => {
     const product = getProduct("fc27-standard")!;
-    expect(product.price).toBe(180000);
+    expect(product.price).toBe(99000);
+    expect(product.listPrice).toBe(180000);
     expect(product.codePrefix).toBe("FC27");
     expect(product.fulfillment.kind).toBe("code");
     expect(product.returnUrl).toBe("/games/fc27");
     expect(buildPaymentSteps("COMPLETED", product)[1].label).toBe(
       "Mã truy cập FC 27 đã được tạo",
     );
+  });
+});
+
+describe("Combo Siêu sale FC 27 + Việt hóa", () => {
+  it("giá 140.000đ, mã cấp ra mở quyền FC 27 Standard", () => {
+    const p = getProduct("fc27-combo")!;
+    expect(p.price).toBe(140000);
+    expect(p.listPrice).toBe(279000);
+    expect(p.codePrefix).toBe("FC27");
+    expect(accessProductIdOf(p)).toBe("fc27-standard");
+    expect(grantsFC27Code(p)).toBe(true);
+    expect(p.returnUrl).toBe("/games/fc27");
+    expect(checkoutPathFor("fc27-combo")).toBe("/sieu-sale/combo");
+    expect(buildPaymentSteps("COMPLETED", p)[1].label).toBe(
+      "Mã truy cập FC 27 đã được tạo",
+    );
+  });
+
+  it("ghi chú combo chèn mã đơn để khách nhắn fanpage cài Việt hóa", () => {
+    const note = bonusNoteFor(getProduct("fc27-combo"), 123456)!;
+    expect(note).toContain("#123456");
+    expect(note).toMatch(/UltraViewer/);
+    expect(bonusNoteFor(getProduct("fc27-standard"), 1)).toBeNull();
+  });
+
+  it("chỉ FC 27 Standard và combo cấp mã FC 27; Việt hóa thì không", () => {
+    expect(grantsFC27Code(getProduct("fc27-standard"))).toBe(true);
+    expect(grantsFC27Code(getProduct("fc27-viet-hoa"))).toBe(false);
+    expect(grantsFC27Code(getProduct("fc26-normal"))).toBe(false);
   });
 });
 

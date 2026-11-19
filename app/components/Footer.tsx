@@ -14,8 +14,9 @@ const FANPAGE_URL = "https://web.facebook.com/dungbinhluan/";
 const MESSENGER_URL = "https://m.me/dungbinhluan";
 
 const exploreLinks = [
-  { label: "Việt hóa FC 27 — mới", href: "/viet-hoa-fc27" },
-  { label: "FC 27 — mua ngay", href: "/games/fc27/select" },
+  { label: "Siêu sale FC 27", href: "/sieu-sale" },
+  { label: "Việt hóa FC 27", href: "/viet-hoa-fc27" },
+  { label: "FC 27 — mua game", href: "/games/fc27/select" },
   { label: "FC 26 — chọn phiên bản", href: "/games/fc26/select" },
   { label: "Kho mod", href: "/mods" },
   { label: "Hướng dẫn", href: "/huong-dan" },

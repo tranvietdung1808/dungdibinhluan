@@ -22,7 +22,12 @@ import {
   type PaymentOrder,
   type ProgressStep,
 } from "@/lib/payment/order-status";
-import { getProduct, type ProductConfig } from "@/lib/payment/config";
+import {
+  bonusNoteFor,
+  getProduct,
+  grantsFC27Code,
+  type ProductConfig,
+} from "@/lib/payment/config";
 import {
   Button,
   ButtonLink,
@@ -309,7 +314,7 @@ function SuccessContent() {
     productForOrder(order) ?? (productParam ? getProduct(productParam) : null);
   const isLinkProduct = product?.fulfillment.kind === "link";
   const isManual = product?.fulfillment.kind === "manual";
-  const isFC27 = product?.id === "fc27-standard";
+  const isFC27 = grantsFC27Code(product);
   const steps = order ? buildPaymentSteps(order.status, product) : null;
   // CTA "tiếp tục đúng sản phẩm": code → trang nhập mã, link → trang Mix Mods,
   // manual → nhắn fanpage để được cài đặt
@@ -322,6 +327,7 @@ function SuccessContent() {
         ? "Xem trang Mix Mods"
         : `Nhập mã tại trang ${codeProductLabel}`
     : "Về trang chủ";
+  const bonusNote = orderCode ? bonusNoteFor(product, orderCode) : null;
   const successTitle = product?.donation ? "Cảm ơn bạn đã donate!" : "Thanh toán thành công";
   const deliveredText = isManual
     ? `Gửi mã đơn và ID UltraViewer cho fanpage để admin cài ${product?.name ?? ""} cho bạn. Hướng dẫn đã được gửi đến ${order?.email ?? "email của bạn"}.`
@@ -369,6 +375,11 @@ function SuccessContent() {
               </div>
               {steps && <StepList steps={steps} />}
               {orderCode && <OrderCodeRow orderCode={orderCode} />}
+              {bonusNote && (
+                <InlineNotice tone="success" className="text-left">
+                  {bonusNote}
+                </InlineNotice>
+              )}
               <div className="space-y-2">
                 <ButtonLink
                   href={continueHref}
@@ -378,6 +389,16 @@ function SuccessContent() {
                 >
                   {continueLabel}
                 </ButtonLink>
+                {bonusNote && (
+                  <ButtonLink
+                    href={SUPPORT_URL}
+                    external
+                    variant="secondary"
+                    fullWidth
+                  >
+                    Nhắn fanpage cài Việt hóa
+                  </ButtonLink>
+                )}
                 <ButtonLink href="/" variant="ghost" fullWidth>
                   Về trang chủ
                 </ButtonLink>

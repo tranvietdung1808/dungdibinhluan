@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { ProductConfig } from "@/lib/payment/config";
+import { grantsFC27Code, type ProductConfig } from "@/lib/payment/config";
 import { SUPPORT_URL } from "@/lib/payment/order-status";
 import PayOSButton from "@/app/components/PayOSButton";
 import CopyButton from "@/app/components/CopyButton";
@@ -87,9 +87,21 @@ function OrderSummary({
             {product.fulfillment.receiveText}
           </p>
           <div className="space-y-2 border-t border-[var(--color-line)] pt-4 text-sm">
+            {product.listPrice && (
+              <div className="flex items-center justify-between">
+                <span className="text-[var(--color-muted)]">Giá gốc</span>
+                <del className="tabular text-[var(--color-muted)]">
+                  {formatVnd(product.listPrice)}
+                </del>
+              </div>
+            )}
             <div className="flex items-center justify-between">
               <span className="text-[var(--color-muted)]">
-                {product.donation ? "Mức donate" : "Đơn giá"}
+                {product.donation
+                  ? "Mức donate"
+                  : product.listPrice
+                    ? "Giá Siêu sale"
+                    : "Đơn giá"}
               </span>
               <span className="tabular font-medium text-[var(--color-body)]">{price}</span>
             </div>
@@ -197,7 +209,7 @@ export function Checkout({
   const kind = product.fulfillment.kind;
   const isCode = kind === "code";
   const action = product.donation ? "Donate" : "Thanh toán";
-  const codeLabel = product.id === "fc27-standard" ? "mã truy cập" : "mã kích hoạt";
+  const codeLabel = grantsFC27Code(product) ? "mã truy cập" : "mã kích hoạt";
   const emailLabel = isCode
     ? `Email nhận ${codeLabel}`
     : kind === "manual"

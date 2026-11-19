@@ -7,11 +7,11 @@ import { PRODUCTS } from "@/lib/payment/config";
 import { formatVnd } from "../../components/format";
 
 const product = PRODUCTS["fc27-standard"];
+const combo = PRODUCTS["fc27-combo"];
 
 export const metadata: Metadata = {
-  title: "Mua EA FC 27 — 180.000đ",
-  description:
-    "EA FC 27 đã ra mắt. Mua Standard Edition giá 180.000đ, thanh toán QR ngân hàng và nhận mã truy cập qua email.",
+  title: `Siêu sale EA FC 27 — chỉ ${formatVnd(product.price)}`,
+  description: `Siêu sale EA FC 27 Standard Edition chỉ ${formatVnd(product.price)}, combo game + Việt hóa ${formatVnd(combo.price)}. Thanh toán QR ngân hàng và nhận mã truy cập qua email.`,
   alternates: { canonical: "https://dungdibinhluan.com/games/fc27/select" },
 };
 
@@ -54,7 +54,7 @@ export default function FC27SelectPage() {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-surface-1)]/80 via-transparent to-transparent md:bg-gradient-to-r md:from-transparent md:to-[var(--color-surface-1)]/35" />
             <div className="absolute left-5 top-5 flex gap-2">
-              <Badge tone="accent">Đã ra mắt</Badge>
+              <Badge tone="credit">Siêu sale</Badge>
               <Badge tone="neutral">Standard Edition</Badge>
             </div>
           </div>
@@ -90,9 +90,14 @@ export default function FC27SelectPage() {
 
             <div className="mt-auto grid gap-4 border-t border-[var(--color-line)] pt-5 sm:grid-cols-[auto_1fr] sm:items-end">
               <div className="space-y-1">
-                <span className="text-meta text-[var(--color-muted)]">Giá trọn gói</span>
-                <span className="tabular block text-2xl font-extrabold text-[var(--color-title)]">
+                <span className="text-meta text-[var(--color-muted)]">Giá Siêu sale</span>
+                <span className="tabular flex items-baseline gap-2 text-2xl font-extrabold text-[var(--color-title)]">
                   {price}
+                  {product.listPrice && (
+                    <del className="text-sm font-medium text-[var(--color-muted)]">
+                      {formatVnd(product.listPrice)}
+                    </del>
+                  )}
                 </span>
               </div>
               <div className="sm:justify-self-end sm:min-w-56">
@@ -103,6 +108,25 @@ export default function FC27SelectPage() {
             </div>
           </div>
         </Card>
+
+        <Link
+          href={combo.checkoutPath}
+          className="mx-auto flex w-full max-w-4xl flex-wrap items-center justify-between gap-3 rounded-2xl border border-[var(--color-credit-border)] bg-[var(--color-credit-subtle)] px-5 py-4 transition-colors hover:border-[var(--color-credit)]"
+        >
+          <span className="text-sm text-[var(--color-body)]">
+            <b className="text-[var(--color-title)]">Combo game + Việt hóa</b>{" "}
+            — admin cài Việt hóa qua UltraViewer
+          </span>
+          <span className="tabular flex items-baseline gap-2 text-lg font-extrabold text-[var(--color-credit)]">
+            {formatVnd(combo.price)}
+            {combo.listPrice && (
+              <del className="text-xs font-medium text-[var(--color-muted)]">
+                {formatVnd(combo.listPrice)}
+              </del>
+            )}
+            <span aria-hidden="true">→</span>
+          </span>
+        </Link>
 
         <div className="flex flex-col items-center gap-3">
           <Link

@@ -13,35 +13,38 @@ import ModCard from "./mods/components/ModCard";
 import { InlineNotice } from "./components/ui";
 import { PRODUCTS } from "@/lib/payment/config";
 import { VIET_HOA_PERKS, VIET_HOA_SHOTS } from "./viet-hoa-fc27/data";
+import SaleBanner from "./sieu-sale/SaleBanner";
+import { formatVnd } from "./games/components/format";
 import s from "./home.module.css";
 
-const FC27_PRICE = 180000;
-const price = new Intl.NumberFormat("vi-VN").format(FC27_PRICE) + "đ";
-const vietHoaPrice =
-  new Intl.NumberFormat("vi-VN").format(PRODUCTS["fc27-viet-hoa"].price) + "đ";
+const fc27 = PRODUCTS["fc27-standard"];
+const combo = PRODUCTS["fc27-combo"];
+const price = formatVnd(fc27.price);
+const listPrice = fc27.listPrice ? formatVnd(fc27.listPrice) : null;
+const comboPrice = formatVnd(combo.price);
+const vietHoaPrice = formatVnd(PRODUCTS["fc27-viet-hoa"].price);
 const contactUrl = "https://web.facebook.com/dungbinhluan/";
 export const metadata: Metadata = {
-  title: "EA FC 27 đã ra mắt — Mua ngay 180.000đ",
-  description:
-    "EA FC 27 đã chính thức ra mắt. Mua Standard Edition giá 180.000đ, thanh toán QR ngân hàng và nhận mã tải game qua email.",
+  title: `Siêu sale EA FC 27 — chỉ ${price}, combo Việt hóa ${comboPrice}`,
+  description: `Siêu sale EA FC 27: game chỉ ${price}, Việt hóa ${vietHoaPrice}, combo game + Việt hóa ${comboPrice}. Thanh toán QR ngân hàng và nhận mã tải game qua email.`,
   alternates: { canonical: "https://dungdibinhluan.com" },
   openGraph: {
-    title: "EA FC 27 đã ra mắt — Chơi ngay hôm nay",
-    description: "Mua EA FC 27 Standard Edition giá 180.000đ.",
+    title: `SIÊU SALE EA FC 27 — chỉ ${price}`,
+    description: `Combo game + Việt hóa chỉ ${comboPrice}.`,
     images: [
       {
-        url: "/games/fc27/fc27-city.webp",
-        width: 1240,
-        height: 698,
-        alt: "EA FC 27",
+        url: "/sale/sale-action.webp",
+        width: 1920,
+        height: 1080,
+        alt: "Siêu sale EA FC 27",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "EA FC 27 đã ra mắt — 180.000đ",
-    description: "Thanh toán QR ngân hàng, nhận mã truy cập qua email và tải game.",
-    images: ["/games/fc27/fc27-city.webp"],
+    title: `SIÊU SALE EA FC 27 — chỉ ${price}`,
+    description: `Combo game + Việt hóa chỉ ${comboPrice}. Thanh toán QR, nhận mã qua email.`,
+    images: ["/sale/sale-action.webp"],
   },
 };
 export const revalidate = 3600;
@@ -56,19 +59,19 @@ const Arrow = () => <span aria-hidden="true">↗</span>;
 const faqs = [
   [
     "EA FC 27 giá bao nhiêu?",
-    "EA FC 27 Standard Edition có giá 180.000đ. Giá được xác nhận phía máy chủ khi tạo đơn thanh toán.",
+    `Đang Siêu sale: EA FC 27 Standard Edition chỉ ${price}${listPrice ? ` (giá gốc ${listPrice})` : ""}, combo game + Việt hóa chỉ ${comboPrice}. Giá được xác nhận phía máy chủ khi tạo đơn thanh toán.`,
   ],
   [
     "Mua xong nhận game như thế nào?",
     "Sau khi giao dịch QR ngân hàng được xác nhận, hệ thống tạo mã FC 27 và gửi đến email. Nhập mã tại trang FC 27 để mở khu tải game.",
   ],
   [
-    "Gói 180.000đ bao gồm gì?",
+    `Gói game ${price} bao gồm gì?`,
     "Gói Standard Edition gồm quyền truy cập bộ cài EA FC 27, ClientTool và hỗ trợ cài đặt. Nội dung cụ thể được hiển thị trước khi thanh toán.",
   ],
   [
     "Bản Việt hóa FC 27 cài đặt như thế nào?",
-    "Donate 99.000đ tại trang Việt hóa FC 27, sau đó nhắn fanpage kèm mã đơn và ID UltraViewer. Admin sẽ cài bản Việt hóa trực tiếp trên máy bạn.",
+    `Donate ${vietHoaPrice} tại trang Việt hóa FC 27 (hoặc mua combo game + Việt hóa ${comboPrice}), sau đó nhắn fanpage kèm mã đơn và ID UltraViewer. Admin sẽ cài bản Việt hóa trực tiếp trên máy bạn.`,
   ],
   [
     "FC 26 và các bản mod có còn không?",
@@ -140,74 +143,18 @@ export default async function HomePage() {
     <main className={s.home} id="home">
       {/* 1. Announcement — chỉ hiển thị khi chiến dịch đang hoạt động */}
       <div className={s.announcement}>
-        <span className={s.dot} aria-hidden="true" /> MỚI: BẢN VIỆT HÓA EA FC
-        27{" "}
+        <span className={s.dot} aria-hidden="true" /> SIÊU SALE: EA FC 27 CHỈ{" "}
+        {price}
         <span className={s.announcementDivider} aria-hidden="true">
           /
         </span>{" "}
-        <Link href="/viet-hoa-fc27">
-          Donate {vietHoaPrice} · Cài đặt qua UltraViewer <Arrow />
+        <Link href="/sieu-sale">
+          Combo game + Việt hóa {comboPrice} <Arrow />
         </Link>
       </div>
 
-      {/* 2. Hero FC 27 */}
-      <section className={s.hero} aria-labelledby="hero-title">
-        <div className={s.heroArt}>
-          <Image
-            src="/games/fc27/fc27-portrait.webp"
-            alt="Ảnh minh họa EA FC 27 với cầu thủ trong trang phục Real Madrid"
-            fill
-            priority
-            sizes="(max-width: 600px) 100vw, (max-width: 1000px) 65vw, 58vw"
-            className={s.portrait}
-          />
-        </div>
-        <div className={s.heroShade} aria-hidden="true" />
-        <div className={s.container}>
-          <div className={s.heroTop}>
-            <span>DUNGDIBINHLUAN / NEW SEASON</span>
-            <span>FC 27 — ĐÃ RA MẮT</span>
-          </div>
-          <div className={s.heroContent}>
-            <p className={s.eyebrow}>
-              <span className={s.dot} aria-hidden="true" /> MÙA GIẢI MỚI ĐÃ BẮT
-              ĐẦU
-            </p>
-            <h1 id="hero-title" className={s.heroTitle}>
-              EA FC <span>27</span>
-              <small>
-                Mùa giải mới.
-                <br />
-                Đam mê tiếp nối.
-              </small>
-            </h1>
-            <p className={s.heroDescription}>
-              EA FC 27 đã chính thức có mặt.
-              <br />
-              Thanh toán, nhận mã và tải game ngay hôm nay.
-            </p>
-            <div className={s.heroOffer}>
-              <div>
-                <span className={s.overline}>GIÁ RA MẮT</span>
-                <strong>{price}</strong>
-              </div>
-              <Link href="/games/fc27/select" className={s.primary}>
-                MUA FC 27 NGAY <Arrow />
-              </Link>
-            </div>
-            <Link href="/games/fc27" className={s.quietLink}>
-              Đã mua FC 27? Nhập mã để tải <span aria-hidden="true">→</span>
-            </Link>
-          </div>
-          <div className={s.heroBottom}>
-            <span>01 / MÙA GIẢI HIỆN TẠI</span>
-            <Link href="/games/fc27/select">
-              CHƠI FC 27 NGAY <span aria-hidden="true">↗</span>
-            </Link>
-            <span>HÌNH ẢNH MINH HỌA</span>
-          </div>
-        </div>
-      </section>
+      {/* 2. Siêu sale — banner chính của trang chủ trong thời gian sale */}
+      <SaleBanner id="sieu-sale" />
 
       {/* 2b. Việt hóa FC 27 — sản phẩm mới, nổi bật ngay dưới hero */}
       <section
@@ -247,7 +194,7 @@ export default async function HomePage() {
           </div>
           <div className={s.vhCopy}>
             <p className={s.vhBadge}>
-              <span className={s.dot} aria-hidden="true" /> MỚI RA MẮT
+              <span className={s.dot} aria-hidden="true" /> BẢN VIỆT HÓA
             </p>
             <h2 id="viet-hoa-title">
               EA FC 27 <span>Việt hóa</span>
@@ -276,6 +223,10 @@ export default async function HomePage() {
             <Link href="/viet-hoa-fc27" className={s.quietLink}>
               Xem chi tiết & ảnh thực tế <span aria-hidden="true">→</span>
             </Link>
+            <Link href={combo.checkoutPath} className={s.vhCombo}>
+              Chưa có game? Combo game + Việt hóa chỉ <b>{comboPrice}</b>{" "}
+              <Arrow />
+            </Link>
           </div>
         </div>
       </section>
@@ -290,7 +241,7 @@ export default async function HomePage() {
           </Link>
           <Link href="/games/fc27/select">
             <b>FC 27</b>
-            <span>Đã ra mắt · Mua ngay</span>
+            <span>Siêu sale · {price}</span>
             <Arrow />
           </Link>
           <Link href="/games/fc26/select">
@@ -338,9 +289,11 @@ export default async function HomePage() {
             </div>
           </div>
           <div className={s.orderCard}>
-            <p className={s.eyebrow}>STANDARD EDITION</p>
+            <p className={s.eyebrow}>SIÊU SALE · STANDARD EDITION</p>
             <h3>Mua EA FC 27</h3>
-            <p className={s.orderPrice}>{price}</p>
+            <p className={s.orderPrice}>
+              {price} {listPrice && <del>{listPrice}</del>}
+            </p>
             <p className={s.orderPromise}>Chơi ngay hôm nay.</p>
             <ul className={s.benefits}>
               <li>
@@ -359,6 +312,9 @@ export default async function HomePage() {
             <p className={s.fineprint}>
               Hệ thống tự xác nhận thanh toán và gửi mã truy cập qua email.
             </p>
+            <Link href={combo.checkoutPath} className={s.vhCombo}>
+              Thêm Việt hóa: combo chỉ <b>{comboPrice}</b> <Arrow />
+            </Link>
           </div>
         </div>
         <div className={s.steps}>

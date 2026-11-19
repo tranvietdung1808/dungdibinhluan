@@ -256,7 +256,7 @@
 /* ---------- Việt hóa FC 27 (nổi bật dưới hero) ---------- */
 .vhSection {
   width: min(1200px, calc(100% - 64px));
-  margin: 8px auto 56px;
+  margin: 48px auto 56px;
 }
 .vhCard {
   --vh-green: var(--color-ok);
@@ -405,6 +405,35 @@
 }
 .vhCopy .quietLink {
   margin-top: 16px;
+}
+.vhCombo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  color: var(--color-body);
+  border: 1px dashed
+    color-mix(in srgb, var(--color-campaign-amber) 50%, transparent);
+  background: color-mix(in srgb, var(--color-campaign-amber) 8%, transparent);
+}
+.vhCombo b {
+  color: var(--color-campaign-amber);
+  font-weight: 900;
+}
+.vhCombo:hover {
+  color: var(--color-title);
+}
+.orderPrice del {
+  font-size: 0.45em;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--color-muted);
+  vertical-align: middle;
+  margin-left: 6px;
 }
 
 /* ---------- Season rail (lối tắt) ---------- */

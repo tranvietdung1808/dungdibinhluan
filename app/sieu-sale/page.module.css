@@ -1,0 +1,148 @@
+.page {
+  background: var(--color-surface-0);
+  color: var(--color-title);
+}
+.section {
+  width: min(1000px, calc(100% - 64px));
+  margin-inline: auto;
+  padding-block: 56px 8px;
+}
+.section:last-child {
+  padding-bottom: 72px;
+}
+.section h2 {
+  font-size: clamp(24px, 3vw, 34px);
+  font-weight: 900;
+  letter-spacing: -0.045em;
+  line-height: 1.25;
+}
+.eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--color-campaign-amber);
+  margin-bottom: 12px;
+}
+.tableWrap {
+  margin-top: 24px;
+  overflow-x: auto;
+  border: 1px solid var(--color-line);
+  border-radius: 16px;
+  background: var(--color-surface-1);
+}
+.table {
+  width: 100%;
+  min-width: 560px;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.table th,
+.table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--color-line);
+  text-align: center;
+}
+.table tbody tr:last-child th,
+.table tbody tr:last-child td {
+  border-bottom: 0;
+}
+.table th[scope="row"] {
+  text-align: left;
+  font-weight: 600;
+  color: var(--color-body);
+}
+.table thead th {
+  font-size: 15px;
+  font-weight: 800;
+}
+.table thead small {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-muted);
+}
+.hl {
+  background: color-mix(in srgb, var(--color-campaign-amber) 9%, transparent);
+}
+thead .hl small {
+  color: var(--color-campaign-amber);
+}
+.yes {
+  color: var(--color-ok);
+  font-weight: 900;
+}
+.no {
+  color: var(--color-muted);
+}
+.btn {
+  display: inline-flex;
+  min-height: 40px;
+  padding: 0 16px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none;
+  color: var(--color-title);
+  border: 1px solid var(--color-line-strong);
+  background: var(--color-surface-2);
+}
+.btnPrimary {
+  background: var(--color-accent);
+  border-color: transparent;
+  color: var(--color-on-accent);
+}
+.faq {
+  margin-top: 20px;
+  border-top: 1px solid var(--color-line);
+}
+.faq details {
+  border-bottom: 1px solid var(--color-line);
+}
+.faq summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px 0;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  list-style: none;
+}
+.faq summary::-webkit-details-marker {
+  display: none;
+}
+.faq summary > span {
+  color: var(--color-accent);
+  font-size: 22px;
+  line-height: 1;
+}
+.faq details[open] summary > span {
+  transform: rotate(45deg);
+}
+.faq details > p {
+  padding: 0 32px 20px 0;
+  font-size: 14px;
+  line-height: 1.85;
+  color: var(--color-body);
+}
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 28px;
+  margin-top: 24px;
+  font-size: 14px;
+}
+.links a {
+  color: var(--color-accent);
+  font-weight: 700;
+  text-decoration: none;
+}
+@media (max-width: 600px) {
+  .section {
+    width: calc(100% - 32px);
+    padding-top: 40px;
+  }
+}

@@ -108,7 +108,7 @@ function CodeEntry({ onSuccess }: { onSuccess: () => void }) {
             href="/games/fc27/select"
             className="text-sm font-semibold text-[var(--color-accent-strong)] underline-offset-4 hover:underline"
           >
-            Chưa có mã? Mua FC 27 — 180.000đ →
+            Chưa có mã? Siêu sale FC 27 — {product.price.toLocaleString("vi-VN")}đ →
           </Link>
           <a
             href={SUPPORT_URL}

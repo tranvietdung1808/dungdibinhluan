@@ -3,7 +3,11 @@ import { Redis } from "@upstash/redis";
 import { PayOS, type Webhook } from "@payos/node";
 import { createCode } from "@/lib/server/gen-code";
 import { sendCodeEmail, sendSupportEmail } from "@/lib/server/email";
-import { getProduct } from "@/lib/payment/config";
+import {
+  accessProductIdOf,
+  bonusNoteFor,
+  getProduct,
+} from "@/lib/payment/config";
 
 const kv = Redis.fromEnv();
 const COMPLETED_ORDER_TTL = 60 * 60 * 24 * 7;
@@ -124,13 +128,18 @@ export async function POST(req: NextRequest) {
         );
       } else {
         if (!generatedCode) {
-          generatedCode = await createCode(product.codePrefix, product.id);
+          generatedCode = await createCode(
+            product.codePrefix,
+            accessProductIdOf(product),
+          );
         }
         emailSent = await sendCodeEmail(
           order.email,
           generatedCode,
           product.name,
           product.codeEntryUrl,
+          undefined,
+          bonusNoteFor(product, orderCode) ?? undefined,
         );
       }
 

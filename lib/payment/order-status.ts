@@ -12,7 +12,7 @@
 //   COMPLETED      → đã thanh toán + cấp nội dung + email đã gửi
 // =====================================================
 
-import { getProduct, type ProductConfig } from "./config";
+import { getProduct, grantsFC27Code, type ProductConfig } from "./config";
 
 export const SUPPORT_URL = "https://web.facebook.com/dungbinhluan/";
 export const DEFAULT_CHECKOUT_PATH = "/games/fc26/select";
@@ -118,7 +118,7 @@ function contentLabel(product: ProductConfig | null): string {
     case "manual":
       return "Đã ghi nhận yêu cầu hỗ trợ cài đặt";
     case "code":
-      return product.id === "fc27-standard"
+      return grantsFC27Code(product)
         ? "Mã truy cập FC 27 đã được tạo"
         : "Mã kích hoạt đã được tạo";
     default:

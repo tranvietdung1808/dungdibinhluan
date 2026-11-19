@@ -76,6 +76,15 @@ Không lặp giá 180.000đ trong logic thanh toán phía client. Copy marketing
 - [ ] Thay video/hướng dẫn cài đặt nếu FC 27 cần quy trình khác FC 26.
 - [ ] Sau khi nghiệm thu mới thông báo rộng rãi cho khách.
 
+## 7a. Siêu sale FC 27 (không giới hạn)
+
+- Giá sale: game `fc27-standard` 99.000đ (gốc 180k), `fc27-viet-hoa` 99.000đ, combo `fc27-combo` 140.000đ (gốc 279k).
+- `fc27-combo`: fulfillment `code` — webhook cấp mã `accessProductIdOf = fc27-standard` + email kèm `bonusNote` hướng nhắn fanpage cài Việt hóa qua UltraViewer.
+- Trang chủ thay hero FC 27 bằng `SaleBanner` (app/sieu-sale) — 3 card offer; lối tắt: `/sieu-sale` landing + `/sieu-sale/combo` checkout.
+- `listPrice` chỉ để gạch giá hiển thị; thu tiền vẫn theo `price`.
+- Hết sale: đổi `price` trong config + khôi phục hero cũ (CSS hero còn trong home.module.css).
+- Lưu ý: đơn PENDING tạo ở giá cũ sẽ không khớp `paidAmount === product.price` → xử lý tay qua fanpage.
+
 ## 7b. Việt hóa FC 27 (donate + hỗ trợ cài đặt)
 
 - Sản phẩm `fc27-viet-hoa` — 99.000đ, `donation: true`, `noCode: true`, `fulfillment.kind = "manual"`.

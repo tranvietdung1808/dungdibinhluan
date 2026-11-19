@@ -1,6 +1,7 @@
 export type ProductId =
   | "fc27-standard"
   | "fc27-viet-hoa"
+  | "fc27-combo"
   | "fc26-normal"
   | "fc26-mods"
   | "mix-mods";
@@ -36,6 +37,12 @@ export interface ProductConfig {
   directDownloadUrl?: string;
   /** Hiển thị dạng "donate để được hỗ trợ" thay vì "mua/thanh toán" */
   donation?: boolean;
+  /** Giá gốc để gạch ngang khi đang sale (chỉ hiển thị, không dùng để thu tiền) */
+  listPrice?: number;
+  /** Quyền truy cập mà mã cấp ra mở được (mặc định = id). Combo dùng quyền FC 27 Standard. */
+  accessProductId?: ProductId;
+  /** Ghi chú thêm trong email + trang kết quả, `{orderCode}` được thay bằng mã đơn */
+  bonusNote?: string;
 }
 
 const BASE = "https://www.dungdibinhluan.com";
@@ -44,7 +51,8 @@ export const PRODUCTS: Record<ProductId, ProductConfig> = {
   "fc27-standard": {
     id: "fc27-standard",
     name: "EA FC 27 Standard Edition",
-    price: 180000,
+    price: 99000,
+    listPrice: 180000,
     codePrefix: "FC27",
     returnUrl: "/games/fc27",
     codeEntryUrl: `${BASE}/games/fc27`,
@@ -80,6 +88,29 @@ export const PRODUCTS: Record<ProductId, ProductConfig> = {
     },
     noCode: true,
     donation: true,
+  },
+  "fc27-combo": {
+    id: "fc27-combo",
+    name: "Combo EA FC 27 + Việt hóa",
+    price: 140000,
+    listPrice: 279000,
+    codePrefix: "FC27",
+    accessProductId: "fc27-standard",
+    returnUrl: "/games/fc27",
+    codeEntryUrl: `${BASE}/games/fc27`,
+    checkoutPath: "/sieu-sale/combo",
+    fulfillment: {
+      kind: "code",
+      receiveText:
+        "Mã truy cập FC 27 được gửi qua email; nhắn fanpage kèm mã đơn để được cài Việt hóa qua UltraViewer.",
+      steps: [
+        "Xác nhận thanh toán qua QR ngân hàng",
+        "Nhận mã truy cập FC 27 qua email, nhập mã tại trang FC 27 để tải game",
+        "Nhắn fanpage kèm mã đơn + ID UltraViewer — admin cài game và Việt hóa cho bạn",
+      ],
+    },
+    bonusNote:
+      "Combo đã gồm Việt hóa FC 27: nhắn fanpage DungDiBinhLuan kèm mã đơn #{orderCode} và ID UltraViewer để admin cài Việt hóa cho bạn.",
   },
   "fc26-normal": {
     id: "fc26-normal",
@@ -145,4 +176,25 @@ export const PRODUCTS: Record<ProductId, ProductConfig> = {
 
 export function getProduct(id: string): ProductConfig | null {
   return PRODUCTS[id as ProductId] ?? null;
+}
+
+/** Mã cấp ra mở quyền của sản phẩm nào (combo → fc27-standard) */
+export function accessProductIdOf(product: ProductConfig): ProductId {
+  return product.accessProductId ?? product.id;
+}
+
+/** Sản phẩm cấp mã truy cập FC 27 (Standard hoặc combo) */
+export function grantsFC27Code(product: ProductConfig | null | undefined): boolean {
+  return (
+    !!product &&
+    product.fulfillment.kind === "code" &&
+    accessProductIdOf(product) === "fc27-standard"
+  );
+}
+
+export function bonusNoteFor(
+  product: ProductConfig | null | undefined,
+  orderCode: string | number,
+): string | null {
+  return product?.bonusNote?.replace("{orderCode}", String(orderCode)) ?? null;
 }

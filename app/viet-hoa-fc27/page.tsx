@@ -9,6 +9,7 @@ import { VIET_HOA_PERKS, VIET_HOA_SHOTS } from "./data";
 import s from "./viet-hoa.module.css";
 
 const product = PRODUCTS["fc27-viet-hoa"];
+const combo = PRODUCTS["fc27-combo"];
 const price = formatVnd(product.price);
 const ZALO_URL = "https://zalo.me/0917742686";
 
@@ -72,7 +73,7 @@ const faqs = [
   ],
   [
     "Chưa có EA FC 27 thì sao?",
-    "Bạn cần cài EA FC 27 trước. Có thể nhận bộ cài FC 27 tại trang FC 27 của DungDiBinhLuan rồi donate Việt hóa sau.",
+    `Bạn cần cài EA FC 27 trước. Đang Siêu sale: combo game + Việt hóa chỉ ${formatVnd(combo.price)} — nhận mã tải game qua email, admin cài Việt hóa qua UltraViewer.`,
   ],
 ];
 
@@ -314,7 +315,9 @@ export default function VietHoaFC27Page() {
             </Link>
           </div>
           <p className={s.backLinks}>
-            <Link href="/games/fc27/select">Chưa có game? Nhận EA FC 27 →</Link>
+            <Link href={combo.checkoutPath}>
+              Chưa có game? Combo game + Việt hóa chỉ {formatVnd(combo.price)} →
+            </Link>
             <Link href="/">← Về trang chủ</Link>
           </p>
         </div>

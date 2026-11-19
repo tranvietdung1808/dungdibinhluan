@@ -23,7 +23,8 @@ export const ZALO_URL = "https://zalo.me/0917742686";
 export const TIKTOK_URL = "https://www.tiktok.com/@dungdibinhluan";
 
 const navItems = [
-  { label: "Việt hóa FC 27", href: "/viet-hoa-fc27", badge: "Mới" },
+  { label: "Siêu sale", href: "/sieu-sale", badge: "Hot" },
+  { label: "Việt hóa FC 27", href: "/viet-hoa-fc27" },
   { label: "FC 27", href: "/games/fc27/select" },
   { label: "FC 26", href: "/games/fc26/select" },
   { label: "Kho mod", href: "/mods" },
