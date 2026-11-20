@@ -22,6 +22,10 @@ import { CatalogEmpty, CatalogError } from "../components/CatalogStates";
 
 type PageSearchParams = Record<string, string | string[] | undefined>;
 
+// ISR 5 phút (bằng /mods): mỗi tổ hợp filter/page/sort là một cache entry
+// riêng, các combo phổ biến được phục vụ từ cache thay vì đập DB mỗi view.
+export const revalidate = 300;
+
 const CANONICAL = "https://dungdibinhluan.com/cau-thu";
 
 export async function generateMetadata({

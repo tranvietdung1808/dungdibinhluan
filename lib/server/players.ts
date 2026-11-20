@@ -285,12 +285,40 @@ interface FilterOptionColumns {
 }
 
 /**
- * PostgREST không có SELECT DISTINCT (không thêm RPC mới) nên đọc 5 cột
- * nhẹ của bản active rồi dedupe trong JS. Kết quả cache 1h nên chi phí
- * quét một lần/giờ/release là chấp nhận được.
+ * Distinct 5 cột lọc của bản active. Ưu tiên RPC DISTINCT phía DB
+ * (migration 20261119_catalog_filter_options) trả vài trăm giá trị;
+ * khi RPC chưa được apply thì fallback đọc 5 cột nhẹ rồi dedupe trong JS.
+ * Kết quả cache 1h nên chi phí một lần/giờ/release là chấp nhận được.
  */
 const getCachedFilterOptions = unstable_cache(
   async (releaseId: string): Promise<CatalogFilterOptions> => {
+    const alpha = (a: string, b: string) => a.localeCompare(b);
+
+    const { data: rpcData, error: rpcError } = await supabaseAdmin.rpc(
+      "player_catalog_filter_options",
+      { p_release_id: releaseId }
+    );
+    if (!rpcError && rpcData) {
+      const o = rpcData as {
+        positions?: string[];
+        teams?: string[];
+        leagues?: string[];
+        nationalities?: string[];
+        genders?: number[];
+      };
+      return {
+        positions: [...(o.positions ?? [])].sort(alpha),
+        teams: [...(o.teams ?? [])].sort(alpha),
+        leagues: [...(o.leagues ?? [])].sort(alpha),
+        nationalities: [...(o.nationalities ?? [])].sort(alpha),
+        // Chỉ khi có >1 giới tính UI mới hiện bộ lọc nam/nữ
+        hasMixedGender: (o.genders ?? []).length > 1,
+      };
+    }
+    if (rpcError) {
+      console.warn("player_catalog_filter_options fallback:", rpcError);
+    }
+
     const { data, error } = await supabaseAdmin
       .from("player_catalog_entries")
       .select("position_short,team_name,league_name,nationality_name,gender")
@@ -313,13 +341,11 @@ const getCachedFilterOptions = unstable_cache(
       if (row.gender != null) genders.add(row.gender);
     }
 
-    const alpha = (a: string, b: string) => a.localeCompare(b);
     return {
       positions: [...positions].sort(alpha),
       teams: [...teams].sort(alpha),
       leagues: [...leagues].sort(alpha),
       nationalities: [...nationalities].sort(alpha),
-      // Chỉ khi có >1 giới tính UI mới hiện bộ lọc nam/nữ
       hasMixedGender: genders.size > 1,
     };
   },

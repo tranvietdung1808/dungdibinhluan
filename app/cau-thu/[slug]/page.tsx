@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { cache } from "react";
 import { getCatalogPlayerBySlug } from "@/lib/server/players";
 import {
   formatEurFull,
@@ -19,6 +20,15 @@ import styles from "../players.module.css";
 // =====================================================
 
 const SITE_URL = "https://dungdibinhluan.com";
+
+// ISR 5 phút (bằng /mods) — trước đây trang dynamic, mỗi view là một query.
+export const revalidate = 300;
+
+// Dedupe query giữa generateMetadata và page trong cùng một request —
+// trước đây 2 lần gọi getCatalogPlayerBySlug = 2 lượt đọc DB cho 1 view.
+const getPlayer = cache(async (slug: string) => {
+  return getCatalogPlayerBySlug(slug);
+});
 
 /** 6 chỉ số "face" — outfield PAC/SHO/PAS/DRI/DEF/PHY; thủ môn có
     bộ mã + nhãn riêng, KHÔNG gắn nhãn PAC/SHO máy móc (§9.3). */
@@ -45,7 +55,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const { data: player, error } = await getCatalogPlayerBySlug(slug);
+  const { data: player, error } = await getPlayer(slug);
 
   // notFound() trong generateMetadata (chạy TRƯỚC khi body stream) để
   // response thật sự là 404 — gọi trong body thì header 200 đã flush,
@@ -166,7 +176,7 @@ export default async function PlayerDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const { data: player, error } = await getCatalogPlayerBySlug(slug);
+  const { data: player, error } = await getPlayer(slug);
 
   if (error) {
     // Lỗi dữ liệu ≠ 404 giả — ném ra error boundary (§9.4 / §12)
